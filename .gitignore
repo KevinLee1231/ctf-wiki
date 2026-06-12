@@ -1,0 +1,4 @@
+backups/*.zip
+backups/*/
+Thumbs.db
+.DS_Store
