@@ -1,77 +1,72 @@
 ---
-type: technique
-tags: [pwn, technique]
+type: family
+tags: [pwn, family, heap, tcache, unlink, house, allocator]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-houses-unlink-and-tcache.md
-updated: 2026-05-21
+  - ../raw/pwn/WMCTF2025-palusimulator-wp.md
+updated: 2026-06-12
 ---
 
 # Heap Houses, Unlink and Tcache
 
-## 适用场景
+## 作用边界
 
-内存破坏、沙箱逃逸、低级原语或 exploit chain 是主要障碍。
+本页是 heap metadata 和 allocator 路线 family，覆盖 House of Apple/Orange/Spirit/Lore/Force/Einherjar、classic unlink、tcache stashing unlink、largebin 写、custom allocator、talloc、musl meta/atexit 和 heap grooming。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不是单一 heap technique。首轮要先判断 libc/allocator、漏洞 primitive、chunk 大小、bin 状态、safe-linking、可泄露地址和最终落点，再决定走 unlink、tcache poisoning、FSOP、largebin、top chunk、custom allocator 还是 runtime handler。
 
-## 识别信号
+## 共同识别信号
 
-- 出现 crash、越界读写、UAF、format string、heap metadata、seccomp 或 kernel primitive。
-- 保护组合、libc、架构或 syscall 约束会影响路线。
-- 需要 leak/write/control-flow hijack 串成最终能力。
-- 题面或 raw 线索能落到这些关键词之一：House of Apple 2 — FSOP for glibc 2.34+ (0xFun 2026)、setcontext Variant for SUID Binaries (Midnight Flag 2026)、House of Einherjar — Off-by-One Null Byte (0xFun 2026)、Heap Exploitation、Heap Grooming via Application Operations (Codegate 2013)、Custom Allocator Exploitation、talloc Pool Header Forgery for Arbitrary Read/Write (Boston Key Party 2016)、talloc Pool Header Forgery。
+- 有堆溢出、off-by-one null、UAF、double free、越界写、可控 free 顺序或自定义 allocator。
+- 可影响 chunk header、tcache fd、unsorted/largebin metadata、top chunk、FILE 结构、wide data、atexit handler 或 allocator meta。
+- exploit 依赖 libc/glibc 版本、safe-linking、tcache 数量、chunk alignment、consolidation 和 heap leak。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 确认 allocator 和 libc 版本：glibc/musl/talloc/custom，以及 tcache/safe-linking 是否存在。
+- 画出 allocation/free 序列、chunk size、bin 状态、重叠关系和可写字段。
+- 至少证明一个 primitive：overlap、arbitrary write、tcache poisoning、largebin write、FILE 控制或 hook/handler 覆盖。
+- 记录最终触发点：malloc/free/exit/flush/setcontext/atexit/ROP。
 
-## 解法骨架
+## 首轮路由
 
-1. 稳定复现 bug。
-2. 量化 read/write/control primitive。
-3. 按保护选择利用路线。
-4. 脚本化 exploit 并处理远程差异。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| off-by-one null、`PREV_INUSE` 可清 | 优先检查 House of Einherjar 或 backward consolidation 造成 overlap | [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md) |
+| tcache fd、double free、safe-linking | 先拿 heap leak 并计算 mangled fd，再做 tcache poisoning 或 stashing unlink | [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md) |
+| unsorted/largebin metadata 可控 | 判断是 libc leak、global_max_fast/stack variable 写，还是扩大后续 read | [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md) |
+| FILE/wide data/House of Apple/Orange | 转 FSOP 和 runtime 保护页，优先核对 glibc 版本字段 | [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md), [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md) |
+| top chunk size 可控 | 检查 House of Force/Orange 的 size、page boundary 和 sysmalloc 条件 | [pwn-tooling.md](pwn-tooling.md) |
+| musl meta、atexit、custom allocator、talloc | 先恢复 allocator 元数据和回调触发点，不要套 glibc chunk 模型 | [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md) |
 
-## 关键变体
+## 来自 WP 的案例索引
 
-| 变体 | 复用重点 |
+| Raw WP | 可复用联系 |
 |---|---|
-| House of Apple 2 — FSOP for glibc 2.34+ (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| setcontext Variant for SUID Binaries (Midnight Flag 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| House of Einherjar — Off-by-One Null Byte (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Heap Exploitation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Heap Grooming via Application Operations (Codegate 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom Allocator Exploitation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| talloc Pool Header Forgery for Arbitrary Read/Write (Boston Key Party 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| talloc Pool Header Forgery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Classic Heap Unlink Attack (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| musl libc Heap Exploitation — Meta Pointer + atexit (UNbreakable 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| House of Orange | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| House of Spirit | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| House of Lore | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| House of Force (CSAW CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| tcache Stashing Unlink Attack | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unsafe Unlink to BSS + Top Chunk Consolidation (SECCON 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| UAF Vtable Pointer Encoding Shell Argument (BCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| realloc(ptr, 0) as free() for UAF (AceBear 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md) | 异常处理产生可泄露的 0x90 chunk 后，先构造小 chunk 进入 0x90 tcache，再用 largebin attack 写栈上 `read` 长度变量，最后 tcache fd 指向栈布置 ORW ROP。 |
+
+## 合并与拆分结论
+
+本页应为 family。它与 [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md) 分工：本页偏 metadata/bin/house 路线，后者偏 UAF/对象生命周期和 tcache primitive 的形成。当前不拆 House 系列小页，因为 raw 仍以速查集合为主。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 不确认 glibc 版本就套 House of Apple/Orange 字段。
+- safe-linking 下忘记 mangling 或 heap base。
+- 只构造 overlap，没有规划最终触发点。
+- largebin 写目标不满足对齐或写入时机，导致目标值不可控。
+- custom allocator 题误套 glibc chunk header。
 
 ## 关联技巧
 
-- [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
-- [format-string.md](format-string.md)
-- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
 - [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md)
+- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
+- [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
+- [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)
+- [pwn-tooling.md](pwn-tooling.md)
 
 ## 原始资料
 
 - [heap-houses-unlink-and-tcache.md](../raw/pwn/heap-houses-unlink-and-tcache.md)
+- [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md)

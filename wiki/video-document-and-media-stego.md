@@ -1,71 +1,75 @@
 ---
-type: technique
-tags: [forensics, technique]
-skills: [ctf-forensics]
+type: family
+tags: [forensics, family, video, document, media, stego]
+skills: [ctf-forensics, ctf-reverse]
 raw:
   - ../raw/forensics/video-document-and-media-stego.md
-updated: 2026-05-21
+  - ../raw/reverse/WMCTF2025-videoplayer-wp.md
+updated: 2026-06-12
 ---
 
 # Video, Document and Media Stego
 
-## 适用场景
+## 作用边界
 
-主要工作是从文件、镜像、内存、PCAP、日志、多媒体或物理信号中恢复证据。
+本页是视频、文档、容器媒体和跨媒体隐写 family。它覆盖帧叠加/平均、倒放音频、JPEG XL TOC permutation、Arnold cat map、SSTV FM、MJPEG extra bytes、EXIF zlib、PDF xref covert channel、ANSI escape、像素级 ECB 去重和多色 QR 映射。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果关键证据在运行时解密出的媒体 buffer，本页与 reverse runtime 页联动：先 dump 真实媒体，再做取证分析。
 
 ## 识别信号
 
-- 附件是 pcap、disk image、memory dump、office/pdf/image/audio/video、日志或容器层。
-- 需要 carving、重组、解码、时间线、凭据恢复或隐写检测。
-- flag 藏在工件或历史状态中。
-- 题面或 raw 线索能落到这些关键词之一：Video Frame Accumulation for Hidden Image (ASIS CTF Finals 2013)、Reversed Audio Hidden Message (ASIS CTF Finals 2013)、Video Frame Averaging for Hidden Content (SECCON 2015)、JPEG XL TOC Permutation Steganography (BSidesSF 2026)、Arnold's Cat Map Image Descrambling (Nuit du Hack 2017)、High-Resolution SSTV Custom FM Demodulation (PlaidCTF 2017)、MJPEG Extra Bytes After FFD9 Steganography (PoliCTF 2017)、EXIF Zlib Data with Non-Default LSB Pixel Pattern (ASIS CTF Finals 2017)。
+- 附件是视频、PDF、Office、MJPEG、JXL、EXIF、ANSI 终端录制、动态图像或自定义媒体容器。
+- 单帧/单页无明显信息，但帧间平均、叠加、差分、末帧、附加字节或索引结构异常。
+- 媒体需要先由播放器或程序解密，原文件本身不是最终容器。
+- 图像/视频中出现 QR、条码、像素置换、颜色映射、DCT/LSB/metadata 或 xref 异常。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 容器格式、帧数、分辨率、时间轴、关键帧、附加数据位置和 metadata。
+- 对变换类题，确认置换/映射是否可逆以及迭代次数或搜索边界。
+- 对 PDF/文档，先检查 xref、object stream、embedded file、annotation、font、script 和外部资源。
+- 对运行时解密媒体，先获得真实媒体文件并验证 magic/播放器可读性。
 
-## 解法骨架
+## 路由表
 
-1. 识别格式和容器层。
-2. 选择 carving、协议重组、内存插件或隐写分析。
-3. 保留中间导出物和命令。
-4. 把 recovered secret 再按需要解码或解密。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| 帧叠加/平均 | 帧对齐、透明度、运动区域和背景稳定性 | 导出帧后平均/差分 |
+| MJPEG/JPEG extra bytes | `FFD9` 后是否有附加数据或多图拼接 | carving 或按帧提取尾部 |
+| JXL/PNG/JPEG 元结构 | TOC、chunk、EXIF zlib、非默认 LSB 模式 | 转图像隐写 family |
+| PDF xref covert | xref offset、object 顺序和增量更新是否异常 | 重建对象序列 |
+| ANSI escape capture | 控制码是否构成隐藏画面或文本 | 终端渲染/清洗两路对比 |
+| 多色 QR | 颜色到 bit 的映射未知 | 枚举映射并校验 QR 格式 |
+| 加密自定义媒体 | 播放器运行时返回真实 buffer | 转 [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 
-## 关键变体
+## 来自 WP 的案例索引
 
-| 变体 | 复用重点 |
+| Raw WP | 可复用联系 |
 |---|---|
-| Video Frame Accumulation for Hidden Image (ASIS CTF Finals 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Reversed Audio Hidden Message (ASIS CTF Finals 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Video Frame Averaging for Hidden Content (SECCON 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JPEG XL TOC Permutation Steganography (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Arnold's Cat Map Image Descrambling (Nuit du Hack 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| High-Resolution SSTV Custom FM Demodulation (PlaidCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| MJPEG Extra Bytes After FFD9 Steganography (PoliCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| EXIF Zlib Data with Non-Default LSB Pixel Pattern (ASIS CTF Finals 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PDF Cross-Reference Table Covert Channel (SEC-T CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ANSI Escape Code Steganography in Network Capture (Square CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Pixel-Wise ECB Deduplication for Image Recovery (BackdoorCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Color QR Code Binary Mapping Brute Force (STEM CTF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | `.mp0` 文件由播放器使用机器信息 MD5 解密；在解密函数返回的 `std::vector` 中用头尾指针算大小并 dump，得到真实 mp4 后从视频末尾读 flag。 |
 
-## 常见陷阱
+## 合并与拆分结论
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 保留为 family：视频、文档和容器媒体共享“先找容器层/帧层/对象层”的 pivot。
+- 不合并进 audio 页：音频页聚焦频域和声道，本文聚焦帧、文档对象和媒体容器。
+- 不合并进 image family：本文保留跨帧、文档和运行时媒体 buffer 的路线。
 
-## 关联技巧
+## 常见误判
 
-- [3d-printing.md](3d-printing.md)
+- 只看首帧/当前页，漏掉末帧、附加字节和增量更新。
+- 对视频重编码后再分析，破坏原始隐藏数据。
+- PDF 只提取文字，忽略 xref、object stream 和 embedded data。
+- 自定义媒体文件没先从播放器内存 dump 真实容器。
+
+## 关联页面
+
+- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
 - [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
-- [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
-- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
+- [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 
 - [video-document-and-media-stego.md](../raw/forensics/video-document-and-media-stego.md)
+- [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md)

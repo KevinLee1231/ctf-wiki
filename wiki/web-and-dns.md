@@ -1,78 +1,67 @@
 ---
-type: technique
-tags: [osint, technique]
+type: family
+tags: [osint, family, web, dns, archive, public-index]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/web-and-dns.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Web and DNS OSINT
 
-## 适用场景
+## 作用边界
 
-需要从公开来源、图像、地理、账号、域名、社媒或历史快照中定位信息。
+本页是 Web/DNS 公开来源 family，用于从搜索引擎、公开文档、DNS/TXT/SPF、WHOIS/ASN、Wayback、Shodan、GitHub、Telegram、Tor relay、公开仓库、目录泄露和服务 banner 中定位信息。它关注公开证据收集，不处理对目标服务的技术性漏洞利用。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果需要登录、利用 Web 漏洞或内网打点，应转 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md) 或 Pentest；如果线索已经变成账号身份链，转 [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md)。
 
-## 识别信号
+## 共同识别信号
 
-- 题目给出图片、用户名、坐标、域名、时间、社媒线索或公开页面。
-- 目标是地点、身份、公开记录、历史版本或关联账号。
-- 公开证据链比技术利用更重要。
-- 题面或 raw 线索能落到这些关键词之一：Google Dorking、Google Docs/Sheets in OSINT、DNS Reconnaissance、DNS TXT Record OSINT、Tor Relay Lookups、GitHub Repository Comments、Telegram Bot Investigation、FEC Political Donation Research。
+- 题目给出域名、URL、公开文档、仓库、用户名、邮箱、服务指纹、SSH/TLS fingerprint、TXT/SPF 记录、历史页面或搜索关键词。
+- 目标是找到公开暴露的 flag、历史版本、真实作者、关联域名、隐藏目录、公开服务位置或被索引的敏感内容。
+- 证据可通过公开 URL/API 复查，且不需要主动攻击目标应用。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保存查询语句、URL、时间、结果页面和关键字段；搜索结果本身会漂移。
+- 对域名/DNS，记录 resolver、记录类型、TTL、历史记录来源和是否存在 wildcard。
+- 对历史页面，记录 archive URL、快照时间和当前页面差异。
+- 对 Shodan/指纹，记录 fingerprint 来源、匹配查询和目标服务最小验证方式。
 
-## 解法骨架
+## 首轮路由
 
-1. 提取元数据、文本、图像和上下文。
-2. 按域名/账号/地理/时间线分支收集证据。
-3. 多来源交叉验证。
-4. 记录 URL、截图、时间戳和推理链。
+| 证据形态 | 先做什么 | 下一跳 |
+|---|---|---|
+| 搜索引擎/公开文档 | 用精确关键词、引号、`site:`、文件类型和片段组合；保存结果 URL 而不是只截图。 | [osint-tooling.md](osint-tooling.md) |
+| DNS/TXT/SPF/WHOIS/ASN | 枚举 A/AAAA/CNAME/MX/TXT/NS/SOA，检查 SPF include 链、历史 WHOIS、ASN 和共享基础设施。 | [dns.md](dns.md) |
+| Wayback/历史页面 | 对比不同时间快照，寻找删除的 flag、旧路径、源码、备份文件和迁移线索。 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) |
+| GitHub/Git commits/公开仓库 | 查 commit author、issue、PR、README、历史 blob、邮箱、用户名和外链。 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
+| Shodan/SSH/TLS/banner | 先获取本地 fingerprint 或 banner，再公开搜索匹配；假 banner 要用多工具确认。 | [osint-tooling.md](osint-tooling.md) |
+| `.DS_Store`、公开目录、静态文件泄露 | 先确认是否公开索引证据；若需要下载/恢复对象，转文件取证。 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
+| Telegram/Tor/FEC/平台公开 API | 先确认平台数据是否公开、稳定和可复查，再把结果并入身份链。 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Google Dorking | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Google Docs/Sheets in OSINT | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Reconnaissance | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS TXT Record OSINT | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Tor Relay Lookups | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GitHub Repository Comments | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Telegram Bot Investigation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| FEC Political Donation Research | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Wayback Machine | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| WHOIS Investigation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Shodan SSH Fingerprint Lookup (EKOPARTY CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Shodan SSH Fingerprint Lookup | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Fake Service Banner Detection via Fingerprinting (MetaCTF Flash 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Fake Service Banner Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Git Commit Author Mining for Credentials (Hackover 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| .DSStore Directory Enumeration with Python-dsstore (35C3 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| TTF Glyph Contour Diffing for Obfuscated CAPTCHA (Square CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Cross-Challenge Container IP Reuse (RITSEC 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Web / DNS OSINT 速查技巧族：公开索引、历史快照与仓库痕迹 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Resources | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| String Identification | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Google Docs/Sheets | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GitHub Repository Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 `family`：raw 覆盖搜索、DNS、历史快照、WHOIS、Shodan、GitHub、Telegram、Tor、公开目录和服务指纹，核心价值是公开来源二级分流。
+- 不并入 [geolocation-and-media.md](geolocation-and-media.md)：本页的起点是域名/公开网页/服务指纹，地理页的起点是图片/坐标/媒体内容。
+- 不拆 DNS、Wayback、Shodan 小页：当前 OSINT 页面数量少，保留三大 family 入口更清晰。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 搜索命中后不保存原始 URL 和时间，后续无法复查。
+- DNS 只查 A 记录，不看 TXT/SPF/NS/MX/历史 WHOIS。
+- Wayback 只看最近快照，遗漏早期泄露和页面迁移。
+- Shodan 指纹未确认来源，拿错误 fingerprint 搜索导致假阳性。
+- 公开目录泄露已经转为文件恢复时仍按 OSINT 搜索，错过 `.git`/archive 取证路线。
 
 ## 关联技巧
 
 - [geolocation-and-media.md](geolocation-and-media.md)
 - [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md)
+- [dns.md](dns.md)
+- [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
 - [osint-tooling.md](osint-tooling.md)
 
 ## 原始资料

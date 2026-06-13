@@ -4,7 +4,7 @@ tags: [reverse, packer, deobfuscation, vmprotect, themida, automation, technique
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/packers-deobfuscation-and-debug-automation.md
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # Packers, Deobfuscation and Debug Automation
@@ -45,6 +45,7 @@ updated: 2026-06-11
 | 变体 | 判断与路线 |
 |---|---|
 | VMProtect / Themida | 先识别壳特征和反调试点，再决定动态 trace、OEP dump、handler 抽象或只抓最终比较反馈。 |
+| VMP OEP dump followed by business logic tracing | 找到 OEP/dump 只是开始，后续仍要跟登录状态、机器绑定、解密函数和返回 buffer。 |
 | 自定义 VM | 重点是 dispatcher、handler 表、opcode/operand 编码和 VM state；能 lift 就 lift，不能 lift 就 trace 切片。 |
 | Binary diffing | 有 patched/old/new 两个版本时，优先用函数匹配和差异点缩小搜索范围，再回到具体校验逻辑。 |
 | Deobfuscation IR | 控制流扁平化、表达式膨胀和 opaque predicate 可先 lift 到 IR，做常量传播、死代码删除和表达式简化。 |
@@ -72,6 +73,13 @@ updated: 2026-06-11
 - [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)
 - [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | VMP/反调试阶段可用 TitanHide 或 CE VEH，断 `GetSystemTimeAsFileTime` 找 OEP 并用 Scylla dump；真正 flag 仍在后续 `.mp0` 解密结果里。 |
+
 ## 原始资料
 
 - [packers-deobfuscation-and-debug-automation.md](../raw/reverse/packers-deobfuscation-and-debug-automation.md)
+- [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md)

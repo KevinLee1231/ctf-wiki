@@ -1,17 +1,17 @@
 ---
-type: technique
-tags: [misc, technique]
-skills: [ctf-misc]
+type: family
+tags: [forensics, misc, hid, audio, video, physical-signal, family]
+skills: [ctf-forensics, ctf-misc]
 raw:
   - ../raw/misc/keyboard-mouse-audio-and-physical-puzzles.md
-updated: 2026-05-21
+updated: 2026-06-13
 ---
 
 # Keyboard, Mouse, Audio and Physical Puzzles
 
 ## 适用场景
 
-题目依赖人机输入轨迹、物理运动、音频/视频可视信号或外设协议，而不是传统编码本身。典型目标是把“动作记录”还原成文字、图形、坐标序列或频率序列。
+本页是物理/外设信号恢复 family。题目依赖人机输入轨迹、物理运动、音频/视频可视信号或外设协议，而不是传统编码本身。典型目标是把“动作记录”还原成文字、图形、坐标序列或频率序列。
 
 ## 识别信号
 

@@ -1,82 +1,50 @@
 ---
-type: technique
-tags: [reverse, technique]
+type: family
+tags: [reverse, family, loader, vm, image-recovery, kernel-module]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/loader-vm-image-and-kernel-patterns.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Loader, VM, Image and Kernel Patterns
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是二阶段载体和特殊执行链 family，覆盖 loader、隐藏 opcode、binfmt、shared library backdoor、kernel module maze、image/bitmap 恢复、shellcode 数据段、GBA ROM VM、线程/通道 VM 和无导入/哈希解析样本。它不再作为 technique；它负责把“程序真实逻辑不在第一眼看到的入口”这类证据分流出去。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+## 首轮路由
 
-## 识别信号
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| 二阶段 loader、`mmap RWX`、数据段 shellcode、execve 递归 | 第一阶段做了什么解密/映射/重启，真实代码何时出现 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
+| 自定义 VM、GBA ROM VM、多线程/channel VM | opcode stream、handler、状态寄存器、输入影响路径和可验证解释器 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| image XOR、bitmap convergence、Windows PE bitmap/OCR | 数据维度、颜色/通道、平滑性、OCR 字符集和 forward check | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)、[image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
+| kernel module maze、custom binfmt、eBPF/tracepoint | 用户态入口和内核侧解释器/模块之间的数据结构 | [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)、[mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
+| shared library backdoor、hash-resolved imports、section header corruption | 加载器实际加载了哪个对象，工具失败是否来自 ELF/PE 元数据损坏 | [anti-analysis.md](anti-analysis.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| game theory / byte-at-a-time / side-channel 状态 | 能否把执行反馈转为 oracle，而不是完整逆向全程序 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：Hidden Emulator Opcodes + LDPRELOAD Key Extraction (0xFun 2026)、Spectre-RSB SPN Cipher — Static Parameter Extraction (0xFun 2026)、Image XOR Mask Recovery via Smoothness (VuwCTF 2025)、Shellcode in Data Section via mmap RWX (VuwCTF 2025)、Recursive execve Subtraction (VuwCTF 2025)、Byte-at-a-Time Block Cipher Attack (UTCTF 2024)、Mathematical Convergence Bitmap (EHAX 2026)、Mathematical Convergence Bitmap。
+## 合并与拆分结论
 
-## 最小证据
+- 保留为 family：raw 覆盖多个二阶段/特殊载体分支，核心价值是判断真实逻辑在哪里加载或被解释。
+- 不合并进 VM family：VM family 是更高层判断，本页承接 loader、image、kernel module、binfmt 和 backdoor shared library 等具体载体。
+- 不拆 image/bitmap 小页：当前 image 恢复案例和 reverse 载体关系更紧，先保留在本页并链接到 forensics 图片页。
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+## 常见误判
 
-## 解法骨架
+- 只分析第一阶段入口，忽略运行时解密、映射、重启、binfmt 或共享库替换。
+- 工具无法解析 ELF/PE 就认为文件坏了；应先看 program header、原始二进制和加载器路径。
+- VM 题急着完整还原 ISA，忘记 trace 热路径和最终比较点通常更快。
+- 图片/bitmap 恢复没有记录宽高、通道顺序和字符集，导致结果不可复算。
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+## 关联页面
 
-## 关键变体
-
-| 变体 | 复用重点 |
-|---|---|
-| Hidden Emulator Opcodes + LDPRELOAD Key Extraction (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Spectre-RSB SPN Cipher — Static Parameter Extraction (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Image XOR Mask Recovery via Smoothness (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Shellcode in Data Section via mmap RWX (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Recursive execve Subtraction (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Byte-at-a-Time Block Cipher Attack (UTCTF 2024) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Mathematical Convergence Bitmap (EHAX 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Mathematical Convergence Bitmap | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows PE XOR Bitmap Extraction + OCR (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Two-Stage Loader: RC4 Gate + VM Constraints (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GBA ROM VM Hash Inversion via Meet-in-the-Middle (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Sprague-Grundy Game Theory Binary (DiceCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Sprague-Grundy Game Theory Binary | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kernel Module Maze Solving (DiceCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kernel Module Maze Solving | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Threaded VM with Channel Synchronization (DiceCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Threaded VM with Channels | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Backdoored Shared Library Detection via String Diffing (Hack.lu CTF 2012) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Backdoored Shared Library Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom binfmt Kernel Module with RC4 Flat Binaries (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom binfmt Kernel Module with RC4 Flat Binaries | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hash-Resolved Imports / No-Import Ransomware (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hash-Resolved Imports / No-Import Ransomware | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ELF Section Header Corruption for Anti-Analysis (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
-- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [anti-analysis.md](anti-analysis.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
+- [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
+- [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)
+- [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)
+- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
 
 ## 原始资料
 

@@ -1,71 +1,77 @@
 ---
-type: technique
-tags: [pwn, technique]
+type: family
+tags: [pwn, family, heap, uaf, tcache, custom-allocator]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-uaf-tcache-and-custom-allocator.md
-updated: 2026-05-21
+  - ../raw/pwn/WMCTF2025-palusimulator-wp.md
+updated: 2026-06-12
 ---
 
 # Heap UAF, Tcache and Custom Allocators
 
-## 适用场景
+## 作用边界
 
-内存破坏、沙箱逃逸、低级原语或 exploit chain 是主要障碍。
+本页是用户态 heap 生命周期与 allocator primitive family。它处理 UAF、double free、未初始化 chunk 残留、tcache poisoning、fastbin/tcache cross-bin、对象相邻覆盖、C++ 异常路径、custom allocator unlink 和函数指针/虚表落点。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它与 [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md) 不合并：本页先回答“对象生命周期如何形成 primitive”，后者更偏 house/unlink/bin metadata 技巧选择。
 
 ## 识别信号
 
-- 出现 crash、越界读写、UAF、format string、heap metadata、seccomp 或 kernel primitive。
-- 保护组合、libc、架构或 syscall 约束会影响路线。
-- 需要 leak/write/control-flow hijack 串成最终能力。
-- 题面或 raw 线索能落到这些关键词之一：UAF Vtable Pointer Encoding Shell Argument (BCTF 2017)、Uninitialized Chunk Residue Pointer Leak (picoCTF 2018)、tcache strcpy Null-Byte Overflow + Backward Consolidation (HITCON 2018)、Adjacent-Struct fn-Pointer Overflow for Libc Leak + GOT Overwrite (RITSEC 2018)、Hidden Menu Option 1337 for Tcache Poisoning (FireShell 2019)、Tcache Double-Free + Fake IOFILE Vtable Stdout Hijack (BCTF 2018)、Tcache-to-Fastbin Promotion Cross-Bin Attack (BCTF 2018)、6-Bit Index OOB + writtenbytes Accumulator for Fn-Pointer Increment (Codegate 2019)。
+- 菜单题或对象管理题存在 add/edit/delete/show，指针释放后仍可读写或重复释放。
+- glibc/tcache/fastbin/unsorted bin 行为影响可利用性，或源码包含 custom allocator。
+- 崩溃点在虚表、函数指针、GOT、hook、IO FILE、exit function、对象方法或相邻 struct。
+- 异常处理、引用计数、隐藏菜单、长度截断、off-by-null、LSB-only overwrite 导致对象状态和源码防护不一致。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- glibc 版本、allocator 类型、chunk size、bin 状态和是否启用 safe-linking。
+- 明确 primitive：leak、double free、tcache fd 控制、overlap、partial overwrite、函数指针增量写。
+- 已证明目标落点可达：GOT、vtable、`__free_hook`、exit function、FILE 结构、栈地址或对象方法表。
+- 对 custom allocator，要先还原 metadata 格式和 unlink/check 条件。
 
-## 解法骨架
+## 路由表
 
-1. 稳定复现 bug。
-2. 量化 read/write/control primitive。
-3. 按保护选择利用路线。
-4. 脚本化 exploit 并处理远程差异。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| UAF read/show | 泄露 heap/libc/PIE 哪个地址，是否需要 unsorted bin | 建 leak 再决定写落点 |
+| double free / tcache poisoning | safe-linking key、size class 和 fd 可控性 | 写 hook、GOT、stack 或对象指针 |
+| off-by-null / backward consolidation | 前后 chunk size、prev_inuse 和可合并范围 | 转 [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md) |
+| adjacent struct overflow | 相邻对象是否有函数指针/长度/索引 | 优先覆盖业务指针或权限字段 |
+| C++ exception path | `bad_alloc`、析构、优化和局部变量残留是否改变状态 | 对照编译产物而不是只看源码 |
+| cross-bin promotion | tcache/fastbin/unsorted 是否可跨 bin 重用 | 固定释放顺序和 size class |
+| custom allocator unlink | metadata 检查、前后指针和写入目标 | 复现 unlink 公式，再选择 GOT/指针表 |
+| IO FILE 作为落点 | stdout/stdin/FILE 被堆 primitive 影响 | 转 [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md) |
 
-## 关键变体
+## 来自 WP 的案例索引
 
-| 变体 | 复用重点 |
+| Raw WP | 可复用联系 |
 |---|---|
-| UAF Vtable Pointer Encoding Shell Argument (BCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Uninitialized Chunk Residue Pointer Leak (picoCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| tcache strcpy Null-Byte Overflow + Backward Consolidation (HITCON 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Adjacent-Struct fn-Pointer Overflow for Libc Leak + GOT Overwrite (RITSEC 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hidden Menu Option 1337 for Tcache Poisoning (FireShell 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Tcache Double-Free + Fake IOFILE Vtable Stdout Hijack (BCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Tcache-to-Fastbin Promotion Cross-Bin Attack (BCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 6-Bit Index OOB + writtenbytes Accumulator for Fn-Pointer Increment (Codegate 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ISMMAPED Bit-Flip for Unsorted Bin Leak on Calloc'd Chunk (0CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Filename-Regex-Constrained Fastbin via LSB-Only Heap Pointer Overwrite (BSidesSF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom Allocator Unsafe Unlink to GOT (DEF CON Qualifier 2014) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md) | 负数 size 触发异常后没有 return，析构函数在 `-O3` 下不再设置 `FREEDBUF`，结合残留指针形成 double free、泄露和 tcache fd 劫持。 |
 
-## 常见陷阱
+## 合并与拆分结论
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 保留为 family：raw 覆盖多种生命周期 bug 和 allocator primitive，能提供 heap 首轮后的二级分流。
+- 不合并进 `heap-houses-unlink-and-tcache.md`：两页边界分别是 primitive 形成和 metadata/bin 技巧落地。
+- 不合并进 `heap-fsop-file-structure-attacks.md`：FSOP 是常见落点，但不是所有 heap UAF 的核心。
 
-## 关联技巧
+## 常见误判
 
-- [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
-- [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
-- [format-string.md](format-string.md)
-- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
+- 只按菜单题模板写 exploit，没有确认 glibc 版本和 safe-linking。
+- 源码里有防 double free 标志就停止，未检查异常路径、优化和未初始化变量。
+- tcache poisoning 只看 fd 可写，没有处理对齐、key 和 size class。
+- custom allocator 直接套 glibc 技巧，忽略自定义 metadata 检查。
+
+## 关联页面
+
+- [pwn-first-pass-red-flags-and-protections.md](pwn-first-pass-red-flags-and-protections.md)
 - [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
+- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
+- [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
+- [format-string.md](format-string.md)
+- [pwn-tooling.md](pwn-tooling.md)
 
 ## 原始资料
 
 - [heap-uaf-tcache-and-custom-allocator.md](../raw/pwn/heap-uaf-tcache-and-custom-allocator.md)
+- [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md)

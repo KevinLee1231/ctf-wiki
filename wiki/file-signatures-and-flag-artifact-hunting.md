@@ -1,17 +1,17 @@
 ---
-type: technique
-tags: [forensics, technique]
+type: family
+tags: [forensics, file-triage, artifact, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/file-signatures-and-flag-artifact-hunting.md
-updated: 2026-05-21
+updated: 2026-06-13
 ---
 
 # File Signatures and Flag Artifact Hunting
 
 ## 适用场景
 
-首轮不知道文件真实类型，或者怀疑 flag 藏在 metadata、文件尾部、未引用对象、删除工件、日志碎片、常见编码层中。这个页面用于快速建立“文件到底是什么、还有什么没看”的首检清单。
+本页是文件首检 family。首轮不知道文件真实类型，或者怀疑 flag 藏在 metadata、文件尾部、未引用对象、删除工件、日志碎片、常见编码层中时，用它先建立“文件到底是什么、还有什么没看”的分流清单。
 
 ## 识别信号
 

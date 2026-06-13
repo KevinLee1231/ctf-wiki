@@ -1,85 +1,67 @@
 ---
-type: technique
-tags:
-  - misc
-  - technique
-skills:
-  - ctf-misc
+type: family
+tags: [misc, family, encoding, qr, esolang, unicode]
+skills: [ctf-misc]
 raw:
   - ../raw/misc/encodings-qr-and-esolangs.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Encodings, QR and Esolangs
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
+本页是轻量可逆变换 family，用于判断 Base/hex/URL/ROT、UTF/Unicode、IEEE-754/BCD、二维码修复、esolang 和多层编码链。它的价值是快速确认“这是不是编码/表示层问题”，以及失败后转向图像、文件格式、pyjail 或约束求解。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果题目核心已经是复杂文件结构、压缩包恢复、图像位平面、沙箱逃逸或交互 oracle，不要继续在编码页里循环尝试。
 
-## 识别信号
+## 共同识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：Common Encodings、Base64、Base32、Hex、IEEE 754 Floating Point Encoding、UTF-16 Endianness Reversal (LACTF 2026)、BCD (Binary-Coded Decimal) Encoding (VuwCTF 2025)、Multi-Layer Encoding Detection (0xFun 2026)。
+- 输入输出主要是字符串、数字列、二维码碎片、Unicode 异常字符、看似程序的符号串、Whitespace/Brainfuck/Piet/Malbolge 等 esolang。
+- 字符集、长度、padding、大小写、分隔符、重复模式或可打印率明显指向可逆编码。
+- 题面给出“基础”“层层”“乱码”“二维码碎片”“空白”“浮点数”“助记词”等提示。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 记录原始样本、长度、字符集、是否有 padding、是否存在分隔符或固定块长。
+- 每解一层都保存中间值，并确认中间值的格式证据，而不是凭“看起来像”继续套工具。
+- 对二维码，先确认尺寸、finder pattern、version、ECC/mask、chunk 顺序和是否需要图像修复。
+- 对 esolang，先确认语言或 opcode 映射，再执行解释器；不要直接把所有符号串当 Brainfuck。
 
-## 解法骨架
+## 首轮路由
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据形态 | 先做什么 | 下一跳 |
+|---|---|---|
+| Base64/Base32/hex/URL/ROT/Caesar | 先按字符集和 padding 验证候选，再逐层记录中间输出。 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
+| UTF-16 endian、Unicode tags、variation selector、homoglyph | 保留原始 Unicode code point，先做规范化/隐藏字符提取，再判断是否是文本隐写。 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
+| IEEE-754、BCD、数字列、频率映射 | 先确认块长、端序和数值范围，再转 bytes 或频率 rank。 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
+| QR 损坏、碎片、目录索引、finder 缺失 | 先恢复网格和 finder pattern，再用 known prefix/ECC 修正。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
+| Whitespace/Brainfuck/Piet/Malbolge/自定义 esolang | 识别语言和 opcode 映射，先跑小样本验证解释器方向，再执行完整链。 | [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| 多层编码链 | 每层只在有格式证据时推进；中间结果若变成文件头、图片、压缩包或脚本，立即 pivot。 | [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Common Encodings | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Base64 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Base32 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hex | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| IEEE 754 Floating Point Encoding | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| UTF-16 Endianness Reversal (LACTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| BCD (Binary-Coded Decimal) Encoding (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Layer Encoding Detection (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| URL Encoding | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ROT13 / Caesar | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Caesar Brute Force | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Codes | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Basic Commands | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Structure | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Repairing Damaged QR | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Finder Pattern Template | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Code Chunk Reassembly (LACTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Code Chunk Reassembly via Indexed Directories (UTCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Stage URL Encoding Chain (UTCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Esoteric Languages | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Whitespace Language Parser (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom Brainfuck Variants (Themed Esolangs) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Layer Esoteric Language Chains (Break In 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| IEEE-754 Float Encoding (Data Hiding) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 `family`：raw 覆盖通用编码、二维码、esolang、Unicode、浮点/数字列等多条路线，第一步判断不同，不能作为单一 technique。
+- 暂不拆 Base/QR/esolang 小页：这些内容当前多为速查和短案例，直接拆会增加查询成本；后续若某类积累多篇 WP 再拆具体 technique。
+- 不并入 [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)：后者更偏异常文件/格式清洗，本页负责轻量可逆编码和文本/QR/esolang 首轮判断。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 用 CyberChef 一路爆破但不记录中间证据，最后无法复现。
+- Base64 padding 不对就放弃，没尝试 URL-safe、缺 padding、换行或多层转义。
+- Unicode 题先复制到不保留原始 code point 的编辑器，破坏隐藏字符。
+- QR 修复只看视觉图，没确认 finder、timing、mask 和 ECC。
+- esolang 链执行错方向，未先用小样本验证 opcode 映射。
 
 ## 关联技巧
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
 - [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
-- [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
+- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
+- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
+- [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md)
+- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
+- [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
 
 ## 原始资料
 

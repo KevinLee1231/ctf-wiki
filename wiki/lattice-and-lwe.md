@@ -1,79 +1,84 @@
 ---
-type: technique
-tags: [crypto, technique]
+type: family
+tags: [crypto, family, lattice, lwe, hnp, cvp, svp]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/lattice-and-lwe.md
-updated: 2026-05-21
+  - ../raw/crypto/WMCTF2025-ishowsplit-wp.md
+  - ../raw/crypto/WMCTF2025-lw3-wp.md
+  - ../raw/crypto/WMCTF2025-lw5-wp.md
+  - ../raw/crypto/WMCTF2025-splitmaster-wp.md
+updated: 2026-06-12
 ---
 
 # Lattice and LWE Attacks
 
-## 适用场景
+## 作用边界
 
-密钥恢复、原语误用、oracle、随机数、签名或协议假设是主要障碍。
+本页是格与 LWE 攻击 family，用于判断一个 crypto 题是否应建模成 LLL/BKZ、Babai/CVP、SVP、HNP、截断 LCG、LWE/Ring-LWE、orthogonal lattice 或 subset sum。它不是单个 technique：不同路线的矩阵构造、目标向量、缩放、变量范围和成功校验都不同。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+首轮不要因为出现“小误差”“部分泄露”“线性关系”就直接上 LLL。先确认 known/unknown/goal、模数、噪声或未知段大小，以及是否存在更简单的代数、PRNG 或协议 oracle 路线。
 
-## 识别信号
+## 共同识别信号
 
-- 题目给出密文、nonce、签名、模数、oracle、PRNG 输出或自定义协议。
-- 存在重复 nonce、弱随机、错误回显、数学结构或可查询接口。
-- 源码能复现加密、签名、哈希或验证流程。
-- 题面或 raw 线索能落到这些关键词之一：Quick Triage: Is This a Lattice Problem?、Core Tools: LLL, BKZ, Babai, CVP, SVP (ASIS CTF Finals 2015, CTFZone 2017)、LLL、BKZ、Babai nearest plane、CVP vs SVP、Hidden Number Problem (HNP): Partial Nonce / Biased Nonce (nullcon HackIM 2020, Ledger D…、Minimal ECDSA partial-nonce workflow。
+- 关系形如 `A*s + e = b mod q`、`k_i` 部分泄露、低位/高位缺失、截断输出、近似倍数、subset sum、短向量或最近向量。
+- 多个样本共享同一个 secret、nonce、状态或误差分布。
+- 误差或未知量有边界、稀疏性、少值集合、bit 段结构或可人为选择。
+- 输出能用候选 secret 正向复算验证。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 写清矩阵维度、样本数、模数、未知变量个数、变量范围和目标误差界。
+- 判断是 SVP、CVP、embedding、Babai 近似、HNP 还是 subset sum。
+- 记录缩放策略和预期短向量形状，避免“LLL 跑完不知道哪一行是答案”。
+- 至少用小规模或 toy 参数验证构造方向。
 
-## 解法骨架
+## 首轮路由
 
-1. 列清 known / unknown / goal。
-2. 复现原语和约束。
-3. 选择一个最匹配攻击族做最小验证。
-4. 用解出的结果做正向复算。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| ECDSA/DSA nonce 有 MSB/LSB/不连续 bit 泄露 | 建 HNP/EHNP，先合并已知段和偏移，再用 CVP/Babai 或 BKZ | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) |
+| LCG/PRNG 输出被截断 | 先判断能否用递推直接恢复；不行再把未知低位作为格变量 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md), [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md) |
+| Plain LWE，误差小或 secret 稀疏/三值 | 先做 embedding/CVP 基线，再按误差分布调缩放和 block size | [crypto-tooling.md](crypto-tooling.md) |
+| error 不是小噪声但只来自少数固定值 | 把“选哪个 error”转成 0/1 选择变量，而不是强行当小误差 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| Ring-LWE/Module-LWE | 先识别环、多项式基、维度和模数，再决定是否 flatten 成 plain LWE | [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) |
+| Approximate GCD、knapsack、subset sum | 先判断目标是短关系还是最近和，再转数论/代数路线 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| HSSP/AHSSP、orthogonal lattice | 先构造正交关系并检查样本数是否足够 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 
-## 关键变体
+## 来自 WP 的案例索引
 
-| 变体 | 复用重点 |
+| Raw WP | 可复用联系 |
 |---|---|
-| Quick Triage: Is This a Lattice Problem? | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Core Tools: LLL, BKZ, Babai, CVP, SVP (ASIS CTF Finals 2015, CTFZone 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LLL | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| BKZ | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Babai nearest plane | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| CVP vs SVP | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hidden Number Problem (HNP): Partial Nonce / Biased Nonce (nullcon HackIM 2020, Ledger D… | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Minimal ECDSA partial-nonce workflow | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LCG and Truncated Output as a Lattice Problem (X-MAS CTF 2018, FwordCTF 2020) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Minimal truncated-LCG workflow | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LWE via Embedding and CVP (PlaidCTF 2016, Aero CTF 2020) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Embedding-style lattice | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| For ternary or sparse secrets | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Ring-LWE / Module-LWE 参数识别与格建模（PlaidCTF 2016 / DiceCTF 2022） | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Flattening Ring-LWE to plain LWE | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Orthogonal Lattices: HSSP / AHSSP Style Recovery (zer0pts CTF 2022) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Subset Sum / Knapsack via Lattice Reduction (HITCON CTF 2017, BackdoorCTF 2023) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Common Failure Modes | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Quick Checklist Before You Commit to Lattices | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Lattice / LWE Attacks | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| [WMCTF2025-ishowsplit-wp](../raw/crypto/WMCTF2025-ishowsplit-wp.md) | 隐藏数泄露不是连续 MSB/LSB，而是 `split_master` 给出的 20 bit 和 10 bit 不连续片段；用 EHNP 的 `Pi/Nu` 描述未知段，LLL 后 Babai CVP 恢复。 |
+| [WMCTF2025-lw3-wp](../raw/crypto/WMCTF2025-lw3-wp.md) | LWE error 取三个随机模数值，不能简单线性映射成小噪声；把每行 error 选择展开为 0/1 变量，再降维并用精确 SVP/强规约恢复。 |
+| [WMCTF2025-lw5-wp](../raw/crypto/WMCTF2025-lw5-wp.md) | 服务端让选手自选五个 error 值并用格 check 排除过小映射；首轮应先研究 check 约束，再利用少值 error 的选择结构恢复 secret。 |
+| [WMCTF2025-splitmaster-wp](../raw/crypto/WMCTF2025-splitmaster-wp.md) | 交互 oracle 允许自选切分 `a*key mod q` 的泄露段；通过多样本相减消去公共 key 部分，把未知段和乘子关系转成 BKZ 可恢复的短向量。 |
+
+## 合并与拆分结论
+
+本页应保留为 family。HNP、截断 LCG、LWE、Ring-LWE、orthogonal lattice 和 subset sum 都有独立构造，但共享“把有界未知转为格问题”的首轮判断。当前不拆小页，是因为 raw 仍以路线集合和 WP 案例索引为主。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 没估计误差界和维度就上 LLL，失败后无法判断是建模错还是参数不够。
+- 把少值 error 当小噪声，导致格构造方向错误。
+- Ring-LWE flatten 时搞错多项式模、系数顺序或卷积方向。
+- Babai/CVP 目标向量偏移漏掉已知 bit 段。
+- 解出候选后不正向复算签名、密文或 oracle 输出。
 
 ## 关联技巧
 
-- [block-mode-misuse-family.md](block-mode-misuse-family.md)
-- [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
 - [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)
+- [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md)
+- [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
+- [crypto-tooling.md](crypto-tooling.md)
 
 ## 原始资料
 
 - [lattice-and-lwe.md](../raw/crypto/lattice-and-lwe.md)
+- [WMCTF2025-ishowsplit-wp](../raw/crypto/WMCTF2025-ishowsplit-wp.md)
+- [WMCTF2025-lw3-wp](../raw/crypto/WMCTF2025-lw3-wp.md)
+- [WMCTF2025-lw5-wp](../raw/crypto/WMCTF2025-lw5-wp.md)
+- [WMCTF2025-splitmaster-wp](../raw/crypto/WMCTF2025-splitmaster-wp.md)

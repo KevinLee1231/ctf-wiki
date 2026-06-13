@@ -1,83 +1,68 @@
 ---
-type: technique
-tags: [forensics, technique]
+type: family
+tags: [forensics, family, windows, registry, logs, credentials, timeline]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/windows-registry-logs-and-credentials.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Windows Registry, Logs and Credentials
 
-## 适用场景
+## 作用边界
 
-主要工作是从文件、镜像、内存、PCAP、日志、多媒体或物理信号中恢复证据。
+本页是 Windows 末端痕迹 family，用于从注册表、事件日志、SAM/SYSTEM、NTFS 元数据、USN Journal、浏览器数据、Defender 日志、WMI 和内存凭据中恢复时间线、账号、密码、执行痕迹或隐藏文件。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不替代磁盘/内存总取证页，也不替代 PCAP 凭据恢复页。当前证据已经明确落在 Windows 主机侧 artifacts 时，从本页做二级分流；若只是“有一个镜像或内存 dump”，先看 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。
 
-## 识别信号
+## 共同识别信号
 
-- 附件是 pcap、disk image、memory dump、office/pdf/image/audio/video、日志或容器层。
-- 需要 carving、重组、解码、时间线、凭据恢复或隐写检测。
-- flag 藏在工件或历史状态中。
-- 题面或 raw 线索能落到这些关键词之一：Windows Event Logs (.evtx)、Registry Analysis、OEMInformation Backdoor Detection、SAM Database Analysis、Recycle Bin Forensics、Browser History、Windows Telemetry (imprbeacons.dat)、Hosts File Hidden Data。
+- 附件包含 `SAM`、`SYSTEM`、`SOFTWARE`、`NTUSER.DAT`、`.evtx`、`$MFT`、`$UsnJrnl:$J`、`OBJECTS.DATA`、`MPLog`、Prefetch、Chrome/Edge/Firefox profile 或 Windows 内存镜像。
+- 题目提示用户创建、RDP、WMI、wmiexec、PowerShell、日志清理、浏览器凭据、回收站、ADS、Defender、恶意持久化或反取证。
+- 目标不是单纯 carving 文件，而是重建“谁在什么时候做了什么”，或从系统状态里恢复 credential/secret。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 明确 artifact 来源：磁盘镜像、内存 dump、导出的 hive、单个日志文件还是浏览器 profile。
+- 保留时间基准：Windows FILETIME、Unix time、USN timestamp、Chrome WebKit timestamp 或事件日志时间要统一到同一时区。
+- 对凭据类证据，确认依赖关系：SAM 需要 SYSTEM boot key；Chrome Login Data 需要 Local State/DPAPI key；Firefox 密码需要 `key4.db` 和 `logins.json`。
+- 对 anti-forensics，不能只说日志缺失；需要有替代证据，如 USN、MFT、SAM key timestamp、Defender MPLog、PowerShell history 或 Prefetch。
 
-## 解法骨架
+## 首轮路由
 
-1. 识别格式和容器层。
-2. 选择 carving、协议重组、内存插件或隐写分析。
-3. 保留中间导出物和命令。
-4. 把 recovered secret 再按需要解码或解密。
+| 证据形态 | 先做什么 | 下一跳 |
+|---|---|---|
+| `.evtx`、RDP、用户创建/删除事件 | 按 Event ID 和 channel 建时间线，优先看 1102、4720、4724、4781、1149、21/24。 | [forensics-tooling.md](forensics-tooling.md) |
+| `SAM` + `SYSTEM` 或内存中 hive | 提取 boot key 和 NTLM hash，再判断是破解、pass-the-hash 还是账号创建时间线。 | [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) |
+| `$MFT`、USN、Recycle Bin、ADS | 先确认文件创建/删除/重命名/命名数据流，再决定恢复内容还是解释行为。 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
+| Chrome/Edge/Firefox profile | 区分 History、Cookies、Login Data、Local Storage、session restore；密码解密先找 master key。 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
+| 日志被清理或攻击者擦痕迹 | 用 USN、MFT、SAM key timestamp、Defender MPLog、PowerShell history、Prefetch 重建旁路时间线。 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
+| Windows 内存 dump | 先用 Volatility 做 `pslist/psxview/cmdline/clipboard/hashdump/netscan`，再按进程或 hive 深挖。 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
+| WMI persistence 或 wmiexec 痕迹 | 检查 WMI repository、USN 中 `__<timestamp>.<random>` 输出文件、WMIPRVSE Prefetch 和 Defender 记录。 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Windows Event Logs (.evtx) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Registry Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| OEMInformation Backdoor Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SAM Database Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Recycle Bin Forensics | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Browser History | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows Telemetry (imprbeacons.dat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hosts File Hidden Data | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Contact Files (.contact) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| WinZip AES Encrypted Archives | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| NTFS Alternate Data Streams | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| NTFS MFT Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| USN Journal ($J) Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SAM Account Creation Timing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Impacket wmiexec.py Artifacts | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PowerShell History as Timeline | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| User Profile Creation as First Login Indicator | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RDP Session Event IDs | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows Defender MPLog Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Anti-Forensics Detection Checklist | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows Memory Forensics: certutil Base64 ZIP Recovery (SEC-T CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| NTFS EFSTMPWP Folder as cipher.exe Wipe Artifact (Security Fest CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Volatility clipboard Plugin for Copy-Paste Secret Recovery (OtterCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Volatility Credential Recovery Toolkit (OtterCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 `family`：raw 同时覆盖日志、注册表、SAM、NTFS、浏览器、Defender、WMI、内存凭据和反取证，核心价值是证据源分流。
+- 不并入 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)：后者负责镜像/内存/VM 容器的入口判断，本页负责 Windows artifact 的细分路线。
+- 暂不拆成独立 Event Log、Registry、NTFS、Browser credential 页面：当前 raw 中它们经常共同支撑同一时间线，拆分会削弱查询路径；后续某类积累多篇 WP 后再拆 technique。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 时间戳格式混用，导致把 Chrome、USN、FILETIME 和 Unix 时间线排错。
+- 只看 Security.evtx；RDP、Defender、PowerShell、WMI、Prefetch 和 USN 往往在日志清理后更有价值。
+- 提取 Chrome/Edge 密码时只拿 `Login Data`，没有 Local State/DPAPI key。
+- 把 ADS 当成普通文件缺失；NTFS 镜像里要用 `fls`/`istat`/`icat` 看命名数据流。
+- 在内存题里只跑 `strings`，没有先用插件定位 clipboard、hashdump、hivelist、cmdline、netscan。
 
 ## 关联技巧
 
-- [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md)
+- [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
+- [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

@@ -301,6 +301,19 @@
 - 另发现 `raw/ai-ml/SU_theifWP.md` 原文引用 `./app.py`，但 raw 中没有该附件；因 raw 正文默认只读，本轮仅记录为原始资料缺口。
 - 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-health-audit-fix-20260611-155909`。
 
+## 2026-06-12 — WMCTF2025 raw WP 摄入
+
+- 按 Ingest 流程处理 raw 中新增的 21 篇 WMCTF2025 WP；本轮不改写 raw 正文，只把可复用识别信号、最小证据和解法骨架沉淀到 active wiki。
+- 新增 `wiki/protocol-relay-and-internal-service-injection.md`：承载 RustDesk `RequestRelay` 这类协议转发到本机/内网服务并造成 Redis 命令注入的模式，避免硬塞进普通 HTTP SSRF 或路径穿越页。
+- 更新五个方向入口：
+  - Web：`guess`、`pdf2text`、`Rustdesk change client backend` 分别路由到 MT19937 预测/Python eval 逃逸、pdfminer CMap pickle、协议 relay 到 Redis。
+  - Crypto：`IShowSplit`、`SplitMaster`、`LW3`、`LW5` 归入 lattice/LWE，`LemonPepper` 归入 p-adic/代数恢复。
+  - Misc/Forensics：`GitHacker` 归入 Git reflog + VeraCrypt 卷头恢复，`Voice_hacker` 归入 RTP 音频恢复和 wav 特征伪造，`Shopping company & phishing email` 归入 LLM 工具调用、Open WebUI N-day 和 SVG/JS 附件分析。
+  - Pwn：`Aberration`、`PaluSimulator`、`wm_easyker`、`wm_easynetlink`、`wm_eat_some_qanux`、`wmkpf` 分别沉淀到 TrustZone/竞态、C++ 堆链、Linux kernel ROP/eBPF/页表和自定义 VM syscall 路线。
+  - Reverse：`appfriend`、`catfriend`、`VideoPlayer`、`Want2BecomeMagicalGirl` 分别沉淀到 Android native crypto、Mach-O 反调试 + 魔改 ChaCha、Windows VMP 动态 dump 和 Flutter/Java/native 反 hook 执行流。
+- 同步 `index.md`：新增 Web technique 入口，Raw 统计更新为 crypto 84、misc 71、pwn 92、reverse 117、web 102。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-wmctf2025-ingest-20260612-145123.zip`。
+
 ## 2026-06-11 — technique 页反向案例索引补强
 
 - 针对 raw WP 只在方向首轮承载页中出现、下一跳 technique 页缺少反向案例入口的问题，补强 10 个 technique 页的 `来自 WP 的案例索引`。
@@ -321,7 +334,7 @@
 ## 2026-06-11 — 弱命名 technique 页手工重构
 
 - 按用户要求，不使用脚本批量修改；逐页阅读并定点重构弱命名页面，目标是让文件名、标题、适用场景和 raw 案例的真实技术模式一致。
-- 已授权修复 raw 缺失附件链接：`raw/ai-ml/SU_theifWP.md` 中 `[app.py](./app.py)` 改为普通附件名描述，避免指向不存在的同层文件。
+- 已授权修复 raw 缺失附件链接：`raw/ai-ml/SU_theifWP.md` 中原本的 `app.py` 相对链接改为普通附件名描述，避免指向不存在的同层文件。
 - 重命名并重写 5 个弱 technique 节点：
   - `wiki/web3.md` -> `wiki/blockchain-smart-contract-exploitation.md`：聚焦 EVM/Solana/Anchor/Sui Move、链上伪随机、CREATE2、账户/capability 绑定和交易状态。
   - `wiki/social-media.md` -> `wiki/osint-account-public-media-correlation.md`：聚焦公开账号、媒体、commit、平台昵称、历史快照和身份链证据闭合。
@@ -420,3 +433,247 @@
 - 更新 `AGENTS.md` 的 tooling 页规则：工具页必须写具体工具路由、环境边界和失败转向，不得用可套用到任意页面的“关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式”占位句。
 - 这条规则用于防止本轮修复过的 tooling 页重新退化成 raw 标题展开表或工具百科表。
 - 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-agents-tooling-rule-tighten-20260611-213054.zip`。
+
+## 2026-06-12 — Reverse 高风险 technique family 化
+
+- 继续执行语义健康检查，处理 Reverse 方向中模板化程度最高、且标题明显承载多平台/多载体/多语言分流职责的一簇页面。
+- 将 6 个原 `type: technique` 页面改为 `type: family`：
+  - `android-games-hardware-and-runtime-platforms.md`：Android/APK、Flutter、Unity/Godot/Roblox、Electron/Node 和硬件抽象等运行时平台分流。
+  - `mobile-firmware-kernel-and-game-re.md`：Mach-O/iOS、固件、驱动、eBPF、游戏引擎和 CAN/车载环境分流。
+  - `go-rust-jvm-and-cpp-reversing.md`：Go、Rust、JVM/Kotlin、C++、Swift、D、Haskell、Cython/Nuitka 等语言运行时分流。
+  - `python-bytecode-esolangs-and-uefi.md`：Python 字节码、opcode remap、Pyarmor/Nuitka、Brainfuck/FRACTRAN、HarmonyOS ABC、UEFI 等字节码/低频格式分流。
+  - `loader-vm-image-and-kernel-patterns.md`：二阶段 loader、image/bitmap、kernel module、binfmt、shared library backdoor 和特殊执行链分流。
+  - `font-shader-firmware-and-legacy-patterns.md`：字体、shader、BPF、MBR、legacy 格式、side-channel 和约束化恢复分流。
+- 未删除或物理合并上述页面：它们仍有 raw 证据和 WP 下一跳价值；但不再占用具体 technique 名额。
+- 暂不拆成更细 technique：当前许多分支仍是短案例速查，优先保留为 family，后续只有稳定高频模式积累足够 raw/WP 证据时再拆具体技巧页。
+- 重写 `reverse-first-pass-workflow-and-debugging.md` 表头路由，使其成为 Reverse 总入口，并保留后续 WP 案例沉淀表。
+- 同步更新 `index.md`，将上述 6 页从 Reverse Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-reverse-family-retune-20260612-155311.zip`。
+
+## 2026-06-12 — Crypto 高风险 technique family 化
+
+- 继续执行语义健康检查，处理 Crypto 方向中模板化程度最高、且明显承载多攻击路线分流职责的一簇页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `rsa-attacks.md`：RSA 基础路线分流，覆盖小指数、共模、广播、Wiener、Fermat、多素数和基础 oracle。
+  - `rsa-specialized-structures-and-oracles.md`：RSA 长尾结构分流，覆盖特殊素数、CRT 参数泄露、fault、ROCA、同态签名、Coppersmith 和复杂 oracle。
+  - `hash-protocol-and-oracle-attacks.md`：Hash/MAC/协议 oracle 分流，覆盖 length extension、CRC/线性 MAC、compression oracle、padding/parse/timing oracle、SRP/DH proof 和状态可逆。
+  - `classical-xor-and-substitution-ciphers.md`：古典替换、Vigenere、XOR、many-time pad、文件头推 key 和视觉轻量 cipher 分流。
+- 未合并 `rsa-attacks.md` 与 `rsa-specialized-structures-and-oracles.md`：前者用于 RSA 快速首检，后者用于需要建模、oracle 或实现 bug 的长尾结构。
+- 暂不拆小 e、共模、length extension、CRC、Vigenere、XOR 等小页：当前 raw 多为短案例速查，先保留在 family 中；后续有多篇 WP 支撑时再拆具体 technique。
+- 同步更新 `index.md`，将上述 4 页从 Crypto Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-crypto-family-retune-20260612-160050.zip`。
+
+## 2026-06-12 — Pwn/Pentest 高风险 technique family 化
+
+- 继续从 technique 页执行语义健康检查，处理 Pwn/Pentest 中模板化程度高且职责明显跨多个技巧路线的页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `overflow-basics.md`：栈溢出、ret2win、canary 泄露/爆破、协议长度越界、signed index、单字节覆盖和结构体指针覆盖的二级分流。
+  - `linux-kernel-exploit-basics.md`：Linux kernel pwn 环境、保护组合、对象 primitive、eBPF/页表和提权目标分流，并保留 WMCTF kernel WP 案例索引。
+  - `pentest-attack-chains-and-tunneling.md`：foothold、凭据、隧道、横向和提权 attack graph 分流。
+  - `linux-privesc.md`：Linux 单机提权、服务配置滥用、数据库/备份凭据、NFS/SSH socket、本机代理和 race 路线分流。
+- 未合并 `pentest-attack-chains-and-tunneling.md` 与 `linux-privesc.md`：前者负责跨主机链路建模，后者负责单台 Linux 上从低权到高权的路线族。
+- 未把 `overflow-basics.md` 并入 `pwn-first-pass-red-flags-and-protections.md`：首轮页负责全 Pwn 漏洞族选择，overflow 页负责基础覆盖/OOB/canary 的二级分流。
+- 同步更新 `index.md`，将上述 4 页从 Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-pwn-pentest-family-retune-20260612-160621.zip`。
+
+## 2026-06-12 — Forensics 证据源 technique family 化
+
+- 继续执行语义健康检查，处理 Forensics 方向中模板化程度高、且明显承担证据源二级分流职责的一簇页面。
+- 将 3 个原 `type: technique` 页面改为 `type: family`：
+  - `windows-registry-logs-and-credentials.md`：Windows 注册表、事件日志、SAM/SYSTEM、NTFS、USN、浏览器凭据、Defender/WMI 和反取证时间线分流。
+  - `pdf-png-gif-and-text-stego.md`：PDF、PNG/APNG、GIF、SVG、终端文本、表格、视频容器和文件叠加隐写分流。
+  - `linux-git-browser-and-container-forensics.md`：Linux 日志、Git 对象库、浏览器 profile、Docker layer/history、KeePass 和运行中进程证据源分流。
+- 未并入 `cross-domain-forensics-technique-map.md`：总 map 负责跨介质下一跳，这三页负责进入具体证据源后的二级分流。
+- 暂不拆成 Windows EventLog/Registry/Browser、PDF/PNG/GIF、Git/Docker/Browser 等小页：当前 raw 多为同题链路或同证据源集合，拆分会导致入口碎片化；后续单一路线积累足够 raw/WP 证据时再拆具体 technique。
+- 同步更新 `index.md`，将上述 3 页从 Forensics Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-forensics-family-retune-20260612-161333.zip`。
+
+## 2026-06-12 — Misc/OSINT 高风险 technique family 化
+
+- 继续执行语义健康检查，处理 Misc/OSINT 中模板化程度高或明显承担分流职责的一簇页面。
+- 将 6 个原 `type: technique` 页面改为 `type: family`：
+  - `encodings-qr-and-esolangs.md`：Base/hex/URL/ROT、Unicode、二维码、esolang、浮点/数字列和多层编码链分流。
+  - `pyjails.md`：Python 受限执行、对象链、字符集限制、装饰器/f-string、oracle、audit hook 和 agent sandbox 分流。
+  - `vm-z3-sandbox-and-game-basics.md`：VM/解释器、WASM/游戏、PyInstaller/marshal、Z3/约束、K8s、浮点和 sandbox 分流。
+  - `geolocation-and-media.md`：图片、视频、坐标、街景、路牌、地标、IP 和公开媒体地理定位分流。
+  - `web-and-dns.md`：搜索引擎、公开文档、DNS、WHOIS、Wayback、Shodan、公开仓库和目录泄露分流。
+  - `osint-account-public-media-correlation.md`：账号、公开媒体、游戏平台、社交平台、archive、GitHub/博客和身份链分流。
+- 修正 `vm-z3-sandbox-and-game-basics.md` 在 `index.md` 中落入 Reverse Technique 区的错位：该页当前职责是 Misc 规则系统 family，复杂 VM/字节码才通过链接 pivot 到 Reverse 页面。
+- 未物理合并 Misc/OSINT 页面：这些页面分别承担编码/QR、Python jail、规则系统、地理媒体、Web/DNS、账号身份链的二级分流，直接合并会让 family 失去 pivot 价值。
+- 同步更新 `index.md`，将上述 6 页从 Technique 索引移动到 Family 索引；OSINT 当前 active 页面均为 family/tooling，暂无线性 technique 列表。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-misc-osint-family-retune-20260612-161803.zip`。
+
+## 2026-06-12 — Pwn runtime/control-flow technique family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Pwn 中模板化程度高、且明显承担二级分流职责的一簇页面。
+- 将 5 个原 `type: technique` 页面改为 `type: family`：
+  - `seccomp-ret2dlresolve-and-runtime-primitives.md`：Seccomp、ORW、ret2dlresolve、runtime syscall、GOT/PLT 和动态解析路线分流。
+  - `interpreter-jit-canary-and-integer-exploits.md`：解释器、JIT、自定义 VM、整数宽度、canary、GC 和 timing oracle 的运行时 primitive 分流。
+  - `runtime-protection-and-tls-exploits.md`：FILE/stdout、TLS destructor、atexit PTR_MANGLE、shadow stack、safe-linking 和 runtime callback 分流。
+  - `stack-pivots-srop-and-seccomp-rop.md`：栈迁移、SROP、RETF、vDSO/vsyscall、JIT-ROP、ret2dlresolve 和 constrained ROP 分流。
+  - `windows-arm-and-cross-platform-exploits.md`：Windows、ARM/Thumb/ARM64、DOS/m68k、Forth、SEH/CFG 和平台约束分流。
+- 未删除或物理合并上述页面：它们都有 raw 支撑，并能在 Pwn 首轮页之后提供明确 pivot；直接合并到 `pwn-first-pass-red-flags-and-protections.md` 会让总入口过宽。
+- 暂不拆出更多小 technique：当前 raw 多为短案例集合，先保留路线族判断；后续只有单一路线积累足够多 raw/WP 证据时再拆具体技巧页。
+- 同步更新 `index.md`，将上述 5 页从 Pwn Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-pwn-runtime-family-retune-20260612-162441.zip`。
+
+## 2026-06-12 — Reverse/Malware 反分析与载荷链 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理仍含大量模板化变体表、且职责明显跨多个路线的 Reverse/Malware 页面。
+- 将 3 个原 `type: technique` 页面改为 `type: family`：
+  - `anti-analysis.md`：反调试、anti-VM、anti-sandbox、anti-DBI、自校验、反反汇编和移动端 hook 检测分流。
+  - `scripts-and-obfuscation.md`：JS/PowerShell/SVG/邮件附件/包载荷、脚本混淆、C2 配置和恶意载荷链分流。
+  - `self-decrypting-strings-and-lattice-patterns.md`：多层自解密、字符串恢复、prefix hash、格/线性约束、决策树和魔改 cipher 恢复分流。
+- 未删除上述页面：它们均有 raw 和 WP 案例支撑，且在对应首轮页之后承担明确二级 pivot。
+- 暂不拆成更细 technique：当前 raw 多为路线集合和短案例，拆分会造成入口碎片化；后续可在 Linux ptrace、Android Frida 检测、TLS/壳 dump、格约束恢复等方向积累足够 raw 后再拆。
+- 同步更新 `index.md`，将上述 3 页从 Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-reverse-malware-family-retune-20260612-163204.zip`。
+
+## 2026-06-12 — Misc jail/format/interactive 页面 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Misc 中仍含模板化变体表且承担二级分流职责的页面。
+- 将 3 个原 `type: technique` 页面改为 `type: family`：
+  - `interactive-containers-jails-and-solvers.md`：交互服务、容器边界、jail 变体、虚拟化 helper、oracle 和小型求解器分流。
+  - `bashjails.md`：bash/rbash 受限 shell、eval 上下文、字符集构造、输出通道和 post-shell 枚举分流。
+  - `exotic-encodings-and-file-formats.md`：Verilog/HDL、Gray code、RTF/SMS PDU/UTF-9、MaxiCode、DTMF、音乐音程和解析器差异等低频格式分流。
+- 未合并 `exotic-encodings-and-file-formats.md` 到 `encodings-qr-and-esolangs.md`：后者负责轻量可逆编码和 QR/esolang 首轮判断，前者负责需要格式规范、字段清洗、信号映射或解析器语义的低频格式。
+- 未合并 `bashjails.md` 到 `pyjails.md`：shell jail 的 eval、fd、变量和输出通道模型与 Python 对象/namespace 模型不同。
+- 同步更新 `index.md`，将上述 3 页从 Misc Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-misc-jail-format-family-retune-20260612-163714.zip`。
+
+## 2026-06-12 — Web 注入/解析器/反序列化 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Web 中仍含大量模板化变体表、且跨多个 sink 或解析器语义的页面。
+- 将 3 个原 `type: technique` 页面改为 `type: family`：
+  - `xml-command-and-graphql-injection.md`：XXE/XML、命令注入、GraphQL、PHP 变量变量、可预测文件名和正则替换绕过分流。
+  - `parser-wrapper-and-legacy-ssrf-tricks.md`：解析器差异、PHP wrapper、URL parser/curl 差异、PDF/LaTeX 内部资源加载、SSRF 到内部协议和 legacy SSRF 分流。
+  - `php-java-python-deserialization.md`：Java/Python/PHP/.NET 反序列化、gadget、包装层、SECRET_KEY/cookie 和 parser 内部 pickle 加载分流。
+- 未并入 Web 首轮页：这三页都承担首轮之后的二级判断，直接合并会让 `web-first-pass-triage-and-chain-patterns.md` 过宽。
+- 暂不拆出 `xxe.md`、`command-injection.md`、`graphql-injection.md`、`java-deserialization.md` 等小页：当前 raw 多为短案例集合，先保留 family 路由；后续积累足够 raw/WP 后再拆具体 technique。
+- 同步更新 `index.md`，将上述 3 页从 Web Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-web-injection-parser-deser-family-retune-20260612-164046.zip`。
+
+## 2026-06-12 — Crypto 格/代数/证明系统 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Crypto 中明显承担算法族分流职责的页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `lattice-and-lwe.md`：HNP/EHNP、截断 LCG、LWE/Ring-LWE、CVP/SVP、orthogonal lattice 和 subset sum 分流。
+  - `number-theory-and-algebra-attacks.md`：DLP、Coppersmith、approximate GCD、p-adic/Hensel、GF(2) 线性代数和特殊代数结构分流。
+  - `homomorphic-and-exotic-algebra.md`：Paillier/Goldwasser-Micali/ElGamal 同态 oracle、braid/tropical/矩阵群、FPE、BB84 和差分隐私分流。
+  - `zkp-secret-sharing-and-proof-systems.md`：ZKP、garbled circuit、Shamir、Groth16、DV-SNARG、KZG/pairing 和阈值签名结构分流。
+- 未并入 `crypto-parameter-triage-family.md`：总入口负责首轮参数分流，这四页负责进入格、数论、低频代数和证明系统后的二级判断。
+- 暂不拆 HNP、LWE、Paillier、Groth16、Shamir 等小页：当前 raw 多为算法族集合，先保留 family 路由；后续单一路线积累足够 raw/WP 后再拆具体 technique。
+- 同步更新 `index.md`，将上述 4 页从 Crypto Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-crypto-algebra-family-retune-20260612-164434.zip`。
+
+## 2026-06-12 — Forensics 图像/存储/网络证据源 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Forensics 中按证据源组织、但仍标为 technique 的页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `image-bitplane-qr-and-jpeg-stego.md`：JPEG/PNG/BMP/GIF、bitplane、QR tile、帧差、DCT/slack/thumbnail 和图像重组分流。
+  - `disk-memory-vm-and-container-forensics.md`：磁盘、内存、VM snapshot、core dump、Android、Docker layer、云存储和勒索脚本残留的载体入口分流。
+  - `filesystems-memory-dumps-and-raid.md`：分区/文件系统、ZFS/APFS/HFS+、minidump、VMDK sparse、RAID、TrueCrypt/VeraCrypt 和数据库历史恢复分流。
+  - `network-covert-auth-and-reassembly.md`：PCAP covert channel、NTLMv2/MS-SNTP/RADIUS/RDP、dnscat2、RTP 音频和多层流量重组分流。
+- 未合并 `disk-memory-vm-and-container-forensics.md` 与 `filesystems-memory-dumps-and-raid.md`：前者负责载体和流程选择，后者负责底层恢复模式；直接合并会让页面过宽。
+- 未并入 `cross-domain-forensics-technique-map.md`：总 map 负责跨证据源下一跳，这四页负责进入图像、网络、磁盘/内存后继续二级判断。
+- 同步更新 `index.md`，将上述 4 页从 Forensics Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-forensics-media-storage-network-family-retune-20260612-164852.zip`。
+
+## 2026-06-12 — Pwn 核心利用页重写与分层调整
+
+- 继续执行 technique 优先的语义健康检查，处理 Pwn 中模板化程度高的核心利用页面。
+- 保留 `format-string.md` 为 `type: technique`：格式串漏洞有明确识别信号、最小证据和 exploitation primitive，适合作为具体技术页；本轮重写为 offset、leak、write、落点和过滤器绕过的可复用骨架。
+- 将 2 个原 `type: technique` 页面改为 `type: family`：
+  - `ret2csu-dynelf-and-shellcode.md`：ret2libc、raw syscall ROP、ret2csu、DynELF、bad-character ROP、exotic gadgets 和 shellcode stager 的后期落地分流。
+  - `heap-houses-unlink-and-tcache.md`：House 系列、unlink、tcache、largebin、custom allocator、musl meta 和 allocator metadata 的 heap 路线分流。
+- 未合并 `heap-houses-unlink-and-tcache.md` 与 `heap-uaf-tcache-and-custom-allocator.md`：前者偏 metadata/bin/house 路线，后者偏 UAF/对象生命周期和 primitive 形成。
+- 同步更新 `index.md`，将上述 2 页从 Pwn Technique 索引移动到 Family 索引，`format-string.md` 保留在 Pwn Technique 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-pwn-core-technique-family-retune-20260612-165244.zip`。
+
+## 2026-06-12 — Crypto PRNG/stream/ECC 页面 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Crypto 中仍含模板化变体表、且实际承担二级分流职责的页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `mt-lcg-and-seed-recovery.md`：MT19937、`random.random()`、时间种子、C `rand()`、LCG、V8 `Math.random()` 和弱 PRNG 状态恢复分流。
+  - `prng-z3-lcg-and-timing-attacks.md`：partial output、Z3、LCG 逆推、timing oracle、格式串改写和跨域 PRNG 状态补全分流。
+  - `rc4-lfsr-and-keystream-reuse.md`：LFSR、RC4 bias、keystream reuse、known plaintext、custom stream 和 PCAP/DNS key 泄露分流。
+  - `ecc-dlp-and-signature-attacks.md`：ECC/DLP、small subgroup、invalid/singular/anomalous curve、torsion side channel、nonce reuse 和 partial nonce 签名恢复分流。
+- 未合并 `prng-z3-lcg-and-timing-attacks.md` 到 `mt-lcg-and-seed-recovery.md`：前者处理的是约束、计时和跨领域 primitive 补齐状态，第一证据与直接 PRNG 类型识别不同。
+- 未合并 `rc4-lfsr-and-keystream-reuse.md` 到 PRNG 页：流密码问题的核心证据是 keystream、known plaintext、位序和复用关系，不是通用 seed recovery。
+- 同步更新 `index.md`，将上述 4 页从 Crypto Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-crypto-prng-stream-ecc-family-retune-20260612-165609.zip`。
+
+## 2026-06-12 — Web auth/Node 与 Misc DNS/game 页面 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Web 与 Misc 中仍含模板化变体表、且实际承担二级分流职责的页面。
+- 将 6 个原 `type: technique` 页面改为 `type: family`：
+  - `node-and-prototype.md`：Node 原型污染、gadget、VM/sandbox escape、Happy-DOM、RSC 和内部 require/SSRF 转向分流。
+  - `oauth-saml-cors-and-cicd.md`：OAuth/OIDC、SAML、CORS、Git 历史、CI/CD 变量、身份平台 API 和 TeamCity/Guacamole 链分流。
+  - `auth-jwt.md`：JWT/JWE、签名 cookie、算法混淆、JWK/JKU/KID、弱 secret 和 token parser 差异分流。
+  - `polyglot-url-tricks-and-ssrf-leaks.md`：URL parser 差异、gopher/CRLF、polyglot 上传、SSRF 凭据泄露和 DNS rebinding 转向分流。
+  - `dns.md`：ECS、DNSSEC、zone transfer、rebinding、DNS tunnel、SPF/TXT 和解析链分流。
+  - `game-state-websocket-and-wasm.md`：游戏状态、WebSocket、Flask session、WASM linear memory、de Bruijn 和资源包状态复现分流。
+- 未合并 `auth-jwt.md` 到 `auth-bypass-cookies-and-hidden-routes.md`：认证总入口负责判断是否进入 token 路线，本页负责 token 内部算法、key lookup、claim 和解析差异。
+- 未合并 `dns.md` 到 OSINT `web-and-dns.md`：后者是公开情报查询入口，本页处理协议行为、隧道、rebinding 和主动解析差异。
+- 未合并 `polyglot-url-tricks-and-ssrf-leaks.md` 到 `parser-wrapper-and-legacy-ssrf-tricks.md`：前者聚焦 payload 自身的 URL/协议多解释，后者覆盖更宽的二段解析器。
+- 同步更新 `index.md`，将上述 6 页从 Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-web-auth-node-misc-family-retune-20260612-170226.zip`。
+
+## 2026-06-12 — Pwn sandbox/kernel/heap 页面 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Pwn 中仍含模板化变体表、且承担二级分流职责的页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `python-vm-and-proc-sandbox-escape.md`：Python/VM、`/proc`、FUSE/CUSE、fifo、emulator、restricted shell 和 sandbox primitive 分流。
+  - `kernel-uaf-race-and-slab-techniques.md`：Kernel UAF、race、SLUB/slab、freelist hardening、BPF verifier/runtime 差异和 PTE/page overlap 分流。
+  - `heap-uaf-tcache-and-custom-allocator.md`：UAF、double free、tcache poisoning、custom allocator、对象生命周期和函数指针/虚表落点分流。
+  - `heap-fsop-file-structure-attacks.md`：glibc FILE、stdout/stdin、FSOP、IO buffer、vtable validation 和 FILE 字段落点分流。
+- 未合并 `heap-uaf-tcache-and-custom-allocator.md`、`heap-houses-unlink-and-tcache.md` 与 `heap-fsop-file-structure-attacks.md`：三者分别负责 primitive 形成、metadata/bin 技巧和 FILE 结构落点。
+- 未合并 `python-vm-and-proc-sandbox-escape.md` 到 `pyjails.md`：前者偏 OS/VM/pwn primitive，后者偏 Python 语言对象链。
+- 同步更新 `index.md`，将上述 4 页从 Pwn Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-pwn-sandbox-kernel-heap-family-retune-20260612-171026.zip`。
+
+## 2026-06-12 — Reverse/Forensics 硬件信号与运行时 trace 页面 family 化
+
+- 继续执行 technique 优先的语义健康检查，处理 Reverse/Forensics 中仍含模板化变体表、且承担二级分流职责的页面。
+- 将 4 个原 `type: technique` 页面改为 `type: family`：
+  - `signals-and-hardware.md`：VGA/HDMI/DisplayPort、UART/I2C/SPI、RF、功耗侧信道、键盘声学、LED/视频和旧硬件介质恢复分流。
+  - `hardware-isa-bootloader-and-kvm.md`：低频 ISA、固件、bootloader、KVM guest、MCU、TrustZone/EL3 和协处理器分流。
+  - `runtime-patching-oracles-and-tracing.md`：运行时 patch、hook、oracle、INT3/coredump、timing 和上下文数据替换分流。
+  - `signal-trace-and-packed-anti-analysis.md`：信号处理器、trace 反演、父子进程 patch、ConfuserEx/dynamic module dump 和 packed anti-analysis 分流。
+- 修正 `signals-and-hardware.md` 的索引方向：该页 frontmatter 与 raw 均属 forensics 信号恢复，本轮从 Reverse Technique 列表移到 Family 表的 forensics 行。
+- 未合并 `runtime-patching-oracles-and-tracing.md` 与 `signal-trace-and-packed-anti-analysis.md`：前者偏主动 patch/hook/oracle，后者偏 signal/trace/dump 证据结构。
+- 同步更新 `index.md`，将上述 4 页从 Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-reverse-hardware-trace-signal-family-retune-20260612-171743.zip`。
+
+## 2026-06-12 — 剩余模板页 family 化与 file triage 重写
+
+- 继续执行 technique 优先的语义健康检查，清理剩余含机械化“复用重点”占位句的页面。
+- 将 8 个原 `type: technique` 页面改为 `type: family`：
+  - `audio-frequency-and-archive-stego.md`：音频频域、SSTV、DTMF、声道 LSB、音频元数据、DeepSound 和语音特征分流。
+  - `video-document-and-media-stego.md`：视频帧、PDF/文档对象、媒体容器、JXL/EXIF、ANSI escape 和运行时媒体 dump 分流。
+  - `peripheral-capture.md`：USB HID、鼠标/键盘、LED Morse、Bluetooth RFCOMM 和外设 report 重组分流。
+  - `oracles-recurrences-captcha-polyglots.md`：比较/timeout oracle、递推、CAPTCHA、QR 结构约束和 polyglot 分流。
+  - `adversarial-ml.md`：FGSM/PGD/C&W、adversarial patch、black-box 查询、poisoning 和 backdoor 分流。
+  - `llm-attacks.md`：prompt injection、jailbreak、token smuggling、context manipulation 和 tool-use exploitation 分流。
+  - `pe-and-dotnet.md`：PE/.NET、配置提取、DNS C2、PyInstaller/PyArmor、YARA、shellcode 和内存证据分流。
+  - `exotic-secret-sharing-rabin-and-polynomials.md`：BIP39、Asmuth-Bloom、Rabin、多项式、Vandermonde、LCG 周期和长尾原语分流。
+- 重写已为 `type: family` 的 `file-triage-archives-and-one-liners.md`，去掉旧模板表，明确其只承担轻量附件首检和下一跳判断。
+- 未合并 audio/video/peripheral 三页：三者分别处理音频频域、媒体容器/文档、外设 report，证据形态和工具路径不同。
+- 未合并 adversarial ML 与 LLM：前者依赖模型扰动/梯度/查询反馈，后者依赖上下文、提示和工具调用边界。
+- 同步更新 `index.md`，将上述页面移入 Family 索引并从 Technique 索引移除。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-final-template-family-retune-20260612-172548.zip`。
+
+## 2026-06-13 — 剩余 Technique 语义健康检查与二级 family 收敛
+
+- 继续按 technique 优先顺序做语义健康检查：逐页判断剩余 `type: technique` 是否存在类型错位、应合并、应拆分、应重命名或删除。
+- 将 5 个原 `type: technique` 页面改为 `type: family`：
+  - `ml-model-inference-extraction-and-weight-analysis.md`：query extraction、model inversion、weight diff、encoder collision、membership inference 与 task-semantic inference 的 AI/ML 模型路线分流。
+  - `blockchain-smart-contract-exploitation.md`：EVM、Solana/Anchor、Sui Move、链上随机、proxy/delegatecall、ABI 和 capability/resource 约束分流。
+  - `filesystem-archive-recovery-and-repair.md`：文件系统删除恢复、损坏归档、ZipCrypto 已知明文、嵌套容器、加密容器和数据库页恢复分流。
+  - `file-signatures-and-flag-artifact-hunting.md`：未知文件、magic/metadata、尾随数据、未引用对象和常见编码层的首轮分流。
+  - `keyboard-mouse-audio-and-physical-puzzles.md`：USB HID、鼠标/键盘、音频频率、视频轨迹、LED/Morse 和物理动作记录恢复分流。
+- 保留未转换的剩余 technique 页：它们都有独立识别信号、最小证据和解法骨架，虽有关键变体，但没有承担首轮/二级目录职责。
+- 未拆分 `lorenz-and-book-cipher-attacks.md`：历史机械密码和 book cipher 第一操作不同，但当前 raw 支撑集中在同一低频 cipher 页，现阶段拆分会制造弱入链小页；后续若新增 Lorenz 或 book cipher raw 再拆。
+- 未合并 `path-confusion-to-signed-internal-request-chain.md`、`json-duplicate-key-hmac-parser-differential.md`、`workflow-runner-internal-api-chain.md` 与 `artifact-trust-ssrf-to-node-require-rce.md`：它们可以组成 Web 漏洞链，但第一证据分别是路径规范化、JSON parser 差异、runner 内部信任和 artifact trust/RCE，保留为独立 technique 更利于下一跳定位。
+- 同步更新 `index.md`，将上述 5 页从 Technique 索引移动到 Family 索引。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-technique-family-retag-20260613-184123.zip`。

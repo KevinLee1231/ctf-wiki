@@ -1,79 +1,70 @@
 ---
 type: technique
-tags: [pwn, technique]
+tags: [pwn, technique, format-string, leak, arbitrary-write]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/format-string.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Format String Exploitation
 
 ## 适用场景
 
-内存破坏、沙箱逃逸、低级原语或 exploit chain 是主要障碍。
+当用户输入被当作 `printf`/`fprintf`/`sprintf`/`scanf` 风格格式串解释，并且可通过 `%p/%s/%n` 等 specifier 泄露或写内存时，优先使用本页。它是具体 technique，不是 Pwn 总入口。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果只能控制普通栈溢出而没有格式串解释，转 [overflow-basics.md](overflow-basics.md)。如果格式串只提供有限写，后续落点可能转 [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)、[runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md) 或 heap 页面。
 
 ## 识别信号
 
-- 出现 crash、越界读写、UAF、format string、heap metadata、seccomp 或 kernel primitive。
-- 保护组合、libc、架构或 syscall 约束会影响路线。
-- 需要 leak/write/control-flow hijack 串成最终能力。
-- 题面或 raw 线索能落到这些关键词之一：Format String Basics、Argument Retargeting (Non-Positional %n Trick)、Blind Pwn (No Binary Provided)、Format String with Filter Bypass、Format String Canary + PIE Leak、freehook Overwrite via Format String (glibc < 2.34)、.rela.plt / .dynsym Patching、Format String for Game State Manipulation (UTCTF 2026)。
+- 输入中 `%p`、`%x`、`%s`、`%n` 会影响输出、崩溃或写入计数。
+- 栈上能看到用户输入、返回地址、canary、libc/PIE 指针或可控地址。
+- 过滤器禁止 `%n`、位置参数、数字或某些字符，但格式串经过 ROT13、编码、截断或二次处理后仍会恢复。
+- 可写目标包括 GOT、`__free_hook`、`.fini_array`、返回地址、BSS 状态变量、动态符号表或 printf 内部表。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 确认格式串 offset：用户输入在第几个参数，地址跟在 payload 后时如何被读取。
+- 至少获得一个稳定 leak：栈地址、canary、PIE、libc 或 GOT 内容。
+- 对写入路径，确认 `%n/%hn/%hhn` 是否可用、当前已输出字节数、写入目标是否可写。
+- 确认远程 libc、换行/缓冲、输出截断和过滤器行为。
 
 ## 解法骨架
 
-1. 稳定复现 bug。
-2. 量化 read/write/control primitive。
-3. 按保护选择利用路线。
-4. 脚本化 exploit 并处理远程差异。
+1. 用 `%p`/marker 定位栈参数 offset。
+2. 泄露 canary/PIE/libc 或验证可写目标。
+3. 选择写入粒度：优先 `%hhn/%hn` 分段写，避免一次打印过多字节。
+4. 选择落点：GOT/hook、`.fini_array` 循环、返回地址、状态变量或二阶段 ROP。
+5. 将 payload 脚本化，处理输出粘连、缓冲和远程地址差异。
 
 ## 关键变体
 
 | 变体 | 复用重点 |
 |---|---|
-| Format String Basics | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Argument Retargeting (Non-Positional %n Trick) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Blind Pwn (No Binary Provided) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String with Filter Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String Canary + PIE Leak | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| freehook Overwrite via Format String (glibc < 2.34) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| .rela.plt / .dynsym Patching | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String for Game State Manipulation (UTCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String Saved EBP Overwrite for .bss Pivot (PlaidCTF 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| argv[0] Overwrite for Stack Smash Info Leak (HITCON CTF 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String .finiarray Loop for Multi-Stage Exploitation (Codegate 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| printfchk Bypass with Sequential %p (VolgaCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Leak + GOT Overwrite in Single printf Call (picoCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Objective-C %@ Format Specifier Exploitation (SHA2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| strlen Integer Truncation Bypass (ASIS CTF Finals 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| printffunctiontable Overwrite via Buffer Overflow (34C3 CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| scanf Format String on Stack Overwrite (TUCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String Exploit Through ROT13 Encoding (SunshineCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String Through Input Transformation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Format String .finiarray Loop for Multi-Stage Exploitation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| 基础 leak/write | 先稳定 offset，再把 `%p/%s` 泄露和 `%n/%hn/%hhn` 写入分开验证。 |
+| 非位置参数或 argument retargeting | 不能用 `%N$` 时，利用顺序消费、栈上指针或 payload 后置地址重定向写目标。 |
+| Blind pwn | 无 binary 时先用 leak 建立栈/ELF/libc 轮廓，再逐步定位 GOT、返回地址和 libc 基址。 |
+| 过滤或输入变换 | 在本地复现 ROT13、长度截断、大小写转换或黑名单顺序，构造最终进入 printf 的真实格式串。 |
+| Canary/PIE leak 后接栈溢出 | 格式串只负责泄露，最终控制流仍由 overflow/ROP 完成。 |
+| Hook/GOT/`.fini_array`/dynsym patch | 写入目标取决于 RELRO、glibc 版本和能否多轮触发；`.fini_array` 常用于循环回主函数做多阶段。 |
+| 游戏状态或业务变量写 | 不必追求 shell，能直接把 chips/score/flag gate 变量写成目标值时优先短路径。 |
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- offset 在本地和远程因环境变量、argv 或 banner 不一致而变化。
+- 一次 `%n` 打印大量空格导致超时或触发输出限制。
+- 忘记 payload 本身已经输出的字节数，分段写偏移错误。
+- RELRO/full RELRO 下继续写 GOT，没换 `.fini_array`、栈或 hook/handler。
+- `%s` 读不可映射地址直接崩溃，没有先用 `%p` 验证指针。
 
 ## 关联技巧
 
-- [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
-- [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
+- [overflow-basics.md](overflow-basics.md)
+- [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)
+- [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md)
+- [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
 - [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
-- [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
-- [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md)
+- [pwn-tooling.md](pwn-tooling.md)
 
 ## 原始资料
 

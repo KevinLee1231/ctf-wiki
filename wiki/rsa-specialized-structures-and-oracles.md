@@ -1,82 +1,53 @@
 ---
-type: technique
-tags: [crypto, technique]
+type: family
+tags: [crypto, family, rsa, coppersmith, oracle, signature]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/rsa-specialized-structures-and-oracles.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # RSA Specialized Structures and Oracles
 
-## 适用场景
+## 作用边界
 
-密钥恢复、原语误用、oracle、随机数、签名或协议假设是主要障碍。
+本页是 RSA 长尾结构和 oracle family。它承接那些已经超出基础 RSA 排查的题：特殊素数关系、`gcd(e, phi)` 非 1、CRT 参数泄露、同态签名、fault、ROCA、padding oracle、LSB oracle、可构造模数、长度/截断 bug 和 Coppersmith 小根模型。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+基础小 e、共模、Hastad、Wiener、Fermat、多素数等快速排查先看 [rsa-attacks.md](rsa-attacks.md)。
 
-## 识别信号
+## 变体路由
 
-- 题目给出密文、nonce、签名、模数、oracle、PRNG 输出或自定义协议。
-- 存在重复 nonce、弱随机、错误回显、数学结构或可查询接口。
-- 源码能复现加密、签名、哈希或验证流程。
-- 题面或 raw 线索能落到这些关键词之一：RSA p=q Validation Bypass (BearCatCTF 2026)、RSA Cube Root CRT when gcd(e, phi) > 1 (BearCatCTF 2026)、Factoring n from Multiple of phi(n) (BearCatCTF 2026)、RSA Signature Forgery via Multiplicative Homomorphism (MMA CTF 2015)、RSA Multiplicative Homomorphism Signature Forgery、Weak RSA Key Generation via Base Representation (Sharif CTF 2016)、RSA with gcd(e, phi(n)) > 1 (CSAW 2015)、Batch GCD for Shared Prime Factoring (BSidesSF 2025)。
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| prime 有线性关系、已知高/低/中间位、base representation | 未知量界是否满足 Coppersmith，小根变量是一元还是多元 | [lattice-and-lwe.md](lattice-and-lwe.md)、[number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| `gcd(e, phi(n)) > 1`、多重根、prime power | 每个模 prime 下有多少根，是否能 CRT 枚举并用格式筛选 | 本页 raw |
+| 泄露 `dp/dq/qinv`、CRT fault、bit flip | CRT 参数能否反推出 p/q，或故障签名和正确签名的 gcd 是否暴露因子 | 本页 raw |
+| 签名同态、message factoring、`e=1`、可构造 modulus | 验证逻辑是否只检查 textbook RSA 关系或 PKCS 前缀 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
+| decryption oracle、LSB oracle、Manger/Bleichenbacher | 响应差异是否可稳定压缩明文区间 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
+| Batch GCD、shared prime、ROCA | 是否有多公钥集合、模数指纹或可批量 gcd 的输入 | [crypto-tooling.md](crypto-tooling.md) |
+| strlen/NULL/last-byte overwrite、协议包装 bug | RSA 漏洞是否来自实现层截断或解析差异 | [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md) |
 
-## 最小证据
+## 合并与拆分结论
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保留为 family：raw 覆盖大量互不相同的 RSA 长尾结构，页面价值是判断建模路线。
+- 不与 `rsa-attacks.md` 合并：基础页用于快速排查，specialized 页用于需要建模、oracle 或实现 bug 的题。
+- 不拆每种长尾攻击：当前 raw 多为短案例速查；后续若 Coppersmith/RSA oracle 有多篇 WP 支撑，可拆具体 technique。
 
-## 解法骨架
+## 常见误判
 
-1. 列清 known / unknown / goal。
-2. 复现原语和约束。
-3. 选择一个最匹配攻击族做最小验证。
-4. 用解出的结果做正向复算。
+- 把所有 RSA 都先丢给通用工具，忽略题目给的结构关系。
+- Coppersmith 未先估未知量界，导致格维度和 bound 乱试。
+- Oracle 只看一次响应，没有证明响应差异和明文区间存在稳定关系。
+- 签名题只关注 hash 算法，忽略 textbook RSA 乘法同态和验签前缀检查。
 
-## 关键变体
+## 关联页面
 
-| 变体 | 复用重点 |
-|---|---|
-| RSA p=q Validation Bypass (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Cube Root CRT when gcd(e, phi) > 1 (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Factoring n from Multiple of phi(n) (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Signature Forgery via Multiplicative Homomorphism (MMA CTF 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Multiplicative Homomorphism Signature Forgery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Weak RSA Key Generation via Base Representation (Sharif CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA with gcd(e, phi(n)) > 1 (CSAW 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Batch GCD for Shared Prime Factoring (BSidesSF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Partial Key Recovery from dp dq qinv (0CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA-CRT Fault Attack / Bit-Flip Recovery (CSAW CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Homomorphic Decryption Oracle Bypass (ECTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA with Small Prime Factors and CRT Decomposition (Hack The Vote 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Timing Attack on Montgomery Reduction (DEF CON 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Bleichenbacher Low-Exponent RSA Signature Forgery (Google CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Coppersmith Small Roots for Linearly Related Primes (Tokyo Westerns 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ROCA Attack on RSA CVE-2017-15361 (EasyCTF IV) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Signature Bypass with e=1 and Crafted Modulus (BackdoorCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Dependent-Prime RSA: q = e^-1 mod p (TokyoWesterns CTF 4th 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Three-Key Pairwise GCD Triangle (Trend Micro 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA n = p^2q Schmidt-Samoa Variant (ASIS Finals 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Modulus Recovery via GCD of Encryption Residuals (X-MAS CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Textbook RSA Negation via encrypt(-1) (X-MAS CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Poly-Exponent RSA: GCD of p^p Combinations (ASIS Finals 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Biased LSB Oracle with Mode-of-Runs Recovery (CSAW CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
-- [block-mode-misuse-family.md](block-mode-misuse-family.md)
-- [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
+- [rsa-attacks.md](rsa-attacks.md)
+- [lattice-and-lwe.md](lattice-and-lwe.md)
+- [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
+- [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
+- [crypto-tooling.md](crypto-tooling.md)
 
 ## 原始资料
 

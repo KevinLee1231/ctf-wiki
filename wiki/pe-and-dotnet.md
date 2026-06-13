@@ -1,68 +1,62 @@
 ---
-type: technique
-tags: [malware, technique]
-skills: [ctf-malware]
+type: family
+tags: [malware, family, pe, dotnet, config, shellcode]
+skills: [ctf-malware, ctf-reverse, ctf-forensics]
 raw:
   - ../raw/malware/pe-and-dotnet.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # PE, .NET, and Binary Malware Analysis
 
-## 适用场景
+## 作用边界
 
-恶意行为、脚本载荷链、C2、配置提取、反分析或样本行为还原是主要障碍。
-
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+本页是 PE/.NET 恶意样本 family，覆盖 PE 静态分析、sandbox evasion、配置提取、.NET DNS C2、PyInstaller/PyArmor、插件化样本、YARA、shellcode 和内存取证联动。它不是 PE 工具百科，重点是从样本行为判断先拆哪一层、提取什么配置、是否需要隔离动态验证。
 
 ## 识别信号
 
-- 样本包含混淆脚本、下载器、Office 宏、PE/.NET、C2 字符串或 IOC。
-- 存在字符串解密、配置 blob、反调试、反沙箱或网络 beacon。
-- 目标是提取配置、payload、flag 或通信密钥。
-- 题面或 raw 线索能落到这些关键词之一：PE Analysis、Sandbox Evasion Checks、Malware Configuration Extraction、.NET DNS-based C2、.NET Malware Analysis (C2 Extraction)、PyInstaller + PyArmor Unpacking、PE / .NET 恶意样本速查技巧族：配置、插件、YARA 与 Shellcode、.NET Malware Analysis。
+- 样本是 PE/.NET、PyInstaller、shellcode、插件、loader 或被混淆的二进制载荷。
+- 存在 C2、DNS 查询、加密配置 blob、反调试/反沙箱、分阶段 payload、YARA/IOC 或内存残留。
+- 目标是提取 flag、配置、会话 key、C2 协议、payload 或恶意行为链。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 文件类型、架构、packer/混淆、导入、入口、字符串和是否 .NET。
+- 配置来源：resource、section、registry、环境变量、DNS、命令行、内存或网络流量。
+- 动态验证必须在隔离环境，并明确要观察的行为：解密、C2、文件释放、进程注入或 shellcode。
+- 输出 IOC/config 时保留偏移、解密 key 和复现脚本/命令。
 
-## 解法骨架
+## 路由表
 
-1. 优先静态拆层。
-2. 恢复每一阶段脚本、URL、key、payload 和配置。
-3. 必要时只在隔离环境动态验证。
-4. 输出 IOC、配置和最终 flag 来源。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| 普通 PE | section、import、resource、TLS callback 和 packer | 静态拆层或轻量动态 |
+| .NET 样本 | dnlib/ILSpy、混淆器、资源和 C2 类 | 还原 IL、解密 string/config |
+| DNS-based C2 | 查询域名、TXT/A 记录、编码和轮询逻辑 | [dns.md](dns.md) 或 network forensics |
+| PyInstaller/PyArmor | pyz、marshal、runtime hook 和 obfuscated pyc | 转 reverse Python 页 |
+| shellcode | 架构、入口、API hash、解密循环和 syscall | 转 reverse/pwn runtime |
+| memory forensics | 进程 dump、injected region、config in memory | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
+| YARA/IOC | 匹配规则是否解释真实行为 | 输出规则时保留字段来源 |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| PE Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Sandbox Evasion Checks | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Malware Configuration Extraction | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| .NET DNS-based C2 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| .NET Malware Analysis (C2 Extraction) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PyInstaller + PyArmor Unpacking | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PE / .NET 恶意样本速查技巧族：配置、插件、YARA 与 Shellcode | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| .NET Malware Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Trojanized Plugin Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| YARA Rules for Malware Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Shellcode Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Memory Forensics for Malware | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：PE/.NET 恶意样本通常是拆层、配置、C2、shellcode和内存证据组合。
+- 不合并进 `malware-c2-session-key-and-protocol-recovery.md`：该页聚焦通信和密钥恢复，本页负责样本本体分析入口。
+- 不合并进 reverse PE 页：恶意样本还需要 IOC、C2 和沙箱边界。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 直接运行样本而没有明确观察目标和隔离边界。
+- 只提 strings，不还原解密函数和配置结构。
+- .NET 样本只反编译不处理资源和混淆器初始化。
+- YARA 规则只匹配壳/库代码，不能说明恶意行为。
 
-## 关联技巧
+## 关联页面
 
 - [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md)
 - [powershell-staged-payload-and-clipboard-phishing.md](powershell-staged-payload-and-clipboard-phishing.md)
 - [scripts-and-obfuscation.md](scripts-and-obfuscation.md)
+- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
 - [malware-tooling.md](malware-tooling.md)
 
 ## 原始资料

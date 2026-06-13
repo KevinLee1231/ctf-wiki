@@ -4,7 +4,7 @@ tags: [web, family, triage]
 skills: [ctf-web]
 raw:
   - ../raw/web/web-first-pass-triage-and-chain-patterns.md
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # First-Pass Triage and Chain Patterns
@@ -31,6 +31,7 @@ updated: 2026-06-11
 | 路径穿越、上传、ZIP/软链接、渲染器、RSC、内部协议 | [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md) | 可控资源定位是否交给文件系统、网络客户端、解包器或内部服务。 |
 | 语言 eval、模板 eval、WebShell、反序列化、命令拼接 | [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md)、[php-java-python-deserialization.md](php-java-python-deserialization.md) | 输入是否已经进入可执行解释层，gadget 或执行点是否可达。 |
 | Node、prototype pollution、workflow runner、internal API | [node-and-prototype.md](node-and-prototype.md)、[workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) | 对象合并、包生命周期、worker/runner 信任链和内部 API 权限。 |
+| 远控/relay/client backend、第三方协议字段进入内网服务 | [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md) | 控制面 key 校验是否覆盖所有消息路径，目标是否会主动连接本机 Redis/Docker/API。 |
 | XSS、DOM、admin bot、CSP、XS-Leak、cache/MIME | [xss-dom-and-browser-tricks.md](xss-dom-and-browser-tricks.md)、[csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md) | 浏览器上下文、CSP/同源限制、外带 oracle 和 bot 触发条件。 |
 | 已知组件、CVE、WordPress/Chromium/ExifTool/框架版本 | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) | 版本、补丁边界、利用前置条件和是否需要串其它漏洞。 |
 | Jail、表达式沙箱、Python/Web 混合过滤 | [pyjails.md](pyjails.md) | 过滤发生在语言、表达式、对象图还是 Web 包装层。 |
@@ -59,6 +60,9 @@ updated: 2026-06-11
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
+| [WMCTF2025-guess-wp](../raw/web/WMCTF2025-guess-wp.md) | Flask 接口连续泄露 `random.Random().getrandbits(32)` 输出，再用预测的 key 进入 Python `eval`；先恢复 MT 状态，再确认表达式沙箱逃逸。 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)、[pyjails.md](pyjails.md) |
+| [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | pdfminer Type0 字体 `/Encoding` 可路径穿越到上传目录，CMap gzip pickle 被反序列化；先证明 parser 内部对象能越过文件名过滤。 | [php-java-python-deserialization.md](php-java-python-deserialization.md)、[parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md) |
+| [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md) | 远控协议 relay 消息绕过 key 校验，让受控端把可控字段发给本机 Redis，再串主从同步模块 RCE。 | [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md) |
 | [ACTF2026-12307-wp](../raw/web/ACTF2026-12307-wp.md) | 认证、会话或 token 语义异常，先比较签名层、业务层和身份绑定。 | [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md) |
 | [ACTF2026-aaa26-wp](../raw/web/ACTF2026-aaa26-wp.md) | 认证、会话或 token 语义异常，先比较签名层、业务层和身份绑定。 | [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md) |
 | [ACTF2026-gomysql-wp](../raw/web/ACTF2026-gomysql-wp.md) | SQL/数据库注入或过滤 oracle，先比较回显、错误、时间、长度和二阶触发点。 | [sqli-filter-and-oracle-family.md](sqli-filter-and-oracle-family.md) |

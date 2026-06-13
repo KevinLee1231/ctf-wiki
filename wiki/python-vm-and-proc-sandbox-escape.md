@@ -1,74 +1,69 @@
 ---
-type: technique
-tags: [pwn, technique]
-skills: [ctf-pwn]
+type: family
+tags: [pwn, family, sandbox, vm, proc, emulator]
+skills: [ctf-pwn, ctf-misc, ctf-reverse]
 raw:
   - ../raw/pwn/python-vm-and-proc-sandbox-escape.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Python, VM and /proc Sandbox Escape
 
-## 适用场景
+## 作用边界
 
-内存破坏、沙箱逃逸、低级原语或 exploit chain 是主要障碍。
+本页是 Pwn 视角下的 sandbox、解释器、VM、`/proc` 和运行时文件系统逃逸 family。它处理的问题不是普通 Python jail，也不是单纯 VM 逆向，而是受限执行环境中如何把可用 primitive 扩展成文件读写、内存写入、syscall、宿主执行或检查绕过。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果主要障碍是 Python 对象链和命名空间过滤，优先看 [pyjails.md](pyjails.md)。如果主要任务是还原复杂字节码语义，优先看 Reverse VM family；只有当已经出现低级读写/执行 primitive 或 OS 边界逃逸时进入本页。
 
 ## 识别信号
 
-- 出现 crash、越界读写、UAF、format string、heap metadata、seccomp 或 kernel primitive。
-- 保护组合、libc、架构或 syscall 约束会影响路线。
-- 需要 leak/write/control-flow hijack 串成最终能力。
-- 题面或 raw 线索能落到这些关键词之一：Python Sandbox Escape、VM Exploitation (Custom Bytecode)、FUSE/CUSE Character Device Exploitation、Busybox/Restricted Shell Escalation、Shell Tricks、Write-Anywhere via /proc/self/mem (BSidesSF 2025)、processvmreadv Failure as Sandbox Escape (0CTF 2016)、Named Pipe mkfifo for File Size Check Bypass (Nuit du Hack 2016)。
+- 题目给出 Python/Busybox/Lua/自定义 VM/emulator/FUSE/CUSE，且运行在 seccomp、chroot、容器或受限 shell 中。
+- 可访问 `/proc/self/mem`、`/proc/*/maps`、pipe、fifo、FUSE/CUSE 设备、`process_vm_readv`、文件大小检查或特殊 syscall。
+- VM 指令、emulator opcode 或 syscall blacklist 可以被非常规指令、内部 helper 或寄存器残留绕过。
+- 成功路线更像“从沙箱内构造读写/执行通道”，而不是传统 ret2libc。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 已确认边界：语言 sandbox、系统调用过滤、文件系统限制、设备回调、VM loader 还是 emulator。
+- 能列出可用 primitive：任意文件读、任意写、内存读写、可控 opcode、可执行页、pipe/fifo 或 syscall 子集。
+- 能复现一个边界差异：检查层和使用层看到的文件/内存/指令不同。
+- 有最终落点：写 `/proc/self/mem`、绕文件大小、触发内部 syscall、逃出 restricted shell 或拿到宿主文件。
 
-## 解法骨架
+## 路由表
 
-1. 稳定复现 bug。
-2. 量化 read/write/control primitive。
-3. 按保护选择利用路线。
-4. 脚本化 exploit 并处理远程差异。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| Python sandbox 但目标是对象链 | 可用 builtins、class hierarchy、import 和字符串构造 | [pyjails.md](pyjails.md) |
+| `/proc/self/mem` 可写 | maps 中目标地址、权限和写入 offset 是否稳定 | patch GOT/code/object 或写 shellcode |
+| `process_vm_readv` / `/proc` 失败反馈 | 失败状态是否泄露权限、地址或 sandbox 边界 | 转文件/内存 oracle |
+| FIFO/pipe 文件大小绕过 | check 和 use 是否针对同一路径/同一 fd | `mkfifo` 或 named pipe 绕固定大小检查 |
+| FUSE/CUSE/设备回调 | 内核或服务端会回调用户态文件系统 | 转 [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md) 或 race primitive |
+| VM/emulator opcode 过滤 | 过滤发生在文本汇编、loader 还是解释器执行阶段 | [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md) |
+| syscall blacklist | 是否可用 `sysenter`、vDSO、uncommon syscall 或内部 helper | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md) |
+| restricted shell / Busybox | 命令、重定向、通配符、环境变量和 applet 是否可用 | [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Python Sandbox Escape | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| VM Exploitation (Custom Bytecode) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| FUSE/CUSE Character Device Exploitation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Busybox/Restricted Shell Escalation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Shell Tricks | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Write-Anywhere via /proc/self/mem (BSidesSF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| processvmreadv Failure as Sandbox Escape (0CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Named Pipe mkfifo for File Size Check Bypass (Nuit du Hack 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Named Pipe (mkfifo) File Size Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Lua Integer Underflow via Game Logic (ASIS CTF Finals 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| CPU Emulator Print Opcode Python eval Injection (Midnight Sun CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Sandbox and Emulator Escape | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unicorn Emulator Syscall Blacklist Bypass via sysenter and Uncommon Syscalls (Meepwn CTF… | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom VM swap Pointer Self-Overwrite (HITCON 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| processvmreadv Sandbox Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：raw 覆盖 Python、VM、FUSE/CUSE、`/proc`、fifo、emulator 和 shell trick，靠单一 technique 无法概括。
+- 不合并进 `pyjails.md`：本页更偏 OS/VM/pwn primitive，`pyjails.md` 偏语言对象链。
+- 不合并进 `seccomp-ret2dlresolve-and-runtime-primitives.md`：该页处理 syscall/ROP 落地，本页处理沙箱边界如何先变成 primitive。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 看到 Python 就直接按 pyjail 解，忽略 `/proc`、fifo 或文件系统使用差异。
+- 只绕过 opcode 文本过滤，没有确认解释器内部实际执行的 opcode。
+- `mkfifo` 绕过大小检查时没处理阻塞读写，导致本地可行远程卡住。
+- 使用 `/proc/self/mem` 前没固定映射地址和权限，写到不可执行/错误段。
 
-## 关联技巧
+## 关联页面
 
+- [pyjails.md](pyjails.md)
+- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
 - [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
-- [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
-- [format-string.md](format-string.md)
-- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
-- [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
+- [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md)
+- [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md)
+- [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md)
+- [pwn-tooling.md](pwn-tooling.md)
 
 ## 原始资料
 

@@ -1,86 +1,75 @@
 ---
-type: technique
-tags: [crypto, technique]
+type: family
+tags: [crypto, family, number-theory, algebra, dlp, coppersmith, polynomial]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/number-theory-and-algebra-attacks.md
-updated: 2026-05-22
+  - ../raw/crypto/WMCTF2025-lemonpepper-wp.md
+updated: 2026-06-12
 ---
 
 # Number Theory and Algebra Attacks
 
-## 适用场景
+## 作用边界
 
-密钥恢复、原语误用、oracle、随机数、签名或协议假设是主要障碍。
+本页是数论与代数攻击 family，覆盖 DLP/BSGS/Pohlig-Hellman、ECC/isogeny、approximate GCD、Merkle-Hellman、Coppersmith、特殊群、四元数 RSA、GF(2)[x] 多项式、p-adic/Hensel、CRC 线性代数和 Manger oracle 等路线。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它的职责是判断数学结构属于哪一类，而不是把所有代数题合并成一个通用求解步骤。若目标已经明确是 RSA 常见参数、LWE 格问题、ECC 签名 nonce 或随机数恢复，应优先转到更窄页面。
 
-## 识别信号
+## 共同识别信号
 
-- 题目给出密文、nonce、签名、模数、oracle、PRNG 输出或自定义协议。
-- 存在重复 nonce、弱随机、错误回显、数学结构或可查询接口。
-- 源码能复现加密、签名、哈希或验证流程。
-- 题面或 raw 线索能落到这些关键词之一：Elliptic Curve Isogenies、Pohlig-Hellman Attack (Weak ECC)、Baby-Step Giant-Step for General DLP、LLL Algorithm for Approximate GCD、Merkle-Hellman Knapsack Cryptosystem via LLL (ASIS 2014)、Coppersmith's Method (Close Private Keys)、Coppersmith's Method (Structured Primes, LACTF 2026)、Clock Group (x^2+y^2=1 mod p) DLP (LACTF 2026)。
+- 源码中出现群运算、模多项式、曲线阶、smooth order、小根、oracle 区间、GF(2) 线性系统、特殊矩阵或非标准代数结构。
+- 题目给出足够多的样本或可查询接口，用于构造方程、CRT、gcd、DLP、root lifting 或 oracle 搜索。
+- 普通 RSA/ECC/PRNG 套路解释不完，需要识别实现者自定义的代数对象。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 写清代数对象：整数模环、有限域、多项式环、曲线群、矩阵群、四元数、clock group 或 p-adic 环。
+- 明确攻击目标：求离散对数、分解模数、求小根、恢复状态、伪造签名、解线性系统或缩小 oracle 区间。
+- 先在小参数上复现群律、CRT、root lifting 或 oracle 收敛。
+- 解出结果必须回代到协议状态、签名、密文或校验函数。
 
-## 解法骨架
+## 首轮路由
 
-1. 列清 known / unknown / goal。
-2. 复现原语和约束。
-3. 选择一个最匹配攻击族做最小验证。
-4. 用解出的结果做正向复算。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| ECC order smooth、低阶子群、DLP、isogeny | 先分解阶并判断 PH/BSGS/特殊曲线，而不是直接爆破私钥 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) |
+| Coppersmith、小根、结构化素数、close private key | 先写多项式和根界，再决定 RSA 页或格页 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md), [lattice-and-lwe.md](lattice-and-lwe.md) |
+| approximate GCD、knapsack、subset sum | 先判断是否短向量/最近向量问题，再转格 | [lattice-and-lwe.md](lattice-and-lwe.md) |
+| 四元数 RSA、clock group、矩阵 ElGamal、GF(2)[x] | 先恢复群律/环结构，再找可线性化或 CRT 的不变量 | [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md) |
+| p-adic 或 Hensel lift 卡在重根 | 先看导数和重根结构，必要时分支枚举候选再结合协议状态剪枝 | [crypto-tooling.md](crypto-tooling.md) |
+| Manger/padding oracle、区间 oracle | 先证明 oracle 单调或区间收缩，再写可重放查询器 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md), [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
+| CRC、affine cipher 非素数模、GF(2) 线性系统 | 先确定域/环和矩阵方向，再做线性代数 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md), [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md) |
 
-## 关键变体
+## 来自 WP 的案例索引
 
-| 变体 | 复用重点 |
+| Raw WP | 可复用联系 |
 |---|---|
-| Elliptic Curve Isogenies | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Pohlig-Hellman Attack (Weak ECC) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Baby-Step Giant-Step for General DLP | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LLL Algorithm for Approximate GCD | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Merkle-Hellman Knapsack Cryptosystem via LLL (ASIS 2014) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Coppersmith's Method (Close Private Keys) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Coppersmith's Method (Structured Primes, LACTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Clock Group (x^2+y^2=1 mod p) DLP (LACTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Quaternion RSA | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Polynomial Arithmetic in GF(2)[x] | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RSA Signing Bug | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Non-Permutation S-box Collision Attack (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Polynomial CRT in GF(2)[x] (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Manger's RSA Padding Oracle Attack (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LWE Lattice Attack via CVP (EHAX 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Affine Cipher over Non-Prime Modulus (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Introspective CRC via GF(2) Linear Algebra (Google CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Baby-Step Giant-Step for Sparse/Low Hamming Weight Exponents (SEC-T CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Common Patterns | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md) | `Lemon` 部分是模 `q^e` 上的重根多项式，普通 `.roots()`/Hensel 可能卡住；先通过求导保留高重数根，再结合 `Pepper` 的 p-adic 候选和 MCG 递推剪枝恢复状态。 |
+
+## 合并与拆分结论
+
+本页应保留为 family。DLP、Coppersmith、p-adic、GF(2) 和特殊群的首轮判断不同；但都属于“先识别代数对象，再选攻击模型”的二级路由。当前不拆小页，等某一路线积累更多 WP 后再独立成 technique。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只看关键词 `LLL`/`Coppersmith`，没写根界或变量范围。
+- 把群律默认成乘法群，忽略题目自定义 group law。
+- Hensel lift 失败就放弃，没处理导数为 0 的重根。
+- GF(2) 与整数模运算混用，矩阵方向和字节序错。
+- oracle 攻击没有记录查询区间和失败响应，远程不可复现。
 
 ## 关联技巧
 
-- [block-mode-misuse-family.md](block-mode-misuse-family.md)
-- [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
-- [rsa-attacks.md](rsa-attacks.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
 - [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)
+- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
 - [lattice-and-lwe.md](lattice-and-lwe.md)
 - [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md)
-- [zkp-secret-sharing-and-proof-systems.md](zkp-secret-sharing-and-proof-systems.md)
-- [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)
-- [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md)
-- [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md)
+- [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
+- [crypto-tooling.md](crypto-tooling.md)
 
 ## 原始资料
 
 - [number-theory-and-algebra-attacks.md](../raw/crypto/number-theory-and-algebra-attacks.md)
+- [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md)

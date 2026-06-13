@@ -1,82 +1,53 @@
 ---
-type: technique
-tags: [crypto, technique]
+type: family
+tags: [crypto, family, hash, mac, oracle, protocol]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/hash-protocol-and-oracle-attacks.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Hash, Protocol and Oracle Attacks
 
-## 适用场景
+## 作用边界
 
-密钥恢复、原语误用、oracle、随机数、签名或协议假设是主要障碍。
+本页是 hash / MAC / 协议 oracle family。共同模式是：攻击者不能直接拿到 key 或明文，但能利用 hash 状态可扩展、MAC/CRC 线性、压缩长度、padding/解析错误、时间差、协议公钥校验缺失或会话反馈，把隐藏状态逐步恢复或伪造。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+分组模式本身的字段拆分先看 [block-mode-misuse-family.md](block-mode-misuse-family.md)；RSA 专用 oracle 先看 [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)。
 
-## 识别信号
+## 变体路由
 
-- 题目给出密文、nonce、签名、模数、oracle、PRNG 输出或自定义协议。
-- 存在重复 nonce、弱随机、错误回显、数学结构或可查询接口。
-- 源码能复现加密、签名、哈希或验证流程。
-- 题面或 raw 线索能落到这些关键词之一：Blum-Goldwasser Bit-Extension Oracle (PlaidCTF 2013)、Hash Length Extension Attack (PlaidCTF 2014)、Hash Length Extension Attack、Compression Oracle / CRIME-Style Attack (BCTF 2015)、Compression Oracle (CRIME-Style)、Hash Function Time Reversal via Cycle Detection (BSidesSF 2025)、OFB Mode with Invertible RNG Backward Decryption (BSidesSF 2026)、Weak Key Derivation via Public Key Hash XOR (BSidesSF 2026)。
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| MD5/SHA1 length extension、secret-prefix MAC | 服务端是否用 `hash(secret || msg)`，是否可控追加数据和原始长度 | 本页 raw；工具入口见 [crypto-tooling.md](crypto-tooling.md) |
+| CRC/线性 MAC/XOR aggregate/hash basis | tag 是否可写成 GF(2) 线性关系或可组合状态 | [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)、[number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| Compression oracle / CRIME-style | secret 与可控前缀同包压缩，响应长度稳定可测 | 本页 raw |
+| Padding/CBC/UTF-8/JSON parse oracle | 错误文本、状态码、时间或业务状态能区分候选 | [block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| SRP/DH 公钥校验缺失、协议 proof 可预测 | 发送特殊公钥后 shared secret 是否固定为 0 或小集合 | [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md) |
+| Rabin/RSA LSB/noisy oracle | 每轮查询是否稳定给出一位、区间或带噪反馈 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)、[number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| Hash state reversal、cycle detection、sponge MITM | 状态转移是否可逆、周期可测或可 meet-in-the-middle | 本页 raw |
 
-## 最小证据
+## 合并与拆分结论
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保留为 family：raw 横跨 hash、MAC、block mode、协议和 oracle，统一价值是判断“可观测差异如何转成隐藏状态”。
+- 不与 block-mode family 合并：block-mode 页关注字段和模式误用；本页关注 oracle、hash/MAC 状态和协议反馈。
+- 不拆 length-extension / compression / CRC 小页：当前多为短案例速查，后续有多篇 WP 支撑时再拆具体 technique。
 
-## 解法骨架
+## 常见误判
 
-1. 列清 known / unknown / goal。
-2. 复现原语和约束。
-3. 选择一个最匹配攻击族做最小验证。
-4. 用解出的结果做正向复算。
+- 有 hash 就直接爆破 key，没先看是否 length extension、线性组合或状态泄露。
+- Oracle 只用一次响应判断，没确认响应差异可重复且与候选字节单调相关。
+- 把 padding error、MAC error、业务 error 混在一起，导致脚本判断条件不稳定。
+- 协议绕过只看数学式，不复现消息编码、HMAC proof、session 绑定和服务端检查顺序。
 
-## 关键变体
+## 关联页面
 
-| 变体 | 复用重点 |
-|---|---|
-| Blum-Goldwasser Bit-Extension Oracle (PlaidCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hash Length Extension Attack (PlaidCTF 2014) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hash Length Extension Attack | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Compression Oracle / CRIME-Style Attack (BCTF 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Compression Oracle (CRIME-Style) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hash Function Time Reversal via Cycle Detection (BSidesSF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| OFB Mode with Invertible RNG Backward Decryption (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Weak Key Derivation via Public Key Hash XOR (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| HMAC-CRC Linearity Attack (Boston Key Party 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DES Weak Keys in OFB Mode (Boston Key Party 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Square Attack on Reduced-Round AES (0CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SRP (Secure Remote Password) Protocol Bypass via Modular Arithmetic (ASIS CTF Finals 201… | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Modified AES S-Box Brute-Force Recovery (H4ckIT CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| AES-ECB Byte-at-a-Time Chosen Plaintext (ABCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| AES-ECB Cut-and-Paste Block Manipulation (NDH Quals 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| AES-CBC IV Bit-Flip Authentication Bypass (Google CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rabin Cryptosystem LSB Parity Oracle (PlaidCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PBKDF2 Pre-Hash Bypass for Long Passwords (BackdoorCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| MD5 Multi-Collision (BackdoorCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom Hash State Reversal via Known Intermediates (BackdoorCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| CRC32 Brute-Force for Small Payloads (BackdoorCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Noisy RSA LSB Oracle with Post-Hoc Error Correction (SharifCTF 7 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Sponge Hash Collision via Meet-in-the-Middle on Partial State (BKP 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| CBC IV Forgery + Block Truncation for Authentication Bypass (0CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
 - [block-mode-misuse-family.md](block-mode-misuse-family.md)
 - [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)
+- [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
+- [crypto-tooling.md](crypto-tooling.md)
 
 ## 原始资料
 

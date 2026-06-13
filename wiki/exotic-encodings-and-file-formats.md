@@ -1,73 +1,68 @@
 ---
-type: technique
-tags: [misc, technique]
-skills: [ctf-misc]
+type: family
+tags: [misc, family, encoding, file-format, unicode, barcode, signal]
+skills: [ctf-misc, ctf-forensics]
 raw:
   - ../raw/misc/exotic-encodings-and-file-formats.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Exotic Encodings and File Formats
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
+本页是异常编码、低频文件格式和结构化数据清洗 family 页。它处理的不是普通 Base/hex/ROT，而是 Verilog/HDL、Gray code、二叉树编码、RTF 自定义 tag、SMS PDU、UTF-9、像素颜色编码、MaxiCode、DTMF、音乐音程、二进制网格和语言运行时格式滥用等边界题。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 的关系是上下游：普通可逆编码、QR、Unicode 首检先看编码 family；一旦证据指向特定文件/协议/信号格式或非标准解析器，就转到本页。
 
-## 识别信号
+## 共同识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：Verilog/HDL、Gray Code Cyclic Encoding (EHAX 2026)、Binary Tree Key Encoding、RTF Custom Tag Data Extraction (VolgaCTF 2013)、SMS PDU Decoding and Reassembly (RuCTF 2013)、Automated Multi-Encoding Sequential Solver (HackIM 2016)、RFC 4042 UTF-9 Decoding (SECCON 2015)、Pixel Color Binary Encoding (Break In 2016)。
+- 数据看似文本，但包含 RTF 控制字、PDU header、UTF-9、Unicode 变体、固定宽度数字、HDL 逻辑或非标准 barcode。
+- 图片/音频不是隐写算法本身，而是颜色、音调、音程、网格或条码格式承载比特。
+- 解码需要先恢复结构字段、排序、端序、块长、版本或格式规范，而不是直接 CyberChef 多层尝试。
+- 出现语言/库解析差异，例如 Ruby `Array#unpack` 这类格式字符串导致的越界读取。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 原始字节和格式边界：文件头、控制字、字段长度、块序号、校验、版本、行列尺寸或采样单位。
+- 能解释一个小样本如何从格式字段变成 bit/byte/text。
+- 如果使用在线或外部解码器，记录输入前处理步骤和可替代本地验证方式。
+- 能判断失败是格式识别错、字段排序错、端序错、采样错，还是需要转图像/音频/forensics 页面。
 
-## 解法骨架
+## 首轮路由
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| Base/hex/ROT/普通 Unicode/QR 首检 | 先在轻量编码 family 中确认不是常规可逆链 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| Verilog/HDL、逻辑门、状态机 | 先把组合/时序逻辑翻译成可跑模型，再从输入输出关系恢复 bit | [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| Gray code、二叉树路径、TOPKEK 这类自定义映射 | 先确定码表、遍历顺序和旋转/偏移，再做逆映射 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
+| RTF tag、SMS PDU、UTF-9、结构化文本格式 | 先按规范拆字段和排序，再提取 payload 或嵌入文件 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
+| 像素颜色编码、二进制网格、QR 拼装、MaxiCode | 先恢复网格尺寸、模块形状和坐标，再转图像/条码解码 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
+| DTMF、多按键键盘、音乐音程 | 先提取频率/音符序列，再转键盘映射或音程编码 | [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md) |
+| Ruby `Array#unpack` 或库解析差异 | 先确认格式字符串语义和越界读取边界，再判断是否转 Web/Pwn/Reverse | [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md), [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Verilog/HDL | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Gray Code Cyclic Encoding (EHAX 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Binary Tree Key Encoding | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RTF Custom Tag Data Extraction (VolgaCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SMS PDU Decoding and Reassembly (RuCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Automated Multi-Encoding Sequential Solver (HackIM 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RFC 4042 UTF-9 Decoding (SECCON 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Pixel Color Binary Encoding (Break In 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hexadecimal Sudoku + QR Assembly (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| TOPKEK Binary Encoding (Hack The Vote 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| MaxiCode 2D Barcode Decoding (CSAW CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DTMF Audio with Multi-Tap Phone Keypad Decoding (h4ckc0n 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Music Note Interval Steganography (DefCamp 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Ruby Array#unpack Buffer Under-Read CVE-2018-8778 (Codegate 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Binary Grid Text to QR Image + XOR Key (Pragyan CTF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+本页应保留为 family，不并入 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)。后者负责轻量编码和 QR/esolang 首轮判断，本页负责需要格式规范、字段清洗、信号映射或解析器语义的低频格式。当前也不拆小页，因为每个格式 raw 数量不足，拆分会只剩孤立案例。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 把低频格式当普通乱码，反复套 Base/ROT 而不看字段结构。
+- 复制 Unicode 或 RTF 内容时丢失控制字、空格、反斜杠或 code point。
+- 图像/条码类只看视觉效果，没确认模块尺寸、坐标系和采样方式。
+- DTMF/音乐题不先做频谱或音符序列，直接按听感猜字符。
+- 使用在线解码器后不记录前处理，导致无法复现。
 
 ## 关联技巧
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
-- [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
+- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
+- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
+- [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
+- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
+- [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
+- [misc-tooling.md](misc-tooling.md)
 
 ## 原始资料
 

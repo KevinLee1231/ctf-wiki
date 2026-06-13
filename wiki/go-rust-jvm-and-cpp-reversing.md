@@ -1,82 +1,54 @@
 ---
-type: technique
-tags: [reverse, technique]
+type: family
+tags: [reverse, family, go, rust, jvm, cpp, language-runtime]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/go-rust-jvm-and-cpp-reversing.md
-updated: 2026-05-21
+  - ../raw/reverse/HGAME2026-衔尾蛇-wp.md
+  - ../raw/reverse/HGAME2026-pvz-wp.md
+  - ../raw/reverse/ACTF2026-calc-my-point-wp.md
+  - ../raw/reverse/D3CTF2022-d3thon-wp.md
+updated: 2026-06-12
 ---
 
 # Go, Rust, JVM and C++ Reversing
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是语言运行时 family，覆盖 Go、Rust、Swift/Kotlin/JVM、D、Haskell、C++、Nuitka/Cython 等编译产物中由运行时对象、符号、类型、异常/协程模型或标准库布局造成的逆向障碍。它不再作为单一 technique。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+## 首轮路由
 
-## 识别信号
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| Go binary、`gopclntab`、goroutine/channel、string/slice/interface | 版本、符号恢复、runtime 类型布局和并发边界 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| Rust mangling、panic string、`Option`/`Result`、iterator fusion | 符号 demangle、类型 layout、panic 路径和实际数值约束 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
+| JVM/Kotlin/Spring Boot/JAR/Android server bytecode | class/jar 入口、反编译是否可靠、协程/state machine、动态加载或隐藏 VM | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)、[vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| C++ vtable/RTTI/template/STL | 类型恢复、虚调用、对象布局和真实业务函数边界 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| D/Haskell/Swift/Kotlin Native | 语言特定符号、运行时库和中间表示是否比普通伪代码更有信息量 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
+| Cython/Nuitka/Python native extension | Python 调用边界和 native 校验函数 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：Go Binary Reversing、Recognition、Symbol Recovery、Go Memory Layout、Goroutine and Concurrency Analysis、Common Go Patterns in Decompilation、Go Binary Reversing Workflow、Go Binary UUID Patching for C2 Client Enumeration (BSidesSF 2026)。
+## 合并与拆分结论
 
-## 最小证据
+- 保留为 family：该页的共同价值是识别语言运行时和对象布局，不是某个单点算法。
+- 不拆 Go/Rust/JVM 独立页：当前 WP 案例仍需要在同一层做语言分流，后续某语言积累多个稳定技巧时再拆 technique。
+- 不合并进基础工具页：基础工具页说明工具怎么用；本页说明语言运行时导致哪些伪代码和数据结构误判。
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+## 常见误判
 
-## 解法骨架
+- Go/Rust 字符串和 slice 当成 C 字符串处理，忽略长度字段。
+- JVM/Kotlin 只相信反编译 Java，漏掉动态类加载、协程状态机或隐藏 VM。
+- C++ 只追函数名，不恢复 vtable/RTTI/对象生命周期。
+- Cython/Nuitka 只看 Python stub，没有跟到 native extension 的真实校验。
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+## 关联页面
 
-## 关键变体
-
-| 变体 | 复用重点 |
-|---|---|
-| Go Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Recognition | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Symbol Recovery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Go Memory Layout | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Goroutine and Concurrency Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Common Go Patterns in Decompilation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Go Binary Reversing Workflow | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Go Binary UUID Patching for C2 Client Enumeration (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Go Binary UUID Patching for C2 Enumeration | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rust Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rust Recognition | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Symbol Demangling | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Common Rust Patterns in Decompilation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rust-Specific Analysis Tools | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Swift Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Swift / Kotlin Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kotlin / JVM Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JVM Bytecode (Android/Server) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kotlin/Native | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| D Language Binary Reversing (CSAW CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| D Language Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Haskell Binary Reversing via STG Closures and hsdecomp (hxp CTF 2017, Codegate 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Haskell Binary RE via GHC CMM Intermediate Language (N1CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| C++ Binary Reversing (速查) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
-- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [anti-analysis.md](anti-analysis.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
+- [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
+- [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)
 - [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
+- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 
 ## 来自 WP 的案例索引
 
@@ -90,3 +62,7 @@ updated: 2026-05-21
 ## 原始资料
 
 - [go-rust-jvm-and-cpp-reversing.md](../raw/reverse/go-rust-jvm-and-cpp-reversing.md)
+- [HGAME2026-衔尾蛇-wp](../raw/reverse/HGAME2026-衔尾蛇-wp.md)
+- [HGAME2026-pvz-wp](../raw/reverse/HGAME2026-pvz-wp.md)
+- [ACTF2026-calc-my-point-wp](../raw/reverse/ACTF2026-calc-my-point-wp.md)
+- [D3CTF2022-d3thon-wp](../raw/reverse/D3CTF2022-d3thon-wp.md)

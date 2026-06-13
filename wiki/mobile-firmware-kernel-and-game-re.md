@@ -1,82 +1,51 @@
 ---
-type: technique
-tags: [reverse, technique]
+type: family
+tags: [reverse, family, mobile, firmware, kernel, game-engine]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/mobile-firmware-kernel-and-game-re.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Mobile, Firmware, Kernel and Game RE
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是平台环境 family，覆盖 macOS/iOS Mach-O、Objective-C/Swift、dyld、固件解包、IoT/RTOS、内核驱动、eBPF、游戏引擎和 CAN/车载协议。它的价值是先判断目标运行在哪个环境、如何加载、怎么调试、哪些格式/权限/架构会影响分析。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+与 [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) 的区别：本页偏 OS、固件、驱动和底层环境；Android/Flutter/Unity/资源类高频入口优先从 Android/游戏 family 进入。
 
-## 识别信号
+## 首轮路由
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：macOS / iOS Reversing、Mach-O Binary Format、Code Signing & Entitlements、Objective-C Runtime RE、Swift Binary Reversing、iOS App Analysis、dyld / Dynamic Linking、Embedded / IoT Firmware RE。
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| Mach-O、IPA、Objective-C selector、Swift 符号 | 架构切片、签名/entitlements、selector 字符串、Swift demangle 和 dyld 依赖 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)、[frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) |
+| 固件镜像、SquashFS/JFFS2/UBI/CPIO、DTB、uImage/zImage | 先解包文件系统、确认架构/端序/基址，再定位 init 脚本、Web handler 或协议服务 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
+| `.ko`、`.sys`、IOCTL、eBPF、内核模块 | 用户态/内核态边界、handler、map、probe、设备对象和可观测反馈 | [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)、[loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
+| Unreal/Unity/Lua 游戏引擎 | 资源、脚本、反射元数据、存档和 native 插件谁控制真实校验 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
+| CAN/UDS/车载协议 | 帧 ID、DLC、seed-key、routine control 和 replay 边界 | [signals-and-hardware.md](signals-and-hardware.md) |
 
-## 最小证据
+## 合并与拆分结论
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保留为 family：这些 raw 分支共同问题是运行环境和载体格式，而不是某个单点恢复技巧。
+- 不拆 Mach-O/固件/驱动/游戏引擎独立页：当前还缺少足够多直接 WP 案例，先作为平台路由更稳定。
+- 与 pwn/kernel 页面保持边界：本页负责理解驱动/内核接口；当目标转为内存破坏和提权时再 pivot 到 pwn。
 
-## 解法骨架
+## 常见误判
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+- 固件题未先确认文件系统和架构，就直接在随机 ELF 上读伪代码。
+- Mach-O/Swift 题忽略 selector、demangle 和 dyld，导致把运行时派发误当普通 C 调用。
+- 驱动题只看用户态 client，没有恢复 IOCTL 号、输入结构和内核侧反馈。
+- 游戏题只抽资源，不确认脚本/引擎/插件是否会在运行时覆盖静态数据。
 
-## 关键变体
+## 关联页面
 
-| 变体 | 复用重点 |
-|---|---|
-| macOS / iOS Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Mach-O Binary Format | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Code Signing & Entitlements | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Objective-C Runtime RE | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Swift Binary Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| iOS App Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| dyld / Dynamic Linking | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Embedded / IoT Firmware RE | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Firmware Extraction | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Firmware Unpacking | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Architecture-Specific Notes | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RTOS Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kernel Driver Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Linux Kernel Modules | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| eBPF Programs | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows Kernel Drivers | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Game Engine Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unreal Engine | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unity (Beyond IL2CPP) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Anti-Cheat Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Lua-Scripted Games | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Automotive / CAN Bus RE | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RISC-V QEMU Execution with GLIBC Symbol Version Patching (Pwn2Win 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| APK Certificate SHA-256 as AES Key (ASIS Finals 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
+- [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 - [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [anti-analysis.md](anti-analysis.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
+- [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)
+- [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)
+- [signals-and-hardware.md](signals-and-hardware.md)
 
 ## 原始资料
 

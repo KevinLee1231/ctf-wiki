@@ -1,76 +1,66 @@
 ---
-type: technique
-tags: [pwn, technique]
+type: family
+tags: [pwn, family, rop, ret2csu, dynelf, shellcode, badchars]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/ret2csu-dynelf-and-shellcode.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # ret2csu, DynELF and Shellcode
 
-## 适用场景
+## 作用边界
 
-内存破坏、沙箱逃逸、低级原语或 exploit chain 是主要障碍。
+本页是 Pwn 后期控制流落地 family，覆盖 ret2libc、raw syscall ROP、ret2csu、DynELF、bad-character ROP、exotic gadgets、受限 shellcode、小缓冲 stager 和替代 syscall。它负责回答：已经有 RIP/ROP/shellcode 入口后，如何在约束下调用函数、解析符号、放置字符串或执行系统调用。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果首要问题仍是怎么拿控制流，先看 [overflow-basics.md](overflow-basics.md)、[format-string.md](format-string.md) 或 heap 页面。如果主要约束是 seccomp 或栈迁移，先看 [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)。
 
-## 识别信号
+## 共同识别信号
 
-- 出现 crash、越界读写、UAF、format string、heap metadata、seccomp 或 kernel primitive。
-- 保护组合、libc、架构或 syscall 约束会影响路线。
-- 需要 leak/write/control-flow hijack 串成最终能力。
-- 题面或 raw 线索能落到这些关键词之一：ROP Chain Building、Two-Stage ret2libc (Leak + Shell)、Raw Syscall ROP (When system() Fails)、rdx Control in ROP Chains、Shell Interaction After execve、ret2csu — libccsuinit Gadgets (Crypto-Cat)、Bad Character Bypass via XOR Encoding in ROP (Crypto-Cat)、Exotic x86 Gadgets — BEXTR/XLAT/STOSB/PEXT (Crypto-Cat)。
+- 已能控制返回地址或函数指针，但缺少 `pop rdi/rsi/rdx`、libc 基址、可用字符串或足够 shellcode 空间。
+- 程序可泄露任意地址或 GOT 内容，需要解析 libc 符号。
+- payload 受 badchars、唯一字节、小缓冲、预初始化寄存器、静态链接或 syscall 限制影响。
+- 目标可能是 `system("/bin/sh")`、`execve`、ORW、mprotect+shellcode、DynELF resolve 或短 stager。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 可控寄存器集合、可写内存、可泄露地址、可执行内存和 gadget 列表。
+- RELRO、PIE、NX、canary、libc 版本和 seccomp 约束。
+- 字符串放置方案：BSS、heap、栈、ROP 写入、XOR 解码或已有字符串。
+- 最终交互方式：shell、ORW、直接打印 flag、反连或文件读。
 
-## 解法骨架
+## 首轮路由
 
-1. 稳定复现 bug。
-2. 量化 read/write/control primitive。
-3. 按保护选择利用路线。
-4. 脚本化 exploit 并处理远程差异。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| 能泄露 libc/GOT，能二次输入 | 先做两阶段 ret2libc，泄露后返回干净调用点再发第二链 | [pwn-tooling.md](pwn-tooling.md) |
+| 缺少常规参数 gadget，但有 `__libc_csu_init` | 用 ret2csu 设置 `rdi/rsi/rdx` 并调用 GOT/PLT 函数 | [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md) |
+| 有任意读但不知道 libc | 用 DynELF 或手工解析 ELF link map/GOT/符号表 | [format-string.md](format-string.md) |
+| `system()` 不可用或 seccomp 限制 | 转 raw syscall ROP、ORW 或替代 syscall | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md) |
+| badchars/唯一字节/小缓冲 | 先写编码器或 stager，利用 XOR、sprintf、BEXTR/XLAT/STOSB/PEXT 等 gadget 组装目标字节 | [windows-arm-and-cross-platform-exploits.md](windows-arm-and-cross-platform-exploits.md) |
+| shellcode 空间小但寄存器已预设 | 只补缺失参数或第一阶段 read/mprotect，再加载完整 shellcode | [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md) |
+| shell 出来但命令被 read 吃掉或无回显 | 先处理交互时序、PTY、延迟和 fd，再考虑 ORW 替代 | [pwn-tooling.md](pwn-tooling.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| ROP Chain Building | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Two-Stage ret2libc (Leak + Shell) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Raw Syscall ROP (When system() Fails) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| rdx Control in ROP Chains | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Shell Interaction After execve | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ret2csu — libccsuinit Gadgets (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Bad Character Bypass via XOR Encoding in ROP (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Exotic x86 Gadgets — BEXTR/XLAT/STOSB/PEXT (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 64-bit: BEXTR + XLAT + STOSB | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 32-bit: PEXT (Parallel Bits Extract) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Stack Pivot via xchg rax,esp (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| sprintf() Gadget Chaining for Bad Character Bypass (PlaidCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DynELF Automated Libc Discovery (RC3 CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Constrained Shellcode in Small Buffers (TUM CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Stack Canary XOR Epilogue as RDX Zeroing Gadget (VolgaCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Minimal Shellcode with Pre-Initialized Registers (Square CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unique-Byte Shellcode via syscall RIP to RCX (HITCON 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| stubexecveat Syscall as execve Alternative (ASIS CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+本页应为 family。ret2csu、DynELF、badchar ROP、shellcode stager 和 syscall ROP 是不同技术，但它们都发生在“控制流已经可用，如何落地最终能力”的阶段。保留为 family 比拆成短页更利于 exploit 链路阅读。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 泄露后返回 `main` 破坏栈状态，没返回到干净的 `call vuln` 或初始化点。
+- ret2csu 忘记满足 `rbx/rbp` 关系，循环多执行或不执行。
+- DynELF 的 leak 函数不稳定，读到 unmapped 地址直接断连。
+- shellcode 没处理 badchars、NX 或 seccomp，能本地执行但远程失败。
+- 拿到 shell 后发送命令太早，被前面的 `read()` 消耗。
 
 ## 关联技巧
 
-- [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
+- [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)
+- [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md)
 - [format-string.md](format-string.md)
-- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
-- [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
+- [overflow-basics.md](overflow-basics.md)
+- [windows-arm-and-cross-platform-exploits.md](windows-arm-and-cross-platform-exploits.md)
+- [pwn-tooling.md](pwn-tooling.md)
 
 ## 原始资料
 

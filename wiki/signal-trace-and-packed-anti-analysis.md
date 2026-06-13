@@ -1,65 +1,67 @@
 ---
-type: technique
-tags: [reverse, technique]
+type: family
+tags: [reverse, family, signal-handler, trace, packed, dump]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/signal-trace-and-packed-anti-analysis.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Signal, Trace and Packed Anti-Analysis
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是信号处理器、trace 反演、父子进程 patch、packed/dynamic module dump 和异常控制流 family。它适合处理 SIGILL/SIGFPE、`strace`/`ptrace` 可观测副作用、指令 trace、call-less chaining、ConfuserEx 动态模块和父进程修改子进程这类运行时结构。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不替代 [anti-analysis.md](anti-analysis.md)：反分析页负责跨过环境检测，本页负责利用 signal/trace/dump 证据恢复真实逻辑。
 
 ## 识别信号
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：SIGILL Handler for Execution Mode Switching (Hack.lu 2015)、SIGFPE Signal Handler Side-Channel via strace Counting (PlaidCTF 2017)、SIGFPE Signal Handler Side-Channel、Instruction Trace Inversion with Keystone and Unicorn (MeePwn CTF 2017)、Call-less Function Chaining via Stack Frame Manipulation (THC CTF 2018)、Parent-Patched Child Binary Dump via strace processvmwritev (Google CTF Quals 2018)、ConfuserEx Dynamic Module Dump via Constructor Breakpoint (Kaspersky 2018)。
+- 程序注册 SIGILL/SIGFPE/SIGSEGV handler，异常不是 crash，而是控制流或 side-channel。
+- `strace`、coredump、instruction trace、process_vm_writev/readv 能暴露父子进程或 packed stage。
+- 静态二进制不是最终执行体，真实模块在运行时生成、解密、写入子进程或动态加载。
+- 函数调用被栈帧、异常、signal handler 或 call-less chaining 隐藏。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 信号类型、handler 地址、触发条件和 handler 修改的寄存器/内存。
+- Trace 采集方式和粒度：syscall、basic block、instruction、coredump、module constructor。
+- packed/dynamic module 的 dump 时机：解密后、执行前、构造函数断点、父进程 patch 后。
+- 恢复结果能映射回真实校验、key、opcode 或明文，而不是只得到一段不可定位 dump。
 
-## 解法骨架
+## 路由表
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| SIGILL mode switching | handler 是否修改 PC/flags/寄存器实现隐藏指令语义 | 建 handler-aware trace |
+| SIGFPE side-channel | 信号次数或触发位置是否和输入字符相关 | `strace` 计数或自动化 oracle |
+| instruction trace inversion | trace 能否还原执行序列，指令是否可用 Keystone/Unicorn 重放 | 转 [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| call-less chaining | 栈帧被手工构造，普通 xref 缺失 | 先恢复栈布局和返回地址链 |
+| parent-patched child | 父进程写入子进程或 memfd 后再执行 | dump 子进程修改后镜像 |
+| ConfuserEx dynamic module | .NET 模块在 constructor 或 runtime 动态解密 | constructor 断点 dump module |
+| packed anti-analysis | 壳和检测交织，trace 指向 fake path | 先转 [anti-analysis.md](anti-analysis.md) 清环境 |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| SIGILL Handler for Execution Mode Switching (Hack.lu 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SIGFPE Signal Handler Side-Channel via strace Counting (PlaidCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SIGFPE Signal Handler Side-Channel | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Instruction Trace Inversion with Keystone and Unicorn (MeePwn CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Call-less Function Chaining via Stack Frame Manipulation (THC CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Parent-Patched Child Binary Dump via strace processvmwritev (Google CTF Quals 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ConfuserEx Dynamic Module Dump via Constructor Breakpoint (Kaspersky 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：信号、trace、dump、父子进程和 packed module 是一组运行时证据路线。
+- 不合并进 `runtime-patching-oracles-and-tracing.md`：本页的触发证据更偏 signal/trace/dump 结构，能提供更具体 pivot。
+- 不合并进 `packers-deobfuscation-and-debug-automation.md`：该页偏壳/脱壳自动化，本页偏异常和 trace 证据。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 把信号当崩溃处理，直接 patch 掉 handler，丢失真实控制流。
+- Dump 时机太早，模块仍是加密或占位状态。
+- Trace 只记录 syscall，实际分支在用户态指令层。
+- 父子进程题只分析初始文件，没有检查运行后 child memory。
 
-## 关联技巧
+## 关联页面
 
-- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [anti-analysis.md](anti-analysis.md)
+- [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)
+- [reverse-tooling.md](reverse-tooling.md)
 
 ## 原始资料
 

@@ -1,64 +1,56 @@
 ---
-type: technique
-tags: [ai-ml, technique]
+type: family
+tags: [ai-ml, family, adversarial-examples, evasion, poisoning, backdoor]
 skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/adversarial-ml.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Adversarial ML
 
-## 适用场景
+## 作用边界
 
-模型行为、训练数据、推理接口、prompt、adversarial input 或 ML 参数是主要攻击面。
-
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+本页是 adversarial examples、evasion、patch、poisoning 和 backdoor 检测 family。它负责从模型、输入约束、梯度可用性和评分反馈判断应走 FGSM/PGD/C&W、adversarial patch、black-box 查询、数据投毒还是后门触发器分析。
 
 ## 识别信号
 
-- 题目涉及 classifier、LLM、embedding、fine-tuning、LoRA、membership 或 extraction。
-- 成功条件取决于模型输出、置信度、梯度、token 或 prompt 行为。
-- 需要查询策略、样本构造或模型分析。
-- 题面或 raw 线索能落到这些关键词之一：Adversarial Example Generation (FGSM, PGD, C&W)、FGSM (Fast Gradient Sign Method)、PGD (Projected Gradient Descent)、C&W (Carlini & Wagner) Attack、Adversarial Patch Generation、Evasion Attacks on ML Classifiers (Foundational)、Data Poisoning (Foundational)、Backdoor Detection in Neural Networks (Foundational)。
+- 成功条件是让分类器误判、通过模型认证、改变置信度、触发后门或规避检测。
+- 题目给出模型文件、推理接口、训练数据、label、loss、梯度、输入范围或查询次数限制。
+- 输入是图片、音频、特征向量或嵌入，且有像素/范数/格式/肉眼可读性约束。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 模型框架、输入 shape、归一化、label space、目标/非目标攻击要求。
+- 是否 white-box：能否拿梯度、loss、权重；black-box 时反馈是 label、score 还是二值。
+- 扰动约束：Linf/L2/L1、像素范围、mask、patch 位置、查询预算和提交格式。
+- 成功样本能被本地或远端稳定复验。
 
-## 解法骨架
+## 路由表
 
-1. 固定输入格式和评分反馈。
-2. 建立最小查询/训练/推理循环。
-3. 选择 adversarial、extraction、prompt injection 等路径。
-4. 用稳定样本验证结果。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| white-box 分类器 | loss、梯度和预处理是否一致 | FGSM/PGD/C&W |
+| 只给 label/score API | 查询预算、score 粒度和随机性 | black-box search / NES / boundary |
+| patch 可见区域 | patch 位置、大小和变换增强 | adversarial patch |
+| MNIST/图像认证 | 输入 clamp、reshape 和归一化 | foolbox/hand-rolled gradient |
+| poisoning/backdoor | 训练数据可控或触发器存在 | 触发器搜索/clean-label 判断 |
+| 需要模型参数/权重 | 攻击面不是扰动而是模型恢复 | [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Adversarial Example Generation (FGSM, PGD, C&W) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| FGSM (Fast Gradient Sign Method) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PGD (Projected Gradient Descent) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| C&W (Carlini & Wagner) Attack | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Adversarial Patch Generation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Evasion Attacks on ML Classifiers (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Data Poisoning (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Backdoor Detection in Neural Networks (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| foolbox L1BasicIterativeAttack on Keras MNIST-Auth (nullcon 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hand-Rolled Keras FGSM via K.gradients (UTCTF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Adversarial Examples | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Gradient-Based Techniques | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：adversarial ML 覆盖多种攻击目标和反馈模型，适合二级分流。
+- 不合并进 LLM 页：LLM prompt/tool 攻击的证据和验证方式不同。
+- 暂不拆 FGSM/PGD/C&W 小页：当前 raw 更适合集中描述选择条件。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 本地预处理和远端不一致，导致样本本地成功远端失败。
+- 梯度攻击后未 clamp 或量化，提交格式破坏扰动。
+- Black-box 题没有估查询预算，过早使用高成本搜索。
+- 只追求误分类，没有满足目标 label 或业务阈值。
 
-## 关联技巧
+## 关联页面
 
 - [llm-attacks.md](llm-attacks.md)
 - [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md)

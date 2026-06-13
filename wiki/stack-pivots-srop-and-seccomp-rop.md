@@ -1,80 +1,66 @@
 ---
-type: technique
-tags: [pwn, technique]
+type: family
+tags: [pwn, family, rop, srop, stack-pivot, seccomp]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/stack-pivots-srop-and-seccomp-rop.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Stack Pivots, SROP and Seccomp ROP
 
-## 适用场景
+## 作用边界
 
-内存破坏、沙箱逃逸、低级原语或 exploit chain 是主要障碍。
+本页是 Pwn 控制流构造 family 页，覆盖栈迁移、SROP、受编码限制的 payload、RETF 架构切换、vDSO/vsyscall、JIT-ROP、ret2dlresolve、受限 gadget ROP、`.fini_array` 分阶段劫持和静态链接 ret2libc 等路线。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+这些内容的共同点是：已经有某种控制流入口，但入口空间、寄存器、syscall、栈位置或字符集受到限制。首轮任务不是马上堆 ROP，而是判断“控制流入口能承载哪一种执行模型”。
 
-## 识别信号
+## 共同识别信号
 
-- 出现 crash、越界读写、UAF、format string、heap metadata、seccomp 或 kernel primitive。
-- 保护组合、libc、架构或 syscall 约束会影响路线。
-- 需要 leak/write/control-flow hijack 串成最终能力。
-- 题面或 raw 线索能落到这些关键词之一：Double Stack Pivot to BSS via leave;ret (Midnightflag 2026)、Double Stack Pivot to BSS via leave;ret、SROP with UTF-8 Payload Constraints (DiceCTF 2026)、Seccomp Bypass、RETF Architecture Switch for Seccomp Bypass (Midnightflag 2026)、RETF Architecture Switch for Seccomp Bypass、Stack Shellcode with Input Reversal、.finiarray Hijack。
+- 能控制返回地址、函数指针、`.fini_array`、异常返回帧、vtable 或某个间接调用，但栈空间不足或 payload 受限。
+- 出现 `leave; ret`、`sigreturn`、`syscall`、`int 0x80`、`retf`、vDSO/vsyscall、SROP frame、BSS stack、UTF-8/反转输入等线索。
+- seccomp 允许的 syscall 与预期 shell 路线冲突，必须改成 ORW、mmap+write、x32 ABI、JIT-ROP 或时间侧信道。
+- 本地可打通但远程失败时，常见原因是栈 pivot 地址、信号帧、libc 版本、vDSO 映射或 fd 差异。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 控制流入口的具体位置和可用字节数。
+- 可控寄存器集合，尤其是 `rsp/rbp/rdi/rsi/rdx/rax` 或架构对应参数寄存器。
+- 可写可读内存区域，如 BSS、heap、栈残留、mmap 区、JIT 区。
+- syscall 可用性和 seccomp 过滤结果。
+- payload 编码、长度、反转、空字节、UTF-8 或唯一字节限制。
 
-## 解法骨架
+## 首轮路由
 
-1. 稳定复现 bug。
-2. 量化 read/write/control primitive。
-3. 按保护选择利用路线。
-4. 脚本化 exploit 并处理远程差异。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| 栈空间很小但能控 `rbp/rsp` 或有 `leave; ret` | 先做一段或两段栈迁移，把第二阶段放到 BSS/heap/mmap | [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md) |
+| 能控制 `rax=15` 或触发 `rt_sigreturn` | 构造 SROP frame 前先确认 frame 地址、`syscall` gadget 和 seccomp 限制 | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md) |
+| seccomp 禁止常规 execve/read/write 组合 | 先枚举允许 syscall，再选 ORW、x32 ABI、RETF、vDSO、JIT-ROP 或 blind shellcode | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md), [pwn-tooling.md](pwn-tooling.md) |
+| 只有格式化写或有限任意写 | 优先考虑 `.fini_array`、GOT、exit handler 或分阶段 ROP，而不是一次写完完整链 | [format-string.md](format-string.md), [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md) |
+| 可泄露 libc 函数但 gadget 不稳定 | 先从泄露范围内扫描 syscall、one_gadget 或可拼接序列 | [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md) |
+| gadget 或立即数受素数、字符集、唯一字节等约束 | 先把约束建模，再决定分解常量、分阶段写入或切换 shellcode 模型 | [pwn-tooling.md](pwn-tooling.md), [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Double Stack Pivot to BSS via leave;ret (Midnightflag 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Double Stack Pivot to BSS via leave;ret | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SROP with UTF-8 Payload Constraints (DiceCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Seccomp Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RETF Architecture Switch for Seccomp Bypass (Midnightflag 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RETF Architecture Switch for Seccomp Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Stack Shellcode with Input Reversal | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| .finiarray Hijack | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| pwntools Template | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Automated Offset Finding via Corefile (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ret2vdso — Using Kernel vDSO Gadgets (HTB Nowhere to go) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Vsyscall ROP for PIE Bypass (Hack.lu 2015) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| x32 ABI Syscall Number Aliasing for Seccomp Bypass (BCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Time-Based Blind Shellcode When write() Blocked (DEF CON 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JIT-ROP: Scan for syscall Byte in Leaked libc Function (Codegate 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ret2dlresolve 64-bit (Codegate 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Prime-Only ROP via Goldbach Decomposition (PlaidCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Imperfect-Gadget Stack Pivot (RITSEC 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| finiarray Double-Entry Staged ROP (Insomnihack 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ret2libc via Statically-Linked libc + Embedded /bin/sh String (TAMUctf 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Useful Commands | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SROP with UTF-8 Constraints | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+本页保留为 family。SROP、栈迁移、RETF、vDSO、ret2dlresolve 和 `.fini_array` hijack 都有独立技术细节，但在健康检查层面，它们常被同一批 raw 混在“受限控制流如何落地”问题下。将其改成 family 可以减少误导：具体执行骨架落到相邻 technique，首轮 pivot 留在这里。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只验证了本地 gadget，没有检查远程 vDSO、libc、栈地址和 seccomp。
+- SROP frame 地址和 `rsp` 落点不一致，导致看似 syscall 失败。
+- `leave; ret` 栈迁移只做一次，但第二阶段仍然覆盖不完整。
+- ret2dlresolve 与 seccomp 同时出现时，只完成解析却调用了被过滤的 syscall。
+- `.fini_array` 分阶段劫持忘记安排第二次触发，导致只执行一次短链。
 
 ## 关联技巧
 
-- [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
+- [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md)
+- [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md)
 - [format-string.md](format-string.md)
-- [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
-- [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
+- [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
+- [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md)
+- [pwn-tooling.md](pwn-tooling.md)
 
 ## 原始资料
 

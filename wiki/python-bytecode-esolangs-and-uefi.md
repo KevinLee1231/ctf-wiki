@@ -1,83 +1,49 @@
 ---
-type: technique
-tags: [reverse, technique]
+type: family
+tags: [reverse, family, python-bytecode, esolang, uefi, bytecode]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/python-bytecode-esolangs-and-uefi.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Python Bytecode, Esolangs and UEFI
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是非标准字节码与低频执行格式 family，覆盖 Python `.pyc`/opcode remap/Pyarmor/Nuitka/Cython 相关入口、Brainfuck/FRACTRAN/函数式语言、HarmonyOS ABC、UEFI、DOS stub、coverage side-channel 和其它解释器式载体。它不再作为单一 technique。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+## 首轮路由
 
-## 识别信号
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| `.pyc`、`dis` 输出、magic/version、opcode remap | Python 版本、字节码版本、opcode 表、常量表和控制流是否可还原 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| Pyarmor/Nuitka/Cython/嵌入式 Python | 入口是 Python 层、native 扩展、模块 stub 还是运行时 dump | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| Brainfuck/FRACTRAN/OPAL/函数式语言 | 是否可反向解释、转 C、抽约束或用 coverage/read count oracle | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| HarmonyOS HAP/ABC、UEFI、DOS stub | 先恢复格式、工具链、入口点和调用约定，再进入算法恢复 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
+| Unity IL2CPP、游戏字节码、非原生脚本 | 先确认 metadata、managed/native 边界和资源脚本关系 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：Python Bytecode Reversing (dis.dis output)、Python .pyc、Python Bytecode Reversing、Common Pattern: XOR Validation with Split Indices、Bytecode Analysis Tips、Python Opcode Remapping、Identification、Recovery。
+## 合并与拆分结论
 
-## 最小证据
+- 保留为 family：这些 raw 分支的共同障碍是“先恢复执行格式/字节码语义”，不是某个具体算法。
+- 不合并进 VM family：VM family 判断自定义 VM/混淆，本页承接 Python/esolang/UEFI/HarmonyOS 等已有格式或小众解释器。
+- 暂不拆 Python 字节码 technique：已有 raw/WP 覆盖 `.pyc`、Cython、Pyarmor、Nuitka 等不同入口，先用 family 分流更稳。
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+## 常见误判
 
-## 解法骨架
+- 忽略 Python 版本，导致用错 opcode 表或 `.pyc` magic。
+- 把 Pyarmor/Nuitka/Cython 都当成普通 `.pyc`，没有检查 native runtime 和模块导入边界。
+- Esolang 题直接手工模拟全程序，没先找输入读取点、比较 idiom、反向解释或 side-channel。
+- UEFI/HarmonyOS 题未先确认格式和工具链，就强行套普通 PE/ELF 分析。
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+## 关联页面
 
-## 关键变体
-
-| 变体 | 复用重点 |
-|---|---|
-| Python Bytecode Reversing (dis.dis output) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Python .pyc | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Python Bytecode Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Common Pattern: XOR Validation with Split Indices | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Bytecode Analysis Tips | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Python Opcode Remapping | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Identification | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Recovery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Pyarmor 8/9 Static Unpack (1shot) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DOS Stub Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unity IL2CPP Games | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| HarmonyOS HAP/ABC Reverse (abc-decompiler) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck/Esolangs | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Character-by-Character Static Analysis (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Character-by-Character Static Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Side-Channel via Read Count Oracle (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Side-Channel via Read Count Oracle | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Comparison Idiom Detection (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Comparison Idiom Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| UEFI Binary Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Transpilation to C | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Code Coverage Side-Channel Attack | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Functional Language Reversing (OPAL) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Python Version-Specific Bytecode (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
+- [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
+- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
 - [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
 - [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [anti-analysis.md](anti-analysis.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
+- [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
 
 ## 原始资料
 

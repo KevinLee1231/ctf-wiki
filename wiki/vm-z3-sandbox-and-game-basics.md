@@ -1,83 +1,78 @@
 ---
-type: technique
-tags: [misc, technique]
+type: family
+tags: [misc, family, vm, z3, sandbox, game, constraints]
 skills: [ctf-misc]
 raw:
   - ../raw/misc/vm-z3-sandbox-and-game-basics.md
-updated: 2026-05-21
+  - ../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md
+updated: 2026-06-12
 ---
 
 # VM, Z3, Sandbox and Game Basics
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
+本页是 Misc 中“规则系统” family，用于处理小型 VM/解释器、WASM/Roblox/游戏资源、PyInstaller/marshal、Z3/约束求解、Kubernetes/RBAC、浮点精度、Lua/Ruby/Python sandbox 和自定义汇编器过滤等题型。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它只承担首轮分流：如果主要任务是逆向复杂 VM 或字节码，转 Reverse family；如果已经形成内存破坏 primitive，转 Pwn；如果是真实内网/容器提权，转 Pentest。
 
-## 识别信号
+## 共同识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：WASM Game Exploitation via Patching、Roblox Place File Reversing、PyInstaller Extraction、Opcode Remapping、Marshal Code Analysis、Bytecode Inspection Tips、Python Environment RCE、Z3 Constraint Solving。
+- 题目给出游戏、解释器、字节码、规则表、约束网络、WASM、Roblox place、PyInstaller 包、marshal code、K8s manifest、浮点交易系统或自定义 sandbox。
+- 关键不是文件 carving，而是把规则还原成可执行模型、patch、约束或状态转移。
+- 可通过小脚本、Z3、模拟器、patch 或重放交互快速验证候选路线。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 明确规则载体：WASM、Python bytecode、marshal、游戏资源、逻辑门网络、YARA 条件、K8s API、浮点计算、VM opcode 或 sandbox 语言。
+- 定义输入、状态、转移和胜利条件；不要只描述“像游戏”或“像 VM”。
+- 对 patch 路线，先确认校验点和可改字段；对 Z3 路线，先确认变量域和约束规模；对 sandbox 路线，先确认可用 API 和过滤阶段。
+- 如果出现读写/执行 primitive，要说明是否已经超出 Misc，是否应 pivot 到 Pwn/Reverse/Pentest。
 
-## 解法骨架
+## 首轮路由
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据形态 | 先做什么 | 下一跳 |
+|---|---|---|
+| WASM/Roblox/游戏 AI 可 patch | 先找评分、胜利条件、资源加载和客户端状态，patch 后用最小交互验证。 | [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md) |
+| PyInstaller/marshal/opcode remap | 先解包、确定 Python 版本和 opcode 表，再反汇编/反编译；复杂 VM 转 Reverse。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
+| Z3/YARA/逻辑门/类型系统 | 先抽变量域和约束，不要直接暴力；若状态递推或 oracle 更强，转 oracle 页面。 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
+| K8s/RBAC/容器 API | 先枚举 service account、token、verb/resource、namespace 和可创建对象；成功后转 Pentest。 | [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md) |
+| 浮点精度/经济系统 | 先找舍入方向、整数转换、库存/余额同步点和可重复交易循环。 | [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) |
+| Lua/Ruby/Python sandbox | 先确定语言运行时和过滤阶段；Python 走 pyjail，Lua/Ruby 看 TracePoint/函数名/元表等隐式执行点。 | [pyjails.md](pyjails.md) |
+| 自定义 VM opcode 或 syscall 被过滤 | 判断过滤发生在汇编器、loader 还是解释器；若已有 SP/RIP/内存 primitive，转 Pwn。 | [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md) |
 
-## 关键变体
+## 来自 WP 的案例索引
 
-| 变体 | 复用重点 |
-|---|---|
-| WASM Game Exploitation via Patching | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Roblox Place File Reversing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PyInstaller Extraction | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Opcode Remapping | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Marshal Code Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Bytecode Inspection Tips | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Python Environment RCE | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Z3 Constraint Solving | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| YARA Rules with Z3 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Type Systems as Constraints | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Z3 SAT Solving for Boolean Logic Gate Networks (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kubernetes RBAC Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| K8s Privilege Escalation Checklist | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Floating-Point Precision Exploitation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Finding Exploitable Values | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Exploitation Strategy | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Why It Works | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Red Flags in Challenges | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Quick Test Script | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Custom Assembly Language Sandbox Escape (EHAX 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Lua Sandbox Escape via Function Name Injection (CSAW CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Ruby Sandbox Escape via TracePoint.trace (HITCON 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| References | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Z3 / Constraint Solving | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| Raw WP | 可复用联系 | 对应路线 |
+|---|---|---|
+| [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md) | 自定义汇编器会把明文 `svc` 替换成 NOP，但解释器内部仍实现 syscall opcode；SP 越界可直接进入内部 opcode 路线。 | VM 语义差异 + Pwn primitive |
+
+## 合并与拆分结论
+
+- 保留为 `family`：raw 横跨游戏 patch、Python 包/字节码、约束求解、K8s、浮点、sandbox 和 VM opcode，单一 technique 无法准确概括。
+- 不并入 [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)：总 triage 只决定是否进入本页，本页负责规则系统内部二级分流。
+- 不拆 Z3、WASM、K8s 等小页：当前 raw 多为短案例集合，拆分后容易形成弱页；后续高频路线再独立成 technique。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 看到 VM/bytecode 就直接用 Reverse 工具，没先确认是否只是小规则系统或可 patch 游戏。
+- 用 Z3 前没有约束变量域，导致 solver 模型不对应实际输入格式。
+- K8s 题只看 pod 内文件，没枚举 service account 权限和 API verbs。
+- 浮点题用十进制直觉推导，未复现实际语言的二进制浮点和整数转换。
+- 自定义汇编过滤只尝试绕文本，忽略解释器内部 opcode/helper 可能直接可用。
 
 ## 关联技巧
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
-- [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
+- [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)
+- [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
+- [pyjails.md](pyjails.md)
+- [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
+- [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md)
+- [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)
 
 ## 原始资料
 
 - [vm-z3-sandbox-and-game-basics.md](../raw/misc/vm-z3-sandbox-and-game-basics.md)
+- [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md)

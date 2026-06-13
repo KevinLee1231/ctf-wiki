@@ -1,71 +1,64 @@
 ---
-type: technique
-tags: [misc, technique]
-skills: [ctf-misc]
+type: family
+tags: [misc, family, oracle, recurrence, captcha, polyglot]
+skills: [ctf-misc, ctf-web, ctf-crypto]
 raw:
   - ../raw/misc/oracles-recurrences-captcha-polyglots.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Oracles, Recurrences, CAPTCHA and Polyglots
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
-
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+本页是 misc 中 oracle、递推、约束、CAPTCHA 和 polyglot 规则系统 family。它覆盖比较 oracle、timeout oracle、XSLT/DSL VM、JavaScript 数值边界、OEIS/递推、矩阵快速幂、QR 结构约束、动态字体 CAPTCHA、Brainfuck/Piet 多层题和 Levenshtein oracle。
 
 ## 识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：XSLT as Turing-Complete VM for Binary Search (35C3 2018)、JavaScript MAXSAFEINTEGER Successor Equality (35C3 2018)、Binary Search Oracle in Comparison-Only DSL (35C3 2018)、Blind SQLi via Script-Engine Timeout Error (35C3 2018)、OEIS Sequence Lookup Automation for Recurrence Puzzles (X-MAS CTF 2018)、QR Code Reassembly from Format-String Structural Constraints (Square CTF 2018)、Matrix Exponentiation for Fibonacci-Like Recurrence (Pwn2Win 2018)、Tribonacci Recurrence for Frog Jump Counting (FireShell 2019)。
+- 服务或脚本不给明文答案，但比较结果、超时、距离、错误类型或成功/失败能作为 oracle。
+- 输入输出满足递推、矩阵幂、序列查询、有限状态机或覆盖约束。
+- CAPTCHA/字体/QR/polyglot 不是图像处理本身，而是结构约束或自动化识别问题。
+- 题目位于 misc，但证据可能 pivot 到 web SQLi timeout、crypto hash length extension 或 encoding。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- oracle 的可控输入、可观察输出和噪声边界。
+- 递推题的初值、模数、转移矩阵或可从 OEIS 验证的前几项。
+- CAPTCHA/QR/polyglot 的结构约束、样本数量和自动化接口。
+- 如果涉及 Web/crypto，确认主要障碍是否应转专项页面。
 
-## 解法骨架
+## 路由表
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| comparison-only oracle | 反馈是否支持二分或逐字符搜索 | 写自动化查询，控制 rate/noise |
+| timeout/error oracle | 时间或错误是否稳定区分条件 | Web 题转 SQLi/oracle 页 |
+| recurrence/sequence | OEIS、特征多项式、矩阵幂和模数 | 建快速幂或闭式恢复 |
+| QR structural constraints | finder/timing/format 信息是否足够 | 枚举缺失块并校验 QR |
+| CAPTCHA/font | 字体是否动态、图片是否可由 DOM/Canvas 获取 | Selenium/Tesseract/模板匹配 |
+| esolang/polyglot | 每层输出是否可作为下一层输入 | 分层保存中间产物 |
+| hash length extension | MAC 形态是否为 `hash(secret || msg)` | 转 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| XSLT as Turing-Complete VM for Binary Search (35C3 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JavaScript MAXSAFEINTEGER Successor Equality (35C3 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Binary Search Oracle in Comparison-Only DSL (35C3 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Blind SQLi via Script-Engine Timeout Error (35C3 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| OEIS Sequence Lookup Automation for Recurrence Puzzles (X-MAS CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Code Reassembly from Format-String Structural Constraints (Square CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Matrix Exponentiation for Fibonacci-Like Recurrence (Pwn2Win 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Tribonacci Recurrence for Frog Jump Counting (FireShell 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Selenium + Tesseract for Dynamic Font CAPTCHA (Square CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Decodes Piet Image URL — Multi-Layer Polyglot (RITSEC 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Bytebeat Synth Code Recognition for Hidden Audio (RITSEC 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SHA-256 Length Extension Attack | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Levenshtein Distance Oracle Attack (SunshineCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：这些题共享“把反馈转为状态/约束”的首轮判断。
+- 不合并进 `vm-z3-sandbox-and-game-basics.md`：该页是规则系统总入口，本页聚焦 oracle/递推/自动化识别。
+- 不拆 CAPTCHA、递推、oracle 小页：当前 raw 更适合作为 misc 二级路由。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 不测 oracle 噪声和 rate limit，自动化脚本结果不稳定。
+- 递推题只暴力前几项，没有找矩阵/闭式结构。
+- CAPTCHA 只上 OCR，不利用字体、DOM 或生成规律。
+- Polyglot 没保存中间产物，后续无法复盘哪层出错。
 
-## 关联技巧
+## 关联页面
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
+- [sqli-filter-and-oracle-family.md](sqli-filter-and-oracle-family.md)
+- [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
 
 ## 原始资料
 

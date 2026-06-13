@@ -2,7 +2,7 @@
 type: family
 tags: [misc, family, triage]
 skills: [ctf-misc]
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # Misc Cross-Category Triage
@@ -39,7 +39,7 @@ updated: 2026-06-11
 | [bgp-rpki-route-hijack.md](bgp-rpki-route-hijack.md) | BGP/RPKI/AS/CIDR 路由策略或 origin-only 校验。 | 1 |
 | [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md) | C2 agent、通信流量、内存密钥或协议解密。 | 1 |
 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) | VM、磁盘、内存镜像、容器或取证环境修复。 | 3 |
-| [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) | ZIP/磁盘/容器恢复，尤其是已知明文或结构字段辅助恢复。 | 1 |
+| [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) | ZIP/磁盘/容器恢复，尤其是已知明文或结构字段辅助恢复。 | 2 |
 | [dns.md](dns.md) | DNS/SPF/TXT 记录和域名解析链。 | 1 |
 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) | 编码链、二维码、助记词、Unicode 或文本变换。 | 5 |
 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) | Unicode 归一化、异常格式或结构化数据清洗。 | 1 |
@@ -48,12 +48,13 @@ updated: 2026-06-11
 | [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md) | 游戏状态、交互协议、资源包或客户端状态复现。 | 5 |
 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) | 图片通道、位平面、二维码、像素块或 JPEG/PNG 隐写。 | 3 |
 | [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md) | 容器、虚拟化边界、交互环境或运行时 helper 可被借用。 | 1 |
-| [llm-attacks.md](llm-attacks.md) | LLM prompt injection、角色泄露或模型约束绕过。 | 1 |
+| [llm-attacks.md](llm-attacks.md) | LLM prompt injection、角色泄露、工具调用滥用或模型约束绕过。 | 2 |
 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) | 矩阵、递推、交互 oracle、约束求解或协议状态。 | 2 |
 | [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md) | 任意文件读、路径推断、上传/恢复或资源路径穿越。 | 1 |
-| [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md) | PCAP、协议重组、量子/媒体数据流或网络证据恢复。 | 2 |
+| [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md) | PCAP、协议重组、量子/媒体数据流或网络证据恢复。 | 3 |
 | [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md) | GIF/PNG/PDF/文本多媒体隐写与拆帧。 | 1 |
 | [pyjails.md](pyjails.md) | Python 受限执行、agent sandbox 或对象链逃逸。 | 4 |
+| [scripts-and-obfuscation.md](scripts-and-obfuscation.md) | 邮件附件、SVG/JS、脚本混淆、诱饵 flag 或 staged payload。 | 1 |
 | [race-condition-and-concurrency-exploits.md](race-condition-and-concurrency-exploits.md) | TOCTOU、并发窗口或状态同步延迟导致检查与使用不一致。 | 1 |
 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) | 非 crypto 载体中暴露 RSA 参数、密文或弱模数，需要跨方向 pivot。 | 1 |
 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) | 公开主页、平台账号、历史记录、媒体来源或身份链路 OSINT。 | 3 |
@@ -68,6 +69,9 @@ updated: 2026-06-11
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
+| [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md) | `git log` 不完整但 `.git` 仍在，先看 reflog/dangling object；疑似图片高熵且大小规整时按 VeraCrypt 容器和卷头恢复处理。 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md)、[filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
+| [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md) | 客服 AI 工具调用可被 prompt injection 诱导解压/执行附件；`.eml` 中 SVG 附件应当作可执行 XML/JS 文档分析，注意诱饵 flag。 | [llm-attacks.md](llm-attacks.md)、[scripts-and-obfuscation.md](scripts-and-obfuscation.md) |
+| [WMCTF2025-voice-hacker-wp](../raw/misc/WMCTF2025-voice-hacker-wp.md) | 语音认证页面和后端接口不一致，PCAP 中 UDP 可 Decode As RTP 导出参考音频，再按后端 wav 特征伪造提交。 | [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)、[audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md) |
 | [ACTF2026-agent-wp](../raw/misc/ACTF2026-agent-wp.md) | Python/agent/sandbox 行为可控，先枚举可用对象、过滤规则和逃逸原语。 | [pyjails.md](pyjails.md) |
 | [ACTF2026-ezssh-wp](../raw/misc/ACTF2026-ezssh-wp.md) | 受限 shell、SSH 或源码后门，先找允许命令副作用、配置泄露和隐藏触发条件。 | [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md) |
 | [ACTF2026-farthest2026-wp](../raw/misc/ACTF2026-farthest2026-wp.md) | DOS/dosemu2/COMCOM64 sidecar 形成容器边界逃逸，先确认虚拟化边界、helper 加载和 host 侧执行点。 | [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md) |
@@ -148,10 +152,11 @@ updated: 2026-06-11
 - [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md)
 - [pyjails.md](pyjails.md)
 - [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)
+- [scripts-and-obfuscation.md](scripts-and-obfuscation.md)
 - [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md)
 - [blockchain-smart-contract-exploitation.md](blockchain-smart-contract-exploitation.md)
 - [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md)
 
 ## 原始资料
 
-本页原始资料以“WP 案例沉淀”表中的 raw WP 链接为准，共 55 篇。
+本页原始资料以“WP 案例沉淀”表中的 raw WP 链接为准，共 58 篇。

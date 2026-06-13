@@ -1,83 +1,63 @@
 ---
-type: technique
-tags: [reverse, technique]
+type: family
+tags: [reverse, family, android, games, runtime-platforms]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/android-games-hardware-and-runtime-platforms.md
-updated: 2026-05-21
+  - ../raw/reverse/WMCTF2025-appfriend-wp.md
+  - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
+updated: 2026-06-12
 ---
 
 # Android, Games, Hardware and Runtime Platforms
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是运行时平台 family，负责把 Android/APK、Flutter、Unity/Godot/Roblox、Electron/Node、硬件描述、SGX、AS/400、Glulx 等“平台先于算法”的逆向题分流到具体分析路线。它不再作为单一 technique 使用。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果题目已经明确是语言运行时对象、Python 字节码、固件/内核驱动或反调试，应从本页转入对应 family / technique。
 
-## 识别信号
+## 首轮路由
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：Roblox Place File Analysis、Godot Game Asset Extraction、Rust serdejson Schema Recovery、Android JNI RegisterNatives Obfuscation (HTB WonderSMS)、Android JNI RegisterNatives Obfuscation、Android DEX Runtime Bytecode Patching via /proc/self/maps (Google CTF 2017)、Android DEX Runtime Bytecode Patching、Android Native .so Loading Bypass in New Project (Codegate CTF 2018)。
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| APK、smali、JNI、`RegisterNatives`、native `.so` | Java/Flutter 层是否只是入口；真实 key、cipher、hook 或 anti-debug 是否在 native 层 | [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)、[anti-analysis.md](anti-analysis.md) |
+| Android DEX 运行时 patch、`/proc/self/maps`、动态加载 | 静态 DEX 是否被 native 代码改写，需不需要重建 patched DEX | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| Unity/Godot/Roblox/RPG Maker/游戏资源 | 资源包、脚本、存档、native 插件和 UI 逻辑哪个是真校验入口 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
+| Electron/Tauri/Node 桌面应用 | `asar`、JS bundle、native binary、npm package runtime introspection 的边界 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)、[node-and-prototype.md](node-and-prototype.md) |
+| Verilog/硬件状态机、SGX enclave、AS/400 SAVF、Glulx | 是否先需要恢复平台格式、状态机或执行模型，再谈 flag 算法 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)、[font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md) |
 
-## 最小证据
+## 合并与拆分结论
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保留为 family：raw 中平台跨度大，共同价值是先判断“平台/运行时边界”，不是单一算法技巧。
+- 不合并进 `mobile-firmware-kernel-and-game-re.md`：本页保留 Android、游戏资源、Electron/Node 和平台运行时的高频 CTF 入口；后者更偏 OS/固件/驱动/底层环境。
+- 不拆出 Android 单页：当前 Android 案例还需要同时指向 Frida、anti-analysis、JNI/native、Flutter/Unity 等不同下一跳。
 
-## 解法骨架
+## 常见误判
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+- 只看 Java/Activity 或 Flutter UI，忽略 native init、JNI 注册、libart hook 和运行时改写。
+- 游戏题只搜资源字符串，没有确认资源、脚本、存档和 native 插件之间的数据流。
+- Electron/Tauri 只读 JS bundle，没有检查 `child_process`、native addon、asar 解包和平台二进制。
+- 硬件/SGX/legacy 平台题先套普通 ELF 逆向，漏掉载体格式和执行环境。
 
-## 关键变体
+## 关联页面
 
-| 变体 | 复用重点 |
-|---|---|
-| Roblox Place File Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Godot Game Asset Extraction | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rust serdejson Schema Recovery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android JNI RegisterNatives Obfuscation (HTB WonderSMS) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android JNI RegisterNatives Obfuscation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android DEX Runtime Bytecode Patching via /proc/self/maps (Google CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android DEX Runtime Bytecode Patching | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android Native .so Loading Bypass in New Project (Codegate CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Frida Firebase Cloud Functions Bypass (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Frida Firebase Cloud Functions Bypass | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Verilog/Hardware Reverse Engineering (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Verilog/Hardware RE | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Prefix-by-Prefix Hash Reversal (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Ruby/Perl Polyglot Constraint Satisfaction (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Ruby/Perl Polyglot Constraint Satisfaction | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Electron App + Native Binary Reversing (RootAccess2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Node.js npm Package Runtime Introspection (RootAccess2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Frida Android Certificate Pinning Bypass (h1702ctf 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android Anti-Debug: TracerPid, su Binary, System Properties (h1702ctf 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android Log-Based Key Extraction (HackIT 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Native JNI Key Extraction via Memory Dump and Smali Patching (HackIT 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| IBM AS/400 SAVF File EBCDIC Decoding (EKOPARTY 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Intel SGX Enclave Reverse Engineering (Pwn2Win 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Glulx Interactive Fiction Bytecode Matrix Validation (PlaidCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
+- [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
+- [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)
+- [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)
+- [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
 - [anti-analysis.md](anti-analysis.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
-- [font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md)
+- [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [WMCTF2025-appfriend-wp](../raw/reverse/WMCTF2025-appfriend-wp.md) | APK 的 Java 层只定位入口，SM4 key/cipher 和 init 段检测在 native so；WP 必须把 key、密文和算法写成可复算数据。 |
+| [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Flutter 输入、Java 层魔改 XXTEA、native 层 libart self-hook 和 Flutter 层魔改 AES 串联，先用 smali trace 确认真实执行顺序。 |
 
 ## 原始资料
 
 - [android-games-hardware-and-runtime-platforms.md](../raw/reverse/android-games-hardware-and-runtime-platforms.md)
+- [WMCTF2025-appfriend-wp](../raw/reverse/WMCTF2025-appfriend-wp.md)
+- [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md)

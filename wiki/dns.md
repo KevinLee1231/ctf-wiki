@@ -1,68 +1,69 @@
 ---
-type: technique
-tags: [misc, technique]
-skills: [ctf-misc]
+type: family
+tags: [misc, family, dns, rebinding, tunneling, enumeration]
+skills: [ctf-misc, ctf-web, ctf-forensics, ctf-osint]
 raw:
   - ../raw/misc/dns.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # DNS Exploitation Techniques
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
+本页是 DNS 协议利用与解析链 family，覆盖 ECS、DNSSEC NSEC walking、IXFR/AXFR 类 zone 枚举、DNS rebinding、DNS tunneling/exfiltration、round-robin 枚举、迷宫式解析、SPF/TXT 链和少量网络协议边界题。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不并入 OSINT 的 [web-and-dns.md](web-and-dns.md)：OSINT 页关注公开情报查询，本页关注 DNS 协议行为、解析器差异、主动查询、隧道和 Web/内网 pivot。
 
 ## 识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：EDNS Client Subnet (ECS) Spoofing、DNSSEC NSEC Walking、Incremental Zone Transfer (IXFR)、DNS Rebinding、DNS Tunneling / Exfiltration、DNS Round-Robin A Record Enumeration (EKOPARTY 2017)、DNS Maze Traversal (hxp CTF 2017)、DNS Enumeration 速查。
+- 题面给出域名、权威 NS、SPF/TXT、DNSSEC、特殊 resolver、可控子域或要求从解析结果走迷宫。
+- 查询结果随 ECS、源地址、递归/权威服务器、TTL、记录类型或时间变化。
+- Web 题中 SSRF/浏览器/后端会解析攻击者控制域名，可能触发 rebinding。
+- PCAP 或日志中出现大量 TXT/NULL/CNAME/子域标签，像隧道或外带。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 明确要查询的域、resolver、记录类型和权威服务器；不要只用默认系统 DNS。
+- 对变化型记录，记录 TTL、查询时间、源地址和递归/权威差异。
+- 对 rebinding，证明目标组件会重复解析，且访问控制用解析前后的不同结果。
+- 对 tunneling，先还原方向、标签编码、分片顺序和是否压缩/加密。
 
-## 解法骨架
+## 路由表
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| ECS 影响结果 | resolver 是否传递 ECS，伪造网段是否改变 A/TXT | 枚举目标地理/网段视角 |
+| DNSSEC NSEC/NSEC3 | zone 是否可 walking，NSEC3 是否可字典恢复 | 枚举隐藏主机名 |
+| IXFR/AXFR/zone transfer | 权威 NS 是否允许 transfer 或增量泄露 | 拉取 zone 并查敏感记录 |
+| DNS rebinding | 目标是否重复解析且不固定 IP | 转 [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md) 或 SSRF 页 |
+| DNS tunneling/exfil | 查询标签高熵、分片、有序号或 base 编码 | 转 [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) |
+| round-robin 枚举 | 同一记录多次查询返回不同 A/AAAA | 多 resolver、多次采样去重 |
+| DNS maze | 每次记录指向下一域名或下一记录类型 | 脚本化遍历，避免缓存干扰 |
+| SPF/TXT 链 | `include:`、`redirect=`、TXT 拼接暴露 flag | 递归展开并处理字符串拼接 |
+| TCP Fast Open / SYN payload | 题目本质是网络协议边界，不是 DNS | 转网络/forensics 或 pwn primitive 判断 |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| EDNS Client Subnet (ECS) Spoofing | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNSSEC NSEC Walking | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Incremental Zone Transfer (IXFR) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Rebinding | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Tunneling / Exfiltration | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Round-Robin A Record Enumeration (EKOPARTY 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Maze Traversal (hxp CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Enumeration 速查 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| TCP Fast Open SYN-Payload Command Injection (Insomnihack 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| DNS Exploitation Techniques | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：DNS 题经常在 misc、web、forensics、osint 之间切换，本页提供协议层 pivot。
+- 不合并进 `misc-cross-category-triage-family.md`：总入口只决定是否进入 DNS，本页负责 DNS 内部路线。
+- 不合并进 OSINT `web-and-dns.md`：公开查询和协议利用的证据、工具和失败状态不同。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只查默认 resolver，漏掉权威服务器、ECS 或缓存差异。
+- DNSSEC walking 时没有区分 NSEC 和 NSEC3，导致错误期待明文枚举。
+- Rebinding 只在浏览器测试成功，没有证明目标后端真的重复解析。
+- 隧道流量没有按 query/response 方向和标签顺序重组。
 
-## 关联技巧
+## 关联页面
 
-- [bashjails.md](bashjails.md)
-- [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
-- [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [web-and-dns.md](web-and-dns.md)
+- [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md)
+- [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
+- [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
+- [misc-tooling.md](misc-tooling.md)
 
 ## 原始资料
 

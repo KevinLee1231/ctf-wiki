@@ -1,17 +1,17 @@
 ---
-type: technique
-tags: [forensics, filesystem, archive, recovery, known-plaintext, technique]
+type: family
+tags: [forensics, filesystem, archive, recovery, known-plaintext, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/disk-recovery.md
-updated: 2026-06-11
+updated: 2026-06-13
 ---
 
 # Filesystem and Archive Recovery Repair
 
 ## 适用场景
 
-题目核心是从磁盘镜像、文件系统、压缩包、损坏容器、删除文件、嵌套归档或结构化文件中恢复数据。它不覆盖所有取证；内存/VM/容器运行态转到 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)，PCAP 转到 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)，图片/音频隐写转到对应媒体页。
+本页是文件系统与归档恢复 family。题目核心是从磁盘镜像、文件系统、压缩包、损坏容器、删除文件、嵌套归档或结构化文件中恢复数据。它不覆盖所有取证；内存/VM/容器运行态转到 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)，PCAP 转到 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)，图片/音频隐写转到对应媒体页。
 
 ## 识别信号
 
@@ -44,6 +44,7 @@ updated: 2026-06-11
 | ZipCrypto 已知明文 | 明文可来自 magic，也可来自 AVIF/ISOBMFF、PNG、PDF、DOCX 等结构字段；关键是压缩方法和明文偏移一致。 |
 | 嵌套 Matryoshka 容器 | 每层都可能改变格式、压缩、编码或文件系统；不要一次性把所有导出物混在一起。 |
 | 加密容器密钥恢复 | LUKS/VeraCrypt 等场景常需要内存 master key、题面密码线索或时间戳 seed。 |
+| VeraCrypt 卷头恢复 | 改挂载密码通常只重包卷头密钥材料，不重加密数据区；两个容器共享 master key 时可用旧卷头恢复旧密码访问。 |
 | 结构化数据库恢复 | SQLite serial type、page header、WAL/journal 和字段类型可直接影响可见内容。 |
 
 ## 常见陷阱
@@ -65,8 +66,10 @@ updated: 2026-06-11
 
 | Raw WP | 可复用联系 |
 |---|---|
+| [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md) | `.png`/`.jpg` 高熵且大小规整时不要按图片隐写死磕；如果是 VeraCrypt 容器，改密码后的容器可通过同源旧容器卷头恢复旧密码访问。 |
 | [SU_chaosWP](../raw/misc/SU_chaosWP.md) | ZipCrypto 已知明文不只用常见 magic；AVIF/ISOBMFF 头部字段也能提供稳定明文窗口。 |
 
 ## 原始资料
 
 - [disk-recovery.md](../raw/forensics/disk-recovery.md)
+- [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md)

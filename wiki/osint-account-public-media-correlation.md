@@ -1,6 +1,6 @@
 ---
-type: technique
-tags: [osint, account-correlation, public-media, technique]
+type: family
+tags: [osint, family, account-correlation, public-media]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/social-media.md
@@ -11,7 +11,7 @@ updated: 2026-06-11
 
 ## 适用场景
 
-题目要求从公开账号、主页、历史记录、公开媒体、游戏平台、邮箱头像、代码提交、社交平台或时间线中定位身份、地点、flag-like 字符串或下一跳线索。它的核心不是“社媒搜索”本身，而是把多个公开身份节点连成可验证证据链。
+题目要求从公开账号、主页、历史记录、公开媒体、游戏平台、邮箱头像、代码提交、社交平台或时间线中定位身份、地点、flag-like 字符串或下一跳线索。本页是 OSINT 身份链 family，核心不是“社媒搜索”本身，而是把多个公开身份节点连成可验证证据链。
 
 ## 识别信号
 
@@ -45,6 +45,12 @@ updated: 2026-06-11
 | 公开视频和公开媒体 | 视频描述、音频文件名、发布账号、字幕、评论和外链可以比媒体内容本身更关键。 |
 | Archive / mirror / gopher | 页面失效时优先保存 archive、Ghostarchive、gopher 或站点镜像，再继续串联。 |
 | 媒体隐写混合 | 如果图片/音频/视频同时出现异常 artifact，先分离“公开来源证据”和“文件内容恢复”两条线。 |
+
+## 合并与拆分结论
+
+- 保留为 `family`：raw 覆盖社交账号、游戏平台、公开媒体、GitHub/博客、archive、Unicode 隐写和平台 API，重点是身份节点之间的 pivot。
+- 不并入 [geolocation-and-media.md](geolocation-and-media.md)：地理页验证地点，本页验证公开身份链和账号关系。
+- 不拆 Twitter/BlueSky/Discord/Gaming 等小页：目前这些平台线索经常共同服务于同一身份链，拆开会破坏证据闭合。
 
 ## 常见陷阱
 

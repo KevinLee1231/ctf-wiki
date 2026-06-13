@@ -1,77 +1,64 @@
 ---
-type: technique
-tags: [forensics, technique]
+type: family
+tags: [forensics, family, disk, memory, vm, container, cloud]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/disk-memory-vm-and-container-forensics.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Disk, Memory, VM and Container Forensics
 
-## 适用场景
+## 作用边界
 
-主要工作是从文件、镜像、内存、PCAP、日志、多媒体或物理信号中恢复证据。
+本页是磁盘、内存、虚拟机、容器和云存储取证 family。它负责判断证据源是完整镜像、内存快照、VM/快照、core dump、Android 备份、Docker layer、云 bucket、BSON/数据库碎片还是勒索脚本残留。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它与 [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) 的区别：本页偏载体入口和取证流程选择；后者偏底层文件系统、RAID、minidump、VMDK sparse 和具体恢复模式。
 
-## 识别信号
+## 共同识别信号
 
-- 附件是 pcap、disk image、memory dump、office/pdf/image/audio/video、日志或容器层。
-- 需要 carving、重组、解码、时间线、凭据恢复或隐写检测。
-- flag 藏在工件或历史状态中。
-- 题面或 raw 线索能落到这些关键词之一：Memory Forensics (Volatility 3)、Disk Image Analysis、VM Forensics (OVA/VMDK)、VMware Snapshot Forensics、GIMP Raw Memory Dump Visual Inspection (INShAck 2018)、Coredump Analysis、Windows KAPE Triage Analysis (UTCTF 2026)、PowerShell Ransomware Analysis。
+- 附件是 `.raw`、`.img`、`.dd`、`.vmdk`、`.ova`、`.vmem`、`.vmss`、core dump、Android backup、Docker image/layer、KAPE collection 或云存储导出。
+- flag 藏在历史状态、已删除文件、环境变量、进程内存、容器层、构建命令、数据库碎片或勒索脚本 key 中。
+- 需要只读挂载、carving、Volatility/MemProcFS、layer diff、timeline、strings、registry/Amcache/MFT 或数据库解析。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 识别容器格式和层级：磁盘分区、文件系统、VM 容器、内存类型、Docker layer、Android backup 或云对象。
+- 记录只读处理方式和导出的中间文件，避免污染证据。
+- 明确搜索目标：文件内容、凭据、key、进程、环境变量、网络痕迹、时间线或删除历史。
+- 能解释从载体到最终 artifact 的恢复路径。
 
-## 解法骨架
+## 首轮路由
 
-1. 识别格式和容器层。
-2. 选择 carving、协议重组、内存插件或隐写分析。
-3. 保留中间导出物和命令。
-4. 把 recovered secret 再按需要解码或解密。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| 完整磁盘镜像、分区表、删除文件 | 先只读挂载和分区识别，再决定 filesystem/recovery 工具 | [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) |
+| 内存 dump、VM snapshot、core dump | 先判断 Volatility profile/OS/进程，再做 strings、filescan、mft、环境变量或进程提取 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
+| OVA/VMDK/VMDK sparse、VMware snapshot | 先展开容器并识别磁盘/内存组件，不要只看外层 tar | [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) |
+| Docker image/layer、container diff、history | 先看 layer.tar、whiteout、history、ENV/ARG 和删除文件 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
+| Android backup/APK/data 分区 | 先分离 APK、shared_prefs、SQLite、WiFi/浏览器/应用数据 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
+| 云 bucket/versioning 导出 | 先查公开权限、版本历史、对象元数据和删除版本 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) |
+| PowerShell 勒索/恶意脚本内存残留 | 先提取脚本和 key，再转 malware 或 crypto 解密 | [scripts-and-obfuscation.md](scripts-and-obfuscation.md), [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Memory Forensics (Volatility 3) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Disk Image Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| VM Forensics (OVA/VMDK) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| VMware Snapshot Forensics | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GIMP Raw Memory Dump Visual Inspection (INShAck 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Coredump Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows KAPE Triage Analysis (UTCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PowerShell Ransomware Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Android Forensics | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Container Forensics (Docker) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Cloud Storage Forensics (AWS S3 / GCP / Azure) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| BSON (Binary JSON) Format Reconstruction (IceCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| TrueCrypt / VeraCrypt Volume Mounting (GreHack CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Volatility mftparser Offset-Based Deleted File Recovery (BSides Delhi 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brotli Blob Detection via ASCII-Art Signature (ASIS Finals 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| corkami/pocs MD5 PDF Collision Generation (35C3 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| See Also | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Disk / VM / Memory Forensics | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+本页保留为 family，不与 [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) 合并：本页负责选择取证载体和流程，后者负责具体底层恢复。若后续页面过长，可按“内存/VM”和“容器/云”再拆。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 直接挂载写入镜像，破坏时间戳或恢复状态。
+- 只跑 strings，没先识别文件系统和快照层级。
+- Docker 题只看最终层，忽略历史层和 whiteout 删除痕迹。
+- 内存题没确认 OS/profile，插件输出误导。
+- 云存储题只看当前对象，没查 versioning 和 metadata。
 
 ## 关联技巧
 
-- [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
-- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)
+- [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md)
+- [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

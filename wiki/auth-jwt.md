@@ -1,69 +1,69 @@
 ---
-type: technique
-tags: [web, technique]
+type: family
+tags: [web, family, auth, jwt, jwe, token]
 skills: [ctf-web]
 raw:
   - ../raw/web/auth-jwt.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
-# JWT & JWE Token Attacks
+# JWT and JWE Token Attacks
 
-## 适用场景
+## 作用边界
 
-HTTP 行为、认证授权、服务端解析差异、文件/路径处理、模板或浏览器执行模型是主要障碍。
+本页是 JWT/JWE 与签名 cookie 的 token family。它覆盖 `alg=none`、RS256/HS256 混淆、弱 secret、未校验签名、JWK/JKU/KID 注入、JWE 公钥误用、余额/权限 replay，以及少量同类签名 cookie 的长度字段或 CRC 绕过。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不替代认证总入口。只有当身份或权限主要由可重放 token、header 参数、签名算法或密钥来源决定时才进入本页。
 
 ## 识别信号
 
-- 请求、路由、Cookie、Header、body 或服务端状态出现可控差异。
-- 源码或响应能定位到中间件、鉴权、解析器、模板、上传或内部 API。
-- 能用最小 HTTP payload 复现行为变化。
-- 题面或 raw 线索能落到这些关键词之一：Algorithm None、Algorithm Confusion (RS256 to HS256)、Weak Secret Brute-Force、Unverified Signature (Crypto-Cat)、JWK Header Injection (Crypto-Cat)、JKU Header Injection (Crypto-Cat)、KID Path Traversal (Crypto-Cat)、JWT Balance Replay (MetaShop Pattern)。
+- Cookie、Authorization header 或 localStorage 中存在三段 JWT、JWE、base64 JSON token 或自定义签名 cookie。
+- token header 包含 `alg`、`kid`、`jwk`、`jku`、`x5u`、`enc`、`zip` 等可控字段。
+- 服务端把公钥、文件路径、远程 JWK、弱 secret、环境变量或用户字段当作验签依据。
+- 修改 claim 后响应变化，或签名失败/成功状态可被区分。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 正常 token 的 header、payload、签名算法、关键 claim 和过期时间。
+- 验签失败和权限失败的响应差异，避免把无效 token 当成无权限。
+- secret/key 来源线索：源码、`.env`、JWK URL、`kid` 文件路径、公钥、默认 secret 或弱字典。
+- 成功伪造后能触发一个敏感动作：admin claim、余额、用户 ID、文件读或内部 API。
 
-## 解法骨架
+## 路由表
 
-1. 固定登录态和正常业务流。
-2. 构造最小请求验证一个主假设。
-3. 把单点漏洞串成 secret/token/internal API/RCE。
-4. 写可重放 solver 并记录关键响应。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| `alg=none` | 服务端是否接受 unsigned token，库版本是否允许 none | 直接构造 admin claim |
+| RS256 -> HS256 | 公钥是否被当 HMAC secret 使用 | 用服务端公钥重签 HS token |
+| 弱 secret | secret 短、默认、来自源码或环境泄露 | 字典/规则爆破后重签 |
+| 未校验签名 | 修改 payload 后签名不变仍生效 | 确认仅 decode 未 verify |
+| JWK/JKU/X5U 注入 | 服务端会拉取 attacker-controlled key | 控制 key set 并重签 |
+| `kid` 注入/路径穿越 | `kid` 参与本地文件或 key lookup | 读 `/dev/null`、公开文件或路径穿越到已知 key |
+| JWE 公钥误用 | 加密 token 可由公开材料伪造或降级 | 确认 JWE header、key management 和解密失败差异 |
+| 签名 cookie 长度/CRC | token 不是 JWT 但结构可控、MAC 弱或字段可交换 | 转 [block-mode-misuse-family.md](block-mode-misuse-family.md) 或 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
+| JSON duplicate key / parser 差异 | 验签和业务读取不同字段 | 转 [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Algorithm None | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Algorithm Confusion (RS256 to HS256) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Weak Secret Brute-Force | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unverified Signature (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JWK Header Injection (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JKU Header Injection (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| KID Path Traversal (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JWT Balance Replay (MetaShop Pattern) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JWE Token Forgery with Exposed Public Key (UTCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| AES Cookie Length-Field Truncation + CRC32 Swap (DefCamp 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JWT 速查 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：JWT/JWE 的攻击点分散在算法、key lookup、远程 key、claim 和解析差异，适合作为 token 二级路由。
+- 不合并进 `auth-bypass-cookies-and-hidden-routes.md`：认证入口页只决定是否进入 token 路线。
+- 不拆 `jwt-alg-confusion.md` 等小页：当前 raw 还不足以支撑多个独立 technique 页。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 解码成功不等于绕过，必须确认服务端验签和业务授权都通过。
+- RS/HS 混淆要求服务端确实把公钥当 HMAC secret，不能只改 header。
+- `kid` 路径 payload 要考虑拼接后缀、缓存和 key store 格式。
+- JWK/JKU 需要确认服务端会出网并信任远程 key，不是所有库都拉取。
 
-## 关联技巧
+## 关联页面
 
-- [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
 - [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md)
-- [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md)
-- [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md)
+- [oauth-saml-cors-and-cicd.md](oauth-saml-cors-and-cicd.md)
 - [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md)
+- [block-mode-misuse-family.md](block-mode-misuse-family.md)
+- [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
+- [web-tooling.md](web-tooling.md)
 
 ## 原始资料
 

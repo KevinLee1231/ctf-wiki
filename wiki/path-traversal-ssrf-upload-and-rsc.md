@@ -4,7 +4,7 @@ tags: [web, family, path-traversal, ssrf, upload, file-read, internal-service]
 skills: [ctf-web]
 raw:
   - ../raw/web/path-traversal-ssrf-upload-and-rsc.md
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # Path Traversal, SSRF, Upload and RSC
@@ -23,6 +23,7 @@ updated: 2026-06-11
 | ZIP symlink、ZipSlip、解压覆盖、自更新包 | 上传包中的路径或软链接能越过目标目录 | [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md)、[artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md) |
 | ExifTool、Image/PDF/SVG/Office 渲染、WeasyPrint、CairoSVG | 解析器会发起本地文件读取、外部请求或命令执行 | [xml-command-and-graphql-injection.md](xml-command-and-graphql-injection.md)、[known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) |
 | SSRF 到 SMTP/MySQL/Gopher/metadata/internal API | 能控制协议、Host、跳转、body 或 gopher payload，且响应/时间可观测 | [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)、[parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md) |
+| 远控/relay/客户端 backend 让目标主动连接内网服务 | 能控制 relay/server 地址和明文字段，目标会连接本机 Redis/Docker/API | [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md) |
 | React Server Components Flight、服务端组件反序列化 | 响应头/Flight payload 表明 RSC 解析用户输入，且能触发 server action 或 redirect | [node-and-prototype.md](node-and-prototype.md)、[workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 | AMQP/TLS、内部 broker、MITM/重写 | Web 服务与内部消息系统之间存在可拦截或可重放的身份字段 | [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 
@@ -47,7 +48,17 @@ updated: 2026-06-11
 - [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
 - [path-confusion-to-signed-internal-request-chain.md](path-confusion-to-signed-internal-request-chain.md)
 - [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md)
+- [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md)
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | 外层文件名过滤不含 `..` 不够，PDF 内部 `/Encoding` 名称仍可路径穿越到上传目录并触发解析器内部资源加载。 |
+| [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md) | 目标不是传统 HTTP SSRF，而是 RustDesk 受控端按 relay 消息主动连接 `127.0.0.1:6379`，再让可控 uuid 字段成为 Redis 协议内容。 |
 
 ## 原始资料
 
 - [path-traversal-ssrf-upload-and-rsc.md](../raw/web/path-traversal-ssrf-upload-and-rsc.md)
+- [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md)
+- [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md)

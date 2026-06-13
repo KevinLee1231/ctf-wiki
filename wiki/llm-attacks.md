@@ -1,64 +1,43 @@
 ---
-type: technique
-tags: [ai-ml, technique]
+type: family
+tags: [ai-ml, family, llm, prompt-injection, jailbreak, tool-use]
 skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/llm-attacks.md
-updated: 2026-05-21
+  - ../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md
+updated: 2026-06-12
 ---
 
 # LLM Attacks
 
-## 适用场景
+## 作用边界
 
-模型行为、训练数据、推理接口、prompt、adversarial input 或 ML 参数是主要攻击面。
-
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+本页是 LLM prompt injection、jailbreak、token smuggling、context manipulation 和 tool-use exploitation family。判断重点不是“模型说了什么”，而是模型输出、上下文、工具调用和外部执行器之间的信任边界。
 
 ## 识别信号
 
-- 题目涉及 classifier、LLM、embedding、fine-tuning、LoRA、membership 或 extraction。
-- 成功条件取决于模型输出、置信度、梯度、token 或 prompt 行为。
-- 需要查询策略、样本构造或模型分析。
-- 题面或 raw 线索能落到这些关键词之一：Prompt Injection (Foundational)、LLM Attacks、Direct Prompt Injection、Indirect Prompt Injection、LLM Jailbreaking (Foundational)、Token Smuggling (Foundational)、Context Window Manipulation (Foundational)、Tool Use Exploitation (Foundational)。
+- 题目有聊天机器人、agent、客服 AI、工具调用、文件分析、检索增强、隐藏提示词或输出格式约束。
+- 成功条件是泄露系统提示、历史对话、secret，或诱导模型调用工具读取/解压/执行附件。
+- 输入可能来自用户 prompt，也可能来自网页、邮件、文档、附件、检索结果或上下文窗口。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 模型可见上下文、角色边界、拒答规则、输出格式和可调用工具列表。
+- 工具调用的参数、文件类型、执行器、权限和返回内容。
+- 至少一个可复验 prompt，能稳定改变模型行为或工具调用路径。
+- 如果目标是 secret 泄露，要确认泄露的是受保护内容而非模型幻觉。
 
-## 解法骨架
+## 路由表
 
-1. 固定输入格式和评分反馈。
-2. 建立最小查询/训练/推理循环。
-3. 选择 adversarial、extraction、prompt injection 等路径。
-4. 用稳定样本验证结果。
-
-## 关键变体
-
-| 变体 | 复用重点 |
-|---|---|
-| Prompt Injection (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LLM Attacks | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Direct Prompt Injection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Indirect Prompt Injection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LLM Jailbreaking (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Token Smuggling (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Context Window Manipulation (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Tool Use Exploitation (Foundational) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
-- [adversarial-ml.md](adversarial-ml.md)
-- [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md)
-- [ai-ml-tooling.md](ai-ml-tooling.md)
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| 直接 prompt injection | 角色/规则是否可覆盖，是否能复述隐藏内容 | 最小对话脚本 |
+| 间接 prompt injection | 外部文档/网页/邮件是否进入上下文 | 控制载体内容并观察引用 |
+| jailbreak | 拒答边界、分段输出、角色扮演和编码是否影响策略 | 记录稳定变体 |
+| token smuggling | tokenizer、不可见字符、分隔符和编码差异 | 保留原始字节 |
+| context window manipulation | 长上下文覆盖、截断、摘要和优先级 | 控制关键指令位置 |
+| tool use exploitation | 工具参数是否可被 prompt 控制 | 审计文件读、解压、执行和网络边界 |
+| agent 附件链 | 附件是否能从“分析”推进到执行 | 转 [scripts-and-obfuscation.md](scripts-and-obfuscation.md) 或 malware |
 
 ## 来自 WP 的案例索引
 
@@ -66,7 +45,29 @@ updated: 2026-05-21
 |---|---|
 | [RCTF2025-the-alchemists-cage-wp](../raw/misc/RCTF2025-the-alchemists-cage-wp.md) | 隐藏提示词泄露题的最小证据是模型能否复述历史对话、系统提示或被要求保护的 secret。 |
 | [SU_easyLLMWP](../raw/ai-ml/SU_easyLLMWP.md) | LLM 对话约束题优先测试角色边界、输出格式约束和提示注入后的可验证回显。 |
+| [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md) | 客服 AI 会分析附件时，prompt injection 可以把“解压并检查 zip”推进到工具执行 ELF；判断重点是工具链而不是聊天输出本身。 |
+
+## 合并与拆分结论
+
+- 保留为 family：LLM 攻击覆盖 prompt、上下文、工具和附件链，多数题需要先判断边界。
+- 不合并进 adversarial ML：LLM 攻击不依赖梯度/扰动范数，验证方式不同。
+- 暂不拆 prompt injection/tool-use 小页：当前 raw 更需要保持链路关系。
+
+## 常见误判
+
+- 只看聊天输出，忽略工具调用才是执行边界。
+- 把模型编造的 secret 当作成功，未做外部验证。
+- 间接注入没有确认恶意文本确实进入模型上下文。
+- 工具调用参数被日志或 schema 修正，实际没有执行攻击者意图。
+
+## 关联页面
+
+- [adversarial-ml.md](adversarial-ml.md)
+- [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md)
+- [scripts-and-obfuscation.md](scripts-and-obfuscation.md)
+- [ai-ml-tooling.md](ai-ml-tooling.md)
 
 ## 原始资料
 
 - [llm-attacks.md](../raw/ai-ml/llm-attacks.md)
+- [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md)

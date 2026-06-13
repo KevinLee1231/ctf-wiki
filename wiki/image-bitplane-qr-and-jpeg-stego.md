@@ -1,79 +1,63 @@
 ---
-type: technique
-tags: [forensics, technique]
+type: family
+tags: [forensics, family, image, stego, qr, jpeg, bitplane]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/image-bitplane-qr-and-jpeg-stego.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Image Bitplane, QR and JPEG Stego
 
-## 适用场景
+## 作用边界
 
-主要工作是从文件、镜像、内存、PCAP、日志、多媒体或物理信号中恢复证据。
+本页是图像隐写和图像重组 family，覆盖 JPEG 量化表/DCT/slack/thumbnail、BMP/PNG bitplane、调色板、QR tile、像素置换、拼图重组、GIF/AVI 帧和 steghide 口令线索等路线。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不替代 [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md) 的跨格式入口；本页负责进入图像后，判断该从像素、压缩结构、二维码结构、帧序列还是元数据口令继续。
 
-## 识别信号
+## 共同识别信号
 
-- 附件是 pcap、disk image、memory dump、office/pdf/image/audio/video、日志或容器层。
-- 需要 carving、重组、解码、时间线、凭据恢复或隐写检测。
-- flag 藏在工件或历史状态中。
-- 题面或 raw 线索能落到这些关键词之一：JPEG Unused Quantization Table LSB Steganography (EHAX 2026)、BMP Bitplane QR Code Extraction + Steghide (BYPASS CTF 2025)、Image Jigsaw Puzzle Reassembly via Edge Matching (BYPASS CTF 2025)、F5 JPEG DCT Coefficient Ratio Detection (ApoorvCTF 2026)、PNG Unused Palette Entry Steganography (ApoorvCTF 2026)、QR Code Tile Reconstruction (UTCTF 2026)、Seed-Based Pixel Permutation + Multi-Bitplane QR (L3m0nCTF 2025)、JPEG Thumbnail Pixel-to-Text Mapping (RuCTF 2013)。
+- 附件是 JPEG/PNG/BMP/GIF/AVI 或由图片碎片、二维码块、缩略图、调色板、DCT 系数、低位平面组成。
+- 正常预览没有 flag，但元数据、通道、bitplane、DQT/PLTE、帧差、缩放残留或坐标链存在异常。
+- 需要导出中间图像、重组 QR、提取 bitstream、修复 header/chunk 或再喂给 steghide/zbar/OCR。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保留原始文件 hash 和未重压缩副本。
+- 确认格式层：文件头、chunk/marker、EXIF、调色板、帧数、缩略图、尺寸和颜色模式。
+- 对 bitplane/像素类，记录通道、bit 位、扫描顺序、阈值和端序。
+- 对 QR/拼图类，记录网格尺寸、finder pattern、tile 顺序、旋转和 ECC/decoder 结果。
 
-## 解法骨架
+## 首轮路由
 
-1. 识别格式和容器层。
-2. 选择 carving、协议重组、内存插件或隐写分析。
-3. 保留中间导出物和命令。
-4. 把 recovered secret 再按需要解码或解密。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| JPEG DQT、DCT 系数、F5、slack、thumbnail | 先解析 marker 和未引用数据，再决定 bitstream、OCR 或 steghide | [forensics-tooling.md](forensics-tooling.md) |
+| BMP/PNG LSB、bitplane、RGB parity、palette unused entry | 先按通道和 bit 位导出平面，检查是否形成文本、QR 或压缩包 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| QR tile、nested resize、multi-bitplane QR | 先恢复 finder/timing/网格，再用 zbar 或 known prefix 校验 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
+| 图像拼图、edge matching、坐标链 | 先建立边缘相似度或坐标遍历顺序，再导出重组图 | [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md) |
+| GIF/AVI 帧差、PLTE 拼接、视频帧藏文件 | 先导出帧和 palette/chunk，再判断是否转视频/容器页面 | [video-document-and-media-stego.md](video-document-and-media-stego.md) |
+| PNG magic/chunk 损坏或大小写异常 | 先修 magic、critical chunk 和 CRC，再继续隐写分析 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| JPEG Unused Quantization Table LSB Steganography (EHAX 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| BMP Bitplane QR Code Extraction + Steghide (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Image Jigsaw Puzzle Reassembly via Edge Matching (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| F5 JPEG DCT Coefficient Ratio Detection (ApoorvCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PNG Unused Palette Entry Steganography (ApoorvCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Code Tile Reconstruction (UTCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Seed-Based Pixel Permutation + Multi-Bitplane QR (L3m0nCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JPEG Thumbnail Pixel-to-Text Mapping (RuCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Conditional LSB Extraction — Near-Black Pixel Filter (BaltCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JPEG Slack Space Steganography (BSidesSF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Nearest-Neighbor Interpolation Steganography (BSidesSF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RGB Parity Steganography (Break In 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Pixel Coordinate Chain Steganography (H4ckIT CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| AVI Frame Differential Pixel Steganography (H4ckIT CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| JPEG Single-Bit-Flip Brute Force with OCR (SECCON 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GIF Frame PLTE Chunk Concatenation to ELF (IceCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Nested-Resize QR Overlay at Survivor Pixels (SECCON 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ImageMagick +append Puzzle Stitching + gaps Solver (X-MAS CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Steghide Passphrase in JPEG Header Metadata (Saudi/Oman CTF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Corrupted PNG Magic and Lowercase Chunk Repair (Pragyan CTF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Steganography | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+本页应保留为 family。JPEG 结构、bitplane、QR 重组、帧差和图像拼图的第一步证据不同；但它们都属于图像证据源内的二级分流。当前不拆小页，避免把短案例拆成孤立节点。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 用截图或编辑器另存图片，破坏原始低位和 chunk。
+- 只跑 steghide/binwalk，没检查 bitplane、palette、thumbnail 和 DCT。
+- QR 重组只按视觉猜，不利用 finder/timing 和 ECC 反馈。
+- JPEG 题只看像素，忽略 marker、DQT 和压缩域。
+- 解出 bitstream 后没继续按压缩包、Base64 或 XOR 检查。
 
 ## 关联技巧
 
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
-- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md)
+- [video-document-and-media-stego.md](video-document-and-media-stego.md)
+- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

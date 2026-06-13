@@ -1,82 +1,52 @@
 ---
-type: technique
-tags: [crypto, technique]
-skills: [ctf-crypto]
+type: family
+tags: [crypto, family, classical, xor, substitution]
+skills: [ctf-crypto, ctf-misc]
 raw:
   - ../raw/crypto/classical-xor-and-substitution-ciphers.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Classical XOR and Substitution Ciphers
 
-## 适用场景
+## 作用边界
 
-密钥恢复、原语误用、oracle、随机数、签名或协议假设是主要障碍。
+本页是轻量古典密码、XOR、替换和已知明文恢复 family。它适合处理 Vigenere、Atbash、Polybius、rotating substitution、many-time pad、cascade XOR、文件头推 key、图像 Caesar、semaphore/photo、book cipher 等“结构简单但识别信号容易分散”的题。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+现代分组模式、MAC、nonce reuse 和 oracle 不在本页展开，转 [block-mode-misuse-family.md](block-mode-misuse-family.md) 或 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)。
 
-## 识别信号
+## 变体路由
 
-- 题目给出密文、nonce、签名、模数、oracle、PRNG 输出或自定义协议。
-- 存在重复 nonce、弱随机、错误回显、数学结构或可查询接口。
-- 源码能复现加密、签名、哈希或验证流程。
-- 题面或 raw 线索能落到这些关键词之一：Vigenere Cipher、Kasiski Examination for Key Length、Atbash Cipher、Polybius Square Cipher (Qiwi-Infosec 2016)、Substitution Cipher with Rotating Wheel、XOR Variants、Multi-Byte XOR Key Recovery via Frequency Analysis、Cascade XOR (First-Byte Brute Force)。
+| 信号 | 先确认 | 下一跳 |
+|---|---|---|
+| Vigenere/Atbash/Polybius/rotating wheel | 字母表、key length、频率、crib、坐标表和是否有变体置换 | 本页 raw |
+| 多字节 XOR、cascade XOR、weak XOR verifier | key length、已知明文、频率、首字节可枚举和 forward check | 本页 raw；流密码转 [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| many-time pad / OTP reuse | 多密文同 key、可猜明文、空格/flag 前缀和 crib dragging | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| 文件头/尾推 XOR key | 已知 magic、trailer、块边界和 key 周期 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) |
+| book/lorenz/长文本替换 | 外部文本、同步轮、crib 和统计模型 | [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md) |
+| 图片 Caesar、semaphore、视觉编码 | 可视排列、坐标/条带偏移、手势表或图像通道 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)、[misc-cross-category-triage-family.md](misc-cross-category-triage-family.md) |
 
-## 最小证据
+## 合并与拆分结论
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 保留为 family：它负责轻量 crypto 与 misc 编码题之间的分流，避免把所有 XOR/替换短案例散成低密度 technique。
+- 不与 `lorenz-and-book-cipher-attacks.md` 合并：后者更适合作具体历史/书本/长文本 cipher 技巧页。
+- 不与 `rc4-lfsr-and-keystream-reuse.md` 合并：本页处理简单 XOR 和古典替换，后者处理可建模 keystream/状态恢复。
 
-## 解法骨架
+## 常见误判
 
-1. 列清 known / unknown / goal。
-2. 复现原语和约束。
-3. 选择一个最匹配攻击族做最小验证。
-4. 用解出的结果做正向复算。
+- 一看到 XOR 就只爆破单字节 key，没先估 key length、周期和已知文件头。
+- 古典替换没有先固定 alphabet 和分组方式，导致频率分析失真。
+- many-time pad 题把每条密文单独解，忽略跨密文 XOR 会消去 keystream。
+- 视觉古典题没有记录坐标、条带方向和变换顺序，结果不可复算。
 
-## 关键变体
+## 关联页面
 
-| 变体 | 复用重点 |
-|---|---|
-| Vigenere Cipher | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kasiski Examination for Key Length | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Atbash Cipher | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Polybius Square Cipher (Qiwi-Infosec 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Substitution Cipher with Rotating Wheel | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| XOR Variants | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Byte XOR Key Recovery via Frequency Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Cascade XOR (First-Byte Brute Force) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| XOR with Rotation: Power-of-2 Bit Isolation (Pragyan 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Weak XOR Verification Brute Force (Pragyan 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Deterministic OTP with Load-Balanced Backends (Pragyan 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| OTP Key Reuse / Many-Time Pad XOR (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Book Cipher | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Variable-Length Homophonic Substitution (ASIS CTF Finals 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Grid Permutation Cipher Keyspace Reduction (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Image-Based Caesar Shift Ciphers (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Variant A — Vertical Strip Shift (caesar1) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Variant B — Horizontal Shift with ASCII Encoding (caesar2) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| XOR Key Recovery via File Format Headers (MetaCTF Flash 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 3D Vigenere Palindrome Symmetry Key Recovery (SECCON 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Nihilist Cipher Double-Crib Key Recovery (Security Fest CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 16-Byte XOR Block Cipher Structural Reversal (h4ckc0n 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Flag Semaphore Photo Decoding (DefCamp CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Two-Byte Nibble Reassembly with Random Padding (Trend Micro 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
 - [block-mode-misuse-family.md](block-mode-misuse-family.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
-- [exotic-secret-sharing-rabin-and-polynomials.md](exotic-secret-sharing-rabin-and-polynomials.md)
+- [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
+- [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
+- [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
 
 ## 原始资料
 

@@ -4,80 +4,57 @@ tags: [reverse, family, triage]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/reverse-first-pass-workflow-and-debugging.md
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # First-Pass Workflow and Debugging
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是 Reverse 方向首轮 family，只负责把附件、运行行为和初步观察分流到更具体的 family / technique / tooling。不要在这里堆 payload 或工具百科；真正的解法骨架应落到具体页面。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+首轮目标是回答四件事：
 
-## 识别信号
+1. 载体是什么：ELF/PE/Mach-O/APK/WASM/pyc/JAR/固件/驱动/游戏资源/脚本/异常格式。
+2. 障碍在哪里：平台运行时、语言对象、壳/反调试、VM/解释器、最终比较点、文件/图像/硬件载体还是密码/数学关系。
+3. 最小可观察状态是什么：字符串、导入、入口、比较点、trace、dump、opcode、资源、协议、key/cipher 或中间 buffer。
+4. 最短验证路径是什么：直接抓明文、恢复约束、写 forward checker、动态 hook、patch 反分析、提取资源或转其它方向。
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：Problem-Solving Workflow、逆向首轮快判技巧族：静态、动态、dump 与误导识别、首轮低成本尝试、Initial Analysis、Memory Dumping Strategy、Decoy Flag Detection、GDB PIE Debugging、Comparison Direction (Critical!)。
+## 首轮路由
 
-## 最小证据
+| 初始信号 | 先去哪里 | 判断重点 |
+|---|---|---|
+| 未知二进制、普通 ELF/PE、需要首检和基础调试 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) | 格式、架构、保护、入口、导入、字符串、PIE 基址和可运行性。 |
+| Android/APK、Flutter、Unity/Godot、Electron/Node、游戏资源 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) | 平台层、资源层、脚本层和 native 层谁才是真校验入口。 |
+| Mach-O/iOS、固件、驱动、eBPF、游戏引擎、CAN | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) | 运行环境、签名/entitlements、文件系统、架构、IOCTL/设备边界。 |
+| Go/Rust/JVM/C++/Swift/Kotlin/D/Haskell/Cython | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) | 语言运行时、对象布局、符号、类型、协程/异常和标准库模式。 |
+| Python bytecode、Pyarmor、Nuitka、Brainfuck、UEFI、HarmonyOS ABC | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) | 先恢复字节码/解释器/低频格式，再谈算法。 |
+| 自定义 VM、dispatch loop、opcode、flattening、字节变换 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) | handler、状态寄存器、opcode stream、trace 和 forward checker。 |
+| 二阶段 loader、image/bitmap、kernel module、binfmt、shared library backdoor | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) | 真实逻辑何时加载、映射、解密或被内核/loader 解释。 |
+| ptrace、Frida 检测、TLS callback、anti-VM、时间/环境检测 | [anti-analysis.md](anti-analysis.md) | 先跨过检测，不要把反分析门槛误当主算法。 |
+| 最终比较点可断、明文 buffer 可 dump | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) | 抓最终明文或中间 buffer，比完整逆向更短。 |
+| hook/patch/oracle/trace/动态符号执行 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) | 用运行时观察降维，而不是追完整伪代码。 |
+| 字体、shader、BPF、MBR、legacy/side-channel 载体 | [font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md) | 先识别隐藏信息承载方式或可观测副作用。 |
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+## 失败后 pivot
 
-## 解法骨架
+- 静态伪代码不可读：回到汇编、trace、hook、dump、emulation 或最终比较点。
+- 程序运行环境不稳定：先处理反调试、签名、权限、依赖、架构、端序和加载器。
+- 看见复杂算法但能断最终比较：优先抓 buffer 或构造 oracle。
+- 附件像图片/字体/固件/资源包：先做格式和资源层 triage，避免过早套普通 ELF/PE 工作流。
+- 逆向后出现 DSA/ECC/RC4/LFSR/代数关系：转 crypto 页面，把 reverse 只当实现恢复层。
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+## 关联页面
 
-## 关键变体
-
-| 变体 | 复用重点 |
-|---|---|
-| Problem-Solving Workflow | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 逆向首轮快判技巧族：静态、动态、dump 与误导识别 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 首轮低成本尝试 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Initial Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Memory Dumping Strategy | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Decoy Flag Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GDB PIE Debugging | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Comparison Direction (Critical!) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 常用工具速查 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| 深入分析转向条件 | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Expected Values Tables | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Unstripped Binary Information Leaks | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-
-## 常见陷阱
-
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
-
-## 关联技巧
-
-- [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)
-- [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
-- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [anti-analysis.md](anti-analysis.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
+- [reverse-tooling.md](reverse-tooling.md)
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
-- [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)
-- [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
+- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
 - [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
+- [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)
+- [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)
+- [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
 - [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)
-
-- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
-- [scripts-and-obfuscation.md](scripts-and-obfuscation.md)
-- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
+- [font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md)
 
 ## WP 案例沉淀
 
@@ -85,6 +62,10 @@ updated: 2026-06-11
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
+| [WMCTF2025-appfriend-wp](../raw/reverse/WMCTF2025-appfriend-wp.md) | Android Java 层很薄，关键 SM4 key/cipher 在 native so 和 init 段检测后；先定位 JNI，再提取常量和密文。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
+| [WMCTF2025-catfriend-wp](../raw/reverse/WMCTF2025-catfriend-wp.md) | Mach-O 小程序含 ptrace 反调试和魔改 ChaCha20/VM xor，先恢复流密码轮函数，再按加解密同构跑一遍。 | [anti-analysis.md](anti-analysis.md)、[self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
+| [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | Windows VMP/反调试后还有后门账户机器绑定，登录通过不够，必须复用目标机器信息 MD5 解密 `.mp0` 并 dump 返回 vector。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Android Flutter + Java + native 混合，Frida 检测和 libart self-hook 会改变 Java XXTEA 真实语义，先用 smali trace 确认执行流。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[anti-analysis.md](anti-analysis.md) |
 | [ACTF2026-计算机系统贯通实验-wp](../raw/reverse/ACTF2026-计算机系统贯通实验-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
 | [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md) | 用户态 loader、二阶段 ELF、eBPF tracepoint 和内核模块共同校验，先合并 ioctl 参数改写和内核数据流。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
 | [ACTF2026-calc-my-point-wp](../raw/reverse/ACTF2026-calc-my-point-wp.md) | Rust/GMP/大整数表达式执行器是主边界，先恢复语言运行时对象、数值约束和 CRT 关系。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |

@@ -1,65 +1,62 @@
 ---
-type: technique
-tags: [crypto, technique]
+type: family
+tags: [crypto, family, secret-sharing, rabin, polynomial, mnemonic]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Exotic Secret Sharing, Rabin and Polynomials
 
-## 适用场景
+## 作用边界
 
-密钥恢复、原语误用、oracle、随机数、签名或协议假设是主要障碍。
-
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+本页是 crypto 长尾结构 family，覆盖 Cayley-Purser、BIP39 部分助记词、Asmuth-Bloom/CRT secret sharing、Rabin 四根解密、多项式素数、LCG 周期检测和 Vandermonde 系数恢复。共同点是题面参数不落入常规 RSA/ECC/AES，但可通过结构识别降维。
 
 ## 识别信号
 
-- 题目给出密文、nonce、签名、模数、oracle、PRNG 输出或自定义协议。
-- 存在重复 nonce、弱随机、错误回显、数学结构或可查询接口。
-- 源码能复现加密、签名、哈希或验证流程。
-- 题面或 raw 线索能落到这些关键词之一：Cayley-Purser Decryption Without Private Key (TJCTF 2018)、BIP39 Partial-Mnemonic Brute Force via Checksum (SECCON 2018)、Asmuth-Bloom Threshold Secret Sharing via CRT (X-MAS 2018)、Rabin Cryptosystem with Polynomial Primes (X-MAS 2018)、LCG Period Detection for Unlimited Output Prediction (X-MAS 2018)、Polynomial Coefficient Recovery via Vandermonde Linear System (X-MAS 2018)、Rabin Decryption via Four-Roots CRT Combination (Pragyan CTF 2019)。
+- 出现 shares、threshold、CRT、mnemonic、Rabin、四个平方根、多项式系数、Vandermonde、周期检测或少见公钥原语。
+- 常规 RSA/ECC/分组模式判断不匹配，但源码能写出清晰的代数关系。
+- 成功条件通常是恢复 secret、私钥等价物、缺失助记词、消息根或多项式系数。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 原语定义、参数规模、模数/域、已知样本数量和未知量边界。
+- 能写出方程或校验过程：CRT 重构、Rabin roots、checksum、线性系统、周期状态。
+- 对 BIP39/助记词，确认词表、checksum、缺失位置和派生路径。
+- 对 secret sharing，确认阈值方案，不要把所有 shares 都当 Shamir。
 
-## 解法骨架
+## 路由表
 
-1. 列清 known / unknown / goal。
-2. 复现原语和约束。
-3. 选择一个最匹配攻击族做最小验证。
-4. 用解出的结果做正向复算。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| BIP39 部分缺词 | 词表、checksum、缺失位和派生地址/密钥 | 枚举缺词并校验 checksum |
+| CRT threshold sharing | shares 与模数是否满足 Asmuth-Bloom 条件 | CRT 合并后检查 secret 范围 |
+| Rabin 四根 | `c = m^2 mod n`，n 可分解或给定 p/q | 四根 CRT 组合并用格式筛选 |
+| polynomial primes | p/q 由多项式或系数生成 | 先恢复系数或构造因式关系 |
+| Vandermonde 系数 | 多点函数值和次数界 | 线性系统恢复多项式 |
+| LCG period | 输出无限或周期明显 | 先转 [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
+| Cayley-Purser/低频原语 | 私钥不可得但群/矩阵结构可逆 | 写出等价解密关系 |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Cayley-Purser Decryption Without Private Key (TJCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| BIP39 Partial-Mnemonic Brute Force via Checksum (SECCON 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Asmuth-Bloom Threshold Secret Sharing via CRT (X-MAS 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rabin Cryptosystem with Polynomial Primes (X-MAS 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| LCG Period Detection for Unlimited Output Prediction (X-MAS 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Polynomial Coefficient Recovery via Vandermonde Linear System (X-MAS 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Rabin Decryption via Four-Roots CRT Combination (Pragyan CTF 2019) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：这些长尾原语共享“先识别结构再降维”的价值，但每个单独案例不足以单独成页。
+- 不合并进 `number-theory-and-algebra-attacks.md`：该页覆盖通用数论/代数主线，本页保留少见协议和资料入口。
+- 不合并进 `mt-lcg-and-seed-recovery.md`：LCG period 只作为交叉变体，主线仍是长尾结构。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 把 Asmuth-Bloom 当 Shamir 插值，方向完全错误。
+- Rabin 解出四根后不做格式/冗余校验。
+- BIP39 只爆词，不验证 checksum 和派生路径。
+- 长尾原语没先写方程，直接套常规 RSA/ECC 工具。
 
-## 关联技巧
+## 关联页面
 
-- [block-mode-misuse-family.md](block-mode-misuse-family.md)
-- [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
+- [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)
+- [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)
+- [crypto-tooling.md](crypto-tooling.md)
 
 ## 原始资料
 

@@ -1,75 +1,64 @@
 ---
-type: technique
-tags: [forensics, technique]
+type: family
+tags: [forensics, family, filesystem, memory-dump, raid, partition]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/filesystems-memory-dumps-and-raid.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Filesystems, Memory Dumps and RAID
 
-## 适用场景
+## 作用边界
 
-主要工作是从文件、镜像、内存、PCAP、日志、多媒体或物理信号中恢复证据。
+本页是底层存储和内存恢复 family，覆盖删除分区、ZFS/APFS/HFS+/GPT、VMDK sparse、minidump/core dump、memory key carving、RAID5 XOR、TrueCrypt/VeraCrypt、SQLite/Kyoto Cabinet 历史、BSON 重组和压缩 blob 检测。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不负责选择取证载体；载体入口先看 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。本页负责已经确认要做文件系统、分区、内存 dump 或 RAID 级恢复后的具体路由。
 
-## 识别信号
+## 共同识别信号
 
-- 附件是 pcap、disk image、memory dump、office/pdf/image/audio/video、日志或容器层。
-- 需要 carving、重组、解码、时间线、凭据恢复或隐写检测。
-- flag 藏在工件或历史状态中。
-- 题面或 raw 线索能落到这些关键词之一：Deleted Partition Recovery、ZFS Forensics (Nullcon 2026)、GPT Partition GUID Data Encoding (VuwCTF 2025)、Windows Minidump String Carving (0xFun 2026)、VMDK Sparse Parsing (0xFun 2026)、Memory Dump String Carving (Pragyan 2026)、Memory Dump Malware Extraction + XOR (VuwCTF 2025)、Linux Ransomware Memory-Key Recovery (MetaCTF 2026)。
+- 文件系统结构损坏、分区表缺失、GUID/元数据异常、快照/版本历史、RAID 成员缺失、VMDK sparse 或 minidump 字符串可见。
+- 明文不在当前目录树，而在已删除分区、快照、resource fork、resident MFT、内存环境变量、数据库 diff 或 RAID parity 中。
+- 需要按结构恢复，而不是简单 `strings` 或 binwalk。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 记录镜像大小、扇区大小、分区表、文件系统类型、块大小、成员盘顺序或 dump 类型。
+- 对恢复类题，先只读复制并保留工具输出。
+- 对内存 key，记录进程、地址附近上下文、算法线索和解密验证。
+- 对 RAID/压缩/数据库，记录重组顺序、校验和以及恢复后的文件签名。
 
-## 解法骨架
+## 首轮路由
 
-1. 识别格式和容器层。
-2. 选择 carving、协议重组、内存插件或隐写分析。
-3. 保留中间导出物和命令。
-4. 把 recovered secret 再按需要解码或解密。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| 分区删除、GPT GUID 藏数据、ZFS/APFS/HFS+ 快照 | 先恢复分区/快照/元数据，再挂载或导出历史版本 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
+| VMDK sparse、OVA、VM snapshot | 先识别 sparse grain 和 snapshot 链，再导出完整磁盘或内存 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
+| Windows minidump、core dump、memory string carving | 先判断 dump 类型和进程，再提取环境变量、key、路径和内存文件 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
+| 勒索脚本/恶意样本 key 在内存中 | 先提取 key 和算法，再转 malware/crypto 解密 | [scripts-and-obfuscation.md](scripts-and-obfuscation.md), [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| RAID5/XOR、缺盘恢复 | 先确定成员顺序、chunk size、parity 方向，再重建文件系统 | [forensics-tooling.md](forensics-tooling.md) |
+| TrueCrypt/VeraCrypt 高熵卷或 keyfile | 先确认卷大小和上下文线索，再尝试密码/keyfile/隐藏卷 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
+| SQLite/Kyoto Cabinet/BSON/diff history | 先解析记录结构和顺序，再重建历史内容 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Deleted Partition Recovery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ZFS Forensics (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GPT Partition GUID Data Encoding (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Windows Minidump String Carving (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| VMDK Sparse Parsing (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Memory Dump String Carving (Pragyan 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Memory Dump Malware Extraction + XOR (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Linux Ransomware Memory-Key Recovery (MetaCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| WordPerfect Macro XOR Extraction (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Minidump ISO 9660 Recovery + XOR Key (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| APFS Snapshot Historical File Recovery (srdnlenCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| RAID 5 Disk Recovery via XOR (Crypto-Cat) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| HFS+ Resource Fork Hidden Binary Recovery (CONFidence CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kyoto Cabinet Hash Database Forensics via Incremental Key Insertion (ASIS CTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SQLite Edit History Reconstruction from Diff Table (Google CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| See Also | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+本页保留为 family，并与 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) 分工：前者是底层恢复路线，后者是载体选择入口。当前不拆分 RAID、minidump、ZFS、TrueCrypt 等小页，因为 raw 仍以短案例集合为主。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 未确认扇区/块大小就恢复分区或 RAID。
+- 对内存 dump 只跑 strings，没利用进程、环境变量和文件映射上下文。
+- VMDK sparse 没按 grain table 解析，直接当 raw 镜像挂载。
+- TrueCrypt/VeraCrypt 高熵文件没结合上下文寻找 keyfile。
+- SQLite/diff/数据库历史不按版本顺序重放。
 
 ## 关联技巧
 
-- [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
-- [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md)
+- [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

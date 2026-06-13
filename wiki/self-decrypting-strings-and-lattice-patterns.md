@@ -1,75 +1,86 @@
 ---
-type: technique
-tags: [reverse, technique]
-skills: [ctf-reverse]
+type: family
+tags: [reverse, family, decryption, constraints, strings, lattice]
+skills: [ctf-reverse, ctf-crypto]
 raw:
   - ../raw/reverse/self-decrypting-strings-and-lattice-patterns.md
-updated: 2026-05-21
+  - ../raw/reverse/WMCTF2025-appfriend-wp.md
+  - ../raw/reverse/WMCTF2025-catfriend-wp.md
+  - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
+updated: 2026-06-12
 ---
 
 # Self-Decrypting, String and Lattice Patterns
 
-## 适用场景
+## 作用边界
 
-需要理解二进制、脚本、字节码、壳、VM、固件或混淆逻辑，再恢复算法或输入。
+本页是 Reverse 中“把隐藏校验恢复成可计算模型”的 family 页，覆盖多层自解密、嵌入式归档、XOR/stack string、prefix hash 爆破、CVP/LLL、决策树函数、GF(2^8) 线性恢复、ROP 链混淆和魔改常见密码算法。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不是一个具体 technique。首轮要判断隐藏逻辑是“需要 dump 每一层”、还是“提取常量后直接解码”、还是“转成约束/线性代数/格问题”、还是“恢复魔改 cipher 的真实轮函数”。不同判断会决定是否进入调试自动化、crypto、solver 或普通脚本解密。
 
-## 识别信号
+## 共同识别信号
 
-- 附件是 ELF/PE/APK/WASM/pyc/固件/脚本，或存在壳、SMC、自定义 VM。
-- flag 校验藏在运行时生成代码、解密字符串、解释器或 native 扩展中。
-- 静态字符串不足，需要交叉引用、动态断点或 trace。
-- 题面或 raw 线索能落到这些关键词之一：Multi-Layer Self-Decrypting Binary (DiceCTF 2026)、Multi-Layer Self-Decrypting Binary、Embedded ZIP + XOR License Decryption (MetaCTF 2026)、Embedded ZIP + XOR License Decryption、Stack String Deobfuscation from .rodata XOR Blob (Nullcon 2026)、Stack String Deobfuscation (.rodata XOR Blob)、Prefix Hash Brute-Force (Nullcon 2026)、Prefix Hash Brute-Force。
+- 静态字符串不完整，运行时才解密或生成新的 ELF/ZIP/代码段/校验函数。
+- `.rodata`、stack string、资源段、native so、Flutter/Java 层或 VM 中藏有 key、S-box、密文、线性矩阵或 hash 前缀。
+- 输入校验不是单一比较，而是多函数决策树、矩阵方程、模约束、格最近向量、魔改 AES/SM4/ChaCha/XXTEA。
+- 需要把动态行为降维成可重复的解密脚本、约束求解器或 forward checker。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 已定位隐藏数据来源：段、偏移、资源、运行时 dump、函数返回值或 trace 输出。
+- 能说明数据变换类型：XOR、流/分组密码、hash 前缀、线性方程、格约束、决策树或多层自解密。
+- 能提取最小常量集合：key、密文、S-box、矩阵、模数、比较常量、轮数或函数调用顺序。
+- 能用脚本复算至少一个中间结果，证明模型与程序行为一致。
 
-## 解法骨架
+## 首轮路由
 
-1. 先做载体、字符串、导入和入口函数首检。
-2. 定位真实校验、解密、分发或比较点。
-3. 把复杂逻辑降维成约束、解密脚本或 oracle。
-4. 用 solver / forward check 验证输入。
+| 证据形态 | 首轮判断 | 下一跳 |
+|---|---|---|
+| 多层自解密、运行时生成新代码或新二进制 | 先自动化 dump/patch/trace，确认每层入口和输出，不要手工逐层点开 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md), [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| 嵌入 ZIP、资源段、XOR license、stack string | 先按偏移和符号边界提取数据，再复算解密脚本 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
+| prefix hash、MD5 前缀、短域爆破 | 先估计搜索空间和剪枝条件，保留程序一致的 hash/编码顺序 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
+| CVP/LLL、整数范围约束、模线性组合 | 先把校验表达式转成矩阵/格模型，并确认变量范围和模数 | [lattice-and-lwe.md](lattice-and-lwe.md), [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| GF(2^8)、GF(2) 或线性字节方程 | 先确认域乘法、多项式和矩阵方向，再做高斯消元 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| 决策树函数、海量小函数比较 | 先批量提取常量和路径条件，再生成 forward checker 或 solver | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
+| 发现 AES/SM4/ChaCha/XXTEA 常量但流程异常 | 先恢复真实轮函数、轮数、S-box、移位方向和加解密同构性 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md), [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) |
+| ROP 链或控制流本身被当作校验 | 先 trace gadget 序列和寄存器状态，再反向组装可计算模型 | [anti-analysis.md](anti-analysis.md), [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
+本页应保留为 family。自解密、字符串恢复、格约束、GF 线性恢复和魔改 cipher 的第一步证据不同，不能合并成单一 technique；但它们都服务于“把隐藏校验恢复成可复算模型”，作为 Reverse 首轮后的二级入口有价值。
+
+当前不重命名文件：现有 slug 虽然较长，但能覆盖页面中的三条主轴，且已有多处链接。若后续拆出专门页面，可再把本页收敛为 `reverse-decryption-and-constraint-recovery.md`。
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
 |---|---|
-| Multi-Layer Self-Decrypting Binary (DiceCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Layer Self-Decrypting Binary | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Embedded ZIP + XOR License Decryption (MetaCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Embedded ZIP + XOR License Decryption | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Stack String Deobfuscation from .rodata XOR Blob (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Stack String Deobfuscation (.rodata XOR Blob) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Prefix Hash Brute-Force (Nullcon 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Prefix Hash Brute-Force | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| CVP/LLL Lattice for Constrained Integer Validation (HTB ShadowLabyrinth) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| CVP/LLL Lattice for Constrained Integer Validation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Decision Tree Function Obfuscation (HTB WonderSMS) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Decision Tree Function Obfuscation | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GF(2^8) Gaussian Elimination for Flag Recovery (ApoorvCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GF(2^8) Gaussian Elimination for Flag Recovery | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ROP Chain Obfuscation in Modified Binary (PlaidCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Common Encryption Patterns | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+| [WMCTF2025-appfriend-wp](../raw/reverse/WMCTF2025-appfriend-wp.md) | native so 中识别 SM4 后，关键是提取 16 字节 key 和 48 字节密文做可复算解密，而不是只描述 native 加密。 |
+| [WMCTF2025-catfriend-wp](../raw/reverse/WMCTF2025-catfriend-wp.md) | 魔改 ChaCha20 仍是流密码，恢复轮数、QR 函数和 VM 实现的 xor 后，加密流程可直接复用为解密流程。 |
+| [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Flutter 层魔改 AES 调整 S-box 和 AddRoundKey/MixColumns 顺序，Java 层魔改 XXTEA 改移位方向和轮数；恢复脚本必须按真实执行流逆序。 |
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只看到 AES/SM4/ChaCha 常量就套标准库，忽略轮函数、S-box、轮数或操作顺序已被改动。
+- 提取数据时没有确认边界，把相邻符号或 padding 当密文。
+- 把数学求解写成一次性脚本，但没有用程序中间结果做 forward check。
+- LLL/CVP、GF 和普通整数线性代数混用，导致模型看似能解但回代失败。
+- 多层自解密只 dump 最后一层，遗漏了前面阶段生成的 key 或修补逻辑。
 
 ## 关联技巧
 
-- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [anti-analysis.md](anti-analysis.md)
+- [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
 - [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [lattice-and-lwe.md](lattice-and-lwe.md)
+- [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
+- [reverse-tooling.md](reverse-tooling.md)
 
 ## 原始资料
 
 - [self-decrypting-strings-and-lattice-patterns.md](../raw/reverse/self-decrypting-strings-and-lattice-patterns.md)
+- [WMCTF2025-appfriend-wp](../raw/reverse/WMCTF2025-appfriend-wp.md)
+- [WMCTF2025-catfriend-wp](../raw/reverse/WMCTF2025-catfriend-wp.md)
+- [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md)

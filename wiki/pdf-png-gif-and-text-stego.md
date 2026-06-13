@@ -1,82 +1,68 @@
 ---
-type: technique
-tags: [forensics, technique]
+type: family
+tags: [forensics, family, stego, pdf, png, gif, svg, text]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/pdf-png-gif-and-text-stego.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # PDF, PNG, GIF and Text Stego
 
-## 适用场景
+## 作用边界
 
-主要工作是从文件、镜像、内存、PCAP、日志、多媒体或物理信号中恢复证据。
+本页是文档/图片/文本隐写 family，用于判断 PDF、PNG/APNG、GIF、SVG、终端转义文本、表格、视频容器和多层文件叠加中的隐藏信息路径。它承担格式族分流，不把每个 raw 标题当作一个独立 technique。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果核心已经是像素位平面、JPEG DCT、QR 重建或图像拼图，优先转到 [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)。如果核心是音频频谱、SSTV、DTMF 或压缩包嵌套，转到对应媒体/文件页面。
 
-## 识别信号
+## 共同识别信号
 
-- 附件是 pcap、disk image、memory dump、office/pdf/image/audio/video、日志或容器层。
-- 需要 carving、重组、解码、时间线、凭据恢复或隐写检测。
-- flag 藏在工件或历史状态中。
-- 题面或 raw 线索能落到这些关键词之一：Quick Tools、Binary Border Steganography、Multi-Layer PDF Steganography (Pragyan 2026)、Advanced PDF Steganography (Nullcon 2026 rdctd series)、SVG Animation Keyframe Steganography (UTCTF 2024)、APNG (Animated PNG) Frame Extraction (IceCTF 2016)、PNG Height/CRC Manipulation for Hidden Content (H4ckIT CTF 2016)、PNG Chunk Reordering (0xFun 2026)。
+- 文件类型是 PDF、PNG/APNG、GIF、SVG、MP4/MKV、spreadsheet、terminal capture、ANSI art 或看似普通文本。
+- `file` 识别正常但视觉内容太干净、帧数异常、chunk/object/stream 结构异常、metadata 异常、EOF 后有数据或容器内有多 stream。
+- 题面提示 redaction、layer、frame、palette、animation、terminal、magic eye、QR、overlay、metadata、hidden in document/text。
+- 单个工具扫不到时，格式结构仍有可解释异常：PDF object stream、PNG ancillary chunk、GIF palette、SVG 微坐标、ANSI escape、Kitty graphics、MP4 stream map。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 先确认真实格式和容器层：`file`、magic bytes、`exiftool`、`binwalk`、`ffprobe`、PDF object/chunk/frame 枚举。
+- 保存每一层导出物：PDF 图片/stream、PNG chunk、GIF frame、SVG 放大视图、视频 stream、终端原始字节。
+- 对“隐写”结论给出可复现差异：可见层与隐藏层的对象、坐标、bitplane、palette、frame diff、metadata 或 post-EOF 数据。
+- 发现中间字符串后先判断它是 flag、密码、key、下一层文件名还是解密参数。
 
-## 解法骨架
+## 首轮路由
 
-1. 识别格式和容器层。
-2. 选择 carving、协议重组、内存插件或隐写分析。
-3. 保留中间导出物和命令。
-4. 把 recovered secret 再按需要解码或解密。
+| 证据形态 | 先做什么 | 下一跳 |
+|---|---|---|
+| PDF 有遮挡、metadata、link、object stream 或 post-EOF 数据 | 先用 `pdfinfo/exiftool/pdfimages/mutool` 分层，再查 URI annotation、Flate stream、图片 LSB、redaction overlay。 | [forensics-tooling.md](forensics-tooling.md) |
+| PNG/APNG chunk、CRC、高度、overlay、unknown chunk 异常 | 解析 chunk 顺序和 IHDR/IDAT/IEND，检查 APNG frame、EOF overlay、CRC/高度、custom chunk 和 XOR 层。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
+| GIF 帧、palette 或 frame count 异常 | 先拆帧和 palette，判断是 frame diff、palette-to-pixel、Morse、QR 还是 ELF/文件重组。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
+| SVG/terminal/text 视觉正常但原始文本异常 | 直接看 XML/ANSI/Kitty escape 原始字节，排除渲染器隐藏、微坐标和不可见字符。 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
+| 视频容器看似无关 | 先 `ffprobe` 列所有 stream，尝试 `-map 0:N` 提取非默认视频/字幕/附件。 | [video-document-and-media-stego.md](video-document-and-media-stego.md) |
+| spreadsheet/文本频率或多层交织 | 先统计唯一值、频率、行列/字节交织，再判断是否恢复二进制、图像或压缩包。 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Quick Tools | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Binary Border Steganography | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Layer PDF Steganography (Pragyan 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Advanced PDF Steganography (Nullcon 2026 rdctd series) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SVG Animation Keyframe Steganography (UTCTF 2024) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| APNG (Animated PNG) Frame Extraction (IceCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PNG Height/CRC Manipulation for Hidden Content (H4ckIT CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PNG Chunk Reordering (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| File Format Overlays (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Nested PNG with Iterating XOR Keys (VuwCTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GIF Frame Differential + Morse Code (BaltCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GZSteg + Spammimic Text Steganography (VolgaCTF 2013) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Spreadsheet Frequency Analysis Binary Recovery (Sharif CTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Kitty Terminal Graphics Protocol Decoding (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| ANSI Escape Sequence Steganography in Terminal Art (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Autostereogram / Magic Eye Solving (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Two-Layer Byte+Line Interleaving (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Multi-Stream Video Container Steganography (BSidesSF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Progressive PNG Layered XOR Decryption (OpenCTF 2016) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| QR Code Reconstruction from Curved Glass Reflection in Video (PlaidCTF 2018) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| GIF Palette Manipulation for QR Code Reconstruction (3DSCTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Angecryption: AES-CBC Encrypting One Valid File into Another (34C3 CTF 2017) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| SVG Micro-Coordinate Steganography (SharifCTF 8) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| PDF Analysis | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 `family`：raw 覆盖 PDF、PNG/APNG、GIF、SVG、terminal/text、spreadsheet、video stream 和 file overlay，第一步都是格式结构分层，但后续工具和证据形态不同。
+- 不并入 [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)：该页更适合像素/位平面/JPEG/QR 具体图像恢复；本页负责文档和容器格式的二级分流。
+- 不拆成 PDF/PNG/GIF 三个页面：当前 raw 更像多格式速查族，且很多题会从一种容器跳到另一种隐藏层。
 
 ## 常见陷阱
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只运行 `strings/binwalk`，没有解析 PDF object、PNG chunk、GIF frame 或 MP4 stream map。
+- PDF redaction 只看截图，不检查 overlay、annotation、compressed stream 和 metadata。
+- PNG 修 CRC 或高度后没有重新导出/查看完整画布，误以为修复失败。
+- GIF 只看第一帧；palette、帧差、帧数平方、帧顺序都可能承载数据。
+- 终端艺术复制到普通文本后丢失 escape sequence，破坏原始证据。
 
 ## 关联技巧
 
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
-- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
+- [video-document-and-media-stego.md](video-document-and-media-stego.md)
+- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

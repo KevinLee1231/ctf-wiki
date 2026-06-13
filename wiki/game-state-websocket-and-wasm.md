@@ -1,66 +1,68 @@
 ---
-type: technique
-tags: [misc, technique]
-skills: [ctf-misc]
+type: family
+tags: [misc, family, game-state, websocket, wasm]
+skills: [ctf-misc, ctf-web, ctf-reverse]
 raw:
   - ../raw/misc/game-state-websocket-and-wasm.md
-updated: 2026-05-21
+updated: 2026-06-12
 ---
 
 # Game State, WebSocket and WASM
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
+本页是游戏状态、WebSocket 交互、客户端资源、WASM 线性内存和轻量解释器题的二级 family。它从 [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) 进入，负责判断是改客户端状态、重放协议、解 session、patch WASM，还是把规则转成约束/模拟。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果主要工作已经变成复杂二进制逆向，转 Reverse；如果已经出现内存破坏 primitive，转 Pwn；如果是纯 Web 业务参数，转 Web 首轮页。
 
 ## 识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：Cookie Checkpoint Game Brute-Forcing (BYPASS CTF 2025)、Flask Session Cookie Game State Leakage (BYPASS CTF 2025)、WebSocket Game Manipulation + Cryptic Hint Decoding (BYPASS CTF 2025)、Server Time-Only Validation Bypass (BYPASS CTF 2025)、De Bruijn Sequence for Substring Coverage (BearCatCTF 2026)、Brainfuck Interpreter Instrumentation (BearCatCTF 2026)、WASM Linear Memory Manipulation (BearCatCTF 2026)、References。
+- 题目表现为小游戏、地图、资源包、RPG/Minecraft、checkpoint、分数、时间限制、WebSocket 帧或客户端状态。
+- Cookie/session/localStorage 中保存游戏状态，或 Flask session 暴露签名/明文结构。
+- WASM 导出函数、linear memory、JS glue code 或浏览器 DevTools 可直接观察胜利条件。
+- 需要覆盖所有子串、路径、状态或指令，例如 de Bruijn、Brainfuck、迷宫、地图事件。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 状态字段、胜利条件和服务端校验点：分数、坐标、时间、背包、checkpoint、签名 cookie。
+- 可重放交互：HTTP 请求、WebSocket 帧、游戏资源变更或 WASM 函数调用。
+- 客户端与服务端各校验什么；只改前端 UI 不算成功。
+- 对 WASM/解释器，先定位 memory offset、导出函数、输入格式和 flag 检查位置。
 
-## 解法骨架
+## 路由表
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| Cookie checkpoint / game state | 状态是否签名、加密、可枚举或只在客户端校验 | 改 cookie/session 或脚本化状态推进 |
+| Flask session | secret 是否弱、是否可解码、字段是否被服务端信任 | 转 [auth-jwt.md](auth-jwt.md) 或 token family |
+| WebSocket game | 帧格式、动作序列和服务器响应是否可重放 | 写 replay client，固定状态和时间 |
+| server time only check | 校验是否只依赖客户端提交时间或可预测时间 | 枚举时间窗口或跳过等待 |
+| de Bruijn / coverage | 胜利条件是覆盖所有子串或状态组合 | 构造序列，减少交互次数 |
+| Brainfuck / esolang interpreter | 需要插桩、跟踪 tape 或修改解释器行为 | 转 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 或 Reverse |
+| WASM linear memory | flag、坐标、生命值或 check buffer 在 memory 中 | Patch memory/函数或重放导出调用 |
+| Minecraft/RPG/map resource | 事件位置、插件逻辑或资源包隐藏路径 | 解析资源，脚本化移动或状态触发 |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| Cookie Checkpoint Game Brute-Forcing (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Flask Session Cookie Game State Leakage (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| WebSocket Game Manipulation + Cryptic Hint Decoding (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Server Time-Only Validation Bypass (BYPASS CTF 2025) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| De Bruijn Sequence for Substring Coverage (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Brainfuck Interpreter Instrumentation (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| WASM Linear Memory Manipulation (BearCatCTF 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| References | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：raw 横跨 WebSocket、session、WASM、游戏资源和解释器，首轮 pivot 比单点 payload 更重要。
+- 不合并进 `vm-z3-sandbox-and-game-basics.md`：总页只决定是否进入规则系统，本页负责游戏/客户端状态内部路线。
+- 暂不拆 WASM、WebSocket 或游戏 session 小页：当前 raw 多为短案例，拆分后会形成弱入口。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只改前端显示，没有触发服务端胜利条件。
+- WebSocket 只抓一帧，没有重放握手、session 和动作顺序。
+- WASM 只看反编译伪代码，没检查 JS glue 和 linear memory 的真实布局。
+- 游戏题没有保存地图、资源包和事件脚本，导致状态不可复现。
 
-## 关联技巧
+## 关联页面
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
+- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
+- [auth-jwt.md](auth-jwt.md)
+- [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
+- [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 
 ## 原始资料
 

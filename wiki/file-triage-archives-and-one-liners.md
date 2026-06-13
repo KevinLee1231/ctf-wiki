@@ -1,72 +1,63 @@
 ---
 type: family
-tags: [misc, family, triage]
+tags: [misc, family, triage, files, archives, one-liners]
 skills: [ctf-misc]
 raw:
   - ../raw/misc/file-triage-archives-and-one-liners.md
-updated: 2026-05-22
+updated: 2026-06-12
 ---
 
 # File Triage, Archives and One-Liners
 
-## 适用场景
+## 作用边界
 
-编码、jail、RF/音频、esolang、约束求解或跨方向轻量技巧是主要障碍。
-
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+本页是轻量附件首检 family，用于处理还没有明显方向的文件、压缩包、嵌套 archive、hash、短脚本、一行式命令、Discord/API 枚举和 cipher identification。它的职责是快速判断下一跳，不把所有小题都吸收到本页。
 
 ## 识别信号
 
-- 题目没有明确落入更具体主线。
-- 输入输出像编码、语法限制、逻辑谜题、交互游戏或特殊格式。
-- 可以用小脚本快速验证候选模式。
-- 题面或 raw 线索能落到这些关键词之一：General Tips、File Type Detection、Archive Extraction、Nested Archive Script、Hash Identification、Technique 速查s、Discord API Enumeration (0xFun 2026)、Useful One-Liners。
+- 附件很小或无明显题型，`file`/magic/strings/binwalk/metadata 仍能给出方向。
+- 压缩包嵌套、伪装扩展名、hash-like 字符串、短日志、API 返回或单行命令即可验证。
+- 当前还无法确定应走 crypto、forensics、web、misc encoding 或 OSINT。
 
 ## 最小证据
 
-- 已完成主方向判断，并确认本页技巧比相邻技巧更能解释当前证据。
-- 至少有一个可复现输入、输出、文件结构、数学关系、协议行为或运行时状态。
-- 能指出 raw 案例中哪一个变体与当前题最接近，以及不同点在哪里。
+- 原始文件 magic、大小、熵、扩展名和至少一种首检输出。
+- 对 archive，记录层级、密码提示、已知明文、损坏位置和工具报错。
+- 对 hash/cipher，先确认字符集、长度、salt、上下文和是否真的加密。
+- 对 API/one-liner，保留可重放请求或命令和关键输出。
 
-## 解法骨架
+## 路由表
 
-1. 排除更具体专项方向。
-2. 做格式、字符集、频率、长度和交互规律检查。
-3. 把问题转成枚举、约束或模拟。
-4. 用最短脚本验证并复现。
+| 证据 | 先验证 | 下一跳 |
+|---|---|---|
+| magic 与扩展名不符 | `file`、hex header、strings、binwalk、Exif | 对应格式页或 forensics |
+| 嵌套 archive | 层级、密码、已知明文和损坏记录 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
+| hash-like 文本 | 长度、字符集、salt、上下文和可校验明文 | crypto/hash 或 cracking 工具 |
+| 一行式/签到 | 是否只是参数、页面、metadata 或公开 API | 保留 raw，不强行新建 technique |
+| Discord/API 枚举 | token/频道/消息分页和 rate limit | [web-and-dns.md](web-and-dns.md) 或 OSINT |
+| cipher identification | 明密文长度、字符集、重复模式和文件头 | [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md) |
 
-## 关键变体
+## 合并与拆分结论
 
-| 变体 | 复用重点 |
-|---|---|
-| General Tips | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| File Type Detection | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Archive Extraction | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Nested Archive Script | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Hash Identification | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Technique 速查s | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Discord API Enumeration (0xFun 2026) | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Useful One-Liners | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
-| Cipher Identification Workflow | 关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式。 |
+- 保留为 family：它是 misc/forensics/crypto/osint 的轻量入口，提供首轮分流价值。
+- 不把具体 archive 恢复写在本页：复杂 ZIP/磁盘/容器恢复转专门 filesystem 页。
+- 不把一次性签到和 API 流水账沉淀为 technique。
 
-## 常见陷阱
+## 常见误判
 
-- 只按关键词跳页，没有先构造最小证据。
-- 照搬 raw 中的一次性 payload，没有检查当前题的边界条件。
-- 忽略相邻技巧之间的 pivot，导致在错误方向上继续投入时间。
+- 只看扩展名，不看 magic 和文件尾部附加数据。
+- 嵌套 archive 自动解完就停止，没有记录层级和密码来源。
+- hash 长得像 MD5 就直接爆破，没确认是否 salted、编码或截断。
+- 把 one-liner 工具输出当结论，没有保留可复现命令。
 
-## 关联技巧
+## 关联页面
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
+- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
-- [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)
-- [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
-- [pyjails.md](pyjails.md)
-- [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md)
-- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
+- [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
+- [web-and-dns.md](web-and-dns.md)
+- [misc-tooling.md](misc-tooling.md)
 
 ## 原始资料
 

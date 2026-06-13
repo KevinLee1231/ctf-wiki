@@ -2,7 +2,7 @@
 type: family
 tags: [crypto, family, triage]
 skills: [ctf-crypto]
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # Crypto Parameter and Oracle Triage
@@ -41,9 +41,9 @@ updated: 2026-06-11
 | [exotic-secret-sharing-rabin-and-polynomials.md](exotic-secret-sharing-rabin-and-polynomials.md) | secret sharing、Rabin、扰动多项式或可替换私钥结构。 | 1 |
 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) | 哈希、PoW、验证码、协议校验或弱比较。 | 5 |
 | [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md) | 同态、配对或特殊代数结构。 | 2 |
-| [lattice-and-lwe.md](lattice-and-lwe.md) | 格规约、小根、近似约束或高维线性关系。 | 8 |
+| [lattice-and-lwe.md](lattice-and-lwe.md) | 格规约、小根、近似约束或高维线性关系。 | 12 |
 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) | PRNG seed、状态恢复、MT/LCG/LFSR 输出泄露。 | 9 |
-| [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) | 数论、代数方程、枚举边界或自定义数学结构。 | 8 |
+| [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) | 数论、代数方程、枚举边界或自定义数学结构。 | 9 |
 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) | RSA 模数、素数结构、小根、低指数或 oracle。 | 14 |
 
 ## WP 案例沉淀
@@ -52,6 +52,11 @@ updated: 2026-06-11
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
+| [WMCTF2025-ishowsplit-wp](../raw/crypto/WMCTF2025-ishowsplit-wp.md) | `A*x+r*k=b mod p` 且隐藏数有不连续 bit 泄露，先把已知段合入 `xbar`，未知段走 EHNP LLL/Babai CVP。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
+| [WMCTF2025-lw3-wp](../raw/crypto/WMCTF2025-lw3-wp.md) | LWE error 不小但只来自少数固定随机值，先把 error 选择展开成 0/1 变量，再降维/精确 SVP。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
+| [WMCTF2025-lw5-wp](../raw/crypto/WMCTF2025-lw5-wp.md) | 可自选 LWE error 集且服务端阻止简单小化，先构造通过 check 的 error 取值，再利用少值 error 的结构恢复 secret。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
+| [WMCTF2025-splitmaster-wp](../raw/crypto/WMCTF2025-splitmaster-wp.md) | 交互 oracle 允许自选分段泄露 `a*key mod q` 的不连续 bit，先设计切分消去公共隐藏数，再用 BKZ 恢复 key。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
+| [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md) | 重根多项式、p-adic roots 和三选一递推状态混合，先用导数/去重根恢复候选，再用递推剪枝同步 state。 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | [ACTF2026-arrange-in-asceding-wp](../raw/crypto/ACTF2026-arrange-in-asceding-wp.md) | 数论/代数方程是主约束，先化简等式、枚举边界并做正向复算。 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | [ACTF2026-inverse-pow-wp](../raw/crypto/ACTF2026-inverse-pow-wp.md) | 数论/代数方程是主约束，先化简等式、枚举边界并做正向复算。 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | [ACTF2026-ohmycaptcha-wp](../raw/crypto/ACTF2026-ohmycaptcha-wp.md) | 哈希、验证码、PoW 或协议校验可被降维，先确认碰撞、弱比较或 oracle。 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
@@ -137,4 +142,4 @@ updated: 2026-06-11
 
 ## 原始资料
 
-本页原始资料以“WP 案例沉淀”表中的 raw WP 链接为准，共 64 篇。
+本页原始资料以“WP 案例沉淀”表中的 raw WP 链接为准，共 69 篇。

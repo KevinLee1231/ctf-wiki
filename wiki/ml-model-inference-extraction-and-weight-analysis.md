@@ -1,17 +1,17 @@
 ---
-type: technique
-tags: [ai-ml, model-extraction, inference, weight-analysis, technique]
+type: family
+tags: [ai-ml, model-extraction, inference, weight-analysis, family]
 skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/model-attacks.md
-updated: 2026-06-11
+updated: 2026-06-13
 ---
 
 # ML Model Inference, Extraction and Weight Analysis
 
 ## 适用场景
 
-模型本身是主要证据：需要通过推理接口、输出置信度、任务语义、模型权重、embedding、encoder、LoRA adapter 或训练/推理参数恢复 flag。若核心是 prompt injection，转到 [llm-attacks.md](llm-attacks.md)；若核心是扰动样本欺骗分类器，转到 [adversarial-ml.md](adversarial-ml.md)。
+本页是 AI/ML 模型攻击 family。模型本身是主要证据：需要通过推理接口、输出置信度、任务语义、模型权重、embedding、encoder、LoRA adapter 或训练/推理参数恢复 flag。若核心是 prompt injection，转到 [llm-attacks.md](llm-attacks.md)；若核心是扰动样本欺骗分类器，转到 [adversarial-ml.md](adversarial-ml.md)。
 
 ## 识别信号
 

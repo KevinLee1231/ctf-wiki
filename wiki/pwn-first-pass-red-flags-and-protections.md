@@ -4,7 +4,7 @@ tags: [pwn, family, triage]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/pwn-first-pass-red-flags-and-protections.md
-updated: 2026-06-11
+updated: 2026-06-12
 ---
 
 # First-Pass Red Flags and Protections
@@ -78,6 +78,12 @@ updated: 2026-06-11
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
+| [WMCTF2025-aberration-wp](../raw/pwn/WMCTF2025-aberration-wp.md) | ARM64 TrustZone/EL3 SMC handler 存在跨 CPU TOCTOU，先提取 BL31、确认 secure world 调用链和竞态窗口。 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)、[race-condition-and-concurrency-exploits.md](race-condition-and-concurrency-exploits.md) |
+| [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md) | C++ 异常处理继续执行、负数 size、未初始化变量和 `-O3` 析构优化共同形成泄露、double free、堆溢出和 largebin/tcache 链。 | [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md)、[heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md) |
+| [WMCTF2025-wm-easyker-wp](../raw/pwn/WMCTF2025-wm-easyker-wp.md) | 一次任意读和可控 `rsp` 不直接 ret2dir；先泄露 kernel base，再利用 `/dev/random` 的 `input_pool.hash.buf` 作为概率 ROP 栈。 | [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md)、[kaslr-kpti-smep-and-kernel-debugging.md](kaslr-kpti-smep-and-kernel-debugging.md) |
+| [WMCTF2025-wm-easynetlink-wp](../raw/pwn/WMCTF2025-wm-easynetlink-wp.md) | Generic Netlink 暴露 UAF 随机写，先用 `bpf_array` 制造 verifier/runtime 差异，再扩展到内核任意读写和页表 patch。 | [kernel-uaf-race-and-slab-techniques.md](kernel-uaf-race-and-slab-techniques.md)、[linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md) |
+| [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md) | 自定义 ARM-like VM 的 SP 边界检查错误，直接写 `svc` 被过滤时可让解释器执行内部 SVC opcode。 | [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [WMCTF2025-wmkpf-wp](../raw/pwn/WMCTF2025-wmkpf-wp.md) | 内核模块管理用户 BPF map fd，利用页表喷射/重叠改写 `modprobe_path` 物理页映射，再触发未知 binfmt 提权。 | [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md)、[kaslr-kpti-smep-and-kernel-debugging.md](kaslr-kpti-smep-and-kernel-debugging.md) |
 | [ACTF2026-acpu-wp](../raw/pwn/ACTF2026-acpu-wp.md) | RISC-V CPU 仿真器存在 Meltdown 型 forwarding/cache timing 侧信道，先证明非法 load 对后续公开访问的影响。 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
 | [ACTF2026-agpu-wp](../raw/pwn/ACTF2026-agpu-wp.md) | 解释器/JIT/虚拟设备语义差异，先定义 OOB/read/write/call primitive。 | [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md) |
 | [ACTF2026-amcu-wp](../raw/pwn/ACTF2026-amcu-wp.md) | MCU 串口输入进入 printf 伪参数，先用 `%n` 建任意写再布置 SRAM 跳板和 I2C shellcode。 | [format-string.md](format-string.md) |
