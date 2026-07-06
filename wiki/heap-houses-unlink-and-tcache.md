@@ -5,7 +5,8 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-houses-unlink-and-tcache.md
   - ../raw/pwn/WMCTF2025-palusimulator-wp.md
-updated: 2026-06-12
+  - ../raw/pwn/D3CTF2019-new-heap-wp.md
+updated: 2026-07-06
 ---
 
 # Heap Houses, Unlink and Tcache
@@ -45,6 +46,7 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md) | 异常处理产生可泄露的 0x90 chunk 后，先构造小 chunk 进入 0x90 tcache，再用 largebin attack 写栈上 `read` 长度变量，最后 tcache fd 指向栈布置 ORW ROP。 |
+| [D3CTF2019-new-heap-wp](../raw/pwn/D3CTF2019-new-heap-wp.md) | glibc 2.29 tcache key 检查、count 限制和 cross-bin overlap 共同决定路线；利用点不只是 double free，而是通过 consolidation/overlap 控制 tcache struct、stdout 和 hook 落点。 |
 
 ## 合并与拆分结论
 
@@ -70,3 +72,4 @@ updated: 2026-06-12
 
 - [heap-houses-unlink-and-tcache.md](../raw/pwn/heap-houses-unlink-and-tcache.md)
 - [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md)
+- [D3CTF2019-new-heap-wp](../raw/pwn/D3CTF2019-new-heap-wp.md)

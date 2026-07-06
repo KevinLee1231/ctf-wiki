@@ -1498,3 +1498,12 @@
 - 抽查 `raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md`，为 `exotic-secret-sharing-rabin-and-polynomials.md` 补充资料内长尾模式索引，覆盖 Cayley-Purser、Asmuth-Bloom、Rabin polynomial primes、Vandermonde 和 LCG period。
 - 本轮不修改 raw 正文，不新增 wiki 页面，不调整 index 入口。
 - 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ai-crypto-raw-pattern-index-20260706-205020.zip`。
+
+## 2026-07-06 — Pwn 单入链 Raw 二级路由抽查
+
+- 抽查只挂在 `pwn-first-pass-red-flags-and-protections.md` 的 raw，确认 `D3CTF2019-babyrop-wp`、`D3CTF2019-basic-basic-parser-wp`、`D3CTF2019-new-heap-wp`、`D3CTF2021-deterministic-heap-wp` 和 `D3CTF2021-easy-chrome-full-chain-wp` 不应只停留在首轮 family。
+- `babyrop` 补入 VM/解释器与运行时 primitive 页面，保留“VM 指令写宿主返回地址”的 pivot；`basic-basic-parser` 补入 parser primitive 与 heap UAF 页面。
+- `new_heap` 补入 heap 生命周期与 heap metadata/bin 页面，明确 glibc 2.29 tcache 检查、consolidation、stdout leak 和 hook 落点；`deterministic-heap` 补入 heap UAF 与 Windows 平台页，强调 NT Heap/LFH 稳定占位。
+- `easy-chrome-full-chain` 补入 JIT/runtime 与 OOB/JIT primitive 页面，强调 V8 OOB primitive 到 Mojo sandbox escape 的衔接条件。
+- 本轮不修改 raw 正文，不新增 wiki 页面，不调整 index 入口。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-pwn-single-ref-raw-routing-20260706-212154.zip`。

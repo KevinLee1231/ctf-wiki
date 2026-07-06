@@ -5,6 +5,7 @@ skills: [ctf-misc, ctf-pwn]
 raw:
   - ../raw/misc/vm-z3-sandbox-and-game-basics.md
   - ../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md
+  - ../raw/pwn/D3CTF2019-babyrop-wp.md
 updated: 2026-07-06
 ---
 
@@ -46,6 +47,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 | 对应路线 |
 |---|---|---|
 | [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md) | 自定义汇编器会把明文 `svc` 替换成 NOP，但解释器内部仍实现 syscall opcode；SP 越界可直接进入内部 opcode 路线。 | VM 语义差异 + Pwn primitive |
+| [D3CTF2019-babyrop-wp](../raw/pwn/D3CTF2019-babyrop-wp.md) | VM 指令语义恢复后发现 guest stack 操作能写宿主返回地址；这类题应先建 opcode 到宿主上下文的映射，再转 Pwn primitive。 | VM 语义差异 + 返回地址覆盖 |
 
 ## 合并与拆分结论
 
@@ -76,3 +78,4 @@ updated: 2026-07-06
 
 - [vm-z3-sandbox-and-game-basics.md](../raw/misc/vm-z3-sandbox-and-game-basics.md)
 - [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md)
+- [D3CTF2019-babyrop-wp](../raw/pwn/D3CTF2019-babyrop-wp.md)

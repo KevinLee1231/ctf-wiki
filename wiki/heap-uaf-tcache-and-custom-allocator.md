@@ -5,7 +5,10 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-uaf-tcache-and-custom-allocator.md
   - ../raw/pwn/WMCTF2025-palusimulator-wp.md
-updated: 2026-06-12
+  - ../raw/pwn/D3CTF2019-basic-basic-parser-wp.md
+  - ../raw/pwn/D3CTF2019-new-heap-wp.md
+  - ../raw/pwn/D3CTF2021-deterministic-heap-wp.md
+updated: 2026-07-06
 ---
 
 # Heap UAF, Tcache and Custom Allocators
@@ -48,6 +51,9 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md) | 负数 size 触发异常后没有 return，析构函数在 `-O3` 下不再设置 `FREEDBUF`，结合残留指针形成 double free、泄露和 tcache fd 劫持。 |
+| [D3CTF2019-basic-basic-parser-wp](../raw/pwn/D3CTF2019-basic-basic-parser-wp.md) | C++ parser 错误恢复路径 `delete` 了已插入全局列表的 `Process` 对象；ASan 定位 UAF 后，可覆盖字符串/容器成员泄露并推进到 double free/tcache attack。 |
+| [D3CTF2019-new-heap-wp](../raw/pwn/D3CTF2019-new-heap-wp.md) | glibc 2.29 下 tcache double-free 检查和 malloc 次数限制同时存在；借 `stdin/getchar` 额外大 chunk 触发 `malloc_consolidate`，再做 overlap、stdout leak 和 `__free_hook`。 |
+| [D3CTF2021-deterministic-heap-wp](../raw/pwn/D3CTF2021-deterministic-heap-wp.md) | Windows NT Heap/LFH 中利用 bucket、subsegment 和 `CachedItems` 的可预测行为稳定重占释放块，把低概率 UAF 转成可复现对象重叠。 |
 
 ## 合并与拆分结论
 
@@ -75,3 +81,6 @@ updated: 2026-06-12
 
 - [heap-uaf-tcache-and-custom-allocator.md](../raw/pwn/heap-uaf-tcache-and-custom-allocator.md)
 - [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md)
+- [D3CTF2019-basic-basic-parser-wp](../raw/pwn/D3CTF2019-basic-basic-parser-wp.md)
+- [D3CTF2019-new-heap-wp](../raw/pwn/D3CTF2019-new-heap-wp.md)
+- [D3CTF2021-deterministic-heap-wp](../raw/pwn/D3CTF2021-deterministic-heap-wp.md)

@@ -4,6 +4,8 @@ tags: [pwn, family, oob, jit, parser, primitive, sandbox, emulator]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/oob-jit-parser-primitives.md
+  - ../raw/pwn/D3CTF2019-basic-basic-parser-wp.md
+  - ../raw/pwn/D3CTF2021-easy-chrome-full-chain-wp.md
 updated: 2026-07-06
 ---
 
@@ -56,6 +58,13 @@ updated: 2026-07-06
 - 在 seccomp 下继续尝试 `system('/bin/sh')`；应先列允许 syscall。
 - 对 JIT 题过早写 shellcode；先确认 JIT code page 权限和 guest-to-host 映射。
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2019-basic-basic-parser-wp](../raw/pwn/D3CTF2019-basic-basic-parser-wp.md) | 源码 parser 的 grammar token fuzz 暴露错误恢复路径 UAF；先用 ASan 定位对象生命周期，再量化 heap primitive 和退出阶段可控调用。 |
+| [D3CTF2021-easy-chrome-full-chain-wp](../raw/pwn/D3CTF2021-easy-chrome-full-chain-wp.md) | V8 bounds check 消除后的 OOB 不是终点，还要量化 addrof/fake_obj/ArrayBuffer 任意读写，并把 primitive 接到 Mojo sandbox escape。 |
+
 
 ## 关联技巧
 
@@ -77,3 +86,5 @@ updated: 2026-07-06
 ## 原始资料
 
 - [oob-jit-parser-primitives.md](../raw/pwn/oob-jit-parser-primitives.md)
+- [D3CTF2019-basic-basic-parser-wp](../raw/pwn/D3CTF2019-basic-basic-parser-wp.md)
+- [D3CTF2021-easy-chrome-full-chain-wp](../raw/pwn/D3CTF2021-easy-chrome-full-chain-wp.md)
