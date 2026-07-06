@@ -56,6 +56,14 @@ updated: 2026-07-06
 | [ACTF2026-amcu-wp](../raw/pwn/ACTF2026-amcu-wp.md) | MCU 固件题要把串口、I2C、SRAM 和执行跳板放在同一个硬件状态模型里看。 |
 | [LilacCTF2026-justrom-wp](../raw/reverse/LilacCTF2026-justrom-wp.md) | ROM/ISA 题先确认架构端序、加载基址和 MMIO register，再复现加密/比较函数。 |
 | [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md) | Xtensa ESP 固件中 `sender_task` 暴露 ESP-NOW 应用层包结构，先恢复 magic、seq、total、IV 和 AES-CBC key，再处理无线捕获。 |
+| [ACTF2026-计算机系统贯通实验-wp](../raw/reverse/ACTF2026-计算机系统贯通实验-wp.md) | xlsx 公式实现 RISC-V 单周期 CPU；先解包 XML 恢复 ROM/RAM/MMIO、指令解码和输出语义，再拆四段校验。 |
+| [ACTF2026-flagchecker-wp](../raw/reverse/ACTF2026-flagchecker-wp.md) | LoongArch64 Go 静态程序破坏符号恢复，通过反射派生真实方法名；再把 shellcode SM4 层和 8 段 Feistel 环分开求逆。 |
+| [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md) | CUDA fatbin 中宿主先解出 NPU bytecode；提取 `MOV_IMM` 比较常量后逆 RC4 drop-512 和多层 S-box/XOR 变换。 |
+| [Bugku-Dual-Personality-wp](../raw/reverse/Bugku-Dual-Personality-wp.md) | PE32 运行时 patch far jump 到 WoW64 `0x33` 代码段；必须按 64 位模式重反汇编后再逆 rolling add/xor。 |
+| [Bugku-EasyVT-wp](../raw/reverse/Bugku-EasyVT-wp.md) | `EasyVT.sys` 模拟 VT-x，驱动 VM-exit handler 只是调度壳；核心校验是 TEA 变体和 RC4，优先静态恢复 handler switch。 |
+| [D3CTF2019-easy-dongle-wp](../raw/reverse/D3CTF2019-easy-dongle-wp.md) | ELF 加密狗和 STM32 固件经 UART 协议协作，先还原固件加载地址、串口封包和 DES 参数。 |
+| [D3CTF2019-simd-wp](../raw/reverse/D3CTF2019-simd-wp.md) | AVX2 SIMD 并行 SM4 校验，先理解 gather/shuffle 后的数据布局再按真实排列解密。 |
+| [D3CTF2022-d3arm-wp](../raw/reverse/D3CTF2022-d3arm-wp.md) | ARM 架构/指令语义是主障碍，先确认加载基址、调用约定和平台特有指令。 |
 
 ## 合并与拆分结论
 

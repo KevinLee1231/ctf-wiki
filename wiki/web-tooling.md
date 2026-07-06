@@ -230,3 +230,9 @@ set_proxy_intercept_state(intercepting=false)
 # 暂停任务执行引擎
 set_task_execution_engine_state(running=false)
 ```
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [VNCTF2026-web-pentest-wp](../raw/web/VNCTF2026-web-pentest-wp.md) | 前端混合加密登录把 SM4 `key/iv` 经 SM2 封装给服务端；若封装值可固定复用，只需重算业务密文和 MD5 签名即可爆破。 |

@@ -50,6 +50,7 @@ updated: 2026-07-06
 |---|---|
 | [ACTF2026-ohmycaptcha-wp](../raw/crypto/ACTF2026-ohmycaptcha-wp.md) | CAPTCHA 只是构造表达式的前置约束；核心 oracle 是“表达式输出被 `e=5` RSA 加密”，可组合小明文、Coppersmith 和 Franklin-Reiter。 |
 | [RCTF2025-suanhash-wp](../raw/crypto/RCTF2025-suanhash-wp.md) | Sponge-like digest 暴露 rate/capacity 差分；两条相邻消息恢复内部差分后，下一块用互补差分直接碰撞。 |
+| [D3CTF2025-d3fnv-wp](../raw/crypto/D3CTF2025-d3fnv-wp.md) | FNV 哈希可视为未知 key 上的小系数多项式求值，先用格恢复 key 幂向量信息。 |
 
 ## 合并与拆分结论
 

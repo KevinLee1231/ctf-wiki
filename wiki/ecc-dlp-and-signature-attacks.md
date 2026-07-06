@@ -68,6 +68,21 @@ updated: 2026-07-06
 - [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
 - [crypto-tooling.md](crypto-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2019-babyecc-wp](../raw/crypto/D3CTF2019-babyecc-wp.md) | 曲线参数和 ECC 群运算是核心，先确认曲线阶、基点和标量关系。 |
+| [D3CTF2019-sign2win-wp](../raw/crypto/D3CTF2019-sign2win-wp.md) | DSA/ECDSA 签名或 nonce 关系异常，先恢复签名方程中的随机数/私钥约束。 |
+| [D3CTF2021-easy-curve-wp](../raw/crypto/D3CTF2021-easy-curve-wp.md) | 曲线/DLP 参数是主约束，先确认群阶、基点、映射和可降维关系。 |
+| [D3CTF2022-leak-dsa-wp](../raw/crypto/D3CTF2022-leak-dsa-wp.md) | DSA/ECDSA nonce 或签名泄露进入格恢复，先写出每个签名的线性近似关系。 |
+| [HGAME2026-ezcurve-wp](../raw/crypto/HGAME2026-ezcurve-wp.md) | ECC 横坐标 oracle 每次减去 163-bit 噪声；成对查询 `t/-t` 消去部分曲线关系，再把小误差放进 LLL。 |
+| [RCTF2025-repairing-wp](../raw/crypto/RCTF2025-repairing-wp.md) | Pairing/ElGamal 风格密文可重随机化：同时改 `C1,C2,C3` 保持 shared key 不变，服务端未去重时可解出原 flag key。 |
+| [SU_IsogenyWP](../raw/crypto/SU_IsogenyWP.md) | CSIDH 群作用与 2-isogeny 交换，三条 2-isogenous 共享曲线高位泄露可建 CI-HNP 小根方程，用 Automated Coppersmith 恢复参数。 |
+| [VNCTF2026-hd-is-what-wp](../raw/crypto/VNCTF2026-hd-is-what-wp.md) | SIDH/SIKE 公钥向量先被公开 seed 的 LCG 矩阵线性混淆；恢复标准公钥后再用 Castryck-Decru attack 求共享 j。 |
+| [VNCTF2026-schnorr-wp](../raw/crypto/VNCTF2026-schnorr-wp.md) | Schnorr 服务固定 seed 导致首轮承诺 `B` 跨连接重复；对同一 `B` 给两个 challenge，用 special soundness 相减提 witness。 |
+| [D3CTF2019-keygenme-wp](../raw/reverse/D3CTF2019-keygenme-wp.md) | Keygen 逻辑落到签名/曲线数学关系，先把校验式转成可求解的 DSA/ECDSA 约束。 |
+
 ## 原始资料
 
 - [ecc-dlp-and-signature-attacks.md](../raw/crypto/ecc-dlp-and-signature-attacks.md)

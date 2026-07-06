@@ -65,6 +65,19 @@ updated: 2026-07-06
 - [auth-jwt.md](auth-jwt.md)
 - [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2022-d3fgo-wp](../raw/web/D3CTF2022-d3fgo-wp.md) | Go/Mongo 管理员登录字段为 interface{}，JSON 可注入 NoSQL 操作符绕过认证。 |
+| [HGAME2026-魔理沙的魔法目录-wp](../raw/web/HGAME2026-魔理沙的魔法目录-wp.md) | 阅读时长由前端周期性上报 `record?time=`，后端信任累计值；直接重放大时间值绕过等待。 |
+| [HGAME2026-vidarshop-wp](../raw/web/HGAME2026-vidarshop-wp.md) | JWT 头是干扰项，真实身份由可预测 uid 决定；拿到管理员语义后用 `__proto__`/constructor 污染余额状态。 |
+| [NCTF2026-n-rustpica-wp](../raw/web/NCTF2026-n-rustpica-wp.md) | 静态调试目录泄露后台凭据后，Rust/Serde `untagged enum` 和未知字段忽略导致工作流状态绕过。 |
+| [RCTF2025-auth-wp](../raw/web/RCTF2025-auth-wp.md) | Node IdP 中 `parseInt(false)` 与 MySQL `TINYINT` 存储语义不一致可注册 admin，再利用 SP XML Signature Wrapping 让业务读取未签名 Assertion。 |
+| [RCTF2025-photographer-wp](../raw/web/RCTF2025-photographer-wp.md) | SQLite `SELECT *` join 中同名 `type` 字段覆盖用户权限字段，上传图片 MIME type 可写成 `-1` 绕过管理员判断。 |
+| [SU_jdbc-masterWP](../raw/web/SU_jdbc-masterWP.md) | Unicode 长 `ſ` 绕过 `/suctf` 路径过滤后，可控 JDBC driver/URL 走 Kingbase `ConfigurePath` 与 Spring XML beans 无外连加载。 |
+| [VNCTF2026-web-pentest-wp](../raw/web/VNCTF2026-web-pentest-wp.md) | 前端混合加密登录把 SM4 `key/iv` 经 SM2 封装给服务端；若封装值可固定复用，只需重算业务密文和 MD5 签名即可爆破。 |
+
 ## 原始资料
 
 - [auth-edge-cases-and-protocol-bypasses.md](../raw/web/auth-edge-cases-and-protocol-bypasses.md)

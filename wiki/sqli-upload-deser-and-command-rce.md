@@ -64,6 +64,16 @@ updated: 2026-07-06
 - [php-java-python-deserialization.md](php-java-python-deserialization.md)
 - [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [LilacCTF2026-trustsql-plus-wp](../raw/pwn/LilacCTF2026-trustsql-plus-wp.md) | 上传 SQLite 库不是普通 SQLi，关键是 FTS4 `compress/uncompress` 函数名拼入内部顶层 SQL，绕过 `trusted_schema=0` 后 `writefile+load_extension`。 |
+| [ACTF2026-gomysql-wp](../raw/web/ACTF2026-gomysql-wp.md) | `/calc` 多语句 MariaDB 注入可写 UDF 并下载 root Go 二进制；最终利用 `/draw` 自写模板的变量替换和 safe/unsafe 顺序执行 `run('cat /flag')`。 |
+| [D3CTF2019-easyweb-wp](../raw/web/D3CTF2019-easyweb-wp.md) | 二次 SQL 注入控制 Smarty 模板，再经 php:phar 触发反序列化 POP 链。 |
+| [D3CTF2019-showhub-wp](../raw/web/D3CTF2019-showhub-wp.md) | insert 注入可用 on duplicate key update 改管理员密码，后续还需 request smuggling 绕过内网 IP 限制。 |
+| [SU_cmsAgainWP](../raw/web/SU_cmsAgainWP.md) | 前台购物车 Cookie 反序列化污染 ProductID 形成 SQLi，盲注拿后台后写 `{~...}` 模板片段触发 ThinkPHP PHP 执行。 |
+
 ## 原始资料
 
 - [sqli-upload-deser-and-command-rce.md](../raw/web/sqli-upload-deser-and-command-rce.md)

@@ -45,6 +45,14 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [RCTF2025-514-wp](../raw/misc/RCTF2025-514-wp.md) | Koishi 插件把 text 写进 Puppeteer 渲染页，`file://` origin 允许 iframe 指向本地 flag；payload 重点是绕过 `/` 转义并把 iframe 覆盖到 canvas 上。 |
+| [D3CTF2019-babyxss-wp](../raw/web/D3CTF2019-babyxss-wp.md) | XSS/CSP/browser bot 是主线，先确认 sink、CSP 约束和可用 exfil 通道。 |
+| [D3CTF2019-d3guestbook-wp](../raw/web/D3CTF2019-d3guestbook-wp.md) | HTML 白名单、JSONP callback 和 CSRF token/sessionid 绑定组合，先构造表单劫持拿管理员 token。 |
+| [HGAME2026-博丽神社的绘马挂-wp](../raw/web/HGAME2026-博丽神社的绘马挂-wp.md) | 留言触发 bot 存储型 XSS，归档搜索支持 JSONP callback；让管理员同源上下文查询私有归档并回传。 |
+| [LilacCTF2026-playground-wp](../raw/web/LilacCTF2026-playground-wp.md) | 浏览器执行模型或 bot 行为可控，先确认 sink、CSP、触发上下文和 exfil 通道。 |
+| [NCTF2026-n-minsite-wp](../raw/web/NCTF2026-n-minsite-wp.md) | MaxSite 源码可由 `/?key` 获取，后台上传入口只校验登录态；上传 HTML/JS 后诱导 bot 读取后台 flag。 |
+| [RCTF2025-author-plus-wp](../raw/web/RCTF2025-author-plus-wp.md) | author meta 属性注入过滤了常规空白但漏 `%0b/%0c`，用 CSP meta 压制防护脚本，并借 popover `onbeforetoggle` 在 bot 点击时触发外带。 |
+| [RCTF2025-author-wp](../raw/web/RCTF2025-author-wp.md) | 用户名进入 `<meta name=author>` 属性，可注入 CSP 限制 `xss-shield.js`，再在文章正文用 `img onerror` 外带 cookie。 |
+| [SU_Note_revWP](../raw/web/SU_Note_revWP.md) | `search.php?q=` 进入内联 JS 字符串且可用 `</script>` 闭合；让 bot 访问内网同源搜索页后 fetch 管理员 notes 并外带。 |
 
 ## 合并与拆分结论
 

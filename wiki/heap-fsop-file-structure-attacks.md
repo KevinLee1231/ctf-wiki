@@ -61,6 +61,15 @@ updated: 2026-06-12
 - [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md)
 - [pwn-tooling.md](pwn-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2019-ezfile-wp](../raw/pwn/D3CTF2019-ezfile-wp.md) | tcache double free 配合 FILE fileno 和受限 ORW，先复用已有 FD 而不是追求 shell。 |
+| [HGAME2026-diary-keeper-wp](../raw/pwn/HGAME2026-diary-keeper-wp.md) | glibc 2.35 off-by-null 伪造合并并泄露 libc/heap，后续不是普通 UAF，而是 `_IO_list_all` + house of obstack。 |
+| [RCTF2025-mstr-wp](../raw/pwn/RCTF2025-mstr-wp.md) | 运行时字符串对象重叠形成越界读写并最终打 FSOP，先确认对象布局、libc 和 FILE 结构目标。 |
+| [RCTF2025-rd-wp](../raw/pwn/RCTF2025-rd-wp.md) | 未初始化 task 指针可踩 stdout，先泄露 heap/libc，再构造 fake stdout / fake FILE 控制执行流。 |
+
 ## 原始资料
 
 - [heap-fsop-file-structure-attacks.md](../raw/pwn/heap-fsop-file-structure-attacks.md)

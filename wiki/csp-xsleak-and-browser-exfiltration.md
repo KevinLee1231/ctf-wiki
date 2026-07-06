@@ -60,6 +60,13 @@ updated: 2026-06-11
 - [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md)
 - [web-tooling.md](web-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [RCTF2025-author-plus-wp](../raw/web/RCTF2025-author-plus-wp.md) | author meta 属性注入过滤了常规空白但漏 `%0b/%0c`，用 CSP meta 压制防护脚本，并借 popover `onbeforetoggle` 在 bot 点击时触发外带。 |
+| [RCTF2025-author-wp](../raw/web/RCTF2025-author-wp.md) | 用户名进入 `<meta name=author>` 属性，可注入 CSP 限制 `xss-shield.js`，再在文章正文用 `img onerror` 外带 cookie。 |
+
 ## 原始资料
 
 - [csp-xsleak-and-browser-exfiltration.md](../raw/web/csp-xsleak-and-browser-exfiltration.md)

@@ -59,6 +59,15 @@ updated: 2026-05-21
 - [node-and-prototype.md](node-and-prototype.md)
 - [php-java-python-deserialization.md](php-java-python-deserialization.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2021-real-cloud-serverless-wp](../raw/web/D3CTF2021-real-cloud-serverless-wp.md) | 云函数/Serverless/Kubernetes 内部 API 链，先固定 SSRF 到控制平面的可达边界。 |
+| [D3CTF2021-real-cloud-storage-wp](../raw/web/D3CTF2021-real-cloud-storage-wp.md) | 云存储/内部 metadata 或可信服务接口可被 SSRF 触达，先确认凭据和对象读取路径。 |
+| [D3CTF2021-shellgen-wp](../raw/web/D3CTF2021-shellgen-wp.md) | token 路径穿越写入模板目录形成 Jinja SSTI，再连 rootless Docker socket 控宿主用户权限。 |
+| [HGAME2026-easyuu-wp](../raw/web/HGAME2026-easyuu-wp.md) | 可控目录列表找到更新包源码，上传后门 `path1` 可覆盖 `./update/easyuu`，再借自更新机制执行自定义程序。 |
+
 ## 原始资料
 
 - [Spirit2026-5-artifact-relay-wp.md](../raw/web/Spirit2026-5-artifact-relay-wp.md)

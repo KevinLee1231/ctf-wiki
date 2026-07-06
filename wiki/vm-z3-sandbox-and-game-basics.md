@@ -48,6 +48,13 @@ updated: 2026-07-06
 |---|---|---|
 | [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md) | 自定义汇编器会把明文 `svc` 替换成 NOP，但解释器内部仍实现 syscall opcode；SP 越界可直接进入内部 opcode 路线。 | VM 语义差异 + Pwn primitive |
 | [D3CTF2019-babyrop-wp](../raw/pwn/D3CTF2019-babyrop-wp.md) | VM 指令语义恢复后发现 guest stack 操作能写宿主返回地址；这类题应先建 opcode 到宿主上下文的映射，再转 Pwn primitive。 | VM 语义差异 + 返回地址覆盖 |
+| [VNCTF2026-vm-syscall-wp](../raw/pwn/VNCTF2026-vm-syscall-wp.md) | VM `case4` 把 4 个寄存器映射到 syscall，但执行前清零 `r8/r9/r10`；绕过常规 `mmap`，用 `shmget/shmat` 放 `/bin/sh` 后 `execve`。 | 跨页补入 |
+| [D3CTF2019-ancient-game-v2-wp](../raw/reverse/D3CTF2019-ancient-game-v2-wp.md) | OISC/NAND 自定义 VM 实现数独约束，先抽取不跳 wrong 的控制流约束再交给 solver。 | 跨页补入 |
+| [HGAME2026-看不懂的华容道-wp](../raw/reverse/HGAME2026-看不懂的华容道-wp.md) | VMP 包裹的华容道状态反馈可转成约束和 BFS，先恢复棋盘、碰撞指纹和最短路径。 | 跨页补入 |
+| [RCTF2025-onion-wp](../raw/reverse/RCTF2025-onion-wp.md) | 自定义 VM 有 PC/HIPC/LOTAG/HITAG/虚拟栈和 50 个 64-bit 输入；先实现反汇编/解释器，再把每个 check 自动逆算。 | 跨页补入 |
+| [SU_easygalWP](../raw/reverse/SU_easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | 跨页补入 |
+| [SU_WestWP](../raw/reverse/SU_WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | 跨页补入 |
+| [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 | 跨页补入 |
 
 ## 合并与拆分结论
 

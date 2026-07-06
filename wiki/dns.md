@@ -65,6 +65,12 @@ updated: 2026-06-12
 - [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
 - [misc-tooling.md](misc-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2022-ohhhh-spf-wp](../raw/misc/D3CTF2022-ohhhh-spf-wp.md) | SPF/DNS 记录是主线，先查询 TXT/SPF 解析链并确认域名授权语义。 |
+
 ## 原始资料
 
 - [dns.md](../raw/misc/dns.md)

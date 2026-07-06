@@ -49,6 +49,10 @@ updated: 2026-07-06
 | [ACTF2026-special-day-wp](../raw/misc/ACTF2026-special-day-wp.md) | 单层 Base64 解码后还要按题面文本规则规范化 flag body；这类签到题重点是记录输入形态和变换规则。 |
 | [HGAME2026-打好基础-wp](../raw/misc/HGAME2026-打好基础-wp.md) | 大段 emoji 优先考虑 base100；每层解码后用字符集、padding 和可打印率确认下一层 Base 编码，而不是盲目爆破。 |
 | [SU_Artifact_OnlineWP](../raw/misc/SU_Artifact_OnlineWP.md) | 符文文本对应自然语言片段时，先恢复 rune/plain 替换映射；若后续进入交互状态选择器，应转游戏状态 family。 |
+| [D3CTF2021-shellgen2-wp](../raw/misc/D3CTF2021-shellgen2-wp.md) | 无字母数字 PHP 生成器本质是受限字符表达式构造，先建字符索引表和递增优化。 |
+| [Bugku-MaybeNotStandrad-wp](../raw/reverse/Bugku-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 |
+| [Bugku-week1_re3-wp](../raw/reverse/Bugku-week1_re3-wp.md) | 标准 Base64 表、3 字节到 4 字符和 `=` padding 同时出现；目标串按 `int` 数组存储时只取低字节解码。 |
+| [NCTF2026-vm-encryptor-wp](../raw/reverse/NCTF2026-vm-encryptor-wp.md) | 先写自定义 VM disassembler 理清 opcode；真实算法是循环位移/XOR 后进魔改 Base64，再整体 XOR。 |
 
 ## 合并与拆分结论
 

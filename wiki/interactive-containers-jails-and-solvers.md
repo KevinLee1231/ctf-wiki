@@ -65,6 +65,12 @@ updated: 2026-06-12
 - [linux-privesc.md](linux-privesc.md)
 - [pwn-tooling.md](pwn-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-farthest2026-wp](../raw/misc/ACTF2026-farthest2026-wp.md) | DOS/dosemu2/COMCOM64 sidecar 形成容器边界逃逸，先确认虚拟化边界、helper 加载和 host 侧执行点。 |
+
 ## 原始资料
 
 - [interactive-containers-jails-and-solvers.md](../raw/misc/interactive-containers-jails-and-solvers.md)

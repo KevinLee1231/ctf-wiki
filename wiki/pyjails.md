@@ -46,6 +46,11 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 | 对应路线 |
 |---|---|---|
 | [WMCTF2025-guess-wp](../raw/web/WMCTF2025-guess-wp.md) | `eval(payload, {'__builtin__': {}})` 在 Python 3 中键名写错，且对象继承链仍可通过 `__subclasses__()` 找到函数 `__globals__['__builtins__']` 取回 `__import__`。 | builtins 恢复 + 对象链逃逸 |
+| [D3CTF2021-scientific-calculator-wp](../raw/misc/D3CTF2021-scientific-calculator-wp.md) | CPython audit hook 沙箱绑定精确版本，先记录允许 action、compile/exec 边界和公开资料缺口。 | 跨页补入 |
+| [D3CTF2023-escape-plan-wp](../raw/web/D3CTF2023-escape-plan-wp.md) | Python Web 沙箱过滤数字/字母，先用 Unicode 同形字符、len 和切片构造可执行表达式。 | 跨页补入 |
+| [LilacCTF2026-checkin-wp](../raw/web/LilacCTF2026-checkin-wp.md) | Python eval jail 经过 IDNA/正则过滤后仍保留 `vars()`、`dir()` 和可变 `LockedList`；原地 pop/append 修改状态。 | 跨页补入 |
+| [VNCTF2026-i-really-really-really-and-revenge-wp](../raw/web/VNCTF2026-i-really-really-really-and-revenge-wp.md) | Pyjail 封数字、字符串和 builtins 后，仍可用布尔造数、类元信息造字符串、`object.__subclasses__()` 找全局模块，并用异常外带。 | 跨页补入 |
+| [VNCTF2026-i-really-really-really-ultimate-wp](../raw/web/VNCTF2026-i-really-really-really-ultimate-wp.md) | Unicode 绕过被补后，生成器 `gi_frame.f_back` 仍能回溯栈帧恢复 `builtins`，再拼 `/flag` 并用断言报错泄露。 | 跨页补入 |
 
 ## 合并与拆分结论
 

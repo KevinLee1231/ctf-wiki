@@ -60,6 +60,15 @@ updated: 2026-07-06
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 - [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [Bugku-Dual-Personality-wp](../raw/reverse/Bugku-Dual-Personality-wp.md) | PE32 运行时 patch far jump 到 WoW64 `0x33` 代码段；必须按 64 位模式重反汇编后再逆 rolling add/xor。 |
+| [Bugku-week1_re1-wp](../raw/reverse/Bugku-week1_re1-wp.md) | 入门 PE 中 flag 明文硬编码在 `.rdata`，先用 strings/Ghidra Strings 和交叉引用确认真实输出。 |
+| [D3CTF2021-jumpjump-wp](../raw/reverse/D3CTF2021-jumpjump-wp.md) | 静态 ELF 用 `setjmp/longjmp` 拆分控制流；先把异常式跳转还原成条件分支，再提取 magic 数组反推。 |
+| [RCTF2025-chaos-wp](../raw/reverse/RCTF2025-chaos-wp.md) | 运行即可输出结果的短题，先做格式、依赖和安全运行验证，再决定是否需要静态分析。 |
+
 ## 原始资料
 
 - [disassemblers-debuggers-and-basic-tools.md](../raw/reverse/disassemblers-debuggers-and-basic-tools.md)

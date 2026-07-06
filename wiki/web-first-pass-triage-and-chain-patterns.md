@@ -165,6 +165,7 @@ updated: 2026-07-06
 | [D3CTF2025-d3jtar-wp](../raw/web/D3CTF2025-d3jtar-wp.md) | jtar 文件名 Unicode 到 ASCII 转换造成后缀变化，先借备份/恢复把上传文件变成 JSP。 | [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md) |
 | [D3CTF2025-d3model-wp](../raw/web/D3CTF2025-d3model-wp.md) | Keras .keras 模型 load_model 反序列化 CVE，先控制 config.json 的类/函数解析路径。 | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md)、[php-java-python-deserialization.md](php-java-python-deserialization.md) |
 | [D3CTF2025-tidy-quic-wp](../raw/web/D3CTF2025-tidy-quic-wp.md) | HTTP/3/QUIC ContentLength 与实际 body 不一致叠加脏缓冲池，先复现请求体污染绕 WAF。 | [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md) |
+| [RCTF2025-signin-wp](../raw/misc/RCTF2025-signin-wp.md) | 前端源码把完成度作为 `score` 参数提交，先读业务逻辑并直接验证阈值触发条件。 | 跨页补入 |
 
 ## 原始资料
 - [web-first-pass-triage-and-chain-patterns.md](../raw/web/web-first-pass-triage-and-chain-patterns.md)

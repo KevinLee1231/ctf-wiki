@@ -59,6 +59,14 @@ Windows 驱动题同时给出 `.sys` 和用户态客户端，客户端只暴露 
 - [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)
 - [vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [SU_LockWP](../raw/reverse/SU_LockWP.md) | Inno Setup、Rust overlay、锁屏程序和内核驱动多层嵌套；最终 IOCTL 中 XXTEA-like dword 校验在驱动层。 |
+| [SU_RevirdWP](../raw/reverse/SU_RevirdWP.md) | 外层魔改 AES 解出第二阶段 EXE，随后通过 `\\.\Revird` 与驱动 op case 协同完成 AES-like 校验。 |
+| [VNCTF2026-shadow-wp](../raw/reverse/VNCTF2026-shadow-wp.md) | 用户态迷宫只触发 `Sleep(0x32)`；真实校验在反射加载驱动、PTE hook、键盘记录和基于 `KeDelayExecutionThread` 参数解密的 shellcode。 |
+
 ## 原始资料
 
 - [Spirit2026-5-kernelmaze-wp.md](../raw/reverse/Spirit2026-5-kernelmaze-wp.md)

@@ -46,6 +46,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [HGAME2026-redacted-wp](../raw/misc/HGAME2026-redacted-wp.md) | PDF 脱敏题先区分视觉遮挡、文本对象残留、ToUnicode/CMap 字体反复制和增量保存历史版本；不要只跑 `strings` 或截图 OCR。 |
+| [D3CTF2023-d3gif-wp](../raw/misc/D3CTF2023-d3gif-wp.md) | GIF/PNG/QR 媒体层叠，先拆帧和图像通道，再恢复二维码或文本 artifact。 |
 
 ## 合并与拆分结论
 

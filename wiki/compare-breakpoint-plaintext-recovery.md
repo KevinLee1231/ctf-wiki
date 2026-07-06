@@ -63,6 +63,8 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [Spirit2026-5-xxxtea-wp](../raw/reverse/Spirit2026-5-xxxtea-wp.md) | 复杂 XXXTEA 外观下程序先解出明文再比较，长度门槛满足后断在最终比较点即可。 |
+| [D3CTF2021-jumpjump-wp](../raw/reverse/D3CTF2021-jumpjump-wp.md) | 静态 ELF 用 `setjmp/longjmp` 拆分控制流；先把异常式跳转还原成条件分支，再提取 magic 数组反推。 |
+| [D3CTF2022-d3re-wp](../raw/reverse/D3CTF2022-d3re-wp.md) | AES/自定义校验逻辑是主线，先定位真实比较点和可 dump 的中间明文/密文。 |
 
 ## 原始资料
 

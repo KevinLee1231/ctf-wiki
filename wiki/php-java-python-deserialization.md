@@ -52,6 +52,18 @@ updated: 2026-07-06
 | [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | pdfminer 的 `CMapDB._load_data` 会读取 gzip pickle CMap；利用关键是让 PDF `/Encoding` 名称路径穿越到上传目录，并让恶意 gzip pickle 同时通过宽松 PDF 检测。 |
 | [D3CTF2019-ezupload-wp](../raw/web/D3CTF2019-ezupload-wp.md) | PHP unserialize 对象在析构阶段形成任意文件写；真正利用前要先解决相对路径失效和上传目录绝对路径定位，再把写文件能力推进到解析执行。 |
 | [D3CTF2025-d3model-wp](../raw/web/D3CTF2025-d3model-wp.md) | Web 服务加载不可信 `.keras` 模型，`keras.models.load_model` 读取 `config.json` 后解析类/函数路径；这是模型格式反序列化进入 Python 对象解析的代表案例。 |
+| [Bugku-Serial-Killer-wp](../raw/web/Bugku-Serial-Killer-wp.md) | Cookie 解码后是 PHP 序列化对象，`file` 属性进入 include；关键是同步长度字段并利用 URL 解码顺序绕过 `../` 过滤。 |
+| [D3CTF2021-non-rce-wp](../raw/web/D3CTF2021-non-rce-wp.md) | JDBC URL 黑名单竞态后触发 MySQL Connector/J 反序列化和 AspectJWeaver 文件写 gadget。 |
+| [D3CTF2021-pool-calc-wp](../raw/web/D3CTF2021-pool-calc-wp.md) | 多服务计算器分别暴露命令拼接、pickle、Swoole 和 Java RMI 反序列化，先按服务边界拆链。 |
+| [D3CTF2022-shorter-wp](../raw/web/D3CTF2022-shorter-wp.md) | Java 原生反序列化入口明确，关键是压缩 TemplatesImpl/ROME payload 长度。 |
+| [D3CTF2023-d3forest-wp](../raw/web/D3CTF2023-d3forest-wp.md) | Forest SSRF 响应会被 Fastjson 自动反序列化，先构造文件读取 gadget 和盲注反馈。 |
+| [D3CTF2023-ezjava-wp](../raw/web/D3CTF2023-ezjava-wp.md) | Sofa Hessian 和 Fastjson/Java 原生反序列化链组合，先绕黑名单再控制动态配置。 |
+| [HGAME2026-ezcc-wp](../raw/web/HGAME2026-ezcc-wp.md) | `userInfo` cookie Base64 后直接 Java 反序列化，commons-collections 3.2.1 黑名单只禁 InvokerTransformer；换 CC6/CC3 TemplatesImpl 链。 |
+| [LilacCTF2026-nailong-wp](../raw/web/LilacCTF2026-nailong-wp.md) | Pickle/PyTorch 模型加载执行链和扫描绕过，先确认反序列化入口、ZIP/CRC 信任边界和命令执行点。 |
+| [RCTF2025-maybe-easy-wp](../raw/web/RCTF2025-maybe-easy-wp.md) | Hessian 反序列化受包名前缀白名单限制；用 Spring/JNDI 辅助类和 PriorityQueue `compareTo` 触发 gadget。 |
+| [RCTF2025-rootkb-dash-wp](../raw/web/RCTF2025-rootkb-dash-wp.md) | 工具沙箱可连默认口令 Redis，Celery token key 使用 pickle 且类加载限制不足，写恶意 pickle 等管理员会话触发。 |
+| [VNCTF2026-black-coffee-wp](../raw/web/VNCTF2026-black-coffee-wp.md) | Java 原生反序列化 gadget 链，先确认编码层、触发类、TemplatesImpl/POJONode 等可用 gadget。 |
+| [VNCTF2026-more-black-coffee-wp](../raw/web/VNCTF2026-more-black-coffee-wp.md) | Java 反序列化继续加载内存马，先确认 FilterShell 注入点、触发链和容器运行时边界。 |
 
 ## 合并与拆分结论
 

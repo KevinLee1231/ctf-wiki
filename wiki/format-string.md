@@ -66,6 +66,14 @@ updated: 2026-06-12
 - [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
 - [pwn-tooling.md](pwn-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2019-unprintablev-wp](../raw/pwn/D3CTF2019-unprintablev-wp.md) | stdout 被关闭的格式化字符串题，先恢复输出或改 FILE 描述符再 leak/ORW。 |
+| [LilacCTF2026-chuantongxiangyan-wp](../raw/pwn/LilacCTF2026-chuantongxiangyan-wp.md) | 格式化字符串可控，先定义泄露、写入粒度和目标地址，再选择 GOT/返回地址/短写链。 |
+| [NCTF2026-checkin-wp](../raw/pwn/NCTF2026-checkin-wp.md) | `read` 后直接 `printf(buf)` 再 `_exit`，核心是格式串泄露/短写，利用 `_exit` GOT 或栈低字节把控制流循环起来。 |
+
 ## 原始资料
 
 - [format-string.md](../raw/pwn/format-string.md)

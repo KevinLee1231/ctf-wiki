@@ -75,6 +75,17 @@ updated: 2026-07-06
 | [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | 外层文件名过滤不含 `..` 不够，PDF 内部 `/Encoding` 名称仍可路径穿越到上传目录并触发解析器内部资源加载。 |
 | [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md) | 目标不是传统 HTTP SSRF，而是 RustDesk 受控端按 relay 消息主动连接 `127.0.0.1:6379`，再让可控 uuid 字段成为 Redis 协议内容。 |
 | [D3CTF2019-ezupload-wp](../raw/web/D3CTF2019-ezupload-wp.md) | 反序列化给出写文件能力后，真正瓶颈是用 `glob://` 爆破随机上传目录绝对路径，并用 `.htaccess` 改解析规则把文本文件推进到 PHP 执行。 |
+| [D3CTF2023-d3readfile-wp](../raw/misc/D3CTF2023-d3readfile-wp.md) | 任意文件读不知道 flag 路径时，先读取 locate 数据库并在本地搜索目标路径。 |
+| [ACTF2026-real-dlsite-wp](../raw/web/ACTF2026-real-dlsite-wp.md) | go-drive `CleanPath`/`Join` 不一致先拿 app RCE，再串 PHP open_basedir check/use race 和 StorageBox setuid TOCTOU 读 root flag。 |
+| [D3CTF2023-d3cloud-wp](../raw/web/D3CTF2023-d3cloud-wp.md) | laravel-admin 上传 zip 后拼接 unzip 命令，先控制文件名进入命令执行。 |
+| [D3CTF2023-d3go-wp](../raw/web/D3CTF2023-d3go-wp.md) | Go embed/static 目录穿越拿源码，再用 Gorm 软删除注入和 zip 解压覆盖 self-update。 |
+| [D3CTF2025-d3jtar-wp](../raw/web/D3CTF2025-d3jtar-wp.md) | jtar 文件名 Unicode 到 ASCII 转换造成后缀变化，先借备份/恢复把上传文件变成 JSP。 |
+| [HGAME2026-babyweb-wp](../raw/web/HGAME2026-babyweb-wp.md) | PHP 上传允许 .php/.htaccess 并可落 WebShell，先证明可控文件内容、解析规则和内网 pivot。 |
+| [HGAME2026-easyuu-wp](../raw/web/HGAME2026-easyuu-wp.md) | 可控目录列表找到更新包源码，上传后门 `path1` 可覆盖 `./update/easyuu`，再借自更新机制执行自定义程序。 |
+| [NCTF2026-n-minsite-wp](../raw/web/NCTF2026-n-minsite-wp.md) | MaxSite 源码可由 `/?key` 获取，后台上传入口只校验登录态；上传 HTML/JS 后诱导 bot 读取后台 flag。 |
+| [RCTF2025-514s-heart-wp](../raw/web/RCTF2025-514s-heart-wp.md) | Koishi 插件静态路由目录穿越先读配置拿后台密码，再用配置 `${{ ... }}` 表达式执行命令。 |
+| [SU_wmsWP](../raw/web/SU_wmsWP.md) | JEECG `/rest/*` 白名单放行且 Spring `params` 可由 POST body 命中后台方法；模板 ZIP 解压目录穿越写 JSP。 |
+| [VNCTF2026-markdown2world-wp](../raw/web/VNCTF2026-markdown2world-wp.md) | Pandoc 转 docx 时会读取 Markdown 图片目标并嵌入 `word/media/`；构造本地资源引用后解压 docx 取回文件内容。 |
 
 ## 原始资料
 

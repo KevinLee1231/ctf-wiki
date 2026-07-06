@@ -46,6 +46,11 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-wm-easynetlink-wp](../raw/pwn/WMCTF2025-wm-easynetlink-wp.md) | UAF 后只能向随机释放块随机偏移写随机值时，`bpf_array` 是可控大小的占位对象；污染 map value 后可借 BPF verifier 认知差异转成 AAR/AAW。 |
+| [D3CTF2019-knote-v1-v2-wp](../raw/pwn/D3CTF2019-knote-v1-v2-wp.md) | 内核 note 对象 UAF/堆布局是主线，先确认 slab 对象复用和提权目标。 |
+| [D3CTF2022-d3kheap-wp](../raw/pwn/D3CTF2022-d3kheap-wp.md) | 内核堆 UAF 与 msg_msg/pipe_buffer 等对象复用，先固定 slab 布局和提权写点。 |
+| [D3CTF2023-d3kcache-wp](../raw/pwn/D3CTF2023-d3kcache-wp.md) | 页级 UAF、buddy/slab/pipe_buffer 复用是主线，先把 page 到 pipe 的重分配稳定化。 |
+| [D3CTF2025-d3kheap2-wp](../raw/pwn/D3CTF2025-d3kheap2-wp.md) | 新版内核堆题继续围绕 UAF/page/slab 复用，先确认对象释放窗口和可控映射。 |
+| [D3CTF2025-d3kshrm-d3kshrm-revenge-wp](../raw/pwn/D3CTF2025-d3kshrm-d3kshrm-revenge-wp.md) | 共享内存 mmap fault 下标越界可映射相邻 struct page，先稳定伪造页表和内核任意映射。 |
 
 ## 合并与拆分结论
 

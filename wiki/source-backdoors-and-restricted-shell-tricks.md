@@ -63,6 +63,12 @@ updated: 2026-07-06
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
 - [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [RCTF2025-rootkb-wp](../raw/web/RCTF2025-rootkb-wp.md) | 工具沙箱目录可写且运行时固定 `LD_PRELOAD=sandbox.so`，覆盖共享库后靠 constructor 把 flag 移到 Web 静态目录。 |
+
 ## 原始资料
 
 - [source-backdoors-and-restricted-shell-tricks.md](../raw/misc/source-backdoors-and-restricted-shell-tricks.md)

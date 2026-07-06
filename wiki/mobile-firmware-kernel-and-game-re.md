@@ -67,6 +67,7 @@ updated: 2026-07-06
 | [HGAME2026-noncesense-wp](../raw/reverse/HGAME2026-noncesense-wp.md) | Client/driver 协议题要先枚举设备对象、IOCTL、nonce、token、blob 生命周期，再分析 AES/HMAC 或 VM 变换。 |
 | [D3CTF2025-d3kernel-wp](../raw/reverse/D3CTF2025-d3kernel-wp.md) | Windows kernel/userland 混合逆向要把 R3/R0 反调试、DeviceIoControl 分发表和驱动内 VM 分层处理。 |
 | [D3CTF2022-d3w0w-wp](../raw/reverse/D3CTF2022-d3w0w-wp.md) | WoW64 隐藏 64 位逻辑时，先 dump 或切换到正确位宽解析，再把方向序列约束转成 puzzle 求解。 |
+| [SU_old_binWP](../raw/reverse/SU_old_binWP.md) | 固件先 XOR 解包出 IMG0 容器，再修复损坏 ELF 和 TLS 布局；最后还原网络 challenge 与自定义块校验。 |
 
 ## 关联页面
 

@@ -64,6 +64,16 @@ updated: 2026-06-12
 - [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
 - [pwn-tooling.md](pwn-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [LilacCTF2026-bytezoo-wp](../raw/pwn/LilacCTF2026-bytezoo-wp.md) | 受限执行环境需要构造运行时读写/执行 primitive，先验证 mprotect、memmove 和二阶段 shellcode。 |
+| [RCTF2025-only-rev-wp](../raw/pwn/RCTF2025-only-rev-wp.md) | syscall stub 或运行时寄存器残留提供读写/执行入口，先验证可控寄存器、可写段和 shellcode 通道。 |
+| [RCTF2025-only-wp](../raw/pwn/RCTF2025-only-wp.md) | 浮点/机器码输入进入 syscall stub，先确认可执行内存、read primitive 和二阶段 shellcode。 |
+| [SU_evbufferWP](../raw/pwn/SU_evbufferWP.md) | TCP/UDP `inet_pton` 后全局溢出伪造 libevent `bufferevent/evbuffer` callback，seccomp 下栈迁移到 ORW。 |
+| [VNCTF2026-vm-syscall-wp](../raw/pwn/VNCTF2026-vm-syscall-wp.md) | VM `case4` 把 4 个寄存器映射到 syscall，但执行前清零 `r8/r9/r10`；绕过常规 `mmap`，用 `shmget/shmat` 放 `/bin/sh` 后 `execve`。 |
+
 ## 原始资料
 
 - [seccomp-ret2dlresolve-and-runtime-primitives.md](../raw/pwn/seccomp-ret2dlresolve-and-runtime-primitives.md)

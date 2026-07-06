@@ -83,6 +83,11 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | VMP/反调试阶段可用 TitanHide 或 CE VEH，断 `GetSystemTimeAsFileTime` 找 OEP 并用 Scylla dump；真正 flag 仍在后续 `.mp0` 解密结果里。 |
+| [Bugku-Roundabout-wp](../raw/reverse/Bugku-Roundabout-wp.md) | UPX/壳是首要边界，先脱壳或 dump 后再处理 XOR/key 与比较表。 |
+| [Bugku-week3_re2-wp](../raw/reverse/Bugku-week3_re2-wp.md) | UPX 脱壳后是 48 轮 XTEA 变体；`sum & 3` 与 `(sum >> 11) & 3` 决定 key 下标。 |
+| [D3CTF2025-locked-door-wp](../raw/reverse/D3CTF2025-locked-door-wp.md) | VMP 壳和反调试后还有 RSA 签名门，先脱壳定位 OEP，再替换公钥或重签 key。 |
+| [LilacCTF2026-kilogram-wp](../raw/reverse/LilacCTF2026-kilogram-wp.md) | VMP 外壳只是前置障碍；输出文件保存 salt、被口令 key 保护的本地 key 和 RC4-like flag 密文。 |
+| [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 |
 
 ## 原始资料
 

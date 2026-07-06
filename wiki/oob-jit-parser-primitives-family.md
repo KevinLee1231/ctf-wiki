@@ -64,6 +64,11 @@ updated: 2026-07-06
 |---|---|
 | [D3CTF2019-basic-basic-parser-wp](../raw/pwn/D3CTF2019-basic-basic-parser-wp.md) | 源码 parser 的 grammar token fuzz 暴露错误恢复路径 UAF；先用 ASan 定位对象生命周期，再量化 heap primitive 和退出阶段可控调用。 |
 | [D3CTF2021-easy-chrome-full-chain-wp](../raw/pwn/D3CTF2021-easy-chrome-full-chain-wp.md) | V8 bounds check 消除后的 OOB 不是终点，还要量化 addrof/fake_obj/ArrayBuffer 任意读写，并把 primitive 接到 Mojo sandbox escape。 |
+| [D3CTF2021-real-vmpwn-wp](../raw/pwn/D3CTF2021-real-vmpwn-wp.md) | 自定义 VM/解释器对象漏洞，先定义 VM 指令面到宿主内存 primitive。 |
+| [LilacCTF2026-elk-wp](../raw/pwn/LilacCTF2026-elk-wp.md) | 嵌入式 JS 引擎对象/属性和 NaN-boxing 形成调用原语，先定义伪造对象到 C 函数调用的 primitive。 |
+| [LilacCTF2026-na1vm-wp](../raw/pwn/LilacCTF2026-na1vm-wp.md) | 自定义 VM 任务队列 OOB 覆盖 `head/tail/size` 后控制寄存器和栈基址；任意写还要恢复 glibc `__exit_funcs` pointer mangling key。 |
+| [RCTF2025-no-check-wasm-wp](../raw/pwn/RCTF2025-no-check-wasm-wp.md) | V8/WASM 类型校验缺陷允许 `externref` 与 `i64` 互转，先构造 `addrOf/fakeObj`，再泄露栈和 RWX 页写 shellcode。 |
+| [SU_BoxWP](../raw/pwn/SU_BoxWP.md) | J2V8 内嵌 V8 9.3.345.11，先排除 Java 沙箱逃逸，再用 CVE-2021-38003 `JSON.stringify` hole 做 OOB/addrof/RWX wasm。 |
 
 
 ## 关联技巧

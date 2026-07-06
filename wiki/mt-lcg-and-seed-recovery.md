@@ -77,6 +77,17 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-guess-wp](../raw/web/WMCTF2025-guess-wp.md) | Web 注册接口连续返回 32 bit MT19937 输出，收集 624 个 `getrandbits(32)` 后预测鉴权 key；后半段需要回到 Web eval 逃逸。 |
+| [D3CTF2022-d3bug-wp](../raw/crypto/D3CTF2022-d3bug-wp.md) | LFSR 输出直接泄露移出位，剩余低位可转成 GF(2) 线性方程或 SAT/Z3。 |
+| [D3CTF2022-d3qcg-wp](../raw/crypto/D3CTF2022-d3qcg-wp.md) | 二次同余生成器只泄露高位，先把未知低位建成二元小根再恢复 PRNG 状态。 |
+| [D3CTF2025-d3guess-wp](../raw/crypto/D3CTF2025-d3guess-wp.md) | 带噪声猜数反馈要用概率二分收集输出，再恢复 MT19937 状态预测后续随机数。 |
+| [LilacCTF2026-noisy-forest-wp](../raw/crypto/LilacCTF2026-noisy-forest-wp.md) | Python MT bitstream 只以“中文字符是否 +9997”泄露；先用中文文本冗余恢复前缀，再从明密文差异克隆 MT19937 状态。 |
+| [NCTF2026-rng-game-wp](../raw/crypto/NCTF2026-rng-game-wp.md) | 服务给出 Python `random` 大整数 seed，目标是构造另一 seed；按 32-bit 分块利用 CPython seed 扩展阶段碰撞。 |
+| [RCTF2025-yet-another-mt-game-wp](../raw/crypto/RCTF2025-yet-another-mt-game-wp.md) | Sage `random_matrix(Zmod(mod))` 小模数路径泄露 GMP MT 31-bit 输出；用 GF(2) 线性系统恢复状态，再反推 GMP seed。 |
+| [RCTF2025-yet-another-shuffled-mt-game-wp](../raw/crypto/RCTF2025-yet-another-shuffled-mt-game-wp.md) | GMP MT 输出被 Python `random.shuffle` 置乱；先从少量输出恢复 128-bit Python seed 逆置乱，再复用 GMP MT 状态恢复。 |
+| [SU_PrngWP](../raw/crypto/SU_PrngWP.md) | 256-bit LCG 输出被“高低半 XOR + 按高位 ror”非线性包装；先恢复 rotation sequence/低半候选，再用 LCG 关系约束原 seed。 |
+| [VNCTF2026-hd-is-what-wp](../raw/crypto/VNCTF2026-hd-is-what-wp.md) | SIDH/SIKE 公钥向量先被公开 seed 的 LCG 矩阵线性混淆；恢复标准公钥后再用 Castryck-Decru attack 求共享 j。 |
+| [VNCTF2026-numberguesser-wp](../raw/crypto/VNCTF2026-numberguesser-wp.md) | 只有 10 次 hint 查询，但 Python `random.seed(os.urandom(8))` 可逆；选相隔 227 的输出 untemper/twist 反推 64-bit seed。 |
+| [VNCTF2026-schnorr-wp](../raw/crypto/VNCTF2026-schnorr-wp.md) | Schnorr 服务固定 seed 导致首轮承诺 `B` 跨连接重复；对同一 `B` 给两个 challenge，用 special soundness 相减提 witness。 |
 
 ## 原始资料
 

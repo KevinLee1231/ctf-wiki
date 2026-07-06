@@ -49,6 +49,17 @@ updated: 2026-07-06
 |---|---|
 | [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md) | `Lemon` 部分是模 `q^e` 上的重根多项式，普通 `.roots()`/Hensel 可能卡住；先通过求导保留高重数根，再结合 `Pepper` 的 p-adic 候选和 MCG 递推剪枝恢复状态。 |
 | [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md) | Fibonacci 模 `n` 的长和可用 Pisano period 压缩到一个周期内计算；求和下标要与题目代码一致，结果再回到 RSA 素数生成结构。 |
+| [ACTF2026-inverse-pow-wp](../raw/crypto/ACTF2026-inverse-pow-wp.md) | `2^n` 十进制前缀匹配可转成 `{n log10(2)}` 命中窄区间，先用固定点 BSGS/LLL 找足够小的 `n`。 |
+| [ACTF2026-pandora-wp](../raw/crypto/ACTF2026-pandora-wp.md) | 二次域 ideal / binary quadratic form 泄露判别式小数、`A` 高位和 `B`，先恢复判别式与 `A`，再做二元 Coppersmith 小根。 |
+| [D3CTF2019-noise-wp](../raw/crypto/D3CTF2019-noise-wp.md) | 带噪声取模 oracle 需要维护候选区间，构造固定商查询把随机噪声转成强收缩。 |
+| [HGAME2026-eezzdlp-wp](../raw/crypto/HGAME2026-eezzdlp-wp.md) | 矩阵 DLP 在 `n=p^2` 且 `det(a)=1` 时不能走行列式；改用特征值上的 p-adic log 和 Pohlig-Hellman 补低位。 |
+| [HGAME2026-ezdlp-wp](../raw/crypto/HGAME2026-ezdlp-wp.md) | 模合数矩阵 DLP 可先取行列式，把 `a^k=b` 降成 `det(a)^k=det(b)`，再分模数做 Pohlig-Hellman 和 CRT。 |
+| [LilacCTF2026-myblock-wp](../raw/crypto/LilacCTF2026-myblock-wp.md) | 8 轮 16-bit Feistel 的轮函数是 `GF(2^16)` 上低次多项式；用明密文样本建正向/反向基矩阵，枚举子密钥看秩下降。 |
+| [LilacCTF2026-nestdlp-wp](../raw/crypto/LilacCTF2026-nestdlp-wp.md) | 二元多项式商环 DLP 可转成乘法矩阵行列式上的 p-adic DLP；恢复指数后还要用 padding 汉明重量约束解明文。 |
+| [NCTF2026-encryption-wp](../raw/crypto/NCTF2026-encryption-wp.md) | pwn 后 dump `libcipher.so`，发现魔改 AES 的 S-box 被线性化；把整块加密建成 GF(2) 仿射变换矩阵再求逆。 |
+| [RCTF2025-f-l-and-ag-plusplus-wp](../raw/crypto/RCTF2025-f-l-and-ag-plusplus-wp.md) | 高次数拼接关系需要快速 resultant、CRT basis 和 Lagrange interpolation；恢复比例后再 rational reconstruction 拼回 flag。 |
+| [RCTF2025-suanp01y-wp](../raw/crypto/RCTF2025-suanp01y-wp.md) | 稀疏多项式满足 `hint = h1 * h0^{-1}` 于 `GF(2)[X]/(X^r-1)`；做 rational reconstruction 恢复分母，再枚举循环位移解 AES-CTR。 |
+| [LilacCTF2026-lambda-m-wp](../raw/reverse/LilacCTF2026-lambda-m-wp.md) | Lambda calculus/Scott encoding 只是表达层，真实语义是 GF(2^8) 有理函数插值；把 40 个点转成齐次线性方程组。 |
 
 ## 合并与拆分结论
 

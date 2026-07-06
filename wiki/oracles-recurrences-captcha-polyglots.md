@@ -54,6 +54,7 @@ updated: 2026-07-06
 | [HGAME2026-flux-wp](../raw/crypto/HGAME2026-flux-wp.md) | 4 个连续状态来自有限域二次递推；先 Groebner 消元恢复递推参数，再用 bit-vector SMT 反求自定义 hash key。 |
 | [NCTF2026-ezprotocol-wp](../raw/misc/NCTF2026-ezprotocol-wp.md) | 自定义协议的状态机比加密更关键：恢复 XOR payload 和 checksum 后，利用同连接认证状态拼接多 packet。 |
 | [SU_MirrorBus9WP](../raw/misc/SU_MirrorBus9WP.md) | 半双工协议可在 reset 态采样仿射映射；先解出能触发 CHAL 的 MIX 点，再利用固定 CHAL 对 16-bit `PROVE` checksum 分批穷举。 |
+| [LilacCTF2026-nestdlp-wp](../raw/crypto/LilacCTF2026-nestdlp-wp.md) | 二元多项式商环 DLP 可转成乘法矩阵行列式上的 p-adic DLP；恢复指数后还要用 padding 汉明重量约束解明文。 |
 
 ## 合并与拆分结论
 

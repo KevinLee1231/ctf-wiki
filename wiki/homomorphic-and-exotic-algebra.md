@@ -53,6 +53,10 @@ updated: 2026-07-06
 |---|---|
 | [SU_RestaurantWP](../raw/crypto/SU_RestaurantWP.md) | Tropical semiring 验证器只检查最终等式和 rank/range，可先构造目标矩阵 `T`，再让 `A/B/P/R/S` 把未知项压成同一结果。 |
 | [VNCTF2026-ezov-wp](../raw/crypto/VNCTF2026-ezov-wp.md) | UOV/OV 公钥二次型保留 oil-oil 零块结构；可恢复等价 vinegar/oil 子空间后固定 vinegar、解 oil 来伪造目标签名。 |
+| [ACTF2026-arrange-in-asceding-wp](../raw/crypto/ACTF2026-arrange-in-asceding-wp.md) | CKKS 排名题要在密文 slot 中打包 128x128 两两比较，靠旋转、Chebyshev 近似和 rescale 控制乘法深度。 |
+| [D3CTF2021-alice-want-flag-wp](../raw/crypto/D3CTF2021-alice-want-flag-wp.md) | ElGamal 乘法同态和长度 oracle 可逐位泄露密码，再结合短 key meet-in-the-middle。 |
+| [LilacCTF2026-bootstrapping-wp](../raw/crypto/LilacCTF2026-bootstrapping-wp.md) | 同态、配对或特殊代数结构暴露运算关系，先确认可组合操作和明文空间。 |
+| [RCTF2025-repairing-wp](../raw/crypto/RCTF2025-repairing-wp.md) | Pairing/ElGamal 风格密文可重随机化：同时改 `C1,C2,C3` 保持 shared key 不变，服务端未去重时可解出原 flag key。 |
 
 ## 常见陷阱
 

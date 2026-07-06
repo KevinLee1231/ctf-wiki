@@ -47,6 +47,10 @@ updated: 2026-07-06
 |---|---|
 | [WMCTF2025-palusimulator-wp](../raw/pwn/WMCTF2025-palusimulator-wp.md) | 异常处理产生可泄露的 0x90 chunk 后，先构造小 chunk 进入 0x90 tcache，再用 largebin attack 写栈上 `read` 长度变量，最后 tcache fd 指向栈布置 ORW ROP。 |
 | [D3CTF2019-new-heap-wp](../raw/pwn/D3CTF2019-new-heap-wp.md) | glibc 2.29 tcache key 检查、count 限制和 cross-bin overlap 共同决定路线；利用点不只是 double free，而是通过 consolidation/overlap 控制 tcache struct、stdout 和 hook 落点。 |
+| [HGAME2026-heap1sez-wp](../raw/pwn/HGAME2026-heap1sez-wp.md) | 自定义 malloc 注释掉 unlink 的 `fd/bk` 一致性检查，UAF 改 freed chunk 后走 unsafe unlink 和隐藏 `hook`。 |
+| [NCTF2026-ezheap-wp](../raw/pwn/NCTF2026-ezheap-wp.md) | 常规 IO 触发面被拿掉后仍可 largebin attack 改 `mp_.tcache_bins`，再用 tcache poisoning 做 AAR/AAW。 |
+| [Spirit2026-5-large-wp](../raw/pwn/Spirit2026-5-large-wp.md) | glibc 2.39 只给 largebin 尺寸堆块，UAF 泄露后用 largebin attack 改 `g_f`，绕过 SHSTK/IBT/GOT 路线。 |
+| [SU_minivfsWP](../raw/pwn/SU_minivfsWP.md) | VFS 风格接口背后是 glibc 2.41 largebin/off-by-null/overlap 堆利用，先稳定 libc/heap leak 和 chunk 布局。 |
 
 ## 合并与拆分结论
 

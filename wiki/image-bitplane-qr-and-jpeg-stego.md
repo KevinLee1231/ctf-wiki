@@ -53,6 +53,9 @@ updated: 2026-07-06
 | [HGAME2026-shiori不想找女友-wp](../raw/misc/HGAME2026-shiori不想找女友-wp.md) | EXIF 中的 JSON 参数直接描述像素抽样网格；先按 `start/step/column` 重排隐藏图像，再处理恢复出的线索。 |
 | [HGAME2026-invest-on-matrix-wp](../raw/misc/HGAME2026-invest-on-matrix-wp.md) | 题面给出的矩阵不是代数约束，而是 QR 小块；按 `5x5` block 和编号顺序拼回二维码后再扫码。 |
 | [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md) | 图片末尾黑白格按固定像素步长转 bitstream，图像阶段只负责稳定提取 192-bit ENT，后续 BIP39 checksum/seed 交给 crypto 长尾结构页。 |
+| [D3CTF2022-badw3ter-wp](../raw/misc/D3CTF2022-badw3ter-wp.md) | 图片图层、黑底 QR 和隐写链组合，先分离图层/背景再恢复二维码或图像隐藏信息。 |
+| [D3CTF2023-d3image-wp](../raw/misc/D3CTF2023-d3image-wp.md) | 图像/二维码/摩斯或像素模式是主线，先分离颜色层、定位图案再恢复可读编码。 |
+| [D3CTF2025-d3image-wp](../raw/misc/D3CTF2025-d3image-wp.md) | 图像块变换和隐写编码可逆，先抽出块顺序/颜色关系再写正反向恢复脚本。 |
 
 ## 常见陷阱
 

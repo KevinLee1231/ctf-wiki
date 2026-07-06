@@ -66,6 +66,12 @@ updated: 2026-06-12
 - [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md)
 - [web-tooling.md](web-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [RCTF2025-auth-wp](../raw/web/RCTF2025-auth-wp.md) | Node IdP 中 `parseInt(false)` 与 MySQL `TINYINT` 存储语义不一致可注册 admin，再利用 SP XML Signature Wrapping 让业务读取未签名 Assertion。 |
+
 ## 原始资料
 
 - [oauth-saml-cors-and-cicd.md](../raw/web/oauth-saml-cors-and-cicd.md)

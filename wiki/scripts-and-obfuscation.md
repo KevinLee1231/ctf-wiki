@@ -51,6 +51,7 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md) | `.eml` 发票催收附件中的 SVG 同时承载视觉诱饵和 JavaScript；分析时先解 MIME/base64，再还原脚本映射表、XOR/key 和诱饵 flag。 |
+| [D3CTF2021-baby-spear-wp](../raw/reverse/D3CTF2021-baby-spear-wp.md) | 隐藏 VBA 宏释放 PE 并用时间派生 AES key，先恢复 Office 宏流和 staged payload。 |
 
 ## 常见陷阱
 

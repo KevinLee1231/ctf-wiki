@@ -65,6 +65,16 @@ updated: 2026-07-06
 - [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
 - [xml-command-and-graphql-injection.md](xml-command-and-graphql-injection.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-tinj-wp](../raw/web/ACTF2026-tinj-wp.md) | JPHP/Jetty 字符字节转换绕过路由后进入 eval、JAR/classloader 和内存马链，先确认运行时边界。 |
+| [Bugku-Serial-Killer-wp](../raw/web/Bugku-Serial-Killer-wp.md) | Cookie 解码后是 PHP 序列化对象，`file` 属性进入 include；关键是同步长度字段并利用 URL 解码顺序绕过 `../` 过滤。 |
+| [D3CTF2019-fake-onelinephp-wp](../raw/web/D3CTF2019-fake-onelinephp-wp.md) | Windows PHP 文件包含可走 WebDAV/SMB 远程包含，再从 git 和内网凭据继续 pivot。 |
+| [D3CTF2021-happy-valentines-day-wp](../raw/web/D3CTF2021-happy-valentines-day-wp.md) | 模板/SSTI 语义是主入口，先确认 Java/模板上下文和可达命令执行对象。 |
+| [VNCTF2026-signin-wp](../raw/web/VNCTF2026-signin-wp.md) | PHP `include` 可控且过滤 `php://filter` 常见写法，先用短 `data:,<?=...` 伪协议构造执行内容。 |
+
 ## 原始资料
 
 - [php-lfi-ssti-ssrf-and-type-juggling.md](../raw/web/php-lfi-ssti-ssrf-and-type-juggling.md)

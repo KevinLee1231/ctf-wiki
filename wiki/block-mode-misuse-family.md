@@ -73,6 +73,21 @@ updated: 2026-07-06
 - [llm-attacks.md](llm-attacks.md)
 - [crypto-tooling.md](crypto-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [NCTF2026-encryption-wp](../raw/crypto/NCTF2026-encryption-wp.md) | pwn 后 dump `libcipher.so`，发现魔改 AES 的 S-box 被线性化；把整块加密建成 GF(2) 仿射变换矩阵再求逆。 |
+| [SU_AESWP](../raw/crypto/SU_AESWP.md) | AES 服务允许分别更新 seed/key，导致当前 S-box 与旧 round keys 不同步；先把 S-box 压成常值恢复 `K10`，再用 probe 值域指纹恢复置换。 |
+| [Bugku-EasyVT-wp](../raw/reverse/Bugku-EasyVT-wp.md) | `EasyVT.sys` 模拟 VT-x，驱动 VM-exit handler 只是调度壳；核心校验是 TEA 变体和 RC4，优先静态恢复 handler switch。 |
+| [Bugku-JustRe-wp](../raw/reverse/Bugku-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 |
+| [Bugku-week1_re4-wp](../raw/reverse/Bugku-week1_re4-wp.md) | 识别 TEA 常量 `0x9e3779b9`、4 个 32-bit key 和 32 轮 Feistel；按反编译的 key 下标反向解密。 |
+| [Bugku-week4_re2-wp](../raw/reverse/Bugku-week4_re2-wp.md) | AES-128-ECB 校验，key 为 `00..0f`，输入 42 字节但比较 48 字节说明最后 block 零填充。 |
+| [HGAME2026-marionette-wp](../raw/reverse/HGAME2026-marionette-wp.md) | 父进程用 `ptrace` 调度子进程 `int3; ret` block；hook 记录 RIP trace 后，还原输入差分和 AES-NI 校验。 |
+| [LilacCTF2026-c-plus-plus-plus-plus-wp](../raw/reverse/LilacCTF2026-c-plus-plus-plus-plus-wp.md) | C# Native AOT 中 `XEngine` 是 Twofish-like 16 轮 Feistel；先按 RS/MDS、40 个 round key 和 whitening 恢复固定 key/IV。 |
+| [SU_flumelWP](../raw/reverse/SU_flumelWP.md) | Flutter/Dart 输入先经 `Rc4Warp`，再由新版 `libjunk.so` 验证 Hermes bundle 并派生 AES-CBC key/IV；旧 placeholder 会误导。 |
+| [SU_protocolWP](../raw/reverse/SU_protocolWP.md) | HTTP 路由很薄，body 先 hex 再进私有协议帧；区分格式错、比较失败和 block 变换后再反推 payload。 |
+
 ## 原始资料
 
 - [aes-modes-mac-and-oracles.md](../raw/crypto/aes-modes-mac-and-oracles.md)

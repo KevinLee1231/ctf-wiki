@@ -64,6 +64,12 @@ updated: 2026-07-06
 - [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md)
 - [web-tooling.md](web-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [SU_jdbc-masterWP](../raw/web/SU_jdbc-masterWP.md) | Unicode 长 `ſ` 绕过 `/suctf` 路径过滤后，可控 JDBC driver/URL 走 Kingbase `ConfigurePath` 与 Spring XML beans 无外连加载。 |
+
 ## 原始资料
 
 - [xml-command-and-graphql-injection.md](../raw/web/xml-command-and-graphql-injection.md)

@@ -64,6 +64,12 @@ updated: 2026-06-12
 - [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
 - [misc-tooling.md](misc-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [NCTF2026-what-a-mess-wp](../raw/misc/NCTF2026-what-a-mess-wp.md) | 表格字段被 Unicode、全角、零宽字符和格式变体污染，先做规范化、白名单和校验位统计。 |
+
 ## 原始资料
 
 - [exotic-encodings-and-file-formats.md](../raw/misc/exotic-encodings-and-file-formats.md)

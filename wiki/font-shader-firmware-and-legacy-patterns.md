@@ -60,6 +60,12 @@ updated: 2026-07-06
 - [anti-analysis.md](anti-analysis.md)
 - [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2019-c-c-wp](../raw/misc/D3CTF2019-c-c-wp.md) | 私用区字符依赖动态加载字体，先脱壳跟进字体 hook 并 dump 解密后的字体资源。 |
+
 ## 原始资料
 
 - [font-shader-firmware-and-legacy-patterns.md](../raw/reverse/font-shader-firmware-and-legacy-patterns.md)

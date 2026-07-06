@@ -63,6 +63,12 @@ updated: 2026-07-06
 - [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
 - [crypto-tooling.md](crypto-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [Bugku-week2_re2-wp](../raw/reverse/Bugku-week2_re2-wp.md) | Go `math/big` 调用链是 RSA 校验；重点是提取 `n/c/e` 并注意 `SetString` 的 base 参数，密文是八进制。 |
+
 ## 原始资料
 
 - [rsa-attacks.md](../raw/crypto/rsa-attacks.md)

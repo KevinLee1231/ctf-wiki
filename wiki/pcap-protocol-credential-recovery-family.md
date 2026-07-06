@@ -58,6 +58,8 @@ updated: 2026-07-06
 |---|---|
 | [SU_LightNovelWP](../raw/forensics/SU_LightNovelWP.md) | AD/Kerberos/NTLM + TSCH 流量应先按 conversation 和 stream 定位认证握手，再用恢复出的凭据/会话密钥解 RPC stub，最后把计划任务 XML 与 PowerShell/AES 逻辑交给 Windows artifact 路线。 |
 | [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md) | ESP-NOW 捕获不能直接把整帧当密文；先定位 vendor frame 和应用层 magic，再按 `seq`、`total`、IV、AES-CBC 密文切块重组 PNG。 |
+| [D3CTF2021-easy-quantum-wp](../raw/misc/D3CTF2021-easy-quantum-wp.md) | PCAP 中传输 pickle/numpy 量子态和测量基，先按流量结构恢复 BB84 密钥再异或密文。 |
+| [D3CTF2021-robust-wp](../raw/misc/D3CTF2021-robust-wp.md) | HTTP/3/QUIC 流量和媒体信号混合，先重组网络层数据，再转频谱或 payload 提取。 |
 
 ## 常见陷阱
 

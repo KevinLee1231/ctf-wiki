@@ -59,6 +59,12 @@ updated: 2026-07-06
 - [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [HGAME2026-my-little-assistant-wp](../raw/web/HGAME2026-my-little-assistant-wp.md) | MCP 工具只暴露 `py_request`，但 Playwright 禁用 Web 安全后外部页面可请求 localhost MCP JSON-RPC 调用 `py_eval`。 |
+
 ## 原始资料
 
 - [Spirit2026-5-flowforge-wp.md](../raw/web/Spirit2026-5-flowforge-wp.md)

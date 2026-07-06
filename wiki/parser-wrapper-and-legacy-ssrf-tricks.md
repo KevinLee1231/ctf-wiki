@@ -48,6 +48,10 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | 上传服务只过滤保存文件名，但 pdfminer 会按 PDF 内部 Type0 字体 `/Encoding` 去拼 CMap 路径；内部名称的路径穿越比外层上传名更关键。 |
+| [ACTF2026-aaa26-wp](../raw/web/ACTF2026-aaa26-wp.md) | Mongo `$regex` 盲注恢复 reviewer invite code，vm2 里用 Buffer slab 泄露 JWT secret，伪造 admin 后上传伪 PDF/SVG 让 ImageMagick `text:/flag` 渲染。 |
+| [D3CTF2025-tidy-quic-wp](../raw/web/D3CTF2025-tidy-quic-wp.md) | HTTP/3/QUIC ContentLength 与实际 body 不一致叠加脏缓冲池，先复现请求体污染绕 WAF。 |
+| [HGAME2026-文文新闻-wp](../raw/web/HGAME2026-文文新闻-wp.md) | Vite 任意文件读取先拿路径和后端源码，再利用代理不清理 TE、后端只信 Content-Length 的 CL/TE 差异做请求走私。 |
+| [VNCTF2026-markdown2world-wp](../raw/web/VNCTF2026-markdown2world-wp.md) | Pandoc 转 docx 时会读取 Markdown 图片目标并嵌入 `word/media/`；构造本地资源引用后解压 docx 取回文件内容。 |
 
 ## 合并与拆分结论
 

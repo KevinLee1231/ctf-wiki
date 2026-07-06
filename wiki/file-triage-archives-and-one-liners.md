@@ -62,6 +62,13 @@ updated: 2026-06-12
 - [web-and-dns.md](web-and-dns.md)
 - [misc-tooling.md](misc-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-questionnaire-wp](../raw/misc/ACTF2026-questionnaire-wp.md) | 问卷反馈型签到没有技术利用链，先确认交互流程和返回页面，不要误挖不存在的附件。 |
+| [Bugku-week4_re3-wp](../raw/reverse/Bugku-week4_re3-wp.md) | `.exe` 扩展名是干扰项；无 `MZ` magic 且内容是文本时，先按文件首检/明文 artifact 处理。 |
+
 ## 原始资料
 
 - [file-triage-archives-and-one-liners.md](../raw/misc/file-triage-archives-and-one-liners.md)
