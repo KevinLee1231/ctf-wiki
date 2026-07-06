@@ -1516,3 +1516,12 @@
 - 合并机械传播中产生的重复“来自 WP 的案例索引”章节，并统一将案例索引放在“原始资料”之前，保持页面结构一致。
 - 本轮不修改 raw 正文，不新增 wiki 页面，不调整 index 入口；index 已覆盖所有被修改页面。
 - 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-single-ref-next-hop-propagation-20260706-213828.zip`。
+
+## 2026-07-06 — 最终语义健康检查与入口层优化
+
+- 全量检查 `wiki/*.md` 的 type、长度、raw 引用、wiki 内部入链和出链：当前 138 个 wiki 页均为 `family`、`technique` 或 `tooling`，没有 index 之外的孤立页面。
+- 页面划分结论：不做强制合并或拆分。多数具体技术名页面虽然标为 `family`，但承担二级分流和失败 pivot；低入链的 3 个 technique 已由父 family 明确指向，保留窄技巧页比合并更利于查询。
+- Raw 支撑结论：修正 Windows 路径归一后确认 504 篇 raw Markdown 均至少被一个 wiki 页引用；本轮未发现需要补入但完全未引用的 raw，也未发现 raw 无法支撑页面主张的高风险项。
+- 导航层次优化：在 `index.md` 增加“方向入口速查”表，把 AI/ML、Crypto、Web、Pwn、Reverse、Forensics、Misc、OSINT、Pentest、Malware 的首轮 family 与 tooling 页显式列出，减少 agent 从长索引线性扫描的成本。
+- 本轮不修改 raw 正文，不新增/删除 wiki 页面，不同步 skill；调整只影响 index 查询入口和维护记录。
+- 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-final-semantic-health-tuning-20260706-215816.zip`。

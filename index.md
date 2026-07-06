@@ -27,6 +27,23 @@
 | `technique` | 具体可复用技巧、攻击模式、恢复路径或判断模型。负责适用场景、识别信号、最小证据、解法骨架和常见坑。 | 可以挂 raw，作为案例和证据来源。 |
 | `tooling` | 工具入口、环境限制、稳定调用方式和常见失败状态。 | 只挂工具资料或与工具调用直接相关的 raw。 |
 
+## 方向入口速查
+
+当题目方向已经初步明确时，优先从下表入口进入对应 family，再按页面内“路由表 / 分流流程 / 关联技巧”跳转；只有工具调用、环境路径或失败状态不清楚时再读 tooling 页。
+
+| 方向 | 首轮入口 | 工具入口 | 适用边界 |
+|---|---|---|---|
+| AI / ML | [ml-model-inference-extraction-and-weight-analysis.md](wiki/ml-model-inference-extraction-and-weight-analysis.md)、[adversarial-ml.md](wiki/adversarial-ml.md)、[llm-attacks.md](wiki/llm-attacks.md) | [ai-ml-tooling.md](wiki/ai-ml-tooling.md) | 模型权重、logits、query extraction、adversarial/poisoning、prompt/tool 注入。 |
+| Crypto | [crypto-parameter-triage-family.md](wiki/crypto-parameter-triage-family.md) | [crypto-tooling.md](wiki/crypto-tooling.md) | 参数、密文、oracle、PRNG、签名、格/数论/对称模式尚需分流。 |
+| Web | [web-first-pass-triage-and-chain-patterns.md](wiki/web-first-pass-triage-and-chain-patterns.md) | [web-tooling.md](wiki/web-tooling.md) | HTTP 应用、认证、浏览器 bot、解析器差异、内部服务或漏洞链。 |
+| Pwn | [pwn-first-pass-red-flags-and-protections.md](wiki/pwn-first-pass-red-flags-and-protections.md) | [pwn-tooling.md](wiki/pwn-tooling.md) | 二进制、libc/heap/ROP、kernel、sandbox、JIT/VM primitive 和保护组合。 |
+| Reverse | [reverse-first-pass-workflow-and-debugging.md](wiki/reverse-first-pass-workflow-and-debugging.md) | [reverse-tooling.md](wiki/reverse-tooling.md) | 载体识别、语言运行时、VM/obfuscation、平台/固件/硬件和动态调试。 |
+| Forensics | [cross-domain-forensics-technique-map.md](wiki/cross-domain-forensics-technique-map.md) | [forensics-tooling.md](wiki/forensics-tooling.md) | 文件、PCAP、磁盘/内存、媒体隐写、日志、信号和容器恢复。 |
+| Misc | [misc-cross-category-triage-family.md](wiki/misc-cross-category-triage-family.md) | [misc-tooling.md](wiki/misc-tooling.md) | 编码、jail、游戏/规则系统、DNS/RF/物理谜题和跨方向边界题。 |
+| OSINT | [osint-account-public-media-correlation.md](wiki/osint-account-public-media-correlation.md)、[geolocation-and-media.md](wiki/geolocation-and-media.md)、[web-and-dns.md](wiki/web-and-dns.md) | [osint-tooling.md](wiki/osint-tooling.md) | 公开账号、地理/媒体、DNS/历史网页和可复查公开证据链。 |
+| Pentest | [pentest-attack-chains-and-tunneling.md](wiki/pentest-attack-chains-and-tunneling.md)、[linux-privesc.md](wiki/linux-privesc.md) | [pentest-tooling.md](wiki/pentest-tooling.md) | 凭据、服务枚举、隧道、横向移动和 Linux 本机提权。 |
+| Malware | [scripts-and-obfuscation.md](wiki/scripts-and-obfuscation.md)、[pe-and-dotnet.md](wiki/pe-and-dotnet.md)、[malware-c2-session-key-and-protocol-recovery.md](wiki/malware-c2-session-key-and-protocol-recovery.md) | [malware-tooling.md](wiki/malware-tooling.md) | 脚本/包载荷、PE/.NET、shellcode、配置提取、C2 协议和会话恢复。 |
+
 ## Family Pages
 
 | Family | 方向 | 用途 |
