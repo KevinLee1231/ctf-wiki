@@ -1,16 +1,16 @@
 ---
 type: family
-tags: [crypto, family, prng, mt19937, lcg, seed-recovery]
-skills: [ctf-crypto]
+tags: [crypto, web, family, prng, mt19937, lcg, seed-recovery]
+skills: [ctf-crypto, ctf-web]
 raw:
   - ../raw/crypto/mt-lcg-and-seed-recovery.md
   - ../raw/web/WMCTF2025-guess-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # MT, LCG and Seed Recovery
 
-## 适用场景
+## 作用边界
 
 题目核心是从弱随机数恢复 seed、内部状态或下一轮输出，常见于抽奖、guess game、token/key 生成、nonce 生成、密码学包装层和 Web 鉴权流程。
 
@@ -30,14 +30,14 @@ updated: 2026-06-12
 - seed 来源与枚举窗口，例如秒级时间戳、固定用户名、短 flag 前缀或可复现服务启动时间。
 - 一个正向校验点：预测下一次输出、复算 token、通过签名验证或还原明文。
 
-## 解法骨架
+## 分流流程
 
 1. 先把 raw 输出统一成 PRNG 原始输出或约束：整数、bit、float mantissa、模后余数、被 XOR 的 keystream。
 2. 判断能否直接状态恢复；能直接恢复时不要先上 Z3/格。
 3. 如果输出不足、截断、打乱或带业务反馈，再转入 [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md)。
 4. 用恢复出的 seed/state 预测最短下一步，并回到原题业务链做正向验证。
 
-## 关键变体
+## PRNG 路线分流
 
 | 变体 | 触发证据 | 处理路线 |
 |---|---|---|
@@ -49,6 +49,12 @@ updated: 2026-06-12
 | V8 `Math.random()` | Node/Chrome 服务用 `Math.random()` 生成 token。 | 按 V8 XorShift128+ 和 cache 顺序反推 state，注意输出缓存方向。 |
 | chaotic / middle-square / flag-derived RNG | seed 空间小、状态退化或由 flag 字节确定。 | 先找不变量和退化周期，再 bounded brute force 或 hill climbing。 |
 | PRNG 喂给 DSA/ECDSA nonce | 签名随机数由弱 PRNG 产生。 | 先恢复 k 或 k 的约束，再转 [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)。 |
+
+## 合并与拆分结论
+
+- 保留为 family：MT19937、C `rand()`、LCG、V8 `Math.random()`、时间种子和 weak nonce 的实现不同，但首轮都要判断输出是否足够直接恢复 seed/state。
+- 不与 [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md) 合并：本页处理“可直接或近直接状态恢复”的路线，后者处理 partial output、timing、SMT、格式串写状态等需要外部约束补齐的路线。
+- 不拆成 MT/LCG/V8 小页：当前 raw 更适合作为 PRNG 二级分流；若某一类积累多个独立 raw，再拆具体 technique。
 
 ## 常见陷阱
 

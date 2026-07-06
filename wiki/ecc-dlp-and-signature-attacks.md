@@ -4,12 +4,12 @@ tags: [crypto, family, ecc, dlp, signature, nonce]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/ecc-dlp-and-signature-attacks.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # ECC DLP and Signature Attacks
 
-## 适用场景
+## 作用边界
 
 题目核心是曲线群、DLP、签名 nonce、small subgroup、invalid curve、异常曲线、同源/配对或 DSA/ECDSA/Schnorr 类签名关系。它是 crypto 首轮分流后的 ECC/签名 family 页，不是单一攻击技巧页。
 
@@ -27,14 +27,14 @@ updated: 2026-06-12
 - 如果是签名问题，要保留消息哈希算法、签名格式和每个签名的 `(r, s, h)`。
 - 如果是曲线结构问题，要先验证点合法性、阶、cofactor 和是否退化到更简单群。
 
-## 解法骨架
+## 分流流程
 
 1. 先做参数体检：曲线是否标准、阶是否 smooth、基点是否正确、点是否在曲线上。
 2. DLP 路线先看群阶分解和可降维结构；签名路线先写出 nonce 方程。
 3. 有 oracle 时先构造最小查询，确认是 small subgroup、invalid curve、torsion side channel 还是普通验证差异。
 4. 得到候选私钥/nonce 后，用签名验证、标量乘或共享密钥派生做正向复算。
 
-## 关键变体
+## ECC / 签名路线分流
 
 | 变体 | 触发证据 | 处理路线 |
 |---|---|---|
@@ -45,6 +45,12 @@ updated: 2026-06-12
 | partial / biased nonce | nonce 高位/低位泄露、短 nonce、PRNG nonce 或 timing 泄露。 | 写 HNP/EHNP 关系，转 [lattice-and-lwe.md](lattice-and-lwe.md) 或 PRNG 页补状态。 |
 | hash-collision generated k | nonce 派生依赖 MD5/SHA 碰撞或弱 hash。 | 先转 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) 固定碰撞关系，再回签名方程。 |
 | shared prime / modulus factor | 多个曲线或签名参数共享素因子。 | GCD 先做参数恢复，再进入 DLP/签名路线。 |
+
+## 合并与拆分结论
+
+- 保留为 family：曲线参数体检、DLP、invalid/singular/anomalous curve、small subgroup 和签名 nonce 恢复的第一步判断不同，但都围绕曲线群或签名方程的结构缺陷。
+- 不并入 [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)：ECC/签名题需要先处理点合法性、群阶、cofactor、签名格式和 nonce 方程，和一般数论代数页的入口证据不同。
+- 不拆成 DLP、invalid curve、signature nonce 三个 technique：当前页面承担 Crypto triage 的二级分流；具体 HNP/格、PRNG nonce 或 hash collision 会继续转到相邻页面。
 
 ## 常见陷阱
 

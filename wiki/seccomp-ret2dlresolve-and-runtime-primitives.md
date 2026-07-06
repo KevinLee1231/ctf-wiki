@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 如果主要问题是先拿控制流，回到 [overflow-basics.md](overflow-basics.md)、[format-string.md](format-string.md) 或 heap 页面；如果主要问题是换栈/SROP/ROP gadget 组织，转 [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)。
 
-## 共同识别信号
+## 识别信号
 
 - `seccomp-tools dump` 或反汇编显示 syscall allowlist/denylist，`execve`、`open`、`read`、`write` 或 `mprotect` 受限。
 - 已有可控 RIP、ROP、shellcode、任意读写、GOT 写、BSS 写或格式串写，但最终能力受运行时限制。

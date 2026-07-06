@@ -4,14 +4,16 @@ tags: [forensics, misc, hid, audio, video, physical-signal, family]
 skills: [ctf-forensics, ctf-misc]
 raw:
   - ../raw/misc/keyboard-mouse-audio-and-physical-puzzles.md
-updated: 2026-06-13
+updated: 2026-06-18
 ---
 
 # Keyboard, Mouse, Audio and Physical Puzzles
 
-## 适用场景
+## 作用边界
 
-本页是物理/外设信号恢复 family。题目依赖人机输入轨迹、物理运动、音频/视频可视信号或外设协议，而不是传统编码本身。典型目标是把“动作记录”还原成文字、图形、坐标序列或频率序列。
+本页是物理/外设信号恢复 family。题目依赖人机输入轨迹、物理运动、音频/视频可视信号或外设协议还原后的事件序列，而不是传统编码本身。典型目标是把“动作记录”还原成文字、图形、坐标序列或频率序列。
+
+边界在于“动作/信号语义还原”：如果证据仍停留在 USB URB、HID report、Bluetooth RFCOMM 或 report descriptor 层，先转 [peripheral-capture.md](peripheral-capture.md) 解析字段；本页处理解析后的坐标、按键、频率、帧和物理轨迹。
 
 ## 识别信号
 
@@ -26,19 +28,19 @@ updated: 2026-06-13
 - 至少可视化一小段轨迹或频谱，证明数据承载信息而不是噪声。
 - 能区分移动、点击、抬笔、静音、空闲模式等状态。
 
-## 解法骨架
+## 分流流程
 
 1. 先转成表格：时间戳、事件类型、数值字段、状态字段。
-2. USB HID：解析 report，累加相对位移，按 click falling edge 取点，必要时叠加屏幕键盘图。
+2. USB HID：若仍是 PCAP/report，先用 [peripheral-capture.md](peripheral-capture.md) 解析字段；本页继续处理相对位移累加、click falling edge 取点和屏幕键盘映射。
 3. 音频：先生成频谱图；若像调制信号再转 forensics/RF 页面，若像音符则提主频映射字符。
 4. 视频/物理：用 OpenCV 跟踪关键点，过滤真正打印/按压/亮灯帧，再画 2D 轨迹或时序。
 5. 对输出做 OCR/QR/人工读图，必要时旋转、缩放、反色。
 
-## 关键变体
+## 信号路线分流
 
-| 变体 | 复用重点 |
+| 信号形态 | 下一跳判断 |
 |---|---|
-| USB Mouse PCAP | `dx/dy` 累加成绝对坐标；点击边沿决定有效点。 |
+| USB mouse 轨迹 | `dx/dy` 已从 report 中提取后，累加成绝对坐标；点击边沿决定有效点。 |
 | Audio spectrogram | `sox audio.wav -n spectrogram` 先看是否有可视文本或频率编码。 |
 | 3D printer video | 跟踪喷头/床位置，过滤挤出动作，把轨迹投影成文字。 |
 | LED/Morse/按键时序 | 用 on/off 持续时间聚类成点、划、分隔。 |
@@ -52,11 +54,12 @@ updated: 2026-06-13
 
 ## 关联技巧
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
-- [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
+- [peripheral-capture.md](peripheral-capture.md)
+- [signals-and-hardware.md](signals-and-hardware.md)
+- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
+- [3d-printing.md](3d-printing.md)
+- [rf-sdr.md](rf-sdr.md)
+- [video-document-and-media-stego.md](video-document-and-media-stego.md)
 
 ## 原始资料
 

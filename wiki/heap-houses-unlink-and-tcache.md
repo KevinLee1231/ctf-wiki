@@ -16,7 +16,7 @@ updated: 2026-06-12
 
 它不是单一 heap technique。首轮要先判断 libc/allocator、漏洞 primitive、chunk 大小、bin 状态、safe-linking、可泄露地址和最终落点，再决定走 unlink、tcache poisoning、FSOP、largebin、top chunk、custom allocator 还是 runtime handler。
 
-## 共同识别信号
+## 识别信号
 
 - 有堆溢出、off-by-one null、UAF、double free、越界写、可控 free 顺序或自定义 allocator。
 - 可影响 chunk header、tcache fd、unsorted/largebin metadata、top chunk、FILE 结构、wide data、atexit handler 或 allocator meta。

@@ -4,7 +4,8 @@ tags: [forensics, family, stego, pdf, png, gif, svg, text]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/pdf-png-gif-and-text-stego.md
-updated: 2026-06-12
+  - ../raw/misc/HGAME2026-redacted-wp.md
+updated: 2026-07-06
 ---
 
 # PDF, PNG, GIF and Text Stego
@@ -15,7 +16,7 @@ updated: 2026-06-12
 
 如果核心已经是像素位平面、JPEG DCT、QR 重建或图像拼图，优先转到 [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)。如果核心是音频频谱、SSTV、DTMF 或压缩包嵌套，转到对应媒体/文件页面。
 
-## 共同识别信号
+## 识别信号
 
 - 文件类型是 PDF、PNG/APNG、GIF、SVG、MP4/MKV、spreadsheet、terminal capture、ANSI art 或看似普通文本。
 - `file` 识别正常但视觉内容太干净、帧数异常、chunk/object/stream 结构异常、metadata 异常、EOF 后有数据或容器内有多 stream。
@@ -39,6 +40,12 @@ updated: 2026-06-12
 | SVG/terminal/text 视觉正常但原始文本异常 | 直接看 XML/ANSI/Kitty escape 原始字节，排除渲染器隐藏、微坐标和不可见字符。 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
 | 视频容器看似无关 | 先 `ffprobe` 列所有 stream，尝试 `-map 0:N` 提取非默认视频/字幕/附件。 | [video-document-and-media-stego.md](video-document-and-media-stego.md) |
 | spreadsheet/文本频率或多层交织 | 先统计唯一值、频率、行列/字节交织，再判断是否恢复二进制、图像或压缩包。 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) |
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [HGAME2026-redacted-wp](../raw/misc/HGAME2026-redacted-wp.md) | PDF 脱敏题先区分视觉遮挡、文本对象残留、ToUnicode/CMap 字体反复制和增量保存历史版本；不要只跑 `strings` 或截图 OCR。 |
 
 ## 合并与拆分结论
 
@@ -67,3 +74,4 @@ updated: 2026-06-12
 ## 原始资料
 
 - [pdf-png-gif-and-text-stego.md](../raw/forensics/pdf-png-gif-and-text-stego.md)
+- [HGAME2026-redacted-wp.md](../raw/misc/HGAME2026-redacted-wp.md)

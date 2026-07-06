@@ -4,12 +4,16 @@ tags: [osint, family, account-correlation, public-media]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/social-media.md
-updated: 2026-06-11
+  - ../raw/osint/SU_CyberTrackWP.md
+  - ../raw/misc/RCTF2025-speak-softly-love-wp.md
+  - ../raw/misc/RCTF2025-wanna-feel-love-wp.md
+  - ../raw/misc/SU_SigninWP.md
+updated: 2026-07-06
 ---
 
 # OSINT Account and Public Media Correlation
 
-## 适用场景
+## 作用边界
 
 题目要求从公开账号、主页、历史记录、公开媒体、游戏平台、邮箱头像、代码提交、社交平台或时间线中定位身份、地点、flag-like 字符串或下一跳线索。本页是 OSINT 身份链 family，核心不是“社媒搜索”本身，而是把多个公开身份节点连成可验证证据链。
 
@@ -27,7 +31,7 @@ updated: 2026-06-11
 - 对会变化的平台内容，优先查快照、镜像、archive、commit history 或公开 API。
 - 能说明当前结果是 flag、下一跳线索，还是需要回到媒体/文件取证继续处理。
 
-## 解法骨架
+## 分流流程
 
 1. 把题面所有可见实体拆成账号、域名、邮箱、媒体、时间和文本片段。
 2. 先查稳定来源：Git commit、站点快照、公开 API、团队页、历史昵称，再查易变化社媒页面。
@@ -35,9 +39,9 @@ updated: 2026-06-11
 4. 对每个节点记录证据来源；遇到媒体文件时交给相邻的地理/媒体/隐写页面继续验证。
 5. 最后只提交能被复查的 flag-like 字符串或明确下一跳，不把猜测当结论。
 
-## 关键变体
+## 账号证据路线分流
 
-| 变体 | 复用重点 |
+| 公开证据形态 | 关联判断 |
 |---|---|
 | 多平台账号关联 | 用户名、头像、邮箱、个人主页和平台 ID 相互佐证；不要只凭一个昵称命中就下结论。 |
 | GitHub / commit / 博客链 | commit、issue、README、历史页面和博客外链常保留删除前线索，先查历史再查当前页面。 |
@@ -79,3 +83,7 @@ updated: 2026-06-11
 ## 原始资料
 
 - [social-media.md](../raw/osint/social-media.md)
+- [SU_CyberTrackWP](../raw/osint/SU_CyberTrackWP.md)
+- [RCTF2025-speak-softly-love-wp](../raw/misc/RCTF2025-speak-softly-love-wp.md)
+- [RCTF2025-wanna-feel-love-wp](../raw/misc/RCTF2025-wanna-feel-love-wp.md)
+- [SU_SigninWP](../raw/misc/SU_SigninWP.md)

@@ -13,9 +13,9 @@ updated: 2026-06-12
 
 本页是底层存储和内存恢复 family，覆盖删除分区、ZFS/APFS/HFS+/GPT、VMDK sparse、minidump/core dump、memory key carving、RAID5 XOR、TrueCrypt/VeraCrypt、SQLite/Kyoto Cabinet 历史、BSON 重组和压缩 blob 检测。
 
-它不负责选择取证载体；载体入口先看 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。本页负责已经确认要做文件系统、分区、内存 dump 或 RAID 级恢复后的具体路由。
+它不负责选择取证载体；载体入口先看 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。本页负责已经确认要做分区、RAID、VMDK sparse、minidump/core dump、内存 key carving 或底层文件系统结构恢复后的具体路由。若问题已经缩小到某个可挂载文件系统内的删除文件、损坏压缩包、ZipCrypto 或结构化文件恢复，转 [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 文件系统结构损坏、分区表缺失、GUID/元数据异常、快照/版本历史、RAID 成员缺失、VMDK sparse 或 minidump 字符串可见。
 - 明文不在当前目录树，而在已删除分区、快照、resource fork、resident MFT、内存环境变量、数据库 diff 或 RAID parity 中。
@@ -37,12 +37,12 @@ updated: 2026-06-12
 | Windows minidump、core dump、memory string carving | 先判断 dump 类型和进程，再提取环境变量、key、路径和内存文件 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
 | 勒索脚本/恶意样本 key 在内存中 | 先提取 key 和算法，再转 malware/crypto 解密 | [scripts-and-obfuscation.md](scripts-and-obfuscation.md), [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
 | RAID5/XOR、缺盘恢复 | 先确定成员顺序、chunk size、parity 方向，再重建文件系统 | [forensics-tooling.md](forensics-tooling.md) |
-| TrueCrypt/VeraCrypt 高熵卷或 keyfile | 先确认卷大小和上下文线索，再尝试密码/keyfile/隐藏卷 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
+| TrueCrypt/VeraCrypt 高熵卷或 keyfile | 先确认卷大小、卷头状态和上下文线索，再尝试密码/keyfile/隐藏卷；若进入卷内文件恢复，转归档/文件系统页 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md), [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
 | SQLite/Kyoto Cabinet/BSON/diff history | 先解析记录结构和顺序，再重建历史内容 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
 
 ## 合并与拆分结论
 
-本页保留为 family，并与 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) 分工：前者是底层恢复路线，后者是载体选择入口。当前不拆分 RAID、minidump、ZFS、TrueCrypt 等小页，因为 raw 仍以短案例集合为主。
+本页保留为 family，并与 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) 分工：本页是底层恢复路线，后者是载体选择入口。它也不并入 [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)：后者处理已进入文件/归档层后的修复与恢复。当前不拆分 RAID、minidump、ZFS、TrueCrypt 等小页，因为 raw 仍以短案例集合为主。
 
 ## 常见陷阱
 

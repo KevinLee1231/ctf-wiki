@@ -1,10 +1,10 @@
 ---
 type: family
-tags: [osint, family, web, dns, archive, public-index]
+tags: [osint, family, public-web, dns, archive, public-index]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/web-and-dns.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Web and DNS OSINT
@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 如果需要登录、利用 Web 漏洞或内网打点，应转 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md) 或 Pentest；如果线索已经变成账号身份链，转 [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 题目给出域名、URL、公开文档、仓库、用户名、邮箱、服务指纹、SSH/TLS fingerprint、TXT/SPF 记录、历史页面或搜索关键词。
 - 目标是找到公开暴露的 flag、历史版本、真实作者、关联域名、隐藏目录、公开服务位置或被索引的敏感内容。

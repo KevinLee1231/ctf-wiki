@@ -2,31 +2,32 @@
 type: tooling
 tags: [pwn, tooling, tools, environment]
 skills: [ctf-pwn]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Pwn Tooling
 
 本页记录 `ctf-pwn` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - 首轮以 `file`、`checksec`、`gdb/pwndbg`、`pwntools`、`ROPgadget/ropper`、`seccomp-tools` 为主。
 - Python exploit 默认在 `ctf-tools` 中执行；需要调试时用 WSL system-global GDB + pwndbg。
 - Kernel/system/qemu 题可能长时间运行，启动服务、编译 rootfs 或跑大量 fuzz 前要先确认。
 
-### 知识页覆盖状态
+### 不应进入 Pwn 工具链的情况
 
-- 当前覆盖栈、格式串、heap、kernel、seccomp、JIT/OOB、cross-arch、sandbox 和长尾 primitives。
-- 缺口主要在新 glibc heap 版本细节、CET/Shadow Stack、browser/JIT 现代利用链和更多 kernel race 实例。
+- 主障碍仍是理解算法、壳、VM、协议或文件格式时，先转 Reverse/Forensics，不急着写 exploit。
+- 没有崩溃、越界、格式化输出、任意读写、syscall 过滤或 sandbox primitive 时，不把普通 binary 题归入 Pwn。
+- browser/JIT、kernel/QEMU 和沙箱题需要先确认运行环境和最小触发，不直接跑长时间 fuzz。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- glibc 2.35+ heap：tcache hardening、safe-linking、IO_FILE 变化。
-- CET/IBT/Shadow Stack 下的控制流替代路线。
-- Kernel exploit lab：KASLR/KPTI/SMEP/SMAP、userfaultfd 替代、modprobe_path 变化。
+- raw 涉及 glibc 2.35+ heap、safe-linking、IO_FILE 变化，并能抽出稳定调试步骤。
+- CET/IBT/Shadow Stack 影响控制流劫持，需要记录替代路线和工具限制。
+- kernel exploit 题出现 KASLR/KPTI/SMEP/SMAP、userfaultfd 替代或 modprobe_path 变化。
 
 ## 本机工具清单（按使用时机）
 
@@ -49,6 +50,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有明显缺口。PWN 这套已经足够完整，后续更值得优化的是 libc 数据库和题型脚手架，而不是继续堆基础工具。
+
+## 失败信号与转向
+
+- `checksec` 和 crash 信息不足以判断漏洞族：先最小化输入并转 [pwn-first-pass-red-flags-and-protections.md](pwn-first-pass-red-flags-and-protections.md)，不要直接拼 ROP。
+- GDB 本地可打通但远程失败：优先核对 libc、PIE base、I/O 同步、超时和环境变量；若是保护组合问题，转 [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)。
+- `one_gadget`、ROPgadget 或 ropper 无可用链：回到 primitive 质量，判断是否需要 leak、栈迁移、ret2dlresolve、SROP、FSOP 或 heap 路线。
+- kernel/QEMU/namespace 题跑不稳：先记录启动脚本、initramfs、保护位和调试改动，再转 [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md) 或 [kaslr-kpti-smep-and-kernel-debugging.md](kaslr-kpti-smep-and-kernel-debugging.md)。
 
 ## 详细清单
 

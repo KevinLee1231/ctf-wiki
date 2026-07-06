@@ -6,7 +6,7 @@ raw:
   - ../raw/reverse/android-games-hardware-and-runtime-platforms.md
   - ../raw/reverse/WMCTF2025-appfriend-wp.md
   - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Android, Games, Hardware and Runtime Platforms
@@ -16,6 +16,20 @@ updated: 2026-06-12
 本页是运行时平台 family，负责把 Android/APK、Flutter、Unity/Godot/Roblox、Electron/Node、硬件描述、SGX、AS/400、Glulx 等“平台先于算法”的逆向题分流到具体分析路线。它不再作为单一 technique 使用。
 
 如果题目已经明确是语言运行时对象、Python 字节码、固件/内核驱动或反调试，应从本页转入对应 family / technique。
+
+## 识别信号
+
+- 附件是 APK/IPA、Flutter bundle、Unity/Godot/Roblox/RPG Maker 资源、Electron/Tauri 包、SGX/legacy 平台文件或硬件描述。
+- 静态入口只负责 UI、资源加载或桥接调用，真实校验可能在 native `.so`、engine plugin、脚本资源、运行时 patch 或平台 API 中。
+- 题目需要先处理平台格式、资源索引、反射元数据、JNI/FFI 边界、hook 点或运行环境，才能讨论算法。
+- 同一输入在 UI 层、脚本层、native 层或资源层之间被多次转换。
+
+## 最小证据
+
+- 明确载体格式、运行平台、架构、入口组件和真实校验可能所在层。
+- 至少记录一条从用户输入到校验函数/资源/插件/native 调用的数据流。
+- 如果依赖动态 hook，要保存 hook 位置、参数、返回值和触发条件，而不是只给最终 patch。
+- 如果是游戏/资源题，要能说明资源、脚本、存档和 native 插件谁控制最终状态。
 
 ## 首轮路由
 

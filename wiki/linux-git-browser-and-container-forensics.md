@@ -5,7 +5,8 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/linux-git-browser-and-container-forensics.md
   - ../raw/misc/WMCTF2025-githacker-wp.md
-updated: 2026-06-12
+  - ../raw/misc/ACTF2026-ezssh-wp.md
+updated: 2026-07-06
 ---
 
 # Linux, Git, Browser and Container Forensics
@@ -16,7 +17,7 @@ updated: 2026-06-12
 
 它不替代磁盘/内存入口页，也不替代 Pentest 横向移动页。当前任务仍是“从已有 artifacts 恢复证据”时用本页；如果已拿到可用凭据并开始登录、隧道或提权，转到 [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md) 或 [linux-privesc.md](linux-privesc.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 附件包含 `.git/`、Docker image tar、`manifest.json`、`blobs/sha256`、Linux `/var/log`、shell history、Chrome/Firefox profile、KeePass `.kdbx`、deleted source、Python 进程或浏览器 SQLite。
 - 题面提示 rollback、squash、history、cache、container layer、Docker build secret、browser password、Local Storage、KeePass、bash history、deleted file but process still running。
@@ -47,6 +48,7 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 | 对应路线 |
 |---|---|---|
 | [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md) | `git log` 被回滚隐藏时，`git reflog` 可恢复关键提交、密码文件和被删除容器；后续还可能需要按文件格式继续恢复。 | Git reflog + dangling object + 后续文件识别 |
+| [ACTF2026-ezssh-wp](../raw/misc/ACTF2026-ezssh-wp.md) | SSH 横向链中 `.bash_history`、`authorized_keys`、Debian 弱 key、Git dangling commit 和 systemd backup unit 各提供一段凭据或配置。 | SSH/Git/backup artifact 串联 |
 
 ## 合并与拆分结论
 
@@ -77,3 +79,4 @@ updated: 2026-06-12
 
 - [linux-git-browser-and-container-forensics.md](../raw/forensics/linux-git-browser-and-container-forensics.md)
 - [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md)
+- [ACTF2026-ezssh-wp](../raw/misc/ACTF2026-ezssh-wp.md)

@@ -2,31 +2,32 @@
 type: tooling
 tags: [crypto, tooling, tools, environment]
 skills: [ctf-crypto]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Crypto Tooling
 
 本页记录 `ctf-crypto` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - 小脚本和对称/哈希实验默认走 `ctf-tools`；数论、格、ECC、Coppersmith 和 Sage 专属能力走 `sage` 环境。
 - RsaCtfTool、HashClash 属于专项全路径/独立项目工具，必须按本页路径调用，不要假设全局命令可用。
 - FactorDB MCP 是 RSA 模数首轮判断工具；先查可分解性，再决定是否进入 Sage/RsaCtfTool。
 
-### 知识页覆盖状态
+### 不应进入 Crypto 工具链的情况
 
-- 当前覆盖 RSA、ECC、lattice/LWE、PRNG、流/分组密码、哈希 oracle、ZKP/secret sharing 等主线。
-- 缺口主要在真实协议复合题：TLS/JWT/签名协议和 Web/parser differential 的交叉边界，需要继续用跨 skill 链接表达。
+- 只有 Base64、hex、压缩、图片像素或文件容器异常时，先按 Misc/Forensics 处理，不先套密码分析。
+- JWT、JSON parser、签名接口或 TLS transcript 同时出现时，先保留请求/协议证据，再决定 crypto 方程是否真是主障碍。
+- Sage/LLL/Z3 只是“能跑”的工具，不是首轮默认答案；没有变量界和可复算方程时先回到 triage family。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- 现代签名误用：EdDSA/ECDSA nonce、BLS、aggregate signatures。
-- 协议型 crypto：KDF、AEAD associated data、handshake transcript。
-- 侧信道：timing/power/cache 题若增多，应独立成技巧页并链接 forensics。
+- raw 出现 EdDSA/ECDSA nonce、BLS、aggregate signature，且需要固定工具链复现。
+- 协议型题目需要 KDF、AEAD associated data、handshake transcript 的可复算脚手架。
+- timing/power/cache 证据足够具体时，工具边界应同时链接 Crypto 与 Forensics。
 
 ## 本机工具清单（按使用时机）
 
@@ -51,6 +52,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有明显缺口。Crypto 这套更需要按题型切换工具，而不是继续堆更多默认依赖。
+
+## 失败信号与转向
+
+- FactorDB、gcd、低指数和近似平方根都无结果：先回到 [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) 重列参数、未知量和可复算方程，不要盲跑 Sage。
+- Sage/LLL/Z3 长时间无解：检查变量界、泄露位宽、模数和方程是否对应真实代码；格问题转 [lattice-and-lwe.md](lattice-and-lwe.md)，PRNG 约束转 [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md)。
+- RsaCtfTool 没覆盖：判断是否是 specialized prime/oracle/padding/fault，而不是继续换自动工具；转 [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)。
+- 证据来自 Web token、JSON parser、签名接口或 PCAP：保留 crypto 方程，但把请求/协议层转到 Web、Forensics 或 Pentest 对应 family。
 
 ## 详细清单
 

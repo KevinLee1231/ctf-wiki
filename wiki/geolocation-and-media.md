@@ -4,7 +4,8 @@ tags: [osint, family, geolocation, media, imagery]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/geolocation-and-media.md
-updated: 2026-06-12
+  - ../raw/osint/LilacCTF2026-sky-is-ours-wp.md
+updated: 2026-07-06
 ---
 
 # Geolocation and Media Analysis
@@ -15,7 +16,7 @@ updated: 2026-06-12
 
 如果核心是公开账号/社媒身份链，转 [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md)；如果核心是域名、DNS、历史网页或公开索引，转 [web-and-dns.md](web-and-dns.md)；如果媒体文件本身存在隐写，转 forensics 媒体页面。
 
-## 共同识别信号
+## 识别信号
 
 - 题目给出照片、视频、街景截图、坐标、地标、路牌、语言、建筑风格、商品/硬件外观、地图片段、EXIF 或 IP。
 - 目标是地点、城市、具体坐标、拍摄方向、时间、设备/产品型号或从地点得到的编码 key。
@@ -66,9 +67,9 @@ updated: 2026-06-12
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
-| [LilacCTF2026-sky-is-ours-wp](../raw/osint/LilacCTF2026-sky-is-ours-wp.md) | 图片、轨迹、公开媒体或社交线索，先保存证据图、查询 URL 和交叉验证路径。 | [geolocation-and-media.md](geolocation-and-media.md) |
-| [SU_CyberTrackWP](../raw/osint/SU_CyberTrackWP.md) | 博客、GitHub、邮箱头像、Minecraft 昵称和社交平台线索串联，先保存每个公开身份节点和哈希/邮箱证据。 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) |
+| [LilacCTF2026-sky-is-ours-wp](../raw/osint/LilacCTF2026-sky-is-ours-wp.md) | 机翼涂装、桥梁/海岸轮廓和题面日期共同收敛航班；先用地点、航空公司和日期三类证据交叉验证。 | [osint-tooling.md](osint-tooling.md) |
 
 ## 原始资料
 
 - [geolocation-and-media.md](../raw/osint/geolocation-and-media.md)
+- [LilacCTF2026-sky-is-ours-wp.md](../raw/osint/LilacCTF2026-sky-is-ours-wp.md)

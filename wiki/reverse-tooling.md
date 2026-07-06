@@ -2,31 +2,32 @@
 type: tooling
 tags: [reverse, tooling, tools, environment]
 skills: [ctf-reverse]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Reverse Tooling
 
 本页记录 `ctf-reverse` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - 普通 binary 首选 Ghidra MCP；Ghidra 未启动时只能得到有限桥接能力，启动并打开项目后再使用完整分析工具。
 - 首轮仍先用 `file`、`strings`、`capa`、`objdump/readelf` 定性，不要直接进入重型符号执行。
 - Python bytecode、Android、firmware、跨架构和 Windows/.NET 各有专用入口，按本页路径调用。
 
-### 知识页覆盖状态
+### 不应进入 Reverse 工具链的情况
 
-- 当前覆盖普通逆向、动态调试、VM/壳、Python/bytecode、Go/Rust/JVM、硬件/firmware、Windows kernel 和多道近期 WP。
-- 后续缺口主要是 Mach-O/iOS、Swift/Objective-C、Unity/IL2CPP、更多 VM handler lifting 和自动化 trace 模板。
+- 已经确认漏洞 primitive、远程交互和内存破坏路线时，转 Pwn，不把 exploit 阶段写成 RE。
+- 证据主要是磁盘/PCAP/metadata/媒体恢复时，先转 Forensics。
+- Web、协议或认证链是主障碍时，先转 Web/Pentest，Reverse 只处理其中的本地组件。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- Ghidra MCP workflow：实例连接、函数命名、手动 create function、trace 证据保存。
-- Mobile/game：IL2CPP metadata、Unity assets、Android native/Java 交叉。
-- VM/obfuscation：handler table、dispatcher、trace slicing、IR lifting。
+- raw 暴露 Ghidra MCP 连接、函数命名、手动 create function 或 trace 保存的稳定流程。
+- Mobile/game 题需要 IL2CPP metadata、Unity assets、Android native/Java 交叉工具链。
+- VM/obfuscation 题需要 handler table、dispatcher、trace slicing 或 IR lifting 的可复用步骤。
 
 ## 本机工具清单（按使用时机）
 
@@ -50,6 +51,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有明显基础缺口。RE 这里真正更重要的是保持 Ghidra MCP 的连接流程和项目能力说明准确。
+
+## 失败信号与转向
+
+- Ghidra/反编译伪代码不可读：回到汇编、字符串、交叉引用和运行时断点；若是 VM/壳/SMC，转 [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) 或 [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)。
+- 程序一运行就退出、检测调试器或时间环境：先转 [anti-analysis.md](anti-analysis.md)，不要继续换反编译器。
+- 只差最终输入但比较点可断：转 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)，优先抓明文 buffer 或最终比较参数。
+- 目标依赖完整系统调用、rootfs、跨架构环境或固件：转 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md) 或 [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)。
 
 ## 详细清单
 

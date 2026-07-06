@@ -4,7 +4,7 @@ tags: [reverse, crypto, dynamic-debugging, breakpoint, symmetric-checker, xxtea]
 skills: [ctf-reverse, ctf-crypto]
 raw:
   - ../raw/reverse/Spirit2026-5-xxxtea-wp.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Compare Breakpoint Plaintext Recovery
@@ -63,8 +63,6 @@ updated: 2026-05-21
 | Raw WP | 可复用联系 |
 |---|---|
 | [Spirit2026-5-xxxtea-wp](../raw/reverse/Spirit2026-5-xxxtea-wp.md) | 复杂 XXXTEA 外观下程序先解出明文再比较，长度门槛满足后断在最终比较点即可。 |
-| [ACTF2026-flagchecker-wp](../raw/reverse/ACTF2026-flagchecker-wp.md) | 复杂校验题先找最终比较/输出前的中间 buffer，再决定是否需要完整还原算法。 |
-| [SU_LockWP](../raw/reverse/SU_LockWP.md) | 当运行时状态已经出现明文或等价中间值，优先 dump 并正向复核，不要只依赖静态推导。 |
 
 ## 原始资料
 

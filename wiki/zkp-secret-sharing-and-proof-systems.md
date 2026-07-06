@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 它不是“用 Z3 解题”的 technique。首轮要判断证据属于约束求解、电路元数据泄露、可信设置错误、nullifier 未约束、pairing oracle、秘密分享系数复用，还是签名协议/阈值协议中的结构错误。
 
-## 共同识别信号
+## 识别信号
 
 - 题目给出 proof、verifier、circuit、witness、commitment、share、pairing 点、garbled table、Z3 约束或可查询 verifier oracle。
 - 验证通过与否比密文本身更重要，攻击目标可能是 forge proof、recover witness、recover key、重放 proof 或重构 secret。

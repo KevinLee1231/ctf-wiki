@@ -4,12 +4,12 @@ tags: [crypto, family, prng, z3, lcg, timing, constraint-solving]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/prng-z3-lcg-and-timing-attacks.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # PRNG Z3, LCG and Timing Attacks
 
-## 适用场景
+## 作用边界
 
 PRNG 证据已经明确，但直接状态恢复不够：输出被截断、打乱、折叠、取模、混入业务反馈，或解题依赖 Z3 求解时间、网络时间、格式串写入等跨方向信号。
 
@@ -28,14 +28,14 @@ PRNG 证据已经明确，但直接状态恢复不够：输出被截断、打乱
 - 变量规模可估计，能判断适合 Z3、MITM、线性代数、格或直接枚举。
 - 至少一个用于筛选候选状态的外部校验点，例如签名验证、下一轮随机数、服务响应时间或 uuid/token 复算。
 
-## 解法骨架
+## 分流流程
 
 1. 把每个观察值写成状态变量上的约束，不急着选 solver。
 2. 先做线性化检查：GF(2)、LCG 逆推、差分求模数能解决时，不要使用重型 SMT。
 3. 变量较少或含非线性条件时再上 Z3；如果约束来自 timing，先测量阈值稳定性。
 4. 状态恢复后回到原领域：签名 nonce 进 ECC/DSA，格式串进 Pwn，网络时间进 Forensics/Web。
 
-## 关键变体
+## 约束与 Timing 路线分流
 
 | 变体 | 触发证据 | 处理路线 |
 |---|---|---|
@@ -47,6 +47,12 @@ PRNG 证据已经明确，但直接状态恢复不够：输出被截断、打乱
 | randcrack-fed DSA | PRNG 可预测签名 nonce 或 nonce 片段。 | PRNG 部分恢复后转 [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)。 |
 | 格式串影响 seed/状态 | Pwn primitive 可改写全局随机状态、赌注或时间偏移。 | 先用 [format-string.md](format-string.md) 获得写原语，再回到 PRNG 预测。 |
 | NTP/UUID/time poisoning | 网络时间或 UUID 结构泄露随机状态。 | 先确认流量和时间源，再转 [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) 补证据。 |
+
+## 合并与拆分结论
+
+- 保留为 family：partial output、Z3 solve-time oracle、LCG modulo、LFSR parity、格式串改状态和时间/UUID poisoning 的共同点是 PRNG 证据需要外部约束补齐。
+- 不并入 [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)：直接状态恢复和“约束补状态”的首轮问题不同；本页的关键是先把反馈写成状态变量上的约束。
+- 不拆成 Z3、timing、LCG 小页：目前这些模式经常作为同一条链的不同补证方式出现，保留在 family 中更利于 pivot。
 
 ## 常见陷阱
 

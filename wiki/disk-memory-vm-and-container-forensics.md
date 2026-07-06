@@ -13,9 +13,9 @@ updated: 2026-06-12
 
 本页是磁盘、内存、虚拟机、容器和云存储取证 family。它负责判断证据源是完整镜像、内存快照、VM/快照、core dump、Android 备份、Docker layer、云 bucket、BSON/数据库碎片还是勒索脚本残留。
 
-它与 [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) 的区别：本页偏载体入口和取证流程选择；后者偏底层文件系统、RAID、minidump、VMDK sparse 和具体恢复模式。
+它与相邻页的区别：本页偏载体入口和取证流程选择；[filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) 偏底层文件系统、RAID、minidump、VMDK sparse 和具体恢复模式；[filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) 偏进入文件/归档层之后的修复、删除恢复、ZipCrypto 和结构化文件恢复。
 
-## 共同识别信号
+## 识别信号
 
 - 附件是 `.raw`、`.img`、`.dd`、`.vmdk`、`.ova`、`.vmem`、`.vmss`、core dump、Android backup、Docker image/layer、KAPE collection 或云存储导出。
 - flag 藏在历史状态、已删除文件、环境变量、进程内存、容器层、构建命令、数据库碎片或勒索脚本 key 中。
@@ -33,6 +33,7 @@ updated: 2026-06-12
 | 证据形态 | 首轮判断 | 下一跳 |
 |---|---|---|
 | 完整磁盘镜像、分区表、删除文件 | 先只读挂载和分区识别，再决定 filesystem/recovery 工具 | [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) |
+| 可挂载文件系统内的删除文件、损坏压缩包、ZipCrypto | 载体已经清楚，重点是文件/归档层恢复 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
 | 内存 dump、VM snapshot、core dump | 先判断 Volatility profile/OS/进程，再做 strings、filescan、mft、环境变量或进程提取 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
 | OVA/VMDK/VMDK sparse、VMware snapshot | 先展开容器并识别磁盘/内存组件，不要只看外层 tar | [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) |
 | Docker image/layer、container diff、history | 先看 layer.tar、whiteout、history、ENV/ARG 和删除文件 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |

@@ -2,31 +2,32 @@
 type: tooling
 tags: [misc, tooling, tools, environment]
 skills: [ctf-misc]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Misc Tooling
 
 本页记录 `ctf-misc` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - `ctf-misc` 是后备方向，不应在主障碍明显属于 Web/Pwn/Reverse/Crypto/Forensics 时抢先使用。
 - 首轮用轻量脚本、编码工具、约束求解和文件 triage；需要专业 RF/音频/图像能力时再查对应技巧页。
 - Jail 题优先枚举允许语法和可用 builtin，不要先上爆破。
 
-### 知识页覆盖状态
+### 不应进入 Misc 工具链的情况
 
-- 当前覆盖 pyjail、bash jail、RF/SDR、DNS、编码、esolang、交互容器、物理谜题和轻量 solver。
-- 缺口主要是游戏/图形类谜题、OCR/字体谜题、浏览器小游戏状态机与更多交互协议。
+- 已经有 HTTP、binary、crypto equation、PCAP/磁盘镜像或漏洞利用主线时，先转对应专项。
+- “看起来杂”但需要真实服务攻击、反编译或密码学推导时，不要用 Misc 掩盖主障碍。
+- 只有一次性剧情、flag 猜测或手工观察，不沉淀成 Misc 工具入口。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- Game/state puzzle：WebSocket、WASM、canvas、存档格式。
-- OCR/font/unicode：字体映射、组合字符、同形异义。
-- Solver patterns：SAT/ILP/SMT、递推、博弈状态搜索。
+- raw 给出 WebSocket/WASM/canvas/存档格式等游戏状态机，并且工具链可复用。
+- OCR、字体映射、组合字符或同形异义成为主要证据，而非一次性观察。
+- SAT/ILP/SMT、递推或博弈搜索需要固定输入建模和失败判断。
 
 ## 本机工具清单（按使用时机）
 
@@ -51,6 +52,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有明显缺口。Misc 更需要守住“不是默认入口”的边界，而不是继续扩容。
+
+## 失败信号与转向
+
+- 文件首检出现明确 Web/Pwn/Reverse/Crypto/Forensics 信号：立即转对应专项，不要把 Misc 当默认桶。
+- 编码/QR/条码工具无结果：保存原始字节和中间图像，再转 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)、[exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) 或图像/媒体取证页面。
+- Jail 或 sandbox 只能得到部分输出：先记录可用语法、builtin、fd、错误回显和过滤阶段，再转 [pyjails.md](pyjails.md)、[bashjails.md](bashjails.md) 或 [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)。
+- Z3/SAT/搜索脚本无解：检查变量域、位宽、目标函数和反馈 oracle；若状态递推或验证码反馈更强，转 [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)。
 
 ## 详细清单
 

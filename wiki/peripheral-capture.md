@@ -11,7 +11,9 @@ updated: 2026-06-12
 
 ## 作用边界
 
-本页是外设流量和输入设备取证 family，覆盖 USB HID 键盘/鼠标/手写笔、LED Morse、方向键路径、Bluetooth RFCOMM、GBA USB interrupt framebuffer 等。它负责把 PCAP/usbmon/蓝牙/URB 记录恢复成按键、轨迹、帧缓冲或交互序列。
+本页是外设流量和输入设备取证 family，覆盖 USB HID 键盘/鼠标/手写笔、LED output report、方向键路径、Bluetooth RFCOMM、GBA USB interrupt framebuffer 等。它负责把 PCAP/usbmon/蓝牙/URB 记录恢复成按键、轨迹、帧缓冲或交互序列。
+
+边界在于“协议/report 解析”：如果原始证据是视频、音频、物理运动轨迹，或者已经从 capture 中提取出按键/坐标序列，后续读图、读频谱、读动作应转 [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md)。
 
 ## 识别信号
 
@@ -31,8 +33,8 @@ updated: 2026-06-12
 |---|---|---|
 | USB keyboard HID | report byte、modifier、keycode 和 release 事件 | 映射 keycode，处理 shift/caps |
 | USB mouse/pen | X/Y 相对或绝对坐标、button 状态 | 累加轨迹并绘图 |
-| LED output report | Caps/Num/Scroll 状态变化时间 | 转 Morse/二进制序列 |
-| Arrow key navigation | 方向键序列和起点/地图 | 重放路径或恢复图案 |
+| LED output report | Caps/Num/Scroll 状态变化时间 | 先提取 on/off 序列；若只剩节奏/视频读码，转 [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md) |
+| Arrow key navigation | 方向键序列和起点/地图 | 先恢复输入序列；若需要重放地图或画图，转 [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md) |
 | Bluetooth RFCOMM | L2CAP/RFCOMM 重组和 payload 方向 | 提取串口文本或文件 |
 | GBA/USB framebuffer | interrupt payload 是否为像素/瓦片数据 | 按尺寸和色深重组图像 |
 
@@ -40,6 +42,7 @@ updated: 2026-06-12
 
 - 保留为 family：外设 capture 的共同点是 report/帧/事件重组，而不是某个单一协议。
 - 不合并进 `signals-and-hardware.md`：硬件页处理物理采样和总线，本页处理已捕获的外设协议记录。
+- 不合并进 `keyboard-mouse-audio-and-physical-puzzles.md`：本页解决 report 字段、方向、release 和重组；对方解决动作轨迹、频谱、视频和物理时序的语义还原。
 - 不拆键盘/鼠标/蓝牙小页：当前 raw 规模适合集中作为外设二级分流。
 
 ## 常见误判

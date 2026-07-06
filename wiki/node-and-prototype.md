@@ -4,7 +4,9 @@ tags: [web, family, nodejs, prototype-pollution, vm-escape]
 skills: [ctf-web]
 raw:
   - ../raw/web/node-and-prototype.md
-updated: 2026-06-12
+  - ../raw/misc/ACTF2026-agent-wp.md
+  - ../raw/misc/VNCTF2026-huntingagent-wp.md
+updated: 2026-07-06
 ---
 
 # Node.js Prototype Pollution and VM Escape
@@ -39,6 +41,7 @@ updated: 2026-06-12
 | Node `vm` / vm2 / sandbox | 能否经 `constructor.constructor`、错误对象、dynamic import 触达宿主 | 按 CommonJS/ESM 分别测试 escape |
 | Happy-DOM / SSR DOM | DOM API 是否会执行 script、`document.write` 或事件处理器 | 先确认服务端 DOM 与浏览器差异 |
 | RSC / server action | Flight payload 或 server action 能否反序列化服务端对象 | 转 [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md) |
+| Workflow/custom node/runner 插件 | runner 是否携带内部 token、localhost API、GraphQL/MCP hint 或 artifact 权限 | 转 [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 | 污染后需 SSRF/内部 require | 目标会从污染字段加载 URL、路径或模块 | 转 [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md) |
 
 ## 合并与拆分结论
@@ -46,6 +49,13 @@ updated: 2026-06-12
 - 保留为 family：原型污染、gadget 和 VM escape 共用 Node 对象模型，但落点不同，需要二级 pivot。
 - 不合并进 `path-traversal-ssrf-upload-and-rsc.md`：后者负责资源定位链，本页负责 Node 对象/执行模型。
 - 暂不拆 `prototype-pollution.md` 和 `node-vm-escape.md`：当前 raw 把污染、gadget 和 VM escape 串成链路，拆开会丢失转向关系。
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-agent-wp](../raw/misc/ACTF2026-agent-wp.md) | 用户字段进入 dotted YAML path 时，`constructor.prototype` 不只是配置字段，而是可污染策略对象并改变后续 eval 分支的入口。 |
+| [VNCTF2026-huntingagent-wp](../raw/misc/VNCTF2026-huntingagent-wp.md) | LLM agent 题的后半段落点是 Node `vm.runInNewContext` escape；空上下文仍可通过 `this.constructor.constructor("return process")()` 触达宿主。 |
 
 ## 常见误判
 
@@ -57,6 +67,7 @@ updated: 2026-06-12
 ## 关联页面
 
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
+- [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md)
 - [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
 - [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md)
 - [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md)
@@ -66,3 +77,5 @@ updated: 2026-06-12
 ## 原始资料
 
 - [node-and-prototype.md](../raw/web/node-and-prototype.md)
+- [ACTF2026-agent-wp](../raw/misc/ACTF2026-agent-wp.md)
+- [VNCTF2026-huntingagent-wp](../raw/misc/VNCTF2026-huntingagent-wp.md)

@@ -4,7 +4,10 @@ tags: [web, family, path-traversal, ssrf, upload, file-read, internal-service]
 skills: [ctf-web]
 raw:
   - ../raw/web/path-traversal-ssrf-upload-and-rsc.md
-updated: 2026-06-12
+  - ../raw/web/WMCTF2025-pdf2text-wp.md
+  - ../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md
+  - ../raw/web/D3CTF2019-ezupload-wp.md
+updated: 2026-07-06
 ---
 
 # Path Traversal, SSRF, Upload and RSC
@@ -14,6 +17,21 @@ updated: 2026-06-12
 本页是文件访问和内部服务链 family。共同模式不是某个单点 payload，而是 Web 服务把用户可控路径、URL、压缩包、渲染器输入或内部协议交给文件系统、网络客户端、解包器、PDF/SVG/Office 解析器、RSC 反序列化或后端消息系统处理。
 
 如果题目的核心已经是单纯 SQL oracle、JWT、Node 原型污染或 Java 反序列化，应转到对应 technique；本页只负责从“可控资源定位”分流到读取、SSRF、上传落地或内部执行链。
+
+## 识别信号
+
+- 用户输入会成为路径、URL、文件名、归档成员名、渲染资源、redirect 目标、组件 payload 或内部消息字段。
+- 后端会替用户读取文件、下载 URL、解包归档、渲染 PDF/SVG/Office、执行 server action 或连接内部服务。
+- 响应、错误、时间、导出文件、截图或二段请求能证明资源定位已经进入后端解释层。
+- 过滤逻辑只检查字符串表面形式，没有绑定最终解析后的路径、host、协议、软链接或解包落点。
+
+## 最小证据
+
+- 保存一个正常资源请求和一个最小异常请求，标出可控字段如何变成路径、URL、归档成员名、渲染资源或内部消息字段。
+- 记录后端最终解析结果：归一化路径、真实 host/IP、协议、解包落点、软链接目标、渲染器资源名或 server action。
+- 文件读路线至少证明能读取源码、配置、`.env`、`.git`、上传目录、`/proc` 或其它稳定敏感资源。
+- SSRF/内部服务路线至少证明目标服务、协议细节、响应/时间/DNS 反馈和是否可升级到内部 API、文件写入或 RCE。
+- 上传/解包路线至少确认文件内容可控、落点可达、解析规则或 Web 访问路径，不只看扩展名是否放行。
 
 ## 变体路由
 
@@ -56,9 +74,11 @@ updated: 2026-06-12
 |---|---|
 | [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | 外层文件名过滤不含 `..` 不够，PDF 内部 `/Encoding` 名称仍可路径穿越到上传目录并触发解析器内部资源加载。 |
 | [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md) | 目标不是传统 HTTP SSRF，而是 RustDesk 受控端按 relay 消息主动连接 `127.0.0.1:6379`，再让可控 uuid 字段成为 Redis 协议内容。 |
+| [D3CTF2019-ezupload-wp](../raw/web/D3CTF2019-ezupload-wp.md) | 反序列化给出写文件能力后，真正瓶颈是用 `glob://` 爆破随机上传目录绝对路径，并用 `.htaccess` 改解析规则把文本文件推进到 PHP 执行。 |
 
 ## 原始资料
 
 - [path-traversal-ssrf-upload-and-rsc.md](../raw/web/path-traversal-ssrf-upload-and-rsc.md)
 - [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md)
 - [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md)
+- [D3CTF2019-ezupload-wp](../raw/web/D3CTF2019-ezupload-wp.md)

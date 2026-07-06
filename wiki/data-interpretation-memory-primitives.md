@@ -1,13 +1,13 @@
 ---
 type: technique
-tags: [pwn, technique]
+tags: [pwn, technique, emulator, float, hash, oob, signedness, primitive]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/emulator-float-and-hash-exploits.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
-# Emulator, Float and Hash Exploits
+# Data Interpretation Memory Primitives
 
 ## 适用场景
 
@@ -34,9 +34,9 @@ updated: 2026-05-21
 4. Hash：审计 `abs`、取模、signedness 和数组基址，构造负索引或碰撞。
 5. 把特殊解释层降级为常规 pwn primitive，再接 ret2libc/ROP/函数指针劫持。
 
-## 关键变体
+## 数据解释分支
 
-| 变体 | 复用重点 |
+| 输入模型 | 利用判断 |
 |---|---|
 | Chip-8 OOB | VM 寄存器/地址空间和宿主数组边界不一致，bytecode 变成 AAR/AAW。 |
 | Float qsort | 排序本身是写 primitive，payload 是 IEEE-754 原始字节。 |

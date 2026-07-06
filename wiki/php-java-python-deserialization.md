@@ -5,7 +5,9 @@ skills: [ctf-web]
 raw:
   - ../raw/web/php-java-python-deserialization.md
   - ../raw/web/WMCTF2025-pdf2text-wp.md
-updated: 2026-06-12
+  - ../raw/web/D3CTF2019-ezupload-wp.md
+  - ../raw/web/D3CTF2025-d3model-wp.md
+updated: 2026-07-06
 ---
 
 # PHP, Java and Python Deserialization
@@ -16,7 +18,7 @@ updated: 2026-06-12
 
 它不是一个统一 payload 模板。首轮要先判断序列化格式、触发入口、gadget 可用性、回显方式和链路目标，再决定是 DNS 探测、文件读、SSRF、命令执行、cookie forgery 还是 parser 二段加载。
 
-## 共同识别信号
+## 识别信号
 
 - 请求、Cookie、session、上传文件、备份导入、XML/JSON 字段或库内部数据文件被服务端反序列化。
 - 出现 Java 类名、pickle opcodes、PHP `O:<len>:"Class"`、`.NET $type`、Werkzeug/Flask cookie、XMLDecoder、Castor `xsi:type`。
@@ -48,6 +50,8 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md) | pdfminer 的 `CMapDB._load_data` 会读取 gzip pickle CMap；利用关键是让 PDF `/Encoding` 名称路径穿越到上传目录，并让恶意 gzip pickle 同时通过宽松 PDF 检测。 |
+| [D3CTF2019-ezupload-wp](../raw/web/D3CTF2019-ezupload-wp.md) | PHP unserialize 对象在析构阶段形成任意文件写；真正利用前要先解决相对路径失效和上传目录绝对路径定位，再把写文件能力推进到解析执行。 |
+| [D3CTF2025-d3model-wp](../raw/web/D3CTF2025-d3model-wp.md) | Web 服务加载不可信 `.keras` 模型，`keras.models.load_model` 读取 `config.json` 后解析类/函数路径；这是模型格式反序列化进入 Python 对象解析的代表案例。 |
 
 ## 合并与拆分结论
 
@@ -75,3 +79,5 @@ updated: 2026-06-12
 
 - [php-java-python-deserialization.md](../raw/web/php-java-python-deserialization.md)
 - [WMCTF2025-pdf2text-wp](../raw/web/WMCTF2025-pdf2text-wp.md)
+- [D3CTF2019-ezupload-wp](../raw/web/D3CTF2019-ezupload-wp.md)
+- [D3CTF2025-d3model-wp](../raw/web/D3CTF2025-d3model-wp.md)

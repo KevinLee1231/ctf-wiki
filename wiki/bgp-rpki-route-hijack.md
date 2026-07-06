@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [misc, network, bgp, rpki, technique]
+tags: [misc, pentest, network, bgp, rpki, technique]
 skills: [ctf-misc, ctf-pentest]
 raw:
   - ../raw/misc/D3CTF2025-d3rpki-wp.md
-updated: 2026-06-11
+updated: 2026-07-06
 ---
 
 # BGP RPKI Route Hijack

@@ -1,19 +1,21 @@
 ---
 type: family
-tags: [forensics, family]
+tags: [forensics, family, pcap, network, credential, protocol, tls, hid]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/pcap-protocol-credential-recovery.md
-updated: 2026-05-22
+  - ../raw/forensics/SU_LightNovelWP.md
+  - ../raw/misc/VNCTF2026-ez-iot-wp.md
+updated: 2026-07-06
 ---
 
 # PCAP 协议、凭据与文件恢复技巧族
 
-## 适用场景
+## 作用边界
 
-本页是 `PCAP 协议、凭据与文件恢复技巧族` 技巧家族页，用来承接多个相邻技巧和案例；先用于判断是否属于这一族，再选择具体变体。
+本页是 PCAP / network forensics family，负责从协议分布、会话方向、可导出对象、凭据材料和加密/编码层判断下一跳。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不处理所有取证附件；只有核心证据来自网络流量、抓包、会话重组、传输对象、凭据或网络 covert channel 时才进入本页。导出出的文件、密钥或媒体应继续转到对应 forensics / crypto / web 页面。
 
 ## 识别信号
 
@@ -29,7 +31,7 @@ updated: 2026-05-22
 - 明确目标是恢复文件、恢复凭据、还原命令、解密 TLS/WiFi，还是分析 covert channel。
 - 若涉及解密，已定位 keylog、证书、密码、握手参数或可爆破材料。
 
-## 解法骨架
+## 分流流程
 
 1. 先做协议分布和时间线，不直接搜索 flag 了事。
 2. 根据协议选择导出方式：Wireshark objects、tshark fields、tcpflow、NetworkMiner、bulk_extractor、aircrack、USB HID decoder。
@@ -37,7 +39,7 @@ updated: 2026-05-22
 4. 如果得到的是凭据/token/cookie，回到 Web 或 Pentest 路线验证用途。
 5. 如果得到的是加密/压缩/损坏文件，再 pivot 到对应 forensics 或 crypto 页面。
 
-## 关键变体
+## 路线分流
 
 | 变体 | 优先证据 | 下一跳页面 | 失败后 pivot |
 |---|---|---|---|
@@ -46,7 +48,16 @@ updated: 2026-05-22
 | DNS/ICMP covert channel | 高频子域、长 label、固定长度 payload | [dns.md](dns.md) | 如果编码不明显，按时间间隔、base32/base64/hex 和排序恢复。 |
 | USB HID / 外设事件 | USB interrupt transfer、键盘鼠标 usage ID | [peripheral-capture.md](peripheral-capture.md) | 若轨迹不成字，转坐标可视化或 chord/stenography。 |
 | WiFi/WPA/WEP | 802.11 握手、SSID、EAPOL、弱 WEP | [rf-sdr.md](rf-sdr.md) | 缺握手时查 deauth、PMKID 或是否已有密码线索。 |
+| Kerberos/NTLM + MSRPC/TSCH | NetNTLMv2、Kerberos ticket、DCE/RPC opnum、TaskSchedulerService stream | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) | 先恢复凭据或会话密钥；若 RPC stub 加密，保留 frame、stream 和 key 派生脚本。 |
 | 分片/损坏 pcap | magic 损坏、截断、乱序、多段文件 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) | 先修 pcap，再重组；不要直接对损坏流量做上层解析。 |
+| ESP-NOW/vendor action frames | 固件里能恢复 magic、seq、total、IV 和加密模式 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) | 先用固件确定应用层边界，再从 raw capture 切帧、解密和按序重组。 |
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [SU_LightNovelWP](../raw/forensics/SU_LightNovelWP.md) | AD/Kerberos/NTLM + TSCH 流量应先按 conversation 和 stream 定位认证握手，再用恢复出的凭据/会话密钥解 RPC stub，最后把计划任务 XML 与 PowerShell/AES 逻辑交给 Windows artifact 路线。 |
+| [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md) | ESP-NOW 捕获不能直接把整帧当密文；先定位 vendor frame 和应用层 magic，再按 `seq`、`total`、IV、AES-CBC 密文切块重组 PNG。 |
 
 ## 常见陷阱
 
@@ -59,16 +70,19 @@ updated: 2026-05-22
 
 ## 关联技巧
 
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
 - [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
 - [peripheral-capture.md](peripheral-capture.md)
 - [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md)
 - [signals-and-hardware.md](signals-and-hardware.md)
+- [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 
 - [pcap-protocol-credential-recovery.md](../raw/forensics/pcap-protocol-credential-recovery.md)
+- [SU_LightNovelWP.md](../raw/forensics/SU_LightNovelWP.md)
+- [VNCTF2026-ez-iot-wp.md](../raw/misc/VNCTF2026-ez-iot-wp.md)

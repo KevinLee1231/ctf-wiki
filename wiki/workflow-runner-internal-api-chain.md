@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [web, workflow, runner, internal-api, graphql, mcp, build, token, lateral-movement]
+tags: [web, pentest, workflow, runner, internal-api, graphql, mcp, build, token, lateral-movement]
 skills: [ctf-web, ctf-pentest]
 raw:
   - ../raw/web/Spirit2026-5-flowforge-wp.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Workflow Runner Internal API Chain
@@ -53,6 +53,8 @@ updated: 2026-05-21
 ## 关联技巧
 
 - [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md)
+- [node-and-prototype.md](node-and-prototype.md)
+- [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
 - [oauth-saml-cors-and-cicd.md](oauth-saml-cors-and-cicd.md)
 - [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)

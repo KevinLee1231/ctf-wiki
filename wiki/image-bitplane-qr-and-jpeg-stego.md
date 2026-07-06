@@ -4,7 +4,10 @@ tags: [forensics, family, image, stego, qr, jpeg, bitplane]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/image-bitplane-qr-and-jpeg-stego.md
-updated: 2026-06-12
+  - ../raw/misc/HGAME2026-shiori不想找女友-wp.md
+  - ../raw/misc/HGAME2026-invest-on-matrix-wp.md
+  - ../raw/misc/VNCTF2026-mymnemonic-wp.md
+updated: 2026-07-06
 ---
 
 # Image Bitplane, QR and JPEG Stego
@@ -15,7 +18,7 @@ updated: 2026-06-12
 
 它不替代 [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md) 的跨格式入口；本页负责进入图像后，判断该从像素、压缩结构、二维码结构、帧序列还是元数据口令继续。
 
-## 共同识别信号
+## 识别信号
 
 - 附件是 JPEG/PNG/BMP/GIF/AVI 或由图片碎片、二维码块、缩略图、调色板、DCT 系数、低位平面组成。
 - 正常预览没有 flag，但元数据、通道、bitplane、DQT/PLTE、帧差、缩放残留或坐标链存在异常。
@@ -43,6 +46,14 @@ updated: 2026-06-12
 
 本页应保留为 family。JPEG 结构、bitplane、QR 重组、帧差和图像拼图的第一步证据不同；但它们都属于图像证据源内的二级分流。当前不拆小页，避免把短案例拆成孤立节点。
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [HGAME2026-shiori不想找女友-wp](../raw/misc/HGAME2026-shiori不想找女友-wp.md) | EXIF 中的 JSON 参数直接描述像素抽样网格；先按 `start/step/column` 重排隐藏图像，再处理恢复出的线索。 |
+| [HGAME2026-invest-on-matrix-wp](../raw/misc/HGAME2026-invest-on-matrix-wp.md) | 题面给出的矩阵不是代数约束，而是 QR 小块；按 `5x5` block 和编号顺序拼回二维码后再扫码。 |
+| [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md) | 图片末尾黑白格按固定像素步长转 bitstream，图像阶段只负责稳定提取 192-bit ENT，后续 BIP39 checksum/seed 交给 crypto 长尾结构页。 |
+
 ## 常见陷阱
 
 - 用截图或编辑器另存图片，破坏原始低位和 chunk。
@@ -62,3 +73,6 @@ updated: 2026-06-12
 ## 原始资料
 
 - [image-bitplane-qr-and-jpeg-stego.md](../raw/forensics/image-bitplane-qr-and-jpeg-stego.md)
+- [HGAME2026-shiori不想找女友-wp](../raw/misc/HGAME2026-shiori不想找女友-wp.md)
+- [HGAME2026-invest-on-matrix-wp](../raw/misc/HGAME2026-invest-on-matrix-wp.md)
+- [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md)

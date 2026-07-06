@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 如果首要问题仍是怎么拿控制流，先看 [overflow-basics.md](overflow-basics.md)、[format-string.md](format-string.md) 或 heap 页面。如果主要约束是 seccomp 或栈迁移，先看 [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 已能控制返回地址或函数指针，但缺少 `pop rdi/rsi/rdx`、libc 基址、可用字符串或足够 shellcode 空间。
 - 程序可泄露任意地址或 GOT 内容，需要解析 libc 符号。

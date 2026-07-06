@@ -13,6 +13,8 @@ updated: 2026-06-12
 
 本页是轻量附件首检 family，用于处理还没有明显方向的文件、压缩包、嵌套 archive、hash、短脚本、一行式命令、Discord/API 枚举和 cipher identification。它的职责是快速判断下一跳，不把所有小题都吸收到本页。
 
+边界在于“轻量分流”：一旦证据落到 metadata、尾随数据、隐藏对象、文件内部日志碎片或 magic 修复，转 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)；一旦确认是损坏归档、已知明文、磁盘/容器恢复，转 [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)。
+
 ## 识别信号
 
 - 附件很小或无明显题型，`file`/magic/strings/binwalk/metadata 仍能给出方向。
@@ -30,7 +32,7 @@ updated: 2026-06-12
 
 | 证据 | 先验证 | 下一跳 |
 |---|---|---|
-| magic 与扩展名不符 | `file`、hex header、strings、binwalk、Exif | 对应格式页或 forensics |
+| magic 与扩展名不符 | `file`、hex header、strings、binwalk、Exif | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) 或对应格式页 |
 | 嵌套 archive | 层级、密码、已知明文和损坏记录 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
 | hash-like 文本 | 长度、字符集、salt、上下文和可校验明文 | crypto/hash 或 cracking 工具 |
 | 一行式/签到 | 是否只是参数、页面、metadata 或公开 API | 保留 raw，不强行新建 technique |
@@ -53,6 +55,7 @@ updated: 2026-06-12
 ## 关联页面
 
 - [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
 - [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)

@@ -4,7 +4,7 @@ tags: [reverse, family, font, shader, legacy-format, side-channel]
 skills: [ctf-reverse, ctf-misc]
 raw:
   - ../raw/reverse/font-shader-firmware-and-legacy-patterns.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Font, Shader, Firmware and Legacy Patterns
@@ -12,6 +12,20 @@ updated: 2026-06-12
 ## 作用边界
 
 本页是特殊载体与低频模式 family，覆盖字体 ligature、GLSL shader VM、LED/ioctl 摩斯、BPF JIT、ESP32/Xtensa、MBR、BWT、滑窗 popcount、单行 Python 约束、batch crackme、time lock、fork/pipe 反分析等案例。共同点是：主要障碍不是普通反编译，而是先识别隐藏信息承载方式或可观测副作用。
+
+## 识别信号
+
+- 附件或题面出现字体、shader、VRAM、LED/ioctl、BPF/JIT、MBR/16-bit、ESP32/Xtensa、BWT/popcount、batch/time lock 等低频载体。
+- 可复用信息不一定在普通函数伪代码里，而可能在渲染替换、图形状态、设备 side effect、采样序列、固件加载基址或脚本约束中。
+- 题目需要先识别“信息如何被承载或观察”，再决定是否转 VM、硬件、反分析、约束求解或 misc。
+- raw 证据通常包含截图、glyph 表、shader 输出、系统调用、日志、设备状态、采样轨迹或非标准格式字段。
+
+## 最小证据
+
+- 保存载体类型、打开/渲染/运行方式、可观察输出和一个能复现隐藏信息或副作用的最小样本。
+- 字体题至少确认字体表、glyph substitution/ligature、动态加载路径和文本渲染前后的差异。
+- shader/VRAM 题至少记录坐标、颜色/纹理状态、store/load 语义和输出图像如何对应内部状态。
+- side-channel/legacy/固件题至少确认架构、端序、加载基址、采样规则、噪声边界或设备接口。
 
 ## 首轮路由
 

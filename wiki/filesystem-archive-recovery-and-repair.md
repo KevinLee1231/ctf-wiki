@@ -4,14 +4,18 @@ tags: [forensics, filesystem, archive, recovery, known-plaintext, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/disk-recovery.md
-updated: 2026-06-13
+  - ../raw/misc/WMCTF2025-githacker-wp.md
+  - ../raw/misc/SU_chaosWP.md
+updated: 2026-07-06
 ---
 
 # Filesystem and Archive Recovery Repair
 
-## 适用场景
+## 作用边界
 
-本页是文件系统与归档恢复 family。题目核心是从磁盘镜像、文件系统、压缩包、损坏容器、删除文件、嵌套归档或结构化文件中恢复数据。它不覆盖所有取证；内存/VM/容器运行态转到 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)，PCAP 转到 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)，图片/音频隐写转到对应媒体页。
+本页是文件系统与归档恢复 family。题目核心是从磁盘镜像中的文件系统、压缩包、损坏容器、删除文件、嵌套归档或结构化文件中恢复数据。
+
+边界在于“文件/归档层恢复”：如果问题还停留在证据载体选择、VM/container/cloud 层级判断，先转 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)；如果需要处理分区表、RAID、VMDK sparse、minidump/core dump 或内存 key carving，转 [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)。PCAP 转 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)，图片/音频隐写转对应媒体页。
 
 ## 识别信号
 
@@ -27,7 +31,7 @@ updated: 2026-06-13
 - 对损坏文件，至少定位一个可解释字段：magic、version、CRC、size、offset、inode、目录项或 central directory。
 - 对 ZipCrypto/已知明文，先证明明文字段稳定且压缩方式匹配，再跑恢复工具。
 
-## 解法骨架
+## 分流流程
 
 1. 首检 magic、binwalk、7z/list、fsstat/fls、exiftool、strings 和熵，画出容器层级。
 2. 若是文件系统，先查分区、目录项、删除文件、free space、snapshot/subvolume 和 orphan inode。
@@ -35,11 +39,11 @@ updated: 2026-06-13
 4. 若可用已知明文，提取稳定文件头或结构字段，验证压缩方式后再用 bkcrack/同类工具恢复 key。
 5. 每导出一层都重新做 magic/metadata 首检，直到拿到 flag、密钥或下一跳线索。
 
-## 关键变体
+## 恢复路线分流
 
-| 变体 | 复用重点 |
+| 恢复路线 | 首轮判断 |
 |---|---|
-| 文件系统删除恢复 | FAT/ext/XFS/BTRFS 的目录项、inode、free space、snapshot 和 orphan 机制不同，先用对应工具确认元数据仍在。 |
+| 文件系统删除恢复 | FAT/ext/XFS/BTRFS 的目录项、inode、free space、snapshot 和 orphan 机制不同，先用对应工具确认元数据仍在；若分区/RAID 本身不完整，先转底层恢复页。 |
 | 损坏压缩包修复 | ZIP/XZ/TAR 常见问题是 magic、size、CRC、central directory 或重复项；先修结构再谈爆破。 |
 | ZipCrypto 已知明文 | 明文可来自 magic，也可来自 AVIF/ISOBMFF、PNG、PDF、DOCX 等结构字段；关键是压缩方法和明文偏移一致。 |
 | 嵌套 Matryoshka 容器 | 每层都可能改变格式、压缩、编码或文件系统；不要一次性把所有导出物混在一起。 |
@@ -73,3 +77,4 @@ updated: 2026-06-13
 
 - [disk-recovery.md](../raw/forensics/disk-recovery.md)
 - [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md)
+- [SU_chaosWP.md](../raw/misc/SU_chaosWP.md)

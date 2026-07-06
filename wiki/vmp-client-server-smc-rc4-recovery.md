@@ -4,7 +4,7 @@ tags: [reverse, crypto, vmp, smc, client-server, rc4, maze, dynamic-debugging]
 skills: [ctf-reverse, ctf-crypto]
 raw:
   - ../raw/reverse/Spirit2026-5-link-start-wp.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # VMP Client Server SMC RC4 Recovery
@@ -34,9 +34,9 @@ updated: 2026-05-21
 4. 如果 key 在握手中派生，记录 nonce、时间戳、固定盐和双方字段。
 5. 写脚本复现协议，先离线解出 flag，再决定是否需要联机 replay。
 
-## 关键变体
+## 受保护协议恢复分支
 
-| 变体 | 复用重点 |
+| 证据形态 | 处理重点 |
 |---|---|
 | VMP 双端 | 不必完整理解所有 VM handler，先找 I/O 边界和明密文边界。 |
 | SMC 解密窗口 | 代码或字符串只在运行时短暂出现，需动态 dump。 |
@@ -56,7 +56,7 @@ updated: 2026-05-21
 - [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
-- [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
+- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 
 ## 原始资料
 

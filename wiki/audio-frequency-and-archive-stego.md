@@ -1,11 +1,11 @@
 ---
 type: family
-tags: [forensics, family, audio, frequency, archive, stego]
-skills: [ctf-forensics]
+tags: [forensics, misc, family, audio, frequency, archive, stego]
+skills: [ctf-forensics, ctf-misc]
 raw:
   - ../raw/forensics/audio-frequency-and-archive-stego.md
   - ../raw/misc/WMCTF2025-voice-hacker-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Audio, Frequency and Archive Stego

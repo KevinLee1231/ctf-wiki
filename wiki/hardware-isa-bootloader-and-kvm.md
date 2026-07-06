@@ -5,7 +5,11 @@ skills: [ctf-reverse, ctf-pwn]
 raw:
   - ../raw/reverse/hardware-isa-bootloader-and-kvm.md
   - ../raw/pwn/WMCTF2025-aberration-wp.md
-updated: 2026-06-12
+  - ../raw/pwn/ACTF2026-acpu-wp.md
+  - ../raw/pwn/ACTF2026-amcu-wp.md
+  - ../raw/reverse/LilacCTF2026-justrom-wp.md
+  - ../raw/misc/VNCTF2026-ez-iot-wp.md
+updated: 2026-07-06
 ---
 
 # Hardware ISA, Bootloader and KVM
@@ -41,6 +45,7 @@ updated: 2026-06-12
 | MBR/bootloader/coreboot | 加载地址、实模式/保护模式切换和磁盘/ROM 布局 | [font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md) |
 | KVM guest analysis | ioctl 参数、guest memory、KVM exit reason 和 halt/block 边界 | 记录 guest/host 数据流再反汇编 guest |
 | SIMD/协处理器加密 | lane 排列、shuffle/gather、协处理器状态和常量表 | 先还原数据布局，再转 crypto/算法页 |
+| ESP/Xtensa 固件 + 无线帧 | `sender_task`、ESP-NOW、应用层包头、IV 和分片序号 | 从固件恢复包格式，再转 PCAP family 重组流量 |
 
 ## 来自 WP 的案例索引
 
@@ -50,6 +55,7 @@ updated: 2026-06-12
 | [ACTF2026-acpu-wp](../raw/pwn/ACTF2026-acpu-wp.md) | CPU 仿真器题可能是微架构语义差异而非内存破坏；非法 load 的 forwarding/cache side effect 是关键证据。 |
 | [ACTF2026-amcu-wp](../raw/pwn/ACTF2026-amcu-wp.md) | MCU 固件题要把串口、I2C、SRAM 和执行跳板放在同一个硬件状态模型里看。 |
 | [LilacCTF2026-justrom-wp](../raw/reverse/LilacCTF2026-justrom-wp.md) | ROM/ISA 题先确认架构端序、加载基址和 MMIO register，再复现加密/比较函数。 |
+| [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md) | Xtensa ESP 固件中 `sender_task` 暴露 ESP-NOW 应用层包结构，先恢复 magic、seq、total、IV 和 AES-CBC key，再处理无线捕获。 |
 
 ## 合并与拆分结论
 
@@ -77,3 +83,7 @@ updated: 2026-06-12
 
 - [hardware-isa-bootloader-and-kvm.md](../raw/reverse/hardware-isa-bootloader-and-kvm.md)
 - [WMCTF2025-aberration-wp](../raw/pwn/WMCTF2025-aberration-wp.md)
+- [ACTF2026-acpu-wp](../raw/pwn/ACTF2026-acpu-wp.md)
+- [ACTF2026-amcu-wp](../raw/pwn/ACTF2026-amcu-wp.md)
+- [LilacCTF2026-justrom-wp](../raw/reverse/LilacCTF2026-justrom-wp.md)
+- [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md)

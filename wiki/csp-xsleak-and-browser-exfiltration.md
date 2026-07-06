@@ -34,9 +34,9 @@ updated: 2026-06-11
 4. 让每轮 oracle 只回答一个小问题，并把命中结果回传到攻击者服务。
 5. 用已恢复前缀继续构造下一轮 payload，直到 forward check 能访问目标资源或复现 secret。
 
-## 关键变体
+## 浏览器外带分支
 
-| 变体 | 复用重点 |
+| 外带条件 | 判断重点 |
 |---|---|
 | CSP 白名单 CDN/Cloud Function 绕过 | 关键不是找到任意第三方域，而是找到能执行 attacker-controlled JS 或能回传数据的白名单域。 |
 | `base` tag / nonce / prefetch 绕过 | 先确认浏览器实际解析顺序；nonce 保护脚本不等于保护所有资源加载。 |

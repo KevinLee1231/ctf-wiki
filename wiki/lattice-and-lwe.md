@@ -8,7 +8,12 @@ raw:
   - ../raw/crypto/WMCTF2025-lw3-wp.md
   - ../raw/crypto/WMCTF2025-lw5-wp.md
   - ../raw/crypto/WMCTF2025-splitmaster-wp.md
-updated: 2026-06-12
+  - ../raw/crypto/HGAME2026-classic-wp.md
+  - ../raw/crypto/HGAME2026-decision-wp.md
+  - ../raw/crypto/NCTF2026-yqs-wp.md
+  - ../raw/crypto/RCTF2025-superguess-plusplus-wp.md
+  - ../raw/crypto/SU_LatticeWP.md
+updated: 2026-07-06
 ---
 
 # Lattice and LWE Attacks
@@ -19,7 +24,7 @@ updated: 2026-06-12
 
 首轮不要因为出现“小误差”“部分泄露”“线性关系”就直接上 LLL。先确认 known/unknown/goal、模数、噪声或未知段大小，以及是否存在更简单的代数、PRNG 或协议 oracle 路线。
 
-## 共同识别信号
+## 识别信号
 
 - 关系形如 `A*s + e = b mod q`、`k_i` 部分泄露、低位/高位缺失、截断输出、近似倍数、subset sum、短向量或最近向量。
 - 多个样本共享同一个 secret、nonce、状态或误差分布。
@@ -44,6 +49,8 @@ updated: 2026-06-12
 | Ring-LWE/Module-LWE | 先识别环、多项式基、维度和模数，再决定是否 flatten 成 plain LWE | [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) |
 | Approximate GCD、knapsack、subset sum | 先判断目标是短关系还是最近和，再转数论/代数路线 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | HSSP/AHSSP、orthogonal lattice | 先构造正交关系并检查样本数是否足够 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| Truncated LFSR / high-bit linear recurrence | 先确认递推阶数、模数是否已知和泄露高低位宽；未知模数时先恢复模数再恢复状态 | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| 低泄露 HNP / lattice sieving | 样本数、泄露 bit 数和模数位数是否接近理论边界，是否需要 Fourier/predicate 辅助 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) |
 
 ## 来自 WP 的案例索引
 
@@ -53,6 +60,11 @@ updated: 2026-06-12
 | [WMCTF2025-lw3-wp](../raw/crypto/WMCTF2025-lw3-wp.md) | LWE error 取三个随机模数值，不能简单线性映射成小噪声；把每行 error 选择展开为 0/1 变量，再降维并用精确 SVP/强规约恢复。 |
 | [WMCTF2025-lw5-wp](../raw/crypto/WMCTF2025-lw5-wp.md) | 服务端让选手自选五个 error 值并用格 check 排除过小映射；首轮应先研究 check 约束，再利用少值 error 的选择结构恢复 secret。 |
 | [WMCTF2025-splitmaster-wp](../raw/crypto/WMCTF2025-splitmaster-wp.md) | 交互 oracle 允许自选切分 `a*key mod q` 的泄露段；通过多样本相减消去公共 key 部分，把未知段和乘子关系转成 BKZ 可恢复的短向量。 |
+| [HGAME2026-classic-wp](../raw/crypto/HGAME2026-classic-wp.md) | RSA `p` 高位泄露时不要暴力分解；把未知低位写成一元小根，恢复 `p` 后再处理明文中的二层古典密码提示。 |
+| [HGAME2026-decision-wp](../raw/crypto/HGAME2026-decision-wp.md) | LWE/随机 chunk 判别题不能逐块解；先找两组真 LWE 样本恢复共享 secret，再用误差大小给所有 chunk 分类。 |
+| [NCTF2026-yqs-wp](../raw/crypto/NCTF2026-yqs-wp.md) | 格攻击只负责恢复坐标 XOR 所需的 LWE 私钥；后半段是无效曲线小子群和 CRT，不应停在 LWE 解密。 |
+| [RCTF2025-superguess-plusplus-wp](../raw/crypto/RCTF2025-superguess-plusplus-wp.md) | HNP 仅泄露 2 bit MSB 且样本数接近下界；普通 LLL 往往不够，需 lattice sieving/Fourier predicate 并接受概率性成功。 |
+| [SU_LatticeWP](../raw/crypto/SU_LatticeWP.md) | 高位截断线性递推在未知模数场景下要先用高位格和 resultant gcd 找模数，再切回 known modulus 格恢复反馈多项式和低位状态。 |
 
 ## 合并与拆分结论
 
@@ -82,3 +94,8 @@ updated: 2026-06-12
 - [WMCTF2025-lw3-wp](../raw/crypto/WMCTF2025-lw3-wp.md)
 - [WMCTF2025-lw5-wp](../raw/crypto/WMCTF2025-lw5-wp.md)
 - [WMCTF2025-splitmaster-wp](../raw/crypto/WMCTF2025-splitmaster-wp.md)
+- [HGAME2026-classic-wp](../raw/crypto/HGAME2026-classic-wp.md)
+- [HGAME2026-decision-wp](../raw/crypto/HGAME2026-decision-wp.md)
+- [NCTF2026-yqs-wp](../raw/crypto/NCTF2026-yqs-wp.md)
+- [RCTF2025-superguess-plusplus-wp](../raw/crypto/RCTF2025-superguess-plusplus-wp.md)
+- [SU_LatticeWP](../raw/crypto/SU_LatticeWP.md)

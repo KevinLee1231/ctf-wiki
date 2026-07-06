@@ -4,7 +4,7 @@ tags: [reverse, family, triage]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/reverse-first-pass-workflow-and-debugging.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # First-Pass Workflow and Debugging
@@ -19,6 +19,20 @@ updated: 2026-06-12
 2. 障碍在哪里：平台运行时、语言对象、壳/反调试、VM/解释器、最终比较点、文件/图像/硬件载体还是密码/数学关系。
 3. 最小可观察状态是什么：字符串、导入、入口、比较点、trace、dump、opcode、资源、协议、key/cipher 或中间 buffer。
 4. 最短验证路径是什么：直接抓明文、恢复约束、写 forward checker、动态 hook、patch 反分析、提取资源或转其它方向。
+
+## 识别信号
+
+- 附件需要先理解可执行载体、运行环境、加载方式、资源格式或语言运行时，而不是直接套固定算法。
+- 初始观察能落到入口、字符串、导入、资源、比较点、trace、dump、opcode、协议字段、key/cipher 或中间 buffer。
+- 同一题可能同时出现壳、反调试、VM、平台 runtime、文件载体和 crypto 关系，需要先判断哪个是第一障碍。
+- 已有运行结果或静态线索能支撑一个最短验证路径：抓明文、hook/patch、写 forward checker、dump 资源或转 crypto/misc。
+
+## 最小证据
+
+- 记录文件类型、架构、位数、端序、保护、入口、依赖和能否安全运行。
+- 保存至少一组最小输入、运行反馈、错误状态或断点位置，说明目前可观察到哪个内部状态。
+- 如果准备转具体 family，列出触发转向的证据：平台标记、语言 runtime、opcode stream、loader 行为、反分析检测、资源表或最终比较点。
+- 如果准备转 crypto/misc/pwn，说明 reverse 已经恢复到哪个实现边界，避免把实现恢复和后续数学/利用步骤混在同一页。
 
 ## 首轮路由
 
@@ -44,6 +58,13 @@ updated: 2026-06-12
 - 附件像图片/字体/固件/资源包：先做格式和资源层 triage，避免过早套普通 ELF/PE 工作流。
 - 逆向后出现 DSA/ECC/RC4/LFSR/代数关系：转 crypto 页面，把 reverse 只当实现恢复层。
 
+## 常见误判
+
+- 看到复杂伪代码就先完整重写算法，忽略最终比较点、明文 buffer、trace 或资源 dump 这些更短路径。
+- 把壳、反调试、签名、依赖缺失或运行环境问题误当作核心算法。
+- 只按扩展名分流，没有用 magic、架构、加载器和运行时行为确认真实载体。
+- 逆向恢复出密码学或约束关系后仍留在 reverse 页内硬解，没有转到 crypto/misc 的可复用 technique。
+
 ## 关联页面
 
 - [reverse-tooling.md](reverse-tooling.md)
@@ -66,72 +87,72 @@ updated: 2026-06-12
 | [WMCTF2025-catfriend-wp](../raw/reverse/WMCTF2025-catfriend-wp.md) | Mach-O 小程序含 ptrace 反调试和魔改 ChaCha20/VM xor，先恢复流密码轮函数，再按加解密同构跑一遍。 | [anti-analysis.md](anti-analysis.md)、[self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | Windows VMP/反调试后还有后门账户机器绑定，登录通过不够，必须复用目标机器信息 MD5 解密 `.mp0` 并 dump 返回 vector。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 | [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Android Flutter + Java + native 混合，Frida 检测和 libart self-hook 会改变 Java XXTEA 真实语义，先用 smali trace 确认执行流。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[anti-analysis.md](anti-analysis.md) |
-| [ACTF2026-计算机系统贯通实验-wp](../raw/reverse/ACTF2026-计算机系统贯通实验-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md) | 用户态 loader、二阶段 ELF、eBPF tracepoint 和内核模块共同校验，先合并 ioctl 参数改写和内核数据流。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
+| [ACTF2026-计算机系统贯通实验-wp](../raw/reverse/ACTF2026-计算机系统贯通实验-wp.md) | xlsx 公式实现 RISC-V 单周期 CPU；先解包 XML 恢复 ROM/RAM/MMIO、指令解码和输出语义，再拆四段校验。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)、[hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
+| [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md) | 用户态 loader、二阶段 ELF、eBPF tracepoint 和内核模块共同校验，先合并 ioctl 参数改写和内核数据流。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
 | [ACTF2026-calc-my-point-wp](../raw/reverse/ACTF2026-calc-my-point-wp.md) | Rust/GMP/大整数表达式执行器是主边界，先恢复语言运行时对象、数值约束和 CRT 关系。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
-| [ACTF2026-flagchecker-wp](../raw/reverse/ACTF2026-flagchecker-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| [Bugku-BabyRE-wp](../raw/reverse/Bugku-BabyRE-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md) | eBPF uprobe/uretprobe 把真实校验藏到内核侧 instrumentation，先提取 BPF 程序、hook 点和常量表。 | [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md) |
-| [Bugku-Dual-Personality-wp](../raw/reverse/Bugku-Dual-Personality-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [Bugku-EasyVT-wp](../raw/reverse/Bugku-EasyVT-wp.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| [ACTF2026-flagchecker-wp](../raw/reverse/ACTF2026-flagchecker-wp.md) | LoongArch64 Go 静态程序破坏符号恢复，通过反射派生真实方法名；再把 shellcode SM4 层和 8 段 Feistel 环分开求逆。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)、[hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
+| [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md) | CUDA fatbin 中宿主先解出 NPU bytecode；提取 `MOV_IMM` 比较常量后逆 RC4 drop-512 和多层 S-box/XOR 变换。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)、[hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| [Bugku-BabyRE-wp](../raw/reverse/Bugku-BabyRE-wp.md) | 主函数只做自定义 base8 第一层，第二层藏在 `atexit` 回调；用输入尾部 6 位十进制 RC4 key 约束反解。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md) | eBPF uprobe/uretprobe 把真实校验藏到内核侧 instrumentation，先提取 BPF 程序、hook 点和常量表。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
+| [Bugku-Dual-Personality-wp](../raw/reverse/Bugku-Dual-Personality-wp.md) | PE32 运行时 patch far jump 到 WoW64 `0x33` 代码段；必须按 64 位模式重反汇编后再逆 rolling add/xor。 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| [Bugku-EasyVT-wp](../raw/reverse/Bugku-EasyVT-wp.md) | `EasyVT.sys` 模拟 VT-x，驱动 VM-exit handler 只是调度壳；核心校验是 TEA 变体和 RC4，优先静态恢复 handler switch。 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
 | [Bugku-foolme-wp](../raw/reverse/Bugku-foolme-wp.md) | 早期 sleep/exit 和 decoy target 误导动态运行，先区分反分析门槛与真正静态校验逻辑。 | [anti-analysis.md](anti-analysis.md) |
-| [Bugku-GoldDigger-wp](../raw/reverse/Bugku-GoldDigger-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [Bugku-JustRe-wp](../raw/reverse/Bugku-JustRe-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-MaybeNotStandrad-wp](../raw/reverse/Bugku-MaybeNotStandrad-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
+| [Bugku-GoldDigger-wp](../raw/reverse/Bugku-GoldDigger-wp.md) | 验证函数形如 `input[index[i]] + const == target[i]`；提取置换表和目标数组后直接反填输入。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
+| [Bugku-JustRe-wp](../raw/reverse/Bugku-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [Bugku-MaybeNotStandrad-wp](../raw/reverse/Bugku-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)、[self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | [Bugku-Roundabout-wp](../raw/reverse/Bugku-Roundabout-wp.md) | UPX/壳是首要边界，先脱壳或 dump 后再处理 XOR/key 与比较表。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
-| [Bugku-week1_re1-wp](../raw/reverse/Bugku-week1_re1-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week1_re2-wp](../raw/reverse/Bugku-week1_re2-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week1_re3-wp](../raw/reverse/Bugku-week1_re3-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week1_re4-wp](../raw/reverse/Bugku-week1_re4-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week2_re1-wp](../raw/reverse/Bugku-week2_re1-wp.md) | 只给汇编文本和数组时，先把指令语义转成可复算脚本，而不是寻找运行时断点。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [Bugku-week2_re2-wp](../raw/reverse/Bugku-week2_re2-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week2_re3-wp](../raw/reverse/Bugku-week2_re3-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
+| [Bugku-week1_re1-wp](../raw/reverse/Bugku-week1_re1-wp.md) | 入门 PE 中 flag 明文硬编码在 `.rdata`，先用 strings/Ghidra Strings 和交叉引用确认真实输出。 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| [Bugku-week1_re2-wp](../raw/reverse/Bugku-week1_re2-wp.md) | 36 字符中间段经过带反馈的 `uint32` 乘加/XOR 哈希，目标数组固定；用 Z3 保留 32 位溢出语义求解。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
+| [Bugku-week1_re3-wp](../raw/reverse/Bugku-week1_re3-wp.md) | 标准 Base64 表、3 字节到 4 字符和 `=` padding 同时出现；目标串按 `int` 数组存储时只取低字节解码。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| [Bugku-week1_re4-wp](../raw/reverse/Bugku-week1_re4-wp.md) | 识别 TEA 常量 `0x9e3779b9`、4 个 32-bit key 和 32 轮 Feistel；按反编译的 key 下标反向解密。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [Bugku-week2_re1-wp](../raw/reverse/Bugku-week2_re1-wp.md) | 只给汇编文本和静态数组时，不找运行时断点；按指令语义模拟原位变换并保留 forward check。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| [Bugku-week2_re2-wp](../raw/reverse/Bugku-week2_re2-wp.md) | Go `math/big` 调用链是 RSA 校验；重点是提取 `n/c/e` 并注意 `SetString` 的 base 参数，密文是八进制。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)、[rsa-attacks.md](rsa-attacks.md) |
+| [Bugku-week2_re3-wp](../raw/reverse/Bugku-week2_re3-wp.md) | `.init_array` 中 `ptrace` 控制代码自解密；先静态复现 XOR patch，再对真实 RC4 函数提 key 和密文。 | [anti-analysis.md](anti-analysis.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
 | [Bugku-week2_re4-wp](../raw/reverse/Bugku-week2_re4-wp.md) | PyInstaller/Python 编码逻辑是主边界，先恢复 Python 代码、常量和自定义 Base58 变换。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
-| [Bugku-week3_re1-wp](../raw/reverse/Bugku-week3_re1-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week3_re2-wp](../raw/reverse/Bugku-week3_re2-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week3_re3-wp](../raw/reverse/Bugku-week3_re3-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week4_re1-wp](../raw/reverse/Bugku-week4_re1-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week4_re2-wp](../raw/reverse/Bugku-week4_re2-wp.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [Bugku-week4_re3-wp](../raw/reverse/Bugku-week4_re3-wp.md) | 文件类型伪装或假 exe 应先做 magic/文本首检，避免把明文 artifact 当二进制逆向。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
+| [Bugku-week3_re1-wp](../raw/reverse/Bugku-week3_re1-wp.md) | 12x12 线性方程组由 `coeff * local_var` 累加到常量表；提取矩阵时保留未满 4 字节和 memset 零变量。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
+| [Bugku-week3_re2-wp](../raw/reverse/Bugku-week3_re2-wp.md) | UPX 脱壳后是 48 轮 XTEA 变体；`sum & 3` 与 `(sum >> 11) & 3` 决定 key 下标。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)、[self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
+| [Bugku-week3_re3-wp](../raw/reverse/Bugku-week3_re3-wp.md) | 256 字节 S-box、双索引 `i/j`、swap 和 PRGA 输出是 RC4 强特征；确认 key `0xGame2022` 后同算法解密密文。 | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| [Bugku-week4_re1-wp](../raw/reverse/Bugku-week4_re1-wp.md) | 简单 VM 执行固定长度字节码，输入/寄存器/输出数组模式重复；可直接抽象每字符通项公式再正向验证。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| [Bugku-week4_re2-wp](../raw/reverse/Bugku-week4_re2-wp.md) | AES-128-ECB 校验，key 为 `00..0f`，输入 42 字节但比较 48 字节说明最后 block 零填充。 | [block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [Bugku-week4_re3-wp](../raw/reverse/Bugku-week4_re3-wp.md) | `.exe` 扩展名是干扰项；无 `MZ` magic 且内容是文本时，先按文件首检/明文 artifact 处理。 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
 | [HGAME2026-看不懂的华容道-wp](../raw/reverse/HGAME2026-看不懂的华容道-wp.md) | VMP 包裹的华容道状态反馈可转成约束和 BFS，先恢复棋盘、碰撞指纹和最短路径。 | [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
 | [HGAME2026-衔尾蛇-wp](../raw/reverse/HGAME2026-衔尾蛇-wp.md) | Spring Boot JAR 动态替换真实风控引擎并进入自定义 VM，先恢复 JVM 业务层和隐藏 VM 调用。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
-| [HGAME2026-androuge-wp](../raw/reverse/HGAME2026-androuge-wp.md) | 移动端、游戏或运行时平台题，先分清资源、脚本、native 和存档校验边界。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
-| [HGAME2026-marionette-wp](../raw/reverse/HGAME2026-marionette-wp.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| [HGAME2026-androuge-wp](../raw/reverse/HGAME2026-androuge-wp.md) | APK 释放魔改 Lua 5.4 VM 与加密 `game` bytecode；先还原 XOR 载入层和 opcode 位域，再提密文数组与 seed。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| [HGAME2026-marionette-wp](../raw/reverse/HGAME2026-marionette-wp.md) | 父进程用 `ptrace` 调度子进程 `int3; ret` block；hook 记录 RIP trace 后，还原输入差分和 AES-NI 校验。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
 | [HGAME2026-noncesense-wp](../raw/reverse/HGAME2026-noncesense-wp.md) | Windows client/driver 通过 IOCTL 交换 nonce、HMAC token 和 AES blob，先确认设备协议和驱动侧 key 派生。 | [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
 | [HGAME2026-pvz-wp](../raw/reverse/HGAME2026-pvz-wp.md) | Java/JAR 游戏用植物阵型 hash 解密 flag，先定位 FlagScreen/GameScreen 并爆破小范围状态。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
-| [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | 壳、trace、自解密或运行时阶段，先抓明文 buffer、key 和 I/O 边界。 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
+| [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | SIGSEGV/SIGTRAP/SIGFPE handler 改 RC4 状态，`TracerPid` 混入 key；先 patch 反调试或复现 handler 后断 `memcmp`。 | [anti-analysis.md](anti-analysis.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)、[signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
 | [HGAME2026-vidarchall-wp](../raw/reverse/HGAME2026-vidarchall-wp.md) | Android zygote preload、isolatedProcess 和 native 埋点共同影响 XXTEA 参数，先确认多进程运行时状态。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
-| [LilacCTF2026-c-plus-plus-plus-plus-wp](../raw/reverse/LilacCTF2026-c-plus-plus-plus-plus-wp.md) | 语言运行时或复杂 C/C++ 抽象影响定位，先恢复符号、类型和真实业务函数。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
-| [LilacCTF2026-ezpython-wp](../raw/reverse/LilacCTF2026-ezpython-wp.md) | Python 字节码、Cython 或嵌入式 Python，先恢复调用边界、dump 对象和反编译路径。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
+| [LilacCTF2026-c-plus-plus-plus-plus-wp](../raw/reverse/LilacCTF2026-c-plus-plus-plus-plus-wp.md) | C# Native AOT 中 `XEngine` 是 Twofish-like 16 轮 Feistel；先按 RS/MDS、40 个 round key 和 whitening 恢复固定 key/IV。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [LilacCTF2026-ezpython-wp](../raw/reverse/LilacCTF2026-ezpython-wp.md) | PyInstaller runtime hook 把自定义 `a85decode/b64decode` 写入 `builtins`，并动态改 `MX.__code__` 后才是 XXTEA 真实轮函数。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 | [LilacCTF2026-justrom-wp](../raw/reverse/LilacCTF2026-justrom-wp.md) | SPARC 32-bit big-endian ROM 和内存映射寄存器是主边界，先确认基址、COMMAND/INPUT/OUTPUT 语义和 ChaCha-like 校验。 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
-| [LilacCTF2026-kilogram-wp](../raw/reverse/LilacCTF2026-kilogram-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [LilacCTF2026-lambda-m-wp](../raw/reverse/LilacCTF2026-lambda-m-wp.md) | Python 字节码、Cython 或嵌入式 Python，先恢复调用边界、dump 对象和反编译路径。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
-| [LilacCTF2026-nineapple-wp](../raw/reverse/LilacCTF2026-nineapple-wp.md) | 移动端、游戏或运行时平台题，先分清资源、脚本、native 和存档校验边界。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
-| [NCTF2026-鸡爪流高手-wp](../raw/reverse/NCTF2026-鸡爪流高手-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
+| [LilacCTF2026-kilogram-wp](../raw/reverse/LilacCTF2026-kilogram-wp.md) | VMP 外壳只是前置障碍；输出文件保存 salt、被口令 key 保护的本地 key 和 RC4-like flag 密文。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| [LilacCTF2026-lambda-m-wp](../raw/reverse/LilacCTF2026-lambda-m-wp.md) | Lambda calculus/Scott encoding 只是表达层，真实语义是 GF(2^8) 有理函数插值；把 40 个点转成齐次线性方程组。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)、[number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| [LilacCTF2026-nineapple-wp](../raw/reverse/LilacCTF2026-nineapple-wp.md) | iOS Swift 九宫格手势锁给出 `weight/target_all/map_list`；无需操作 UI，按加权和反查每个字符路径。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
+| [NCTF2026-鸡爪流高手-wp](../raw/reverse/NCTF2026-鸡爪流高手-wp.md) | 游戏协议和 ELO 结算是主线；低分保护检查更新前状态，结算写入无符号分数字段导致下溢登榜。 | [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)、[interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) |
 | [NCTF2026-hook-my-secret-wp](../raw/reverse/NCTF2026-hook-my-secret-wp.md) | 运行时 hook、patch 或 oracle 可观测关键状态，先选断点和最小输入。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
-| [NCTF2026-nomybank-wp](../raw/reverse/NCTF2026-nomybank-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [NCTF2026-pay-for-2048-wp](../raw/reverse/NCTF2026-pay-for-2048-wp.md) | 移动端、游戏或运行时平台题，先分清资源、脚本、native 和存档校验边界。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
-| [NCTF2026-vm-encryptor-wp](../raw/reverse/NCTF2026-vm-encryptor-wp.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| [RCTF2025-chaos-wp](../raw/reverse/RCTF2025-chaos-wp.md) | 低成本运行即可暴露结果时，先做安全运行和输出验证，再决定是否需要深入逆向。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
+| [NCTF2026-nomybank-wp](../raw/reverse/NCTF2026-nomybank-wp.md) | Godot PCK 密钥、运行时解密 DLL、TLS callback hook 和 SMC 共同隐藏真实校验；先恢复资源和动态补丁链。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| [NCTF2026-pay-for-2048-wp](../raw/reverse/NCTF2026-pay-for-2048-wp.md) | Electron `app.asar` 中 JS bridge 调 WASM license 校验；先直接用 Node 调应用服务，再补 WASM digest/key 派生。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md) |
+| [NCTF2026-vm-encryptor-wp](../raw/reverse/NCTF2026-vm-encryptor-wp.md) | 先写自定义 VM disassembler 理清 opcode；真实算法是循环位移/XOR 后进魔改 Base64，再整体 XOR。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)、[encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| [RCTF2025-chaos-wp](../raw/reverse/RCTF2025-chaos-wp.md) | 运行即可输出结果的短题，先做格式、依赖和安全运行验证，再决定是否需要静态分析。 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
 | [RCTF2025-chaos2-wp](../raw/reverse/RCTF2025-chaos2-wp.md) | 大量花指令、反调试和动态 key 修改掩护 RC4 解密，先清理 junk、跟构造函数和密钥更新点。 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
-| [RCTF2025-onion-wp](../raw/reverse/RCTF2025-onion-wp.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| [Spirit2026-5-cythonchecker-wp](../raw/reverse/Spirit2026-5-cythonchecker-wp.md) | Python 字节码、Cython 或嵌入式 Python，先恢复调用边界、dump 对象和反编译路径。 | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
-| [Spirit2026-5-im-a-human-wp](../raw/reverse/Spirit2026-5-im-a-human-wp.md) | 壳、trace、自解密或运行时阶段，先抓明文 buffer、key 和 I/O 边界。 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
+| [RCTF2025-onion-wp](../raw/reverse/RCTF2025-onion-wp.md) | 自定义 VM 有 PC/HIPC/LOTAG/HITAG/虚拟栈和 50 个 64-bit 输入；先实现反汇编/解释器，再把每个 check 自动逆算。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [Spirit2026-5-cythonchecker-wp](../raw/reverse/Spirit2026-5-cythonchecker-wp.md) | Loader 释放 `runtime_codec.pyd` 并传入 AES key；必须分析实际释放的 Cython 扩展和 ShiftRows 变体。 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
+| [Spirit2026-5-im-a-human-wp](../raw/reverse/Spirit2026-5-im-a-human-wp.md) | 钓鱼页写剪贴板 `mshta`，`.mp3` 被当 HTA/JS 执行并拼接 PowerShell；按 JS charcode、hex、XOR 分阶段还原。 | [powershell-staged-payload-and-clipboard-phishing.md](powershell-staged-payload-and-clipboard-phishing.md)、[scripts-and-obfuscation.md](scripts-and-obfuscation.md) |
 | [Spirit2026-5-kernelmaze-wp](../raw/reverse/Spirit2026-5-kernelmaze-wp.md) | 驱动/内核接口隐藏反馈，先确认 IOCTL、用户态/内核态边界和可观测输出。 | [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
-| [Spirit2026-5-link-start-wp](../raw/reverse/Spirit2026-5-link-start-wp.md) | 壳、trace、自解密或运行时阶段，先抓明文 buffer、key 和 I/O 边界。 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
+| [Spirit2026-5-link-start-wp](../raw/reverse/Spirit2026-5-link-start-wp.md) | VMP client/server 两段输入：迷宫路径既是第一阶段答案又是 SMC XOR key，解密后函数生成 RC4 key 校验 flag。 | [vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)、[packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
 | [Spirit2026-5-xxxtea-wp](../raw/reverse/Spirit2026-5-xxxtea-wp.md) | 程序最终先解出明文再与输入比较，先满足长度检查并在最终比较前断下读取明文。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [SU_easygalWP](../raw/reverse/SU_easygalWP.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [SU_flumelWP](../raw/reverse/SU_flumelWP.md) | 语言运行时或复杂 C/C++ 抽象影响定位，先恢复符号、类型和真实业务函数。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
-| [SU_LockWP](../raw/reverse/SU_LockWP.md) | 复杂校验最终落到比较点，先断在比较/输出前恢复明文或中间 buffer。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [SU_MvsicPlayerWP](../raw/reverse/SU_MvsicPlayerWP.md) | 语言运行时或复杂 C/C++ 抽象影响定位，先恢复符号、类型和真实业务函数。 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) |
-| [SU_old_binWP](../raw/reverse/SU_old_binWP.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [SU_protocolWP](../raw/reverse/SU_protocolWP.md) | 自实现 HTTP/body 解码和私有二进制协议是首要边界，先复现解析流程、block 变换和固定目标比较。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [SU_RevirdWP](../raw/reverse/SU_RevirdWP.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [SU_WestWP](../raw/reverse/SU_WestWP.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | VM/解释器/混淆变换是主障碍，先定位 dispatch、状态寄存器、opcode 和真实比较点。 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| [VNCTF2026-login-wp](../raw/reverse/VNCTF2026-login-wp.md) | 常规逆向首轮，先做载体、字符串、交叉引用、动态断点和最小解密脚本。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
-| [VNCTF2026-shadow-wp](../raw/reverse/VNCTF2026-shadow-wp.md) | 壳、trace、自解密或运行时阶段，先抓明文 buffer、key 和 I/O 边界。 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
+| [SU_easygalWP](../raw/reverse/SU_easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [SU_flumelWP](../raw/reverse/SU_flumelWP.md) | Flutter/Dart 输入先经 `Rc4Warp`，再由新版 `libjunk.so` 验证 Hermes bundle 并派生 AES-CBC key/IV；旧 placeholder 会误导。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [SU_LockWP](../raw/reverse/SU_LockWP.md) | Inno Setup、Rust overlay、锁屏程序和内核驱动多层嵌套；最终 IOCTL 中 XXTEA-like dword 校验在驱动层。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
+| [SU_MvsicPlayerWP](../raw/reverse/SU_MvsicPlayerWP.md) | Electron 音乐播放器先解析 `.su_mv` payload，再由 native `.node` 对 WAV 分支执行 VM bytecode 加密；目标是恢复原 WAV MD5。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| [SU_old_binWP](../raw/reverse/SU_old_binWP.md) | 固件先 XOR 解包出 IMG0 容器，再修复损坏 ELF 和 TLS 布局；最后还原网络 challenge 与自定义块校验。 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
+| [SU_protocolWP](../raw/reverse/SU_protocolWP.md) | HTTP 路由很薄，body 先 hex 再进私有协议帧；区分格式错、比较失败和 block 变换后再反推 payload。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [SU_RevirdWP](../raw/reverse/SU_RevirdWP.md) | 外层魔改 AES 解出第二阶段 EXE，随后通过 `\\.\Revird` 与驱动 op case 协同完成 AES-like 校验。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
+| [SU_WestWP](../raw/reverse/SU_WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)、[anti-analysis.md](anti-analysis.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [VNCTF2026-login-wp](../raw/reverse/VNCTF2026-login-wp.md) | APK Java 层只组包，native so 完成魔改 AES、HTTP header 签名和 Frida/IDA 环境检测；可结合流量复算。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[anti-analysis.md](anti-analysis.md) |
+| [VNCTF2026-shadow-wp](../raw/reverse/VNCTF2026-shadow-wp.md) | 用户态迷宫只触发 `Sleep(0x32)`；真实校验在反射加载驱动、PTE hook、键盘记录和基于 `KeDelayExecutionThread` 参数解密的 shellcode。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
 | [D3CTF2019-ancient-game-v2-wp](../raw/reverse/D3CTF2019-ancient-game-v2-wp.md) | OISC/NAND 自定义 VM 实现数独约束，先抽取不跳 wrong 的控制流约束再交给 solver。 | [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
 | [D3CTF2019-ch1pfs-wp](../raw/reverse/D3CTF2019-ch1pfs-wp.md) | 自定义文件系统镜像和 RC4 文件层加密，先恢复元数据结构和已知明文 keystream。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
 | [D3CTF2019-disappeared-memory-wp](../raw/reverse/D3CTF2019-disappeared-memory-wp.md) | Windows 10 compressed memory 导致关键页缺失，先从 dump/PTE/Store Manager 恢复数据页。 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
@@ -141,7 +162,7 @@ updated: 2026-06-12
 | [D3CTF2019-simd-wp](../raw/reverse/D3CTF2019-simd-wp.md) | AVX2 SIMD 并行 SM4 校验，先理解 gather/shuffle 后的数据布局再按真实排列解密。 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
 | [D3CTF2021-ancient-wp](../raw/reverse/D3CTF2021-ancient-wp.md) | 算术编码和编译期字符串保护组合，先 dump 固定分布表和目标编码再反解输入。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | [D3CTF2021-baby-spear-wp](../raw/reverse/D3CTF2021-baby-spear-wp.md) | 隐藏 VBA 宏释放 PE 并用时间派生 AES key，先恢复 Office 宏流和 staged payload。 | [scripts-and-obfuscation.md](scripts-and-obfuscation.md) |
-| [D3CTF2021-jumpjump-wp](../raw/reverse/D3CTF2021-jumpjump-wp.md) | 静态 ELF 用 setjmp/longjmp 拆分控制流，先识别异常式跳转再提取 magic 数组反推。 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
+| [D3CTF2021-jumpjump-wp](../raw/reverse/D3CTF2021-jumpjump-wp.md) | 静态 ELF 用 `setjmp/longjmp` 拆分控制流；先把异常式跳转还原成条件分支，再提取 magic 数组反推。 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)、[compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
 | [D3CTF2021-no-name-wp](../raw/reverse/D3CTF2021-no-name-wp.md) | Android assets 加密 Java 校验代码由 native 返回 key，先恢复运行时真实验证接口。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 | [D3CTF2021-white-give-wp](../raw/reverse/D3CTF2021-white-give-wp.md) | LLVM pass 全局变量 AES、常数拆分和 MBA 表达式替换，先 dump 明文常量再还原校验流。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | [D3CTF2021-zigzag-encryptor-wp](../raw/reverse/D3CTF2021-zigzag-encryptor-wp.md) | Zigzag 图形编码叠加 LFSR 流密码，先还原图像排列再用已知明文恢复递推。 | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |

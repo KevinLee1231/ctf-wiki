@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [forensics, technique]
+tags: [forensics, technique, 3d-printing, gcode, cad, bgcode, qoi, physical]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/3d-printing.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # 3D Printing / CAD File Forensics
@@ -34,9 +34,9 @@ updated: 2026-05-21
 4. 从 `G1` 提取 X/Y/Z/E，按挤出动作过滤，画 XY、XZ、YZ 投影。
 5. 视频题用 OpenCV 跟踪喷头/床位置，过滤打印层帧，生成 2D histogram。
 
-## 关键变体
+## 3D/CAD 载体分支
 
-| 变体 | 复用重点 |
+| 载体 | 处理重点 |
 |---|---|
 | PrusaSlicer `.bgcode` | `GCDE` block 结构，GCode/thumbnail block 可能压缩。 |
 | QOI thumbnail | 缩略图不是常见 PNG/JPEG 时，按 `qoif` 解析。 |
@@ -52,11 +52,12 @@ updated: 2026-05-21
 
 ## 关联技巧
 
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
-- [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
-- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+- [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
 - [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md)
+- [video-document-and-media-stego.md](video-document-and-media-stego.md)
+- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
+- [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
 
 ## 原始资料
 

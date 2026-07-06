@@ -2,31 +2,32 @@
 type: tooling
 tags: [osint, tooling, tools, environment]
 skills: [ctf-osint]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # OSINT Tooling
 
 本页记录 `ctf-osint` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - OSINT 首轮先保存原始证据：URL、图片、用户名、时间戳、坐标、页面快照。
 - 本机工具主要用于辅助解析和记录；真正证据通常来自公开页面，需要保留可复查来源。
 - 涉及现实人物或最新公开信息时，应实时搜索验证，不沿用旧结论。
 
-### 知识页覆盖状态
+### 不应进入 OSINT 工具链的情况
 
-- 当前覆盖地理/媒体、社交媒体、Web/DNS OSINT 三条主线，页面数量偏少但入口清晰。
-- 后续应补 GitHub/代码仓库 OSINT、地图/街景推理、历史网页、用户名跨平台聚合和元数据反查。
+- 需要绕权限、打接口、利用漏洞或登录后访问时，转 Web/Pentest，不把技术利用写成 OSINT。
+- 线索已经变成文件恢复、metadata 提取、PCAP 或内存证据时，转 Forensics。
+- 结论依赖最新公开信息时，必须实时验证，不能只复用旧 raw 的结论。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- Geolocation checklist：地貌、路牌、建筑、天气、太阳方位。
-- Account pivot：username/email/头像/社交图谱。
-- Web history：Wayback、DNS history、certificate transparency、GitHub commits。
+- raw 给出地理定位链，且需要固定记录地貌、路牌、建筑、天气或太阳方位证据。
+- username/email/头像/社交图谱能形成可迁移的账号 pivot 流程。
+- Wayback、DNS history、certificate transparency、GitHub commits 成为可复查证据链。
 
 ## 本机工具清单（按使用时机）
 
@@ -48,6 +49,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有明显高优先级 CLI 缺口。`WhatsMyName` 现在更适合作为数据源 / 网页核对，而不是默认本地命令行入口。
+
+## 失败信号与转向
+
+- 搜索结果无法复现或页面已变化：保存查询语句、搜索引擎、时间和快照 URL，再用 [web-and-dns.md](web-and-dns.md) 的历史页面/DNS 路线交叉验证。
+- 线索变成图片、音频、视频或文件 metadata：不要继续靠搜索猜测，转 [geolocation-and-media.md](geolocation-and-media.md) 或对应 Forensics 媒体页。
+- 需要登录、绕权限、打接口或利用服务漏洞：这已经超出 OSINT 工具页，转 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md) 或 [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)。
+- 用户名枚举命中过多：先用头像、邮箱、主页互链、时间线和平台 ID 缩小身份链，再回到 [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md)。
 
 ## 详细清单
 

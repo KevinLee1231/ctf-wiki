@@ -5,7 +5,7 @@ skills: [ctf-web]
 raw:
   - ../raw/web/parser-wrapper-and-legacy-ssrf-tricks.md
   - ../raw/web/WMCTF2025-pdf2text-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Parser, Wrapper and Legacy SSRF Tricks
@@ -16,7 +16,7 @@ updated: 2026-06-12
 
 共同点是：外层业务校验和内层解析器理解的资源不一致。首轮要找“哪个组件做了第二次解释”，而不是把所有案例都归成普通 SSRF 或路径穿越。
 
-## 共同识别信号
+## 识别信号
 
 - 目标把 URL、文件名、上传文档、SQL/HQL、PDF/SVG/Office、LaTeX、数据库连接或 wrapper 字符串交给下游库处理。
 - 外层过滤看似通过，但内层组件重新解析路径、协议、host、CMap、字体、压缩数据、zip wrapper 或远程资源。
@@ -36,6 +36,7 @@ updated: 2026-06-12
 |---|---|---|
 | SSRF 到 Docker API、Elasticsearch、metadata 或内部 HTTP | 先枚举协议和端点，确认是否能从文件读升级到 exec/RCE | [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md), [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md) |
 | URL parser 和 curl/requests/后端库解释不同 | 先做 host、userinfo、IPv6、编码、重定向和 DNS rebinding 最小差异样本 | [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md) |
+| Gateway、签名层和后端路由的 path 视图不一致 | 先确认 ACL、HMAC 和后端实际命中的路径分别看到什么 | [path-confusion-to-signed-internal-request-chain.md](path-confusion-to-signed-internal-request-chain.md) |
 | PHP `zip://`、`phar://`、`file://`、LFI wrapper | 先确认 wrapper 是否启用、路径是否可控、polyglot 是否被内层识别 | [php-lfi-ssti-ssrf-and-type-juggling.md](php-lfi-ssti-ssrf-and-type-juggling.md), [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md) |
 | PDF/SVG/Office/LaTeX 解析器内部加载资源 | 先看文档内部名称和库加载路径，外层保存文件名不代表安全 | [xml-command-and-graphql-injection.md](xml-command-and-graphql-injection.md), [pdf-png-gif-and-text-stego.md](pdf-png-gif-and-text-stego.md) |
 | Castor XML、XMLDecoder、pickle/gzip/CMap 等二段数据加载 | 先判断是否为反序列化 sink，再构造最小类型/数据文件触发 | [php-java-python-deserialization.md](php-java-python-deserialization.md) |
@@ -65,6 +66,7 @@ updated: 2026-06-12
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
 - [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md)
 - [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md)
+- [path-confusion-to-signed-internal-request-chain.md](path-confusion-to-signed-internal-request-chain.md)
 - [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md)
 - [php-java-python-deserialization.md](php-java-python-deserialization.md)
 - [sqli-filter-and-oracle-family.md](sqli-filter-and-oracle-family.md)

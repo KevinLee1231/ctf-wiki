@@ -1,19 +1,20 @@
 ---
-type: technique
-tags: [reverse, packer, deobfuscation, vmprotect, themida, automation, technique]
+type: family
+tags: [reverse, packer, deobfuscation, vmprotect, themida, automation, family]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/packers-deobfuscation-and-debug-automation.md
-updated: 2026-06-12
+  - ../raw/reverse/WMCTF2025-videoplayer-wp.md
+updated: 2026-07-06
 ---
 
 # Packers, Deobfuscation and Debug Automation
 
-## 适用场景
+## 作用边界
 
 逆向对象被壳、虚拟化、控制流扁平化、反调试、动态解密或自动化干扰掩盖，静态反编译无法直接看到真实校验逻辑。目标不是“把所有工具跑一遍”，而是先判断保护类型，再选择脱壳、动态 trace、差分、IR lifting、patch 或约束提取路线。
 
-本页保留为 technique，是因为它描述的是一类解题工作流：怎样把受保护程序降维成可分析的真实逻辑。具体工具入口和环境细节应转到 [reverse-tooling.md](reverse-tooling.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)、[frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) 或 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)。
+本页是受保护逆向题的 family 分流入口，回答“当前保护应先降维到哪种可分析边界”。具体工具入口和环境细节应转到 [reverse-tooling.md](reverse-tooling.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)、[frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) 或 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)。
 
 ## 识别信号
 
@@ -29,7 +30,7 @@ updated: 2026-06-12
 - 记录一条可复现 trace：输入、运行条件、断点/Hook 点、关键寄存器/内存变化和最终结果。
 - 能说明当前应走“脱壳还原代码”“动态提取明文/约束”“patch 反调试”“VM lifting”“差分定位变化”中的哪条路线。
 
-## 解法骨架
+## 分流流程
 
 1. 首检壳和混淆特征：section、entropy、入口点、导入表、TLS callback、反调试 API、异常处理和自修改代码。
 2. 找分析边界：
@@ -40,9 +41,9 @@ updated: 2026-06-12
 4. 把结果转成可验证 artifact：解密后的字符串、简化后的伪代码、opcode log、约束系统、patch 后 binary 或 solver。
 5. 用一个已知输入或最终 flag 校验路径，避免把诱饵分支、假 flag 或调试环境副作用当作真实逻辑。
 
-## 关键变体
+## 保护类型分流
 
-| 变体 | 判断与路线 |
+| 保护形态 | 判断与路线 |
 |---|---|
 | VMProtect / Themida | 先识别壳特征和反调试点，再决定动态 trace、OEP dump、handler 抽象或只抓最终比较反馈。 |
 | VMP OEP dump followed by business logic tracing | 找到 OEP/dump 只是开始，后续仍要跟登录状态、机器绑定、解密函数和返回 buffer。 |
@@ -61,6 +62,10 @@ updated: 2026-06-12
 - Patch 过度，导致成功分支被伪造，实际 flag 变换逻辑丢失。
 - 在 VM 题里只看 handler 代码，不记录 VM state、opcode 和 operand 的对应关系。
 - 忽略假 flag、诱饵字符串和反调试环境差异。
+
+## 合并与拆分结论
+
+该页不再作为 technique 使用。壳、商业虚拟化、控制流混淆、动态解密、patch 和 trace 自动化的共同点是“先找到真实逻辑边界”，但后续路线依赖保护类型分叉。具体单点模式应落到 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)、[vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) 或工具页；本页只保留分流和降维判断。
 
 ## 关联技巧
 

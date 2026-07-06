@@ -1,19 +1,19 @@
 ---
 type: family
-tags: [web, family]
+tags: [web, family, sqli, oracle, filter-bypass, blind-sqli, second-order]
 skills: [ctf-web]
 raw:
   - ../raw/web/sqli-filter-and-oracle.md
-updated: 2026-05-22
+updated: 2026-07-06
 ---
 
 # SQLi 过滤、输入面与 Oracle 技巧族
 
-## 适用场景
+## 作用边界
 
-本页是 `SQLi 过滤、输入面与 Oracle 技巧族` 技巧家族页，用来承接多个相邻技巧和案例；先用于判断是否属于这一族，再选择具体变体。
+本页是 Web SQLi family，负责从输入面、过滤器行为和反馈通道判断 SQLi 变体，再决定是直接提取数据，还是转向 XML/GraphQL 注入、上传/反序列化/RCE、认证边界或已知组件漏洞。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不承担通用 Web 认证、浏览器侧外带或文件上传链路的目录职责；只有当核心证据仍是数据库查询语义、SQL 方言差异或 SQL oracle 时才留在本页。
 
 ## 识别信号
 
@@ -29,7 +29,7 @@ updated: 2026-05-22
 - 已识别注入类型：回显、错误、布尔、时间、二阶、文件/元数据、编码绕过或 race/oracle。
 - 如果使用工具失败，仍有手写 payload 能证明一个 bit、一个字符或一个状态差异。
 
-## 解法骨架
+## 分流流程
 
 1. 固定 cookie、CSRF、账号状态和 baseline 响应。
 2. 找到最小可控参数，用单字符 payload 验证引号、注释、编码和过滤行为。
@@ -37,7 +37,7 @@ updated: 2026-05-22
 4. 把过滤绕过和提取逻辑分开脚本化，先验证一个字符，再扩展到完整 secret。
 5. 如果 SQLi 只是链路一环，继续串 SSTI、文件写入、上传、session 覆盖或内部 API。
 
-## 关键变体
+## SQLi 路线分流
 
 | 变体 | 优先证据 | 下一跳页面 | 失败后 pivot |
 |---|---|---|---|
@@ -59,15 +59,15 @@ updated: 2026-05-22
 
 ## 关联技巧
 
-- [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
-- [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md)
-- [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md)
-- [auth-jwt.md](auth-jwt.md)
-- [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md)
-- [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
-- [php-lfi-ssti-ssrf-and-type-juggling.md](php-lfi-ssti-ssrf-and-type-juggling.md)
-- [xss-dom-and-browser-tricks.md](xss-dom-and-browser-tricks.md)
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
+- [xml-command-and-graphql-injection.md](xml-command-and-graphql-injection.md)
+- [sqli-upload-deser-and-command-rce.md](sqli-upload-deser-and-command-rce.md)
+- [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md)
+- [php-lfi-ssti-ssrf-and-type-juggling.md](php-lfi-ssti-ssrf-and-type-juggling.md)
+- [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md)
+- [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
+- [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md)
+- [web-tooling.md](web-tooling.md)
 
 ## 原始资料
 

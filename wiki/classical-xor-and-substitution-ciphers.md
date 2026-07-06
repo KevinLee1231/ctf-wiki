@@ -4,7 +4,7 @@ tags: [crypto, family, classical, xor, substitution]
 skills: [ctf-crypto, ctf-misc]
 raw:
   - ../raw/crypto/classical-xor-and-substitution-ciphers.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Classical XOR and Substitution Ciphers
@@ -14,6 +14,20 @@ updated: 2026-06-12
 本页是轻量古典密码、XOR、替换和已知明文恢复 family。它适合处理 Vigenere、Atbash、Polybius、rotating substitution、many-time pad、cascade XOR、文件头推 key、图像 Caesar、semaphore/photo、book cipher 等“结构简单但识别信号容易分散”的题。
 
 现代分组模式、MAC、nonce reuse 和 oracle 不在本页展开，转 [block-mode-misuse-family.md](block-mode-misuse-family.md) 或 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)。
+
+## 识别信号
+
+- 密文仍呈现轻量结构：可见字母表、固定分组、周期性 key、替换表、重复片段、文件 magic 或明显的 crib。
+- 题目给出多条同源密文、同一 key 下的 XOR/OTP reuse、book/轮盘/坐标提示，或图片/手势/旗语等视觉编码线索。
+- 解题重点是恢复 alphabet、周期、keystream、替换映射、坐标表或已知明文关系，而不是攻击现代 cipher 实现。
+- 能用少量 forward check 验证候选 key/映射，例如 flag 前缀、可打印性、文件头、JSON/PNG/PDF 结构或题面固定格式。
+
+## 最小证据
+
+- 明确字母表、编码层、分组方式、key 周期或替换表是否已知。
+- 至少保留一个 crib：flag 前缀、文件 magic、固定 JSON/PNG/PDF 片段、空格频率或题面给出的明文结构。
+- 对 XOR/OTP reuse，要证明多密文共享 keystream 或 key 周期，而不是单条密文随机乱码。
+- 对视觉/手势/图片古典题，要保存坐标、方向、通道和变换顺序，保证解码过程可复算。
 
 ## 变体路由
 

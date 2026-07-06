@@ -4,8 +4,11 @@ tags: [ai-ml, family, llm, prompt-injection, jailbreak, tool-use]
 skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/llm-attacks.md
+  - ../raw/ai-ml/SU_easyLLMWP.md
+  - ../raw/misc/RCTF2025-the-alchemists-cage-wp.md
   - ../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md
-updated: 2026-06-12
+  - ../raw/misc/VNCTF2026-huntingagent-wp.md
+updated: 2026-07-06
 ---
 
 # LLM Attacks
@@ -37,6 +40,7 @@ updated: 2026-06-12
 | token smuggling | tokenizer、不可见字符、分隔符和编码差异 | 保留原始字节 |
 | context window manipulation | 长上下文覆盖、截断、摘要和优先级 | 控制关键指令位置 |
 | tool use exploitation | 工具参数是否可被 prompt 控制 | 审计文件读、解压、执行和网络边界 |
+| LLM 输出作为 key/seed/password | 模型、prompt、temperature 和输出格式是否已知，输出分布是否集中 | 批量采样候选输出，派生 key 后用密文/校验 oracle 碰撞验证 |
 | agent 附件链 | 附件是否能从“分析”推进到执行 | 转 [scripts-and-obfuscation.md](scripts-and-obfuscation.md) 或 malware |
 
 ## 来自 WP 的案例索引
@@ -44,7 +48,8 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [RCTF2025-the-alchemists-cage-wp](../raw/misc/RCTF2025-the-alchemists-cage-wp.md) | 隐藏提示词泄露题的最小证据是模型能否复述历史对话、系统提示或被要求保护的 secret。 |
-| [SU_easyLLMWP](../raw/ai-ml/SU_easyLLMWP.md) | LLM 对话约束题优先测试角色边界、输出格式约束和提示注入后的可验证回显。 |
+| [SU_easyLLMWP](../raw/ai-ml/SU_easyLLMWP.md) | 服务端公开 `key = SHA256(LLM_output)[:16]`、模型、prompt 和 temperature；低温输出空间集中时，把 LLM 当弱 key generator，批量采样候选输出后用 AES-CBC 密文和 padding/明文格式 oracle 碰撞。 |
+| [VNCTF2026-huntingagent-wp](../raw/misc/VNCTF2026-huntingagent-wp.md) | Multi-Agent 审计平台要同时看 Supervisor 截断审查、Coordinator ReAct 调度和 Skill 触发概率；prompt leak 与工具执行可各拿一段 secret。 |
 | [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md) | 客服 AI 会分析附件时，prompt injection 可以把“解压并检查 zip”推进到工具执行 ELF；判断重点是工具链而不是聊天输出本身。 |
 
 ## 合并与拆分结论
@@ -64,10 +69,14 @@ updated: 2026-06-12
 
 - [adversarial-ml.md](adversarial-ml.md)
 - [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md)
+- [block-mode-misuse-family.md](block-mode-misuse-family.md)
 - [scripts-and-obfuscation.md](scripts-and-obfuscation.md)
 - [ai-ml-tooling.md](ai-ml-tooling.md)
 
 ## 原始资料
 
 - [llm-attacks.md](../raw/ai-ml/llm-attacks.md)
+- [SU_easyLLMWP.md](../raw/ai-ml/SU_easyLLMWP.md)
+- [RCTF2025-the-alchemists-cage-wp.md](../raw/misc/RCTF2025-the-alchemists-cage-wp.md)
 - [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md)
+- [VNCTF2026-huntingagent-wp](../raw/misc/VNCTF2026-huntingagent-wp.md)

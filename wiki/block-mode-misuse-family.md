@@ -1,19 +1,20 @@
 ---
 type: family
-tags: [crypto, family]
+tags: [crypto, family, block-cipher, aes, cbc, ctr, gcm, mac, oracle, key-derivation]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/aes-modes-mac-and-oracles.md
-updated: 2026-05-22
+  - ../raw/ai-ml/SU_easyLLMWP.md
+updated: 2026-07-06
 ---
 
 # 分组密码模式、MAC 与 Oracle 误用技巧族
 
-## 适用场景
+## 作用边界
 
-本页是 `分组密码模式、MAC 与 Oracle 误用技巧族` 技巧家族页，用来承接多个相邻技巧和案例；先用于判断是否属于这一族，再选择具体变体。
+本页是对称加密误用 family，负责判断题目是否落在 block mode、nonce/IV/counter、MAC/tag、padding 或可查询 oracle 的组合问题上。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+如果核心证据是 RSA/ECC/格/代数参数，不应停留在本页；如果核心证据是文件格式、Web parser 或逆向实现细节，本页只接收已经恢复出的加密边界和可复验输入输出。
 
 ## 识别信号
 
@@ -30,7 +31,7 @@ updated: 2026-05-22
 - 明确攻击目标：恢复明文、伪造密文、伪造 tag、恢复 key stream，或绕过认证。
 - 如果走 oracle，必须量化 oracle 信号：状态码、错误文本、时间、长度、业务状态或返回对象。
 
-## 解法骨架
+## 分流流程
 
 1. 切分协议字段：`nonce/iv | ciphertext | tag/mac | aad | payload`，不要把整包直接丢给工具。
 2. 先用 block size、重复块、长度变化、错误差异判断模式和认证顺序。
@@ -38,7 +39,7 @@ updated: 2026-05-22
 4. 写最小脚本验证一个字节、一个块或一个字段能否被控制。
 5. 扩展到完整明文恢复或目标字段伪造；最后用服务端响应或本地复现做正向验证。
 
-## 关键变体
+## 路线分流
 
 | 变体 | 优先证据 | 下一跳页面 | 失败后 pivot |
 |---|---|---|---|
@@ -47,6 +48,7 @@ updated: 2026-05-22
 | CTR/GCM nonce reuse | nonce/counter 重复，同 key 多密文 | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) | 如果只有 tag 可查，转 GHASH/forbidden attack 或协议 oracle。 |
 | ECB 图像/结构泄漏 | 重复明文块对应重复密文块 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) | 如果块不重复，检查压缩、随机 padding 或分组边界。 |
 | 线性 MAC / CRC 伪造 | tag 满足 XOR/GF(2)/CRC 可组合关系 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) | 若非线性，回到长度扩展、keyed hash 或签名实现。 |
+| LLM / password generator 输出派生 key | `key_derivation`、模型/prompt/temperature 或输出格式公开，且多组密文可收集 | [llm-attacks.md](llm-attacks.md) | 若输出空间不集中或模型不可复现，回查实现侧 key 泄露、弱随机种子或已知明文 oracle。 |
 | PDF / HashClash chosen-prefix | 需要构造两个同 hash 但语义不同文件 | [crypto-tooling.md](crypto-tooling.md) | 若服务端二次解析文件，联合 Web/parser differential 页面。 |
 
 ## 常见陷阱
@@ -61,20 +63,17 @@ updated: 2026-05-22
 ## 关联技巧
 
 - [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
-- [exotic-secret-sharing-rabin-and-polynomials.md](exotic-secret-sharing-rabin-and-polynomials.md)
-- [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
-- [rsa-attacks.md](rsa-attacks.md)
-- [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)
-- [lattice-and-lwe.md](lattice-and-lwe.md)
-- [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md)
+- [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
+- [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
 - [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)
-- [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md)
-- [zkp-secret-sharing-and-proof-systems.md](zkp-secret-sharing-and-proof-systems.md)
-- [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
+- [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
+- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
+- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [llm-attacks.md](llm-attacks.md)
+- [crypto-tooling.md](crypto-tooling.md)
 
 ## 原始资料
 
 - [aes-modes-mac-and-oracles.md](../raw/crypto/aes-modes-mac-and-oracles.md)
+- [SU_easyLLMWP.md](../raw/ai-ml/SU_easyLLMWP.md)

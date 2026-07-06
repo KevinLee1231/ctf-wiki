@@ -8,7 +8,7 @@ raw:
   - ../raw/reverse/HGAME2026-pvz-wp.md
   - ../raw/reverse/ACTF2026-calc-my-point-wp.md
   - ../raw/reverse/D3CTF2022-d3thon-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Go, Rust, JVM and C++ Reversing
@@ -16,6 +16,20 @@ updated: 2026-06-12
 ## 作用边界
 
 本页是语言运行时 family，覆盖 Go、Rust、Swift/Kotlin/JVM、D、Haskell、C++、Nuitka/Cython 等编译产物中由运行时对象、符号、类型、异常/协程模型或标准库布局造成的逆向障碍。它不再作为单一 technique。
+
+## 识别信号
+
+- 二进制或字节码中出现语言 runtime 特征：Go `gopclntab`、Rust panic/mangling、JVM class/JAR、C++ RTTI/vtable、Swift/Kotlin/D/Haskell runtime。
+- 伪代码主要困难来自对象布局、字符串/slice/interface、异常/协程、反射、动态加载、模板/STL 或大整数库，而不是普通控制流。
+- 关键校验入口藏在运行时回调、业务类、native extension、泛型/trait 虚调用、反射方法名或标准库封装后。
+- raw 证据显示需要先恢复语言语义，再把提取出的约束、cipher 参数或比较表交给其它 technique。
+
+## 最小证据
+
+- 记录语言/编译器版本线索、符号恢复方式、入口函数、关键类/方法/对象和可观察的输入输出边界。
+- 对 Go/Rust/C++，先确认字符串、slice、vector、vtable、interface 或大整数对象的真实内存布局。
+- 对 JVM/Kotlin/Spring Boot，至少定位 main/controller/game loop、动态加载点、反编译不可靠位置和真实校验类。
+- 对 Cython/Nuitka/native extension，明确 Python stub 与 native 校验函数的调用边界，再决定是否转 Python 字节码或 native 分析页。
 
 ## 首轮路由
 

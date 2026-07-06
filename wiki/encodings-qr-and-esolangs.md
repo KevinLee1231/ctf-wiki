@@ -4,7 +4,10 @@ tags: [misc, family, encoding, qr, esolang, unicode]
 skills: [ctf-misc]
 raw:
   - ../raw/misc/encodings-qr-and-esolangs.md
-updated: 2026-06-12
+  - ../raw/misc/ACTF2026-special-day-wp.md
+  - ../raw/misc/HGAME2026-打好基础-wp.md
+  - ../raw/misc/SU_Artifact_OnlineWP.md
+updated: 2026-07-06
 ---
 
 # Encodings, QR and Esolangs
@@ -15,7 +18,7 @@ updated: 2026-06-12
 
 如果题目核心已经是复杂文件结构、压缩包恢复、图像位平面、沙箱逃逸或交互 oracle，不要继续在编码页里循环尝试。
 
-## 共同识别信号
+## 识别信号
 
 - 输入输出主要是字符串、数字列、二维码碎片、Unicode 异常字符、看似程序的符号串、Whitespace/Brainfuck/Piet/Malbolge 等 esolang。
 - 字符集、长度、padding、大小写、分隔符、重复模式或可打印率明显指向可逆编码。
@@ -38,6 +41,14 @@ updated: 2026-06-12
 | QR 损坏、碎片、目录索引、finder 缺失 | 先恢复网格和 finder pattern，再用 known prefix/ECC 修正。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
 | Whitespace/Brainfuck/Piet/Malbolge/自定义 esolang | 识别语言和 opcode 映射，先跑小样本验证解释器方向，再执行完整链。 | [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
 | 多层编码链 | 每层只在有格式证据时推进；中间结果若变成文件头、图片、压缩包或脚本，立即 pivot。 | [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md) |
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-special-day-wp](../raw/misc/ACTF2026-special-day-wp.md) | 单层 Base64 解码后还要按题面文本规则规范化 flag body；这类签到题重点是记录输入形态和变换规则。 |
+| [HGAME2026-打好基础-wp](../raw/misc/HGAME2026-打好基础-wp.md) | 大段 emoji 优先考虑 base100；每层解码后用字符集、padding 和可打印率确认下一层 Base 编码，而不是盲目爆破。 |
+| [SU_Artifact_OnlineWP](../raw/misc/SU_Artifact_OnlineWP.md) | 符文文本对应自然语言片段时，先恢复 rune/plain 替换映射；若后续进入交互状态选择器，应转游戏状态 family。 |
 
 ## 合并与拆分结论
 
@@ -66,3 +77,6 @@ updated: 2026-06-12
 ## 原始资料
 
 - [encodings-qr-and-esolangs.md](../raw/misc/encodings-qr-and-esolangs.md)
+- [ACTF2026-special-day-wp](../raw/misc/ACTF2026-special-day-wp.md)
+- [HGAME2026-打好基础-wp](../raw/misc/HGAME2026-打好基础-wp.md)
+- [SU_Artifact_OnlineWP](../raw/misc/SU_Artifact_OnlineWP.md)

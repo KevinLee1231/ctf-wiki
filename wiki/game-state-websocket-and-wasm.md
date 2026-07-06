@@ -4,7 +4,10 @@ tags: [misc, family, game-state, websocket, wasm]
 skills: [ctf-misc, ctf-web, ctf-reverse]
 raw:
   - ../raw/misc/game-state-websocket-and-wasm.md
-updated: 2026-06-12
+  - ../raw/misc/SU_Artifact_OnlineWP.md
+  - ../raw/misc/ACTF2026-master-of-album-wp.md
+  - ../raw/misc/VNCTF2026-minecraft-wp.md
+updated: 2026-07-06
 ---
 
 # Game State, WebSocket and WASM
@@ -36,11 +39,21 @@ updated: 2026-06-12
 | Cookie checkpoint / game state | 状态是否签名、加密、可枚举或只在客户端校验 | 改 cookie/session 或脚本化状态推进 |
 | Flask session | secret 是否弱、是否可解码、字段是否被服务端信任 | 转 [auth-jwt.md](auth-jwt.md) 或 token family |
 | WebSocket game | 帧格式、动作序列和服务器响应是否可重放 | 写 replay client，固定状态和时间 |
+| Socket.IO quiz / media recognition | 题型、正确率阈值、session 校验和题库/媒体识别接口 | 写自动答题 client，分离封面、音频和题型分支 |
 | server time only check | 校验是否只依赖客户端提交时间或可预测时间 | 枚举时间窗口或跳过等待 |
 | de Bruijn / coverage | 胜利条件是覆盖所有子串或状态组合 | 构造序列，减少交互次数 |
 | Brainfuck / esolang interpreter | 需要插桩、跟踪 tape 或修改解释器行为 | 转 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 或 Reverse |
 | WASM linear memory | flag、坐标、生命值或 check buffer 在 memory 中 | Patch memory/函数或重放导出调用 |
 | Minecraft/RPG/map resource | 事件位置、插件逻辑或资源包隐藏路径 | 解析资源，脚本化移动或状态触发 |
+| Cube/面板状态选择器 | 字符映射、状态置换、激活规则和服务端执行点 | 建模状态转移，用 BFS/beam search 生成动作序列 |
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [SU_Artifact_OnlineWP](../raw/misc/SU_Artifact_OnlineWP.md) | `5x5` 六面 cube 的 `R/C/F` 置换和 activate 选字符规则可本地模拟；先从符文文本恢复映射，再搜索能执行 `cd ..;nl flag` 的状态。 |
+| [ACTF2026-master-of-album-wp](../raw/misc/ACTF2026-master-of-album-wp.md) | Socket.IO 问答系统没有强绑定登录态，随机 `team/token/session_id` 也能开局；重点是封面/音频识别缓存、题型分支和失败轮次丢弃策略。 |
+| [VNCTF2026-minecraft-wp](../raw/misc/VNCTF2026-minecraft-wp.md) | Minecraft 题先画代理、子服、插件和共享数据库边界；creative 侧游戏权限只是入口，后续需转 Pentest/CVE 页面处理跨服权限和 Log4Shell。 |
 
 ## 合并与拆分结论
 
@@ -67,3 +80,6 @@ updated: 2026-06-12
 ## 原始资料
 
 - [game-state-websocket-and-wasm.md](../raw/misc/game-state-websocket-and-wasm.md)
+- [SU_Artifact_OnlineWP.md](../raw/misc/SU_Artifact_OnlineWP.md)
+- [ACTF2026-master-of-album-wp.md](../raw/misc/ACTF2026-master-of-album-wp.md)
+- [VNCTF2026-minecraft-wp.md](../raw/misc/VNCTF2026-minecraft-wp.md)

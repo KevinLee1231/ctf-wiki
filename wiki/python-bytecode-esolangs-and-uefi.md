@@ -4,7 +4,7 @@ tags: [reverse, family, python-bytecode, esolang, uefi, bytecode]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/python-bytecode-esolangs-and-uefi.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Python Bytecode, Esolangs and UEFI
@@ -12,6 +12,20 @@ updated: 2026-06-12
 ## 作用边界
 
 本页是非标准字节码与低频执行格式 family，覆盖 Python `.pyc`/opcode remap/Pyarmor/Nuitka/Cython 相关入口、Brainfuck/FRACTRAN/函数式语言、HarmonyOS ABC、UEFI、DOS stub、coverage side-channel 和其它解释器式载体。它不再作为单一 technique。
+
+## 识别信号
+
+- 附件不是常规 ELF/PE 主逻辑，而是 `.pyc`、PyInstaller/Pyarmor/Nuitka/Cython、esolang、HarmonyOS ABC、UEFI、DOS stub 或解释器式载体。
+- 第一障碍是恢复字节码版本、opcode 表、常量表、解释器语义、格式入口或工具链，而不是求解最终算法。
+- 程序可通过反汇编、反编译、解释器重放、side-channel、coverage/read count 或 runtime dump 还原中间语义。
+- 原始 WP 中多次出现“先恢复执行格式，再处理算法/约束”的模式。
+
+## 最小证据
+
+- 对 Python 字节码，记录 magic/version、opcode 表、常量表、入口 code object、导入边界和是否存在 opcode remap。
+- 对 Pyarmor/Nuitka/Cython，确认真实逻辑在 `.pyc`、stub、native extension、runtime hook 还是动态生成的 code object。
+- 对 esolang/函数式语言，保存输入读取点、输出/比较 idiom、状态转移规则和一个可正向验证的小样本。
+- 对 UEFI/HarmonyOS/legacy stub，先确认格式、加载地址、调用约定和可用工具，再转平台或 VM family。
 
 ## 首轮路由
 

@@ -4,7 +4,9 @@ tags: [reverse, family, loader, vm, image-recovery, kernel-module]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/loader-vm-image-and-kernel-patterns.md
-updated: 2026-06-12
+  - ../raw/reverse/ACTF2026-abyssgate-wp.md
+  - ../raw/reverse/Bugku-Berkeley-wp.md
+updated: 2026-07-06
 ---
 
 # Loader, VM, Image and Kernel Patterns
@@ -12,6 +14,20 @@ updated: 2026-06-12
 ## 作用边界
 
 本页是二阶段载体和特殊执行链 family，覆盖 loader、隐藏 opcode、binfmt、shared library backdoor、kernel module maze、image/bitmap 恢复、shellcode 数据段、GBA ROM VM、线程/通道 VM 和无导入/哈希解析样本。它不再作为 technique；它负责把“程序真实逻辑不在第一眼看到的入口”这类证据分流出去。
+
+## 识别信号
+
+- 第一阶段程序主要做解密、映射、释放、重启、注册 binfmt、加载共享库或挂载 probe，而不是直接校验 flag。
+- 静态工具看到的入口、导入表、section header、opcode 或资源和运行时行为明显不一致。
+- 数据段、图片、ROM、共享库、内核模块或 eBPF 程序在运行时才成为真实代码或解释器输入。
+- 崩溃、trace、dump 或系统调用显示另一个执行层正在解释用户输入。
+
+## 最小证据
+
+- 标出真实逻辑出现的时机：解密后、`mmap` 后、`dlopen` 后、binfmt 触发后、kernel probe 触发后或 VM dispatch 中。
+- 保存第一阶段到第二阶段之间的载荷位置、映射权限、入口地址、参数和校验数据流。
+- 对 VM/解释器题，至少确认 opcode stream、handler 位置、状态变量和一个可回放输入到输出的路径。
+- 对 image/bitmap/ROM 题，保存宽高、通道、地址映射、字符集或 forward checker，保证恢复结果可复算。
 
 ## 首轮路由
 
@@ -37,6 +53,13 @@ updated: 2026-06-12
 - VM 题急着完整还原 ISA，忘记 trace 热路径和最终比较点通常更快。
 - 图片/bitmap 恢复没有记录宽高、通道顺序和字符集，导致结果不可复算。
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md) | 用户态 loader 释放第二阶段 ELF，eBPF 在 ioctl 进入/返回时改写参数，内核模块再完成协议状态机；必须把三层数据流合并建模。 |
+| [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md) | 用户态校验是诱饵，真实逻辑在 libbpf-bootstrap 挂载到自身 `check_flag` 的 uprobe/uretprobe 中；先提取 BPF 程序和 map 常量，再还原双层变换。 |
+
 ## 关联页面
 
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
@@ -49,3 +72,5 @@ updated: 2026-06-12
 ## 原始资料
 
 - [loader-vm-image-and-kernel-patterns.md](../raw/reverse/loader-vm-image-and-kernel-patterns.md)
+- [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md)
+- [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md)

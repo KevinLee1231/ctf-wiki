@@ -9,7 +9,7 @@ updated: 2026-06-12
 
 # RC4, LFSR and Keystream Reuse
 
-## 适用场景
+## 作用边界
 
 题目表现为流密码、LFSR、RC4、XOR keystream 或自定义递推产生的逐字节/逐 bit 加密。重点不是恢复 seed，而是从已知明文、重复 keystream、统计偏差或线性结构中恢复 keystream、反馈多项式、初始状态或明文。
 
@@ -27,14 +27,14 @@ updated: 2026-06-12
 - 如果依赖 RC4 bias，需要足够多独立样本；单个短密文通常不能靠 bias 解决。
 - 能用恢复出的 keystream 或状态正向解出一段明文。
 
-## 解法骨架
+## 分流流程
 
 1. 先判断是 keystream reuse、线性 LFSR、RC4 bias 还是自定义 stream 约束。
 2. 对 known plaintext，先 XOR 出 keystream，再看能否 Berlekamp-Massey、线性方程或 tap recovery。
 3. 对多密文 reuse，先做 `C1 xor C2 = P1 xor P2` 和 crib dragging。
 4. 对非线性过滤或折叠输出，转 [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md) 建约束。
 
-## 关键变体
+## 流密码路线分流
 
 | 变体 | 触发证据 | 处理路线 |
 |---|---|---|

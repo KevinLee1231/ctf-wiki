@@ -1,11 +1,11 @@
 ---
 type: family
-tags: [misc, family, pyjail, sandbox, python, oracle]
-skills: [ctf-misc]
+tags: [misc, web, family, pyjail, sandbox, python, oracle]
+skills: [ctf-misc, ctf-web]
 raw:
   - ../raw/misc/pyjails.md
   - ../raw/web/WMCTF2025-guess-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Python Jails
@@ -16,7 +16,7 @@ updated: 2026-06-12
 
 如果约束已经不是 Python 运行时，而是 bash/rbash、容器边界、Web 模板或原生 pwn，应及时转到相邻页面。
 
-## 共同识别信号
+## 识别信号
 
 - 题目暴露 Python 表达式执行、REPL、`eval(payload, globals)`、`exec`、`compile`、AST visitor、blacklist、whitelist、audit hook、agent 工具调用或 Mastermind 式反馈。
 - 字符、长度、关键字、括号、引号、点号、下划线、调用、赋值或 import 被限制。

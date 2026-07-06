@@ -4,12 +4,14 @@ tags: [forensics, family, map]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/cross-domain-forensics-technique-map.md
-updated: 2026-06-04
+  - ../raw/forensics/SU_forensicsWP.md
+  - ../raw/forensics/SU_LightNovelWP.md
+updated: 2026-07-06
 ---
 
 # Cross-Domain Technique Map
 
-## 适用场景
+## 作用边界
 
 题目跨越多个取证介质，单一页面不足以覆盖：例如 PCAP 里传磁盘镜像、内存 dump 中藏浏览器历史、视频里出现硬件信号、容器层里残留凭据。这个页面应作为“下一跳地图”，帮助快速选择更具体技巧，而不是承载完整解法。
 
@@ -26,7 +28,7 @@ updated: 2026-06-04
 - 对每一层保存一个可复现中间产物，例如导出的 TCP stream、mount 后目录树、frame dump、音频频谱图。
 - 每次 pivot 都要能说明“为什么从 A 跳到 B”，例如协议里出现文件头、内存里出现 AES key、视频里出现 LED Morse。
 
-## 解法骨架
+## 分流流程
 
 1. 先做低成本分层：`file`、`binwalk`、`7z l`、`tshark -r`、`strings`、`exiftool`。
 2. 为每一层建立 evidence log：输入文件、导出命令、输出路径、观察到的 flag-like/secret-like 线索。
@@ -34,9 +36,9 @@ updated: 2026-06-04
 4. 如果工具失败，改用原始字节/格式结构验证，不要被单个工具结论卡住。
 5. 解出中间 secret 后再回到上一层验证它是否是密码、key、seed 或 flag。
 
-## 关键变体
+## 跨域路线分流
 
-| 变体 | 复用重点 |
+| 跨域证据 | 下一跳判断 |
 |---|---|
 | 容器/镜像转文件系统 | Docker layer、SquashFS、disk image 先拆层，再看删除文件和历史命令。 |
 | 网络转文件 | 从 PCAP 导出 HTTP/SMB/TCP stream，按 magic bytes 重组。 |
@@ -72,8 +74,10 @@ updated: 2026-06-04
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
-| [SU_forensicsWP](../raw/forensics/SU_forensicsWP.md) | 取证线索可能跨文件、图片和编码层，按证据链逐层保存中间产物。 | [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md) |
-| [SU_LightNovelWP](../raw/forensics/SU_LightNovelWP.md) | 文档/媒体载体里有隐写或嵌入对象，先分层检查文本、图片、metadata 和附件。 | [video-document-and-media-stego.md](video-document-and-media-stego.md) |
+| [SU_forensicsWP](../raw/forensics/SU_forensicsWP.md) | AD1 Windows 系统盘综合取证，证据集中在事件日志、Notepad TabState、应用缓存、聊天数据库和 Ollama 痕迹。 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md)、[disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
+| [SU_LightNovelWP](../raw/forensics/SU_LightNovelWP.md) | PCAP 中出现 Kerberos/NTLM、MSRPC 与 TSCH 远程任务调度，先做 stream、凭据和会话密钥恢复，再解析计划任务与 PowerShell/AES 逻辑。 | [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)、[windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
 
 ## 原始资料
 - [cross-domain-forensics-technique-map.md](../raw/forensics/cross-domain-forensics-technique-map.md)
+- [SU_forensicsWP.md](../raw/forensics/SU_forensicsWP.md)
+- [SU_LightNovelWP.md](../raw/forensics/SU_LightNovelWP.md)

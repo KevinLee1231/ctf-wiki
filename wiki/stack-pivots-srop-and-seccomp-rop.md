@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 这些内容的共同点是：已经有某种控制流入口，但入口空间、寄存器、syscall、栈位置或字符集受到限制。首轮任务不是马上堆 ROP，而是判断“控制流入口能承载哪一种执行模型”。
 
-## 共同识别信号
+## 识别信号
 
 - 能控制返回地址、函数指针、`.fini_array`、异常返回帧、vtable 或某个间接调用，但栈空间不足或 payload 受限。
 - 出现 `leave; ret`、`sigreturn`、`syscall`、`int 0x80`、`retf`、vDSO/vsyscall、SROP frame、BSS stack、UTF-8/反转输入等线索。

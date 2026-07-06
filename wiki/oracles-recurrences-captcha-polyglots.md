@@ -4,7 +4,11 @@ tags: [misc, family, oracle, recurrence, captcha, polyglot]
 skills: [ctf-misc, ctf-web, ctf-crypto]
 raw:
   - ../raw/misc/oracles-recurrences-captcha-polyglots.md
-updated: 2026-06-12
+  - ../raw/crypto/ACTF2026-ohmycaptcha-wp.md
+  - ../raw/crypto/HGAME2026-flux-wp.md
+  - ../raw/misc/NCTF2026-ezprotocol-wp.md
+  - ../raw/misc/SU_MirrorBus9WP.md
+updated: 2026-07-06
 ---
 
 # Oracles, Recurrences, CAPTCHA and Polyglots
@@ -34,10 +38,22 @@ updated: 2026-06-12
 | comparison-only oracle | 反馈是否支持二分或逐字符搜索 | 写自动化查询，控制 rate/noise |
 | timeout/error oracle | 时间或错误是否稳定区分条件 | Web 题转 SQLi/oracle 页 |
 | recurrence/sequence | OEIS、特征多项式、矩阵幂和模数 | 建快速幂或闭式恢复 |
+| finite-field recurrence samples | 转移多项式次数、样本数量和模数是否足够消元 | Groebner/Resultant 后再用 SMT 或正向复算 |
+| finite-field affine protocol | `RESET` 后输出对输入呈仿射关系，且状态机反馈可反复采样 | 采零点/基向量恢复矩阵，求触发线，再固定 oracle 爆破小空间 |
 | QR structural constraints | finder/timing/format 信息是否足够 | 枚举缺失块并校验 QR |
 | CAPTCHA/font | 字体是否动态、图片是否可由 DOM/Canvas 获取 | Selenium/Tesseract/模板匹配 |
+| modular CAPTCHA / expression oracle | CAPTCHA 是否可转 CRT/LLL 约束，表达式输出是否形成 crypto oracle | 先构造最短表达式，再转 crypto family |
 | esolang/polyglot | 每层输出是否可作为下一层输入 | 分层保存中间产物 |
 | hash length extension | MAC 形态是否为 `hash(secret || msg)` | 转 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [ACTF2026-ohmycaptcha-wp](../raw/crypto/ACTF2026-ohmycaptcha-wp.md) | CAPTCHA 由模素数余数集合决定，可用 CRT+LLL 直接构造能通过校验的 Python 表达式，再把后续输出交给 crypto oracle。 |
+| [HGAME2026-flux-wp](../raw/crypto/HGAME2026-flux-wp.md) | 4 个连续状态来自有限域二次递推；先 Groebner 消元恢复递推参数，再用 bit-vector SMT 反求自定义 hash key。 |
+| [NCTF2026-ezprotocol-wp](../raw/misc/NCTF2026-ezprotocol-wp.md) | 自定义协议的状态机比加密更关键：恢复 XOR payload 和 checksum 后，利用同连接认证状态拼接多 packet。 |
+| [SU_MirrorBus9WP](../raw/misc/SU_MirrorBus9WP.md) | 半双工协议可在 reset 态采样仿射映射；先解出能触发 CHAL 的 MIX 点，再利用固定 CHAL 对 16-bit `PROVE` checksum 分批穷举。 |
 
 ## 合并与拆分结论
 
@@ -63,3 +79,7 @@ updated: 2026-06-12
 ## 原始资料
 
 - [oracles-recurrences-captcha-polyglots.md](../raw/misc/oracles-recurrences-captcha-polyglots.md)
+- [ACTF2026-ohmycaptcha-wp](../raw/crypto/ACTF2026-ohmycaptcha-wp.md)
+- [HGAME2026-flux-wp](../raw/crypto/HGAME2026-flux-wp.md)
+- [NCTF2026-ezprotocol-wp](../raw/misc/NCTF2026-ezprotocol-wp.md)
+- [SU_MirrorBus9WP.md](../raw/misc/SU_MirrorBus9WP.md)

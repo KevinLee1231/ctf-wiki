@@ -4,21 +4,23 @@ tags: [crypto, family, homomorphic, exotic-algebra, paillier, elgamal, oracle]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/homomorphic-and-exotic-algebra.md
-updated: 2026-06-12
+  - ../raw/crypto/SU_RestaurantWP.md
+  - ../raw/crypto/VNCTF2026-ezov-wp.md
+updated: 2026-07-06
 ---
 
 # Homomorphic and Exotic Algebra
 
 ## 作用边界
 
-本页是同态与非常规代数 family，覆盖 Paillier/Goldwasser-Micali/ElGamal 同态 oracle、braid group、tropical semiring、矩阵/对称群密码、format-preserving encryption、BB84、差分隐私噪声、Hamming code 和其它低频代数构造。
+本页是同态与非常规代数 family，覆盖 Paillier/Goldwasser-Micali/ElGamal 同态 oracle、braid group、tropical semiring、多变量二次签名、矩阵/对称群密码、format-preserving encryption、BB84、差分隐私噪声、Hamming code 和其它低频代数构造。
 
 这些内容不应作为单一 technique。首轮需要判断题目利用的是同态可塑性、oracle 单调性、特殊群不变量、编码纠错、概率噪声可抵消，还是协议参与者可被中间人控制。
 
-## 共同识别信号
+## 识别信号
 
 - 密文可做乘法/加法/重随机化/复制，oracle 响应泄露 bit、大小关系、合法性或部分明文。
-- 代数结构不是常见整数模乘法，而是 braid、tropical semiring、矩阵群、对称群、FPE、量子密钥分发或编码系统。
+- 代数结构不是常见整数模乘法，而是 braid、tropical semiring、UOV/OV 二次型矩阵、矩阵群、对称群、FPE、量子密钥分发或编码系统。
 - 可查询接口允许构造选择密文、选择明文、重复采样或控制协议一方。
 - 解法往往靠不变量、同态变换、二分、噪声抵消、表查询或低维 brute force。
 
@@ -36,6 +38,7 @@ updated: 2026-06-12
 | Paillier/GM/ElGamal 可塑密文和 bit/大小 oracle | 先构造同态变换，判断可否二分、逐 bit 提取或重随机化绕检查 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
 | ElGamal 矩阵、特殊群、clock/group law | 先恢复群结构和阶，再决定 DLP、Jordan normal form 或不变量恢复 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md), [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) |
 | Braid/tropical/monotone function | 先找乘法性、偏序、单调性或 residuation，不要直接暴力私钥 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
+| UOV/OV 或多变量二次签名 | 先找 oil-oil 零块、等价子空间和可固定变量；不要把它误归成普通 hash/signature oracle | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | FPE/Feistel 小参数、对称群 cipher | 先估计状态空间，优先表查询或低位 brute force | [block-mode-misuse-family.md](block-mode-misuse-family.md), [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md) |
 | Hamming code、交织、差分隐私噪声 | 先恢复编码/采样模型，再通过重复查询、纠错或噪声抵消恢复明文 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
 | BB84/QKD、双方协议交互可控 | 先建攻击者控制的消息流和基选择，再比较校验阶段能否通过 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
@@ -43,6 +46,13 @@ updated: 2026-06-12
 ## 合并与拆分结论
 
 本页应保留为 family。它承接的是低频 crypto 结构的首轮识别，而不是具体算法步骤。当前 raw 多为短案例，拆分成 Paillier、ElGamal、Braid、FPE、BB84 等小页会形成孤立节点。
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [SU_RestaurantWP](../raw/crypto/SU_RestaurantWP.md) | Tropical semiring 验证器只检查最终等式和 rank/range，可先构造目标矩阵 `T`，再让 `A/B/P/R/S` 把未知项压成同一结果。 |
+| [VNCTF2026-ezov-wp](../raw/crypto/VNCTF2026-ezov-wp.md) | UOV/OV 公钥二次型保留 oil-oil 零块结构；可恢复等价 vinegar/oil 子空间后固定 vinegar、解 oil 来伪造目标签名。 |
 
 ## 常见陷阱
 
@@ -65,3 +75,5 @@ updated: 2026-06-12
 ## 原始资料
 
 - [homomorphic-and-exotic-algebra.md](../raw/crypto/homomorphic-and-exotic-algebra.md)
+- [SU_RestaurantWP](../raw/crypto/SU_RestaurantWP.md)
+- [VNCTF2026-ezov-wp](../raw/crypto/VNCTF2026-ezov-wp.md)

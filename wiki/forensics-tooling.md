@@ -2,31 +2,32 @@
 type: tooling
 tags: [forensics, tooling, tools, environment]
 skills: [ctf-forensics]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Forensics Tooling
 
 本页记录 `ctf-forensics` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - 首轮先用 system-global 工具识别载体：`file`、`exiftool`、`tshark`、`binwalk`、Sleuth Kit。
 - 需要 Python 图像/信号/内存处理时再进入 `ctf-tools`，并显式激活/退出 Conda。
 - 对磁盘镜像、内存 dump、PCAP 和媒体文件，优先导出中间产物，避免只保留工具 UI 结论。
 
-### 知识页覆盖状态
+### 不应进入 Forensics 工具链的情况
 
-- 当前覆盖磁盘、内存、PCAP、音视频、图像隐写、PDF、硬件信号、容器和文件系统。
-- 后续缺口集中在 Windows 事件日志、云对象存储、移动端 app 数据库和更多现代文件格式。
+- 载体只是 Web 响应、API 数据或远程服务交互时，先按 Web/Pentest 保存请求链。
+- 二进制行为、混淆、VM 或反调试是主障碍时，先转 Reverse/Malware，不用取证工具硬拆。
+- 只有编码、谜题或语言 jail 特征时，先转 Misc，不把所有“附件题”都归入 Forensics。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- Windows triage：EVTX、Amcache、ShimCache、PowerShell history。
-- Cloud forensics：S3/GCS/Azure versioning 和公开 bucket 误配。
-- Mobile forensics：Android app sandbox、SQLite、shared_prefs、iOS plist/backup。
+- raw 给出 EVTX、Amcache、ShimCache、PowerShell history，并且现有工具页无法指导复现。
+- 云对象存储或公开 bucket 证据需要记录 API/版本历史/权限边界。
+- 移动端 app sandbox、SQLite、shared_prefs、plist/backup 成为可复用入口。
 
 ## 本机工具清单（按使用时机）
 
@@ -53,6 +54,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有必须补的基础工具。若后续经常做事件日志或注册表题，再单独评估是否补专用解析工具。
+
+## 失败信号与转向
+
+- `file`、`binwalk`、`exiftool` 结论互相矛盾：先保存 magic、尾部数据、metadata 和导出层级，再转 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)。
+- PCAP 导出物不是 flag 而是凭据、密钥、音频或文件：保留 stream 编号和导出命令，再转 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md) 或对应媒体/文件页面。
+- 磁盘/内存/容器工具输出太多：先建立时间线和对象清单；如果是文件系统恢复，转 [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)，如果是运行态证据，转 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。
+- 隐写工具无命中：不要继续堆工具，先确认位平面、颜色通道、帧序、音频频谱或文档对象是否真有异常。
 
 ## 详细清单
 

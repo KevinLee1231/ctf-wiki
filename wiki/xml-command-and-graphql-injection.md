@@ -4,7 +4,7 @@ tags: [web, family, xxe, command-injection, graphql, injection]
 skills: [ctf-web]
 raw:
   - ../raw/web/xml-command-and-graphql-injection.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # XML, Command and GraphQL Injection
@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 它不是单一 technique。首轮要判断可控数据最终进入的是 XML 解析器、系统命令、GraphQL 查询构造、PHP 变量解析、文件名生成器还是过滤器重写链。不同 sink 的最小 payload、失败信号和外带方式完全不同。
 
-## 共同识别信号
+## 识别信号
 
 - 请求体、上传文档、Header、路径、条码内容、Git URL、GraphQL query 或服务端拼接字符串被后端解释。
 - 响应出现文件内容、DNS/HTTP 外带、命令输出、schema 信息、错误栈、内部路径或异常过滤痕迹。

@@ -5,7 +5,8 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/number-theory-and-algebra-attacks.md
   - ../raw/crypto/WMCTF2025-lemonpepper-wp.md
-updated: 2026-06-12
+  - ../raw/crypto/Bugku-Fibonacci-RSA-wp.md
+updated: 2026-07-06
 ---
 
 # Number Theory and Algebra Attacks
@@ -16,7 +17,7 @@ updated: 2026-06-12
 
 它的职责是判断数学结构属于哪一类，而不是把所有代数题合并成一个通用求解步骤。若目标已经明确是 RSA 常见参数、LWE 格问题、ECC 签名 nonce 或随机数恢复，应优先转到更窄页面。
 
-## 共同识别信号
+## 识别信号
 
 - 源码中出现群运算、模多项式、曲线阶、smooth order、小根、oracle 区间、GF(2) 线性系统、特殊矩阵或非标准代数结构。
 - 题目给出足够多的样本或可查询接口，用于构造方程、CRT、gcd、DLP、root lifting 或 oracle 搜索。
@@ -36,6 +37,7 @@ updated: 2026-06-12
 | ECC order smooth、低阶子群、DLP、isogeny | 先分解阶并判断 PH/BSGS/特殊曲线，而不是直接爆破私钥 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) |
 | Coppersmith、小根、结构化素数、close private key | 先写多项式和根界，再决定 RSA 页或格页 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md), [lattice-and-lwe.md](lattice-and-lwe.md) |
 | approximate GCD、knapsack、subset sum | 先判断是否短向量/最近向量问题，再转格 | [lattice-and-lwe.md](lattice-and-lwe.md) |
+| 递推序列模小整数、Pisano period、周期求和 | 先恢复周期和求和语义，再看结果是否喂给 RSA、PRNG 或其它协议 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) |
 | 四元数 RSA、clock group、矩阵 ElGamal、GF(2)[x] | 先恢复群律/环结构，再找可线性化或 CRT 的不变量 | [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md) |
 | p-adic 或 Hensel lift 卡在重根 | 先看导数和重根结构，必要时分支枚举候选再结合协议状态剪枝 | [crypto-tooling.md](crypto-tooling.md) |
 | Manger/padding oracle、区间 oracle | 先证明 oracle 单调或区间收缩，再写可重放查询器 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md), [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
@@ -46,6 +48,7 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md) | `Lemon` 部分是模 `q^e` 上的重根多项式，普通 `.roots()`/Hensel 可能卡住；先通过求导保留高重数根，再结合 `Pepper` 的 p-adic 候选和 MCG 递推剪枝恢复状态。 |
+| [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md) | Fibonacci 模 `n` 的长和可用 Pisano period 压缩到一个周期内计算；求和下标要与题目代码一致，结果再回到 RSA 素数生成结构。 |
 
 ## 合并与拆分结论
 
@@ -73,3 +76,4 @@ updated: 2026-06-12
 
 - [number-theory-and-algebra-attacks.md](../raw/crypto/number-theory-and-algebra-attacks.md)
 - [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md)
+- [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md)

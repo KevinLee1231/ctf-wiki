@@ -2,31 +2,32 @@
 type: tooling
 tags: [ai-ml, tooling, tools, environment]
 skills: [ctf-ai-ml]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # AI/ML Tooling
 
 本页记录 `ctf-ai-ml` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - 首轮只依赖 `ctf-tools` 中已经可用的 `numpy`、`scipy`、`Pillow`、`scikit-learn`，避免为不确定题型先安装重量级框架。
 - 需要深度学习框架时，先确认题目确实给出模型权重、推理接口、adapter、embedding 或训练数据，再按需补装。
 - 如果只是 Web 上的模型服务、prompt/API 权限问题，先回到 `ctf-web` 或对应服务链路，不要直接装 ML 框架。
 
-### 知识页覆盖状态
+### 不应进入 AI/ML 工具链的情况
 
-- 当前覆盖 adversarial input、LLM/prompt、model extraction/inversion/LoRA 等核心方向。
-- 覆盖仍偏轻；后续 raw 若出现 ONNX、PyTorch checkpoint、safetensors、TensorFlow Lite、Kaggle 风格数据泄漏，应优先沉淀为独立技巧页。
+- 证据只有 HTTP 接口、登录态、API key、前端权限或模型服务路由时，先按 Web 处理。
+- 证据只有自然语言 prompt、拒答、工具调用或上下文注入时，先看 [llm-attacks.md](llm-attacks.md)，不先安装 `torch`。
+- 模型文件像压缩包、打包器、恶意载荷或混淆二进制时，先进入 Reverse/Malware 路线确认载体。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- 模型文件格式 triage：`.pt/.pth/.onnx/.safetensors/.tflite`。
-- 权重/adapter 差分：LoRA merge、恶意 adapter、embedding 泄露。
-- 远程推理 oracle：query budget、置信度侧信道、rate limit 绕过。
+- raw 给出 `.pt/.pth/.onnx/.safetensors/.tflite`，并且加载错误会影响解题。
+- 需要比较权重、adapter、embedding 或 logits，且现有 `numpy/scipy/sklearn` 不足以复现。
+- 远程 oracle 暴露概率、置信度、embedding 或 query budget，工具选择会影响可重复验证。
 
 ## 本机工具清单（按使用时机）
 
@@ -50,6 +51,13 @@ updated: 2026-05-21
 - `safetensors`
 
 这些都属于题型确认后的重量级依赖，适合继续保持“按需安装”，不要放进默认首轮环境。
+
+## 失败信号与转向
+
+- 只有 HTTP 接口、登录态、API key 或前端权限问题，没有模型证据：先转 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)，不要为了“看起来像 AI”安装深度学习框架。
+- 查询接口不给概率、logits 或稳定标签：先构造少量代表性查询输入，确认反馈是否稳定可区分；如果只能得到自然语言拒答或工具调用，转 [llm-attacks.md](llm-attacks.md)。
+- checkpoint、adapter 或 embedding 文件无法加载：先记录文件格式、magic、config 和版本错误；若像打包器/混淆载荷，转 [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md) 或 Reverse/Malware 页面。
+- 需要 `torch`、`transformers` 或 `safetensors`：只有确认模型文件或推理代码确实依赖它们时再安装，并记录安装原因和复现实验。
 
 ## 详细清单
 

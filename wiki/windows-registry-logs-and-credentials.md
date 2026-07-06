@@ -4,7 +4,8 @@ tags: [forensics, family, windows, registry, logs, credentials, timeline]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/windows-registry-logs-and-credentials.md
-updated: 2026-06-12
+  - ../raw/forensics/SU_forensicsWP.md
+updated: 2026-07-06
 ---
 
 # Windows Registry, Logs and Credentials
@@ -15,7 +16,7 @@ updated: 2026-06-12
 
 它不替代磁盘/内存总取证页，也不替代 PCAP 凭据恢复页。当前证据已经明确落在 Windows 主机侧 artifacts 时，从本页做二级分流；若只是“有一个镜像或内存 dump”，先看 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 附件包含 `SAM`、`SYSTEM`、`SOFTWARE`、`NTUSER.DAT`、`.evtx`、`$MFT`、`$UsnJrnl:$J`、`OBJECTS.DATA`、`MPLog`、Prefetch、Chrome/Edge/Firefox profile 或 Windows 内存镜像。
 - 题目提示用户创建、RDP、WMI、wmiexec、PowerShell、日志清理、浏览器凭据、回收站、ADS、Defender、恶意持久化或反取证。
@@ -64,6 +65,13 @@ updated: 2026-06-12
 - [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
 - [forensics-tooling.md](forensics-tooling.md)
 
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [SU_forensicsWP](../raw/forensics/SU_forensicsWP.md) | AD1 Windows 系统盘综合题，证据横跨关机事件、Notepad TabState 删除内容、应用缓存、聊天数据库和 Ollama 日志；适合先按 artifact 类型拆证据，再统一时间线和答案拼接规则。 |
+
 ## 原始资料
 
 - [windows-registry-logs-and-credentials.md](../raw/forensics/windows-registry-logs-and-credentials.md)
+- [SU_forensicsWP.md](../raw/forensics/SU_forensicsWP.md)

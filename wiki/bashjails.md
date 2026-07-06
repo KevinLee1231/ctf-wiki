@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 它不处理 Python 对象模型类 jail，也不处理纯 Web 命令注入。判断标准很简单：如果限制发生在 shell 语法、内建命令、文件描述符、环境变量或 rbash 行为上，先看本页；如果限制发生在 Python namespace 或字节码层，转 [pyjails.md](pyjails.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 远程服务把输入送进 `bash`、`sh`、`rbash`、`eval`、`read -e`、`printf`、`echo` 或受限命令白名单。
 - 可用字符极少，例如只剩 `$`、`#`、反斜杠、数字、换行、引号、`=` 或环境变量切片。

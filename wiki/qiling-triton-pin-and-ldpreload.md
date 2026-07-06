@@ -4,7 +4,7 @@ tags: [reverse, tooling, emulation, tracing, instrumentation]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/qiling-triton-pin-and-ldpreload.md
-updated: 2026-06-11
+updated: 2026-07-06
 ---
 
 # Qiling, Triton, Pin and LD_PRELOAD
@@ -12,6 +12,13 @@ updated: 2026-06-11
 ## 作用边界
 
 本页覆盖逆向中的重型运行控制工具：完整环境模拟、指令级动态符号执行、二进制插桩计数和动态库劫持。它们适合在普通调试器、反汇编器或 Frida hook 已经无法稳定观察目标时使用，但使用成本更高，必须先明确要控制的环境变量、系统调用、输入长度、目标分支或侧信道指标。
+
+## 触发证据
+
+- 普通 GDB/Ghidra/Frida 已经能定位目标片段，但运行依赖 rootfs、syscall、文件路径、动态库、时间/随机源、跨架构环境或黑盒计数反馈。
+- 需要在可控环境中重放真实代码，而不是只做静态伪代码理解；已有最小输入、目标函数、目标分支或 side-channel 指标。
+- raw 证据显示失败来自环境不一致、系统调用缺失、反调试结果、库函数返回值、输入计数差异或动态链接行为。
+- 如果只是想 patch 一个函数返回值或断最终比较点，优先使用 [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) 或 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)，不要直接上重型模拟。
 
 ## 工具路由
 
@@ -37,6 +44,13 @@ updated: 2026-06-11
 - Pin 计数不稳定时，固定 ASLR、输入长度、线程和随机源，多次采样确认差异是否可复现。
 - LD_PRELOAD 无效时，检查 `ldd`、静态链接、setuid、符号版本和目标是否直接 syscall。
 - 侧信道路线每一步都要做 forward check；不要只相信计数最高或路径最短的候选字节。
+
+## 失败后转向
+
+- Qiling 仍无法复现完整环境：缩小到 Unicorn 单函数模拟，或回到 GDB/Frida dump 真实内存与输入输出边界。
+- Triton/Pin 路线噪声过大：转 [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) 固定 trace 点，或回 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) 抓最终 buffer。
+- LD_PRELOAD 被静态链接、setuid 或直接 syscall 绕过：转 Frida/GDB patch，或把 syscall/API 层搬到 Qiling hook。
+- 如果工具失败暴露的是反调试、时间、环境检测或 packed code，转 [anti-analysis.md](anti-analysis.md) 或 [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)。
 
 ## 关联页面
 

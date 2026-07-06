@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 它与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 的关系是上下游：普通可逆编码、QR、Unicode 首检先看编码 family；一旦证据指向特定文件/协议/信号格式或非标准解析器，就转到本页。
 
-## 共同识别信号
+## 识别信号
 
 - 数据看似文本，但包含 RTF 控制字、PDU header、UTF-9、Unicode 变体、固定宽度数字、HDL 逻辑或非标准 barcode。
 - 图片/音频不是隐写算法本身，而是颜色、音调、音程、网格或条码格式承载比特。

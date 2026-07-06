@@ -4,7 +4,7 @@ tags: [web, family, php, lfi, ssti, ssrf, parser-confusion]
 skills: [ctf-web]
 raw:
   - ../raw/web/php-lfi-ssti-ssrf-and-type-juggling.md
-updated: 2026-06-11
+updated: 2026-07-06
 ---
 
 # PHP, LFI, SSTI, SSRF and Type Juggling
@@ -14,6 +14,22 @@ updated: 2026-06-11
 本页是 Web 服务端解析差异的 family，不再作为单一 technique 使用。它覆盖的共同信号是：用户输入进入 PHP/模板/XML/URL fetch/格式化器/弱比较等服务端解释层，校验与执行层看到的值不一致，最终形成认证绕过、源码读取、内部访问或 RCE。
 
 不应把这里当成 payload 字典。先判断输入进入了哪一种解释器，再跳到具体 technique 或相邻 family。
+
+边界在于“解释层差异判断”：如果当前证据只证明能读源码、访问内网、改变解析结果或绕过认证，先留在本页或转资源/SSRF 页面；如果已经确认输入进入 `eval`、模板求值、命令拼接、WebShell 或可执行上传，转 [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md) 处理 RCE 落地。
+
+## 识别信号
+
+- 输入进入 PHP 弱类型比较、文件包含、模板表达式、URL fetch、XML parser、格式化器或其它服务端解释器。
+- 校验层和执行层对同一值的解析结果不同：类型、路径、host、协议、模板对象、XML 实体或格式化字段发生变化。
+- 响应暴露源码、内部响应、模板报错、XML 实体错误、过滤器行为、认证状态或可控 include 路径。
+- 题目还没证明代码执行，但已经能证明服务端解释层可被影响。
+
+## 最小证据
+
+- 保存能复现差异的最小输入，并标出它进入的是 PHP 比较、文件包含、模板、URL fetch、XML parser 还是格式化器。
+- 记录校验层与执行层看到的关键值：类型转换结果、归一化路径、最终 host、模板上下文、XML 实体展开或格式化字段。
+- 若目标是源码/secret 泄露，至少拿到一处可控文件读取、源码片段、配置值、错误回显或内部响应。
+- 若准备转 RCE family，必须先证明输入已到达可执行解释层或可写入可执行位置，不能只凭报错或黑盒猜测跳转。
 
 ## 首轮变体判断
 

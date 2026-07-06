@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [misc, technique]
-skills: [ctf-misc]
+tags: [forensics, misc, technique, rf, sdr, iq, qam, fsk, signal]
+skills: [ctf-forensics, ctf-misc]
 raw:
   - ../raw/misc/rf-sdr.md
-updated: 2026-05-21
+updated: 2026-06-18
 ---
 
 # RF / SDR / IQ Signal Processing
@@ -34,9 +34,9 @@ updated: 2026-05-21
 4. 做 carrier recovery、timing recovery、AGC，得到 symbol decisions。
 5. 尝试 0/90/180/270 旋转、bit/nibble endian、delimiter framing 和 CRC。
 
-## 关键变体
+## RF 解调分支
 
-| 变体 | 复用重点 |
+| 信号形态 | 处理重点 |
 |---|---|
 | cf32/cs16/cu8 | 先读对 dtype；读错格式会让频谱和星座全错。 |
 | QAM-16 | 需要载波恢复和定时恢复，且可能有 4-fold rotation ambiguity。 |
@@ -52,11 +52,12 @@ updated: 2026-05-21
 
 ## 关联技巧
 
-- [bashjails.md](bashjails.md)
-- [dns.md](dns.md)
-- [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
+- [signals-and-hardware.md](signals-and-hardware.md)
+- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
+- [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
+- [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
+- [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

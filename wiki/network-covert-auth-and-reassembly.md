@@ -16,7 +16,7 @@ updated: 2026-06-12
 
 它不替代 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md) 的首轮入口；本页负责在确认是网络证据后，判断是 covert encoding、凭据恢复、协议重组、内部认证绕过还是多层文件恢复。
 
-## 共同识别信号
+## 识别信号
 
 - 附件是 pcap/pcapng，或磁盘/内存中导出的网络流量。
 - Wireshark 正常 Follow Stream 不直接给 flag，需要看时间间隔、TCP flags、DNS name、ICMP payload、RTP、SMB/RPC、NTP/RADIUS/RDP 或压缩/加密层。

@@ -4,7 +4,8 @@ tags: [pwn, family, overflow, stack, oob, canary]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/overflow-basics.md
-updated: 2026-06-12
+  - ../raw/pwn/D3CTF2023-d3op-wp.md
+updated: 2026-07-06
 ---
 
 # Overflow Basics
@@ -15,7 +16,7 @@ updated: 2026-06-12
 
 如果当前题的主要障碍已经是 glibc heap 状态、FILE/FSOP、seccomp ORW、ret2dlresolve、内核对象或浏览器/JIT primitive，应尽快转到对应 technique，不要继续把所有 crash 都按基础溢出处理。
 
-## 共同识别信号
+## 识别信号
 
 - `gets`、`read`、`scanf("%s")`、`memcpy`、协议长度字段、CSV/解析器字段或菜单输入能覆盖固定长度缓冲区。
 - crash 点靠近返回地址、函数指针、GOT、结构体指针、canary 或相邻全局变量。
@@ -40,6 +41,12 @@ updated: 2026-06-12
 | 协议 length、stride、parser record 造成越界读/写 | 先把越界范围和每次读写粒度画清楚，再决定泄露地址、写 GOT 或构造 ROP。 | [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md) |
 | signed index、负数数量、单字节 RIP/函数指针覆盖 | 确认类型转换和目标地址同页/相邻关系；优先找低熵 pivot。 | [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) |
 | 结构体指针覆盖后可间接写 GOT/函数指针 | 先选不会被目标函数再次调用的 GOT 项，再把写 primitive 变成控制流。 | [format-string.md](format-string.md)、[heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md) |
+
+## 来自 WP 的案例索引
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2023-d3op-wp](../raw/pwn/D3CTF2023-d3op-wp.md) | ubus RPC 的 base64 服务输出长度计算和索引检查不一致，最终是协议入口触发的 AArch64 栈溢出；先量化溢出长度和保护，再转跨平台 ROP。 |
 
 ## 合并与拆分结论
 
@@ -68,3 +75,4 @@ updated: 2026-06-12
 ## 原始资料
 
 - [overflow-basics.md](../raw/pwn/overflow-basics.md)
+- [D3CTF2023-d3op-wp](../raw/pwn/D3CTF2023-d3op-wp.md)

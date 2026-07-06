@@ -4,7 +4,7 @@ tags: [reverse, tooling, instrumentation, symbolic-execution, debugger]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/frida-angr-lldb-and-x64dbg.md
-updated: 2026-06-11
+updated: 2026-07-06
 ---
 
 # Frida, angr, lldb and x64dbg
@@ -12,6 +12,13 @@ updated: 2026-06-11
 ## 作用边界
 
 本页记录逆向中“静态分析已经不够，但还不一定需要完整模拟”的工具选择。Frida 适合运行时 hook 和 patch，angr 适合把路径条件交给符号执行，lldb/x64dbg 适合特定平台调试。它们解决的是观察和控制执行的问题，不应替代基础反汇编，也不应被当成所有复杂逆向的默认入口。
+
+## 稳定调用方式
+
+- Frida：先确认进程、架构、模块加载时机和 hook 点，再用 `frida -f ./target -l hook.js --no-pause` 或移动端 attach；脚本里优先枚举模块/导出后再 patch 具体函数。
+- angr：先从 Ghidra/r2/GDB 得到 `find`、`avoid`、输入长度和字符集约束，再写最小 `angr.Project(...).factory.full_init_state()` 路线；库函数、复杂校验和环境输入能 hook 就 hook。
+- lldb/x64dbg：先固定平台、位数、ASLR/PIE 基址和断点地址；用条件断点或脚本化断点记录寄存器/内存，不把长单步当作分析结果。
+- 调用前必须有静态或动态证据支撑 hook/符号执行目标；如果还没有入口和比较点，先回 [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)。
 
 ## 工具路由
 

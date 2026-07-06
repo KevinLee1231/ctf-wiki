@@ -16,7 +16,7 @@ updated: 2026-06-12
 
 它不是脚本解混淆 technique 的大杂烩。首轮要判断载荷链的阶段：文本混淆、编码壳、下载器、配置提取、C2 协议、进程注入、内存驻留还是 IOC/YARA 提炼。不同阶段需要的证据和工具完全不同。
 
-## 共同识别信号
+## 识别信号
 
 - 样本包含 `.js`、`.ps1`、宏、`.eml`、SVG、HTML、npm/deb/plugin、shellcode blob、Base64/hex/charcode、`Invoke-Expression`、`eval`、WMI、注册表或计划任务。
 - 代码中存在分阶段下载、字符串表、异或/自定义 alphabet、环境探测、反沙箱、API hashing、C2 URL、User-Agent、session key 或加密配置。

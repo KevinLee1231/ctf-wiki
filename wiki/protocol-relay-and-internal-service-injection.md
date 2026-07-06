@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [web, protocol, ssrf, redis, internal-service]
+tags: [web, pentest, protocol, ssrf, redis, internal-service]
 skills: [ctf-web, ctf-pentest]
 raw:
   - ../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # Protocol Relay and Internal Service Injection
@@ -34,9 +34,9 @@ updated: 2026-06-12
 4. 如果目标是 Redis，优先判断是否能写配置、主从同步加载模块、写 crontab/authorized_keys 或利用已知版本链。
 5. 完成 RCE 后再处理远控软件自身的 view-only、文件传输、剪贴板或终端限制。
 
-## 关键变体
+## Relay 注入分支
 
-| 变体 | 复用重点 |
+| 注入条件 | 处理重点 |
 |---|---|
 | Relay 地址可控 | 攻击不是直接访问内网，而是让目标客户端替你访问本机或内网服务。 |
 | 字段明文穿透 | protobuf/JSON 包装不等于安全；只要字符串字段原样进入 TCP 流，就能拼协议。 |

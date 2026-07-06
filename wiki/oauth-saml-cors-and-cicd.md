@@ -15,6 +15,8 @@ updated: 2026-06-12
 
 共同问题是：应用把身份、redirect、Origin、token、仓库或 runner 变量托付给外部系统。首轮要确认“哪个系统被信任，以及信任条件是否可伪造”。
 
+边界在于“跨系统信任”：如果只是在应用本地 cookie/session/hidden route/IDOR/代理 ACL 层绕过授权，回到 [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md)；如果 token 本体的算法、key lookup 或 claim 可伪造，转 [auth-jwt.md](auth-jwt.md)。
+
 ## 识别信号
 
 - 登录流程出现 OAuth/OIDC/SAML provider、`redirect_uri`、`state`、`code`、`id_token`、ACS URL 或 metadata。
@@ -35,12 +37,12 @@ updated: 2026-06-12
 |---|---|---|
 | OAuth open redirect / token theft | `redirect_uri` 是否严格匹配，code/token 是否泄露到攻击者域 | [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md) |
 | OIDC `id_token` 可改 | issuer、audience、nonce、email_verified 和签名是否校验 | [auth-jwt.md](auth-jwt.md) |
-| `state` 缺失或不绑定 session | 是否能把受害者 code 绑定到攻击者 session | 认证 CSRF / account linking |
+| `state` 缺失或不绑定 session | 是否能把受害者 code 绑定到攻击者 session | [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md) |
 | SAML/SSO 自动化 | ACS、NameID、签名覆盖范围和 XML canonicalization 是否正确 | [xml-command-and-graphql-injection.md](xml-command-and-graphql-injection.md) |
 | CORS 反射 Origin | 是否允许 credentials，敏感接口是否可被浏览器读取 | [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md) |
 | Git 历史或 CI 变量泄露 | token 是否仍有效、权限范围和环境隔离是否足够 | [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 | TeamCity/Guacamole/IdP API | 凭据能否从管理 API 扩展到连接参数或 RCE | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) |
-| 登录页投毒 | 管理员是否会访问被修改页面，凭据是否回传 | 浏览器侧 exfil 或平台 API 接管 |
+| 登录页投毒 | 管理员是否会访问被修改页面，凭据是否回传 | [xss-dom-and-browser-tricks.md](xss-dom-and-browser-tricks.md) 或 [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 
 ## 合并与拆分结论
 

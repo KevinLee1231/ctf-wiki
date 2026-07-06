@@ -2,31 +2,32 @@
 type: tooling
 tags: [web, tooling, tools, environment]
 skills: [ctf-web]
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Web Tooling
 
 本页记录 `ctf-web` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
 
-## 调用层与覆盖状态
+## 工具选择边界
 
-### 非交互调用原则
+### 入口选择
 
 - Web 首轮优先 Burp MCP + `curl`：先保存请求/响应、cookie、redirect、认证状态和差异样本。
 - fuzz/扫描要有边界：确认应用面不足时才用 `ffuf/gobuster/feroxbuster`，确认注入信号后才用 `sqlmap`。
 - Java/PHP 反序列化、hash length extension、JWT/JWE、PDF 附件等专项工具按本页路径进入，不要和普通请求测试混在一起。
 
-### 知识页覆盖状态
+### 不应进入 Web 工具链的情况
 
-- 当前覆盖 auth、JWT、SSRF/path/upload、prototype pollution、deserialization、SQLi、browser/XSS、OAuth/SAML/CORS、GraphQL/XML 等主线。
-- 缺口主要在 HTTP/2 request smuggling、cache poisoning、modern browser isolation、WebSocket 状态机和更多 CI/CD artifact 链。
+- 目标主要是本地 binary、内存破坏、固件或模型文件时，Web 只保留传输证据，主线转对应专项。
+- 扫描器没有输入面、认证态和 baseline 时不要先跑；先用 Burp/curl 建最小差异样本。
+- Web 只是进入内网、runner、主机命令或凭据链的第一步时，要及时转 Pentest/Reverse/Pwn。
 
-### 后续补强方向
+### 补工具经验的触发条件
 
-- HTTP parsing differentials：H2/H1 转换、CL/TE、proxy normalization。
-- Browser-side：postMessage、XS-Leaks、CSP bypass、Service Worker。
-- Supply chain / CI：artifact trust、workflow token、internal runner。
+- raw 给出 H2/H1 转换、CL/TE、proxy normalization 等 HTTP parser differential。
+- Browser-side 证据集中在 postMessage、XS-Leaks、CSP bypass 或 Service Worker。
+- Supply chain/CI 题需要 artifact trust、workflow token、internal runner 的工具链复现。
 
 ## 本机工具清单（按使用时机）
 
@@ -51,6 +52,13 @@ updated: 2026-05-21
 ### 当前未装 / 建议按需补装
 
 - 当前没有明显缺口。`jwcrypto` 已在 `ctf-tools` 中，只有在需要完整 JWT/JWS/JWE 构造、验证或调试时才把它拉进首轮流程；不要把它当成 `flask-unsign` 的替代品。
+
+## 失败信号与转向
+
+- Burp/curl 只有页面差异，没有明确参数控制点：先回到 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md) 建 baseline、认证态和输入面，不要直接上扫描器。
+- 目录扫描命中大量静态文件或误报：收敛到路由、文件首检或源码线索；若导出附件/压缩包，转 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)。
+- `sqlmap`、nuclei 或模板扫描无结果：保留能复现差异的请求、响应片段和参数控制点，再按 SQLi、SSRF、反序列化、认证或浏览器侧 family 分流。
+- 请求已经进入内网服务、runner、token 或主机命令阶段：转 [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md)、[workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) 或 [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)。
 
 ## 详细清单
 

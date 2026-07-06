@@ -4,7 +4,7 @@ tags: [reverse, tooling, disassembler, debugger]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/disassemblers-debuggers-and-basic-tools.md
-updated: 2026-06-11
+updated: 2026-07-06
 ---
 
 # Disassemblers, Debuggers and Basic Tools
@@ -14,6 +14,13 @@ updated: 2026-06-11
 这是逆向题的第一层工具路由页：用于把未知 ELF/PE/APK/WASM/pyc/.NET/固件先拆成可观察的入口、字符串、导入、交叉引用、运行时状态和最小可复现行为。它不负责记录某一种攻击技巧，而是说明静态反汇编、动态调试、轻量模拟和格式专用工具分别该在什么时候上场。
 
 当问题已经明确落到反调试、壳/虚拟化、自定义 VM、符号执行或运行时 hook 时，应从这里转入相应 technique 或更专门的 tooling 页。
+
+## 触发证据
+
+- 只知道附件是 ELF/PE/APK/WASM/pyc/.NET/固件或未知二进制，还没有确认入口、架构、保护、字符串、导入和运行行为。
+- 需要用最小命令建立事实：`file`、`strings`、`readelf`、`objdump`、`checksec`、GDB 断 `main` 或 Ghidra/r2 交叉引用。
+- raw 证据只证明“可运行/可反汇编/能看到比较点”，还没出现反调试、壳、VM、完整模拟或符号执行的必要性。
+- 需要判断后续应该转 [anti-analysis.md](anti-analysis.md)、[compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)、[frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) 还是 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)。
 
 ## 工具路由
 

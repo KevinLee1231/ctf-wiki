@@ -4,7 +4,7 @@
 
 - Knowledge base path: `D:/文档/markdown文件/ctf-wiki`
 - Structure: flat graph
-- Updated: 2026-06-13
+- Updated: 2026-07-06
 
 ## 查询顺序
 
@@ -13,7 +13,7 @@
   -> SKILL.md
   -> SKILL.md 中的 wiki 直链 / <direction>-tooling.md
   -> 如不足，再查本 index
-  -> wiki/<family|technique|tooling>.md
+  -> 对应的 wiki 页面
   -> 必要时回查 raw/<direction>/
 ```
 
@@ -32,7 +32,7 @@
 | Family | 方向 | 用途 |
 |---|---|---|
 | [adversarial-ml.md](wiki/adversarial-ml.md) | ai-ml | 对抗样本、evasion、patch、poisoning、backdoor 和梯度/查询反馈分流。 |
-| [llm-attacks.md](wiki/llm-attacks.md) | ai-ml | Prompt injection、jailbreak、token smuggling、context manipulation 和工具调用分流。 |
+| [llm-attacks.md](wiki/llm-attacks.md) | ai-ml | Prompt injection、jailbreak、token smuggling、LLM 输出派生 key/seed/password 和工具调用分流。 |
 | [ml-model-inference-extraction-and-weight-analysis.md](wiki/ml-model-inference-extraction-and-weight-analysis.md) | ai-ml | 模型推理、query extraction、model inversion、weight diff、encoder collision 和 membership inference 分流。 |
 | [block-mode-misuse-family.md](wiki/block-mode-misuse-family.md) | crypto | 分组模式、MAC、oracle 和对称密码误用分流。 |
 | [crypto-parameter-triage-family.md](wiki/crypto-parameter-triage-family.md) | crypto | RSA/ECC/格/PRNG/哈希/代数等 crypto 参数首轮分流。 |
@@ -46,7 +46,7 @@
 | [zkp-secret-sharing-and-proof-systems.md](wiki/zkp-secret-sharing-and-proof-systems.md) | crypto | ZKP、garbled circuit、Shamir、KZG/pairing 和证明系统分流。 |
 | [exotic-secret-sharing-rabin-and-polynomials.md](wiki/exotic-secret-sharing-rabin-and-polynomials.md) | crypto | BIP39、Asmuth-Bloom、Rabin、多项式、Vandermonde 和长尾原语分流。 |
 | [blockchain-smart-contract-exploitation.md](wiki/blockchain-smart-contract-exploitation.md) | blockchain | EVM、Solana/Anchor、Sui Move、链上随机、proxy/delegatecall、ABI 和 capability/resource 分流。 |
-| [mt-lcg-and-seed-recovery.md](wiki/mt-lcg-and-seed-recovery.md) | crypto | MT19937、LCG、C rand、V8 Math.random、时间种子和 PRNG 状态恢复分流。 |
+| [mt-lcg-and-seed-recovery.md](wiki/mt-lcg-and-seed-recovery.md) | crypto/web | MT19937、LCG、C rand、V8 Math.random、时间种子、token/key 和 PRNG 状态恢复分流。 |
 | [prng-z3-lcg-and-timing-attacks.md](wiki/prng-z3-lcg-and-timing-attacks.md) | crypto | 约束、Z3、partial output、timing oracle 和跨域 PRNG 恢复分流。 |
 | [rc4-lfsr-and-keystream-reuse.md](wiki/rc4-lfsr-and-keystream-reuse.md) | crypto | LFSR、RC4、keystream reuse、known plaintext 和流密码恢复分流。 |
 | [ecc-dlp-and-signature-attacks.md](wiki/ecc-dlp-and-signature-attacks.md) | crypto | ECC/DLP、small subgroup、invalid curve、nonce reuse 和签名恢复分流。 |
@@ -54,6 +54,7 @@
 | [web-first-pass-triage-and-chain-patterns.md](wiki/web-first-pass-triage-and-chain-patterns.md) | web | Web 首轮业务流、解析差异和漏洞链分流。 |
 | [auth-bypass-cookies-and-hidden-routes.md](wiki/auth-bypass-cookies-and-hidden-routes.md) | web | Cookie/session、隐藏路由、代理 ACL、OAuth 和访问控制分流。 |
 | [auth-jwt.md](wiki/auth-jwt.md) | web | JWT/JWE、签名 cookie、算法混淆、key lookup 和 token 伪造分流。 |
+| [auth-edge-cases-and-protocol-bypasses.md](wiki/auth-edge-cases-and-protocol-bypasses.md) | web | Hash bucket、Unicode、SRP/DH、AQL/NoSQL 等长尾认证边界分流。 |
 | [oauth-saml-cors-and-cicd.md](wiki/oauth-saml-cors-and-cicd.md) | web | OAuth/OIDC、SAML、CORS、Git/CI 凭据和身份平台链分流。 |
 | [php-lfi-ssti-ssrf-and-type-juggling.md](wiki/php-lfi-ssti-ssrf-and-type-juggling.md) | web | PHP/LFI/SSTI/SSRF/XXE/type juggling 等服务端解释层差异分流。 |
 | [path-traversal-ssrf-upload-and-rsc.md](wiki/path-traversal-ssrf-upload-and-rsc.md) | web | 路径穿越、上传、SSRF、渲染器、RSC 和内部服务链分流。 |
@@ -93,6 +94,7 @@
 | [loader-vm-image-and-kernel-patterns.md](wiki/loader-vm-image-and-kernel-patterns.md) | reverse | Loader、镜像/bitmap、kernel module、binfmt 和二阶段执行链分流。 |
 | [font-shader-firmware-and-legacy-patterns.md](wiki/font-shader-firmware-and-legacy-patterns.md) | reverse | 字体、shader、BPF、MBR、legacy 和 side-channel 载体分流。 |
 | [anti-analysis.md](wiki/anti-analysis.md) | reverse | 反调试、anti-VM、anti-DBI、自校验和反反汇编分流。 |
+| [packers-deobfuscation-and-debug-automation.md](wiki/packers-deobfuscation-and-debug-automation.md) | reverse | 壳、商业虚拟化、动态解密、patch、trace 和降维路线分流。 |
 | [self-decrypting-strings-and-lattice-patterns.md](wiki/self-decrypting-strings-and-lattice-patterns.md) | reverse | 自解密、字符串恢复、格/线性约束和魔改 cipher 恢复分流。 |
 | [hardware-isa-bootloader-and-kvm.md](wiki/hardware-isa-bootloader-and-kvm.md) | reverse | 低频 ISA、固件、bootloader、KVM、MCU、TrustZone 和协处理器分流。 |
 | [runtime-patching-oracles-and-tracing.md](wiki/runtime-patching-oracles-and-tracing.md) | reverse | 运行时 patch、oracle、hook、trace、coredump 和上下文替换分流。 |
@@ -111,19 +113,20 @@
 | [filesystems-memory-dumps-and-raid.md](wiki/filesystems-memory-dumps-and-raid.md) | forensics | 分区/文件系统、minidump、VMDK sparse、RAID 和卷恢复分流。 |
 | [network-covert-auth-and-reassembly.md](wiki/network-covert-auth-and-reassembly.md) | forensics | 网络 covert channel、凭据恢复、协议重组和 RTP 音频分流。 |
 | [signals-and-hardware.md](wiki/signals-and-hardware.md) | forensics | 显示链路、总线、RF、功耗、键盘声学和硬件信号恢复分流。 |
-| [audio-frequency-and-archive-stego.md](wiki/audio-frequency-and-archive-stego.md) | forensics | 音频频域、SSTV、DTMF、声道 LSB、DeepSound 和音频 archive 分流。 |
+| [audio-frequency-and-archive-stego.md](wiki/audio-frequency-and-archive-stego.md) | forensics/misc | 音频频域、SSTV、DTMF、声道 LSB、DeepSound、语音认证和音频 archive 分流。 |
 | [video-document-and-media-stego.md](wiki/video-document-and-media-stego.md) | forensics | 视频帧、文档对象、媒体容器、JXL/PDF/EXIF 和运行时媒体 dump 分流。 |
 | [peripheral-capture.md](wiki/peripheral-capture.md) | forensics | USB HID、鼠标/键盘、LED Morse、Bluetooth RFCOMM 和外设 report 重组分流。 |
 | [keyboard-mouse-audio-and-physical-puzzles.md](wiki/keyboard-mouse-audio-and-physical-puzzles.md) | forensics/misc | USB HID、鼠标/键盘、音频频率、视频轨迹和物理动作记录恢复分流。 |
 | [encodings-qr-and-esolangs.md](wiki/encodings-qr-and-esolangs.md) | misc | Base/hex/URL/ROT、Unicode、二维码、esolang 和多层编码链分流。 |
-| [pyjails.md](wiki/pyjails.md) | misc | Python 受限执行、对象链、字符集、oracle 和 agent sandbox 分流。 |
-| [vm-z3-sandbox-and-game-basics.md](wiki/vm-z3-sandbox-and-game-basics.md) | misc | VM/解释器、WASM/游戏、Z3/约束、K8s、浮点和 sandbox 分流。 |
+| [pyjails.md](wiki/pyjails.md) | misc/web | Python 受限执行、Web 表达式沙箱、对象链、字符集、oracle 和 agent sandbox 分流。 |
+| [vm-z3-sandbox-and-game-basics.md](wiki/vm-z3-sandbox-and-game-basics.md) | misc/pwn | VM/解释器、WASM/游戏、Z3/约束、K8s、浮点、sandbox 和 VM primitive 分流。 |
 | [game-state-websocket-and-wasm.md](wiki/game-state-websocket-and-wasm.md) | misc | 游戏状态、WebSocket、session、WASM linear memory 和资源包分流。 |
 | [misc-cross-category-triage-family.md](wiki/misc-cross-category-triage-family.md) | misc | 编码、游戏、shell、oracle、pyjail、轻量附件等 misc 边界题分流。 |
 | [dns.md](wiki/dns.md) | misc | DNSSEC、zone transfer、rebinding、DNS tunnel、SPF/TXT 和解析链分流。 |
 | [file-triage-archives-and-one-liners.md](wiki/file-triage-archives-and-one-liners.md) | misc | 文件首检、压缩包、一行式和轻量附件 triage。 |
 | [oracles-recurrences-captcha-polyglots.md](wiki/oracles-recurrences-captcha-polyglots.md) | misc | 比较/timeout oracle、递推、CAPTCHA、QR 结构约束和 polyglot 分流。 |
 | [interactive-containers-jails-and-solvers.md](wiki/interactive-containers-jails-and-solvers.md) | misc | 交互服务、容器边界、jail 变体和小型求解器分流。 |
+| [source-backdoors-and-restricted-shell-tricks.md](wiki/source-backdoors-and-restricted-shell-tricks.md) | misc | 源码后门、受限 shell、HISTFILE/`bash -v`、rvim 插件和工具副作用分流。 |
 | [bashjails.md](wiki/bashjails.md) | misc | Bash/rbash 受限 shell、字符集、输出通道和 post-shell 分流。 |
 | [exotic-encodings-and-file-formats.md](wiki/exotic-encodings-and-file-formats.md) | misc | 低频编码、结构化格式、条码/音频映射和解析器差异分流。 |
 | [geolocation-and-media.md](wiki/geolocation-and-media.md) | osint | 图片、视频、坐标、街景、路牌、地标、IP 和媒体地理定位分流。 |
@@ -150,6 +153,12 @@
 
 ## Technique Pages
 
+### AI / ML
+
+- [linear-model-input-lattice-recovery.md](wiki/linear-model-input-lattice-recovery.md)
+- [linear-model-parameter-recovery.md](wiki/linear-model-parameter-recovery.md)
+- [transformer-logit-inversion.md](wiki/transformer-logit-inversion.md)
+
 ### Crypto / Blockchain
 
 - [lorenz-and-book-cipher-attacks.md](wiki/lorenz-and-book-cipher-attacks.md)
@@ -157,25 +166,27 @@
 ### Web
 
 - [artifact-trust-ssrf-to-node-require-rce.md](wiki/artifact-trust-ssrf-to-node-require-rce.md)
-- [auth-edge-cases-and-protocol-bypasses.md](wiki/auth-edge-cases-and-protocol-bypasses.md)
 - [csp-xsleak-and-browser-exfiltration.md](wiki/csp-xsleak-and-browser-exfiltration.md)
 - [json-duplicate-key-hmac-parser-differential.md](wiki/json-duplicate-key-hmac-parser-differential.md)
 - [path-confusion-to-signed-internal-request-chain.md](wiki/path-confusion-to-signed-internal-request-chain.md)
 - [protocol-relay-and-internal-service-injection.md](wiki/protocol-relay-and-internal-service-injection.md)
 - [workflow-runner-internal-api-chain.md](wiki/workflow-runner-internal-api-chain.md)
 
+### Cross-Direction
+
+- [bgp-rpki-route-hijack.md](wiki/bgp-rpki-route-hijack.md)
+- [race-condition-and-concurrency-exploits.md](wiki/race-condition-and-concurrency-exploits.md)
+
 ### Pwn
 
-- [emulator-float-and-hash-exploits.md](wiki/emulator-float-and-hash-exploits.md)
+- [data-interpretation-memory-primitives.md](wiki/data-interpretation-memory-primitives.md)
 - [format-string.md](wiki/format-string.md)
 - [kaslr-kpti-smep-and-kernel-debugging.md](wiki/kaslr-kpti-smep-and-kernel-debugging.md)
-- [race-condition-and-concurrency-exploits.md](wiki/race-condition-and-concurrency-exploits.md)
 
 ### Reverse
 
 - [compare-breakpoint-plaintext-recovery.md](wiki/compare-breakpoint-plaintext-recovery.md)
 - [embedded-python-pyd-custom-aes.md](wiki/embedded-python-pyd-custom-aes.md)
-- [packers-deobfuscation-and-debug-automation.md](wiki/packers-deobfuscation-and-debug-automation.md)
 - [vmp-client-server-smc-rc4-recovery.md](wiki/vmp-client-server-smc-rc4-recovery.md)
 - [windows-kernel-ioctl-hidden-feedback-maze.md](wiki/windows-kernel-ioctl-hidden-feedback-maze.md)
 
@@ -189,11 +200,6 @@
 
 - [malware-c2-session-key-and-protocol-recovery.md](wiki/malware-c2-session-key-and-protocol-recovery.md)
 - [powershell-staged-payload-and-clipboard-phishing.md](wiki/powershell-staged-payload-and-clipboard-phishing.md)
-
-### Misc
-
-- [bgp-rpki-route-hijack.md](wiki/bgp-rpki-route-hijack.md)
-- [source-backdoors-and-restricted-shell-tricks.md](wiki/source-backdoors-and-restricted-shell-tricks.md)
 
 ## Raw 资料统计
 

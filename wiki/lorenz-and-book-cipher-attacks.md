@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [crypto, technique]
+tags: [crypto, technique, lorenz, book-cipher, historical-cipher, baudot, known-plaintext]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/lorenz-and-book-cipher-attacks.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Lorenz and Book Cipher Attacks
@@ -34,9 +34,9 @@ updated: 2026-05-21
 4. 从剩余 delta 推 psi stepping pattern，再恢复 mu/psi 轮或暴力剩余相位。
 5. Book cipher：枚举起点，按距离前进取字符；用 valid charset 和 flag 格式快速过滤。
 
-## 关键变体
+## 历史密码分支
 
-| 变体 | 复用重点 |
+| 结构 | 判断方式 |
 |---|---|
 | Lorenz delta attack | `delta_k = delta_chi XOR delta_psi`，psi 静止比例高，delta 统计偏向 chi。 |
 | ITA2/Baudot | 先处理 FIGS/LTRS shift，否则解出的字符会错位。 |
@@ -52,11 +52,11 @@ updated: 2026-05-21
 
 ## 关联技巧
 
-- [block-mode-misuse-family.md](block-mode-misuse-family.md)
 - [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
-- [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
+- [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
+- [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
 
 ## 原始资料
 

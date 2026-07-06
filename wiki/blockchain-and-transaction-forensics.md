@@ -1,10 +1,10 @@
 ---
 type: technique
-tags: [forensics, technique]
-skills: [ctf-forensics]
+tags: [forensics, osint, technique, blockchain, transaction, bitcoin, ethereum, utxo]
+skills: [ctf-forensics, ctf-osint]
 raw:
   - ../raw/forensics/blockchain-and-transaction-forensics.md
-updated: 2026-05-21
+updated: 2026-07-06
 ---
 
 # Blockchain and Transaction Forensics
@@ -12,6 +12,8 @@ updated: 2026-05-21
 ## 适用场景
 
 题目给出 TXID、地址、区块高度、钱包导出、交易截图或链上金额流转，需要从公开链数据中恢复收款方、找零链、隐藏 memo、交易时间线或最终资金落点。它属于取证而不是密码学：核心证据来自链上交易图和金额行为。
+
+如果目标是修改合约状态、绕过 owner/capability、mint/claim/settle 或利用代理合约、PDA、Move resource，本页只作为链上查询辅助，应转 [blockchain-smart-contract-exploitation.md](blockchain-smart-contract-exploitation.md)。
 
 ## 识别信号
 
@@ -34,9 +36,9 @@ updated: 2026-05-21
 4. 每跳记录区块时间、高度、金额变化和地址复用。
 5. 最后检查地址标签、OP_RETURN、交易备注、NFT/代币 metadata 或最终输出金额是否编码 flag。
 
-## 关键变体
+## 链上追踪分支
 
-| 变体 | 复用重点 |
+| 证据形态 | 判断方式 |
 |---|---|
 | Bitcoin peel chain | 从起点 TXID 开始，优先跟踪较大输出；round amount 或固定小额输出常是剥离支付。 |
 | 地址聚类 | 多输入交易常暗示这些输入地址由同一实体控制，可作为聚类证据。 |
@@ -52,11 +54,12 @@ updated: 2026-05-21
 
 ## 关联技巧
 
-- [3d-printing.md](3d-printing.md)
-- [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
+- [blockchain-smart-contract-exploitation.md](blockchain-smart-contract-exploitation.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
-- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
-- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
+- [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
+- [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
+- [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
+- [forensics-tooling.md](forensics-tooling.md)
 
 ## 原始资料
 

@@ -4,7 +4,7 @@ tags: [web, family, sqli, upload, deserialization, command-injection, rce-chain]
 skills: [ctf-web]
 raw:
   - ../raw/web/sqli-upload-deser-and-command-rce.md
-updated: 2026-06-11
+updated: 2026-07-06
 ---
 
 # SQLi, Upload, Deserialization and Command RCE
@@ -14,6 +14,20 @@ updated: 2026-06-11
 本页是 Web RCE 链路 family，覆盖 SQLi、上传、反序列化、命令包装器、备份泄露、文件读和自定义序列化等路线如何串到执行或敏感数据。它不再作为 technique，因为 raw 中的分支横跨数据库、文件系统、语言运行时、shell、PHP-FPM、反序列化和业务竞态。
 
 与 [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md) 的区别：本页更强调“已有一个入口后如何升级成执行链”；后者更强调语言/模板/上传本身的执行面识别。
+
+## 识别信号
+
+- 已经有一个入口：SQLi、文件读、上传、反序列化、命令包装器、源码/备份泄露、自定义 serializer 或业务竞态。
+- 单点漏洞本身未直接给 flag，但能继续拿配置、secret、路径、session、写文件能力、gadget 入口或命令参数控制。
+- 攻击链需要跨数据库、文件系统、Web 服务器、语言运行时、shell、队列或后台任务。
+- 后续成功条件是把已有 primitive 升级为文件读、WebShell、反序列化触发、命令执行或管理员动作。
+
+## 最小证据
+
+- 明确当前已有 primitive：读、写、注入、上传、反序列化入口、命令参数控制或状态竞争窗口。
+- 列出下一跳所需条件：路径、权限、解析规则、gadget 类、触发请求、后台任务、secret 或可访问 URL。
+- 保存一条从初始入口到升级目标的证据链，不要只保存最终 payload。
+- 若链路跨服务，记录每个服务的身份、网络位置、文件系统视图和共享状态。
 
 ## 链路分流
 

@@ -59,14 +59,6 @@ Windows 驱动题同时给出 `.sys` 和用户态客户端，客户端只暴露 
 - [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)
 - [vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)
 
-## 来自 WP 的案例索引
-
-| Raw WP | 可复用联系 |
-|---|---|
-| [HGAME2026-noncesense-wp](../raw/reverse/HGAME2026-noncesense-wp.md) | Client/driver 协议题要先枚举 IOCTL、nonce、token 和 blob 生成关系，再分析 AES/HMAC。 |
-| [D3CTF2025-d3kernel-wp](../raw/reverse/D3CTF2025-d3kernel-wp.md) | Windows kernel/userland 混合逆向要把 R3/R0 反调试和 DeviceIoControl VM 分层处理。 |
-| [D3CTF2022-d3w0w-wp](../raw/reverse/D3CTF2022-d3w0w-wp.md) | WoW64 隐藏 64 位逻辑时，先 dump 并按真实模式解析，再恢复约束。 |
-
 ## 原始资料
 
 - [Spirit2026-5-kernelmaze-wp.md](../raw/reverse/Spirit2026-5-kernelmaze-wp.md)

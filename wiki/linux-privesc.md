@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 如果问题已经变成多主机横向、域渗透或复杂隧道，应回到 [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)。如果只是需要稳定调用工具，见 [pentest-tooling.md](pentest-tooling.md)。
 
-## 共同识别信号
+## 识别信号
 
 - 已有 Linux shell 或可执行命令，但当前用户不能直接读 root flag。
 - `sudo -l` 出现通配符、受限命令、可控参数、编辑器、抓包/归档/解析工具或服务管理命令。

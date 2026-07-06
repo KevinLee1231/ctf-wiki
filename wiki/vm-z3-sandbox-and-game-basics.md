@@ -1,11 +1,11 @@
 ---
 type: family
-tags: [misc, family, vm, z3, sandbox, game, constraints]
-skills: [ctf-misc]
+tags: [misc, pwn, family, vm, z3, sandbox, game, constraints]
+skills: [ctf-misc, ctf-pwn]
 raw:
   - ../raw/misc/vm-z3-sandbox-and-game-basics.md
   - ../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # VM, Z3, Sandbox and Game Basics
@@ -16,7 +16,7 @@ updated: 2026-06-12
 
 它只承担首轮分流：如果主要任务是逆向复杂 VM 或字节码，转 Reverse family；如果已经形成内存破坏 primitive，转 Pwn；如果是真实内网/容器提权，转 Pentest。
 
-## 共同识别信号
+## 识别信号
 
 - 题目给出游戏、解释器、字节码、规则表、约束网络、WASM、Roblox place、PyInstaller 包、marshal code、K8s manifest、浮点交易系统或自定义 sandbox。
 - 关键不是文件 carving，而是把规则还原成可执行模型、patch、约束或状态转移。

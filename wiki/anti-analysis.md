@@ -18,7 +18,7 @@ updated: 2026-06-12
 
 它不是单一 technique。遇到反分析时，首轮目标通常不是完整还原所有保护，而是找到最短稳定分析路线：patch 检测点、伪造环境、换调试器、提前 dump、动态 hook、trace 真实比较点，或者绕过保护后转入算法恢复。
 
-## 共同识别信号
+## 识别信号
 
 - 一上调试器就退出、卡死、走假分支，或输出与非调试运行不一致。
 - 出现 `ptrace`、`/proc/self/status`、`rdtsc`、`alarm`、`SIGTRAP`、`IsDebuggerPresent`、`NtQueryInformationProcess`、TLS callback、PEB、DR register、Frida/Pin/DynamoRIO 检测。

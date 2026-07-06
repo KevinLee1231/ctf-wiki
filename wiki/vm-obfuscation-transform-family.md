@@ -1,19 +1,19 @@
 ---
 type: family
-tags: [reverse, family]
+tags: [reverse, family, vm, obfuscation, bytecode, smc, anti-debug, tracing]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/vm-obfuscation-transform-patterns.md
-updated: 2026-05-22
+updated: 2026-07-06
 ---
 
 # VM、混淆与字节变换技巧族
 
-## 适用场景
+## 作用边界
 
-本页是 `VM、混淆与字节变换技巧族` 技巧家族页，用来承接多个相邻技巧和案例；先用于判断是否属于这一族，再选择具体变体。
+本页是 Reverse 中“执行模型被隐藏或改写”的 family，负责把自定义 VM、flattening、runtime 解密、SMC、反调试和字节变换分流到合适的 trace、lifting、patch、oracle 或约束恢复路线。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不要求完整反混淆；首要目标是找到真实校验边界、可观测中间状态和 forward check。如果障碍只是普通文件格式、语言运行时或工具使用，应先回到对应 family / tooling。
 
 ## 识别信号
 
@@ -29,7 +29,7 @@ updated: 2026-05-22
 - 已判断适合路线：静态 lifting、动态 trace、hook/patch、fuzz ISA、符号执行、直接抓明文或约束求解。
 - 有 forward check：恢复出的输入能在原程序、patch 后程序或等价解释器中通过。
 
-## 解法骨架
+## 分流流程
 
 1. 首检载体、架构、入口、导入、字符串、反调试和运行需求。
 2. 找真实校验边界：最终 compare、成功/失败分支、解密后明文、VM dispatch、handler 表。
@@ -37,7 +37,7 @@ updated: 2026-05-22
 4. 优先做最小可验证模型，不追求完整还原全程序。
 5. 用原程序或自写 forward checker 验证 flag；记录关键断点、地址、脚本和失败分支。
 
-## 关键变体
+## 路线分流
 
 | 变体 | 优先证据 | 下一跳页面 | 失败后 pivot |
 |---|---|---|---|

@@ -15,7 +15,7 @@ updated: 2026-06-12
 
 如果证据已经明确是 Python jail、bash/rbash、纯编码链、图像隐写或 WebSocket 游戏，应转入更具体页面。本页保留的价值是把容器、交互 oracle、游戏规则、运行时 helper、虚拟化边界和受限执行环境的首轮判断串起来。
 
-## 共同识别信号
+## 识别信号
 
 - 题目提供远程交互服务、容器、Docker/BuildKit、rvim、受限命令环境、模拟器、ROM 切换、marshal 代码载入或多阶段小游戏。
 - 静态附件不足以出 flag，需要维护会话状态、并发连接、socket oracle、交互脚本或求解器。

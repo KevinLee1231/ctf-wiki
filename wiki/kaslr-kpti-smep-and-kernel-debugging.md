@@ -4,7 +4,10 @@ tags: [pwn, kernel, kaslr, kpti, smep, smap, technique]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/kaslr-kpti-smep-and-kernel-debugging.md
-updated: 2026-06-12
+  - ../raw/pwn/WMCTF2025-wm-easyker-wp.md
+  - ../raw/pwn/WMCTF2025-wm-easynetlink-wp.md
+  - ../raw/pwn/WMCTF2025-wmkpf-wp.md
+updated: 2026-07-06
 ---
 
 # Kernel KASLR, KPTI, SMEP and SMAP Bypass

@@ -4,7 +4,7 @@ tags: [crypto, family, rsa, textbook-rsa]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/rsa-attacks.md
-updated: 2026-06-12
+updated: 2026-07-06
 ---
 
 # RSA Attacks
@@ -14,6 +14,20 @@ updated: 2026-06-12
 本页是 RSA 基础路线 family，用于在看到 `n/e/c`、多组密文、多个模数、弱私钥指数、低指数、可查询 oracle 或可疑 prime 结构时，先判断该走哪条最短路线。它不再作为单一 technique，因为 raw 覆盖的是一组 RSA 攻击入口。
 
 更长尾的素数结构、签名同态、fault、ROCA、CRT 泄露和复杂 oracle 转到 [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)。
+
+## 识别信号
+
+- 题目给出 `n/e/c`、PEM、公钥集合、多组密文、相同明文提示、低指数、可疑小 `d` 或可查询解密/验签接口。
+- 模数之间可能共享因子，素数可能太近、太小、多素数或能被 FactorDB/批量 gcd 直接排查。
+- 明文结构有已知前缀、短消息、无 padding、相同消息多模数或同模多指数。
+- 响应差异看起来像 padding/timing/oracle 时，应先确认是否已超出基础页，转 specialized。
+
+## 最小证据
+
+- 列出所有公开参数：`n`、`e`、`c`、模数数量、密文数量、是否同明文、是否同模数。
+- 先完成低成本检查：FactorDB/小因子、pairwise gcd、近似平方根、`m^e < n`、CRT/Hastad 条件和 Wiener 粗界。
+- 对低指数/广播攻击，要证明合并后的明文界满足整数开根。
+- 对 oracle 类 RSA，要保存可重放查询和响应分类，再转 specialized 页面继续建模。
 
 ## 首轮路由
 

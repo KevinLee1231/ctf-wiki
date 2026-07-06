@@ -1,19 +1,19 @@
 ---
 type: family
-tags: [pwn, family]
+tags: [pwn, family, oob, jit, parser, primitive, sandbox, emulator]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/oob-jit-parser-primitives.md
-updated: 2026-05-22
+updated: 2026-07-06
 ---
 
 # OOB / JIT / Parser 原语技巧族
 
-## 适用场景
+## 作用边界
 
-本页是 `OOB / JIT / Parser 原语技巧族` 技巧家族页，用来承接多个相邻技巧和案例；先用于判断是否属于这一族，再选择具体变体。
+本页是 Pwn primitive 形成 family，负责把 OOB、JIT、parser、emulator、整数边界和 sandbox 触发面分流到“先形成什么能力、再落到哪个目标”。
 
-本页不是 raw 的目录页；它把原始资料中的案例压缩成可迁移的判断信号、最小证据和解题骨架。
+它不替代 Pwn 首轮页；只有在已经有越界、解释器/JIT/parser crash、host/guest 语义落差或可疑低级读写能力时才进入本页。
 
 ## 识别信号
 
@@ -29,7 +29,7 @@ updated: 2026-05-22
 - 已确认目标环境保护和 libc/loader 差异；远程 exploit 不应只依赖本地偏移。
 - 能说明从 primitive 到目标能力的链路：leak、任意读写、控制流、shell、文件读取或 sandbox escape。
 
-## 解法骨架
+## 分流流程
 
 1. 最小化触发样本，固定输入长度、字段、序列化格式和交互时序。
 2. 用调试器或 sanitizer 量化 primitive，不急于拼 ROP。
@@ -37,12 +37,12 @@ updated: 2026-05-22
 4. 把 exploit 拆成阶段：握手、leak、基址计算、写入或劫持、触发、交互。
 5. 对远程差异设置超时、recv 边界、重试和日志，保留一次成功 transcript。
 
-## 关键变体
+## 路线分流
 
 | 变体 | 优先证据 | 下一跳页面 | 失败后 pivot |
 |---|---|---|---|
 | OOB read/write | index、length、count 或坐标越界 | [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) | 若只能读不能写，转 leak + 逻辑绕过或只读 ROP 构造。 |
-| Parser 整数/符号错误 | signed/unsigned、截断、size_t underflow | [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md) | 若 crash 不可控，先做格式 grammar fuzz 和字段二分。 |
+| Parser 整数/符号错误 | signed/unsigned、截断、size_t underflow | [data-interpretation-memory-primitives.md](data-interpretation-memory-primitives.md) | 若 crash 不可控，先做格式 grammar fuzz 和字段二分。 |
 | JIT / emulator escape | guest 指令影响 host 指针或跳转 | [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md) | 若 W^X 阻断 shellcode，转 ROP、JOP 或已有 native helper。 |
 | GOT/PLT 覆写 | Partial RELRO、任意写、可触发函数调用 | [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md) | Full RELRO 时转 libc hook、栈迁移、vtable、FSOP 或 ret2dlresolve。 |
 | seccomp/sandbox | syscall 被过滤，能读写内存但不能直接 execve | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md) | 转 open/read/write、ORW、SROP、ret2dlresolve 或文件描述符继承。 |
@@ -60,7 +60,7 @@ updated: 2026-05-22
 ## 关联技巧
 
 - [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
-- [emulator-float-and-hash-exploits.md](emulator-float-and-hash-exploits.md)
+- [data-interpretation-memory-primitives.md](data-interpretation-memory-primitives.md)
 - [format-string.md](format-string.md)
 - [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
 - [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
