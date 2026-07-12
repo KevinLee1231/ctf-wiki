@@ -1525,3 +1525,95 @@
 - 导航层次优化：在 `index.md` 增加“方向入口速查”表，把 AI/ML、Crypto、Web、Pwn、Reverse、Forensics、Misc、OSINT、Pentest、Malware 的首轮 family 与 tooling 页显式列出，减少 agent 从长索引线性扫描的成本。
 - 本轮不修改 raw 正文，不新增/删除 wiki 页面，不同步 skill；调整只影响 index 查询入口和维护记录。
 - 修复前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-final-semantic-health-tuning-20260706-215816.zip`。
+
+## 2026-07-06 — SU 前缀 Raw WP 文件名规范化
+
+- 将 `raw/` 下 38 个 `SU_*.md` WP 文件按用户要求统一改名为 `SUCTF2026-...` 前缀；其中 `SUCTF2026-Chronos_Ring_SUCTF2026-Chronos_Ring1WP.md` 保留原双题合并语义，只替换文件名中的赛事前缀片段。
+- 同步重命名 5 个同名前缀图片目录：forensics、LightNovel、chaos、CyberTrack、Note_rev，并重写对应 raw 图片引用。
+- 同步更新 `wiki/*.md` 中指向这些 raw WP 的 frontmatter、案例表和“原始资料”链接；raw 正文中的 Markdown 标题也已从旧 `SU_` 题名改为 `SUCTF2026-...` 题名。
+- 校验确认 raw 中不再存在旧前缀文件或目录，旧 raw Markdown 链接已清零；代码块和正文中真实附件名、主机提示符、解包口令等原始证据不作为 WP 文件名改写。
+
+## 2026-07-07 — WMCTF2023 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已拆分的 30 篇 WMCTF2023 单题 WP 归档到 `raw/<category>/`，命名为 `WMCTF2023-<challenge>-wp.md`。
+- 按主要障碍和 raw 允许方向放置：Crypto 4 篇、Forensics 4 篇、Misc 6 篇、Pwn 5 篇、Reverse 5 篇、Web 6 篇；其中 `Steg` 原始方向题归入 `forensics`，`Blockchain` 中 `babyblock` 归入 `web`，`mollvme` 归入 `reverse`。
+- 同步移动 16 个图片目录到同名 raw 目录，并改写归档版与源 WP 的图片链接；校验确认 raw/source 图片引用均无断链、无未引用图片、无旧式图片名。
+- 本轮只做 raw 资料层归档与统计更新，不做 wiki 技巧沉淀，不新增或重写 wiki 页面。
+
+## 2026-07-11 — Raw 十四方向结构迁移
+
+- 将 raw 正式一级方向统一为 `web`、`pwn`、`reverse`、`crypto`、`forensics`、`stego`、`osint`、`malware`、`pentest`、`ai-ml`、`mobile`、`blockchain`、`hardware-embedded`、`cloud-infra`；不再使用 `misc` 或 `programming` 作为物理兜底目录。
+- 主分类改按“最小预期解法中的决定性主障碍”判断，而不是赛事标签、附件类型、部署位置或最后使用的工具；交叉属性继续由 wiki 链接、正文语义和 skill 路由表达。
+- 迁移前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-raw-14-category-migration-20260711-105758.zip`，共 1,293 个条目，大小 94,091,574 bytes。
+- 共迁移 110 篇 raw Markdown 和 37 个同 basename 资源目录：原 `raw/misc/` 的 88 篇全部重新判定，另从 forensics、pwn、reverse、web 等旧目录迁出 22 篇平台或领域特征明确的资料；空的 `raw/misc/` 已删除。
+- 保留 `raw/_unclassified/` 作为待复核暂存区，现有 10 篇均为问卷、纯编码/格式、矩阵/二维码重组谜题、数据整理或跨算法合集；它不是第十五个正式方向，后续获得更明确的决定性障碍证据时应迁入正式方向。
+- 使用逐文件旧路径到新路径映射更新 45 个 `wiki/*.md`，共替换 151 处受迁移影响的路径；未改写 `log.md` 中的历史记录，也未改写任何 raw 正文。
+- 同步更新 `AGENTS.md` 的方向定义、边界规则和维护校验项，更新 `index.md` 的方向入口与 live raw 统计，并同步修正 `ctf-writeup` 的归档 allowlist、`_unclassified` 边界和错分类迁移规则，防止未来重新生成 `raw/misc/`。
+- 迁移后共有 614 篇 raw Markdown、96 个同名资源目录和 537 个资源文件；14 个正式方向计数分别为 ai-ml 17、blockchain 10、cloud-infra 4、crypto 110、forensics 31、hardware-embedded 4、malware 9、mobile 2、osint 9、pentest 8、pwn 120、reverse 136、stego 17、web 127，另有 `_unclassified` 10。
+- 校验结果：备份与当前 raw Markdown 的 SHA-256 内容多重集合差异为 0；537 个真实图片引用全部存在且一一对应资源文件；wiki/index 的 1,460 处 raw Markdown 引用指向 504 个唯一目标，断链 0，旧 `raw/misc/` / `raw/programming/` 引用 0；138 个 wiki 页均被 index 覆盖且 type 仅为 family、technique、tooling。
+
+## 2026-07-11 — `_unclassified` 全量二次归类复核
+
+- 逐篇全文复核 `_unclassified` 中现有 10 份资料，重新以“最小预期解法中的决定性主障碍”对照 14 个正式方向；本轮不是按标题、附件形式、工具名或 wiki 下一跳机械归类。
+- 复核结论如下；“保留”表示已经确认其边界，而不是尚未阅读或遗漏分类：
+
+| 资料 | 决定性主障碍 | 相邻正式方向为何不成立 | 结论 |
+|---|---|---|---|
+| `ACTF2026-questionnaire-wp.md` | 提交反馈问卷后直接获得 flag，没有技术利用链。 | 网页只是交付介质，不存在 Web 应用漏洞。 | 保留 `_unclassified`。 |
+| `ACTF2026-special-day-wp.md` | 单层 Base64 解码和文本去标点/连接。 | Base64 不是 Crypto；也没有取证恢复或隐藏存在性。 | 保留 `_unclassified`。 |
+| `D3CTF2025-d3rpg-signin-wp.md` | NPC/地图提示、摩尔斯、游戏数值溢出和模拟内存观察组成的混合游戏谜题。 | 没有 Pwn 利用原语；预期解不要求分析二进制、字节码或工程，不能归 Reverse。 | 保留 `_unclassified`。 |
+| `encodings-qr-and-esolangs.md` | 同时覆盖普通编码、QR 修复/重组、esolang、Unicode 隐藏字符和数值映射。 | 各章节分别跨 Reverse、Stego、Forensics 与纯编码，没有统一主障碍。 | 保留 `_unclassified`。 |
+| `exotic-encodings-and-file-formats.md` | 汇总编码、RTF/SMS、QR/条码、DTMF、音乐、Verilog、数独和 Ruby CVE 等异构案例。 | 同时跨 Forensics、Stego、Hardware、Pwn 与纯谜题，任一正式目录都会误代表全篇。 | 保留 `_unclassified`。 |
+| `HGAME2026-打好基础-wp.md` | 从 Base100 到 Base32 的九层无密钥编码剥离。 | 普通表示层编码不是 Crypto，也没有 Stego/Forensics 证据链。 | 保留 `_unclassified`。 |
+| `HGAME2026-invest-on-matrix-wp.md` | 将 25 组 `5x5` 二值块按索引拼回 QR。 | 信息存在性没有隐藏，不是 Stego；也不存在数字证据恢复链。 | 保留 `_unclassified`。 |
+| `NCTF2026-what-a-mess-wp.md` | NFKC、零宽字符清理、字段校验、去重和业务统计。 | 是通用数据清洗，不是攻击事件或数字证据重建，不能归 Forensics。 | 保留 `_unclassified`。 |
+| `oracles-recurrences-captcha-polyglots.md` | 汇总 XSLT/JS、比较与时间 oracle、递推、QR、OCR、esolang、音频和长度扩展。 | 同时跨 Web、Crypto、Reverse、Forensics 与算法题，没有稳定单一方向。 | 保留 `_unclassified`。 |
+| `SUCTF2026-Artifact_OnlineWP.md` | 符文替换映射、六面 cube 置换建模及 BFS/beam 状态搜索。 | Shell 命令是预期输出且没有 Pwn 原语；规则由题面/交互给出，没有 Reverse 程序分析。 | 保留 `_unclassified`。 |
+
+- 因没有找到可辩护的正式主目录，本轮迁移数量为 0：不移动 raw Markdown 或同名资源目录，不改写 raw 正文，也不改动 wiki 引用。`index.md` 的 `_unclassified = 10` 统计保持不变。
+- 校验确认 10 份资料均有现有 wiki 入口，共 31 处 raw 路径引用；2 个同名资源目录共 6 个文件，正文图片断链为 0。没有结构变更，因此不新增迁移备份。
+
+## 2026-07-11 — Encoding 归 Crypto、Stego 边界修订与混合 Raw 拆分
+
+- 本轮按用户确认修订此前 `_unclassified` 复核结论：Base/hex/URL/ROT、字符编码、自定义码表和多层可逆编码等普通表示层问题统一归 `crypto`；QR 碎片重组、视觉/空间线索和游戏场景隐藏信息归 `stego`。编程语言、脚本和约束求解仍只是手段，不能因此默认归 Crypto。上一条历史记录不回写，由本条说明新边界和实际迁移结果。
+- 修改前备份为 `D:/文档/markdown文件/ctf-wiki/backups/pre-encoding-crypto-and-mixed-raw-split-20260711-154101.zip`，共 1,296 个条目、94,106,051 bytes；快照包含当时的 raw/wiki、根规则文档和本轮同步的 4 个 CTF skill。
+- 迁入 `raw/crypto/`：`encodings-qr-and-esolangs.md`、`ACTF2026-special-day-wp.md`、`HGAME2026-打好基础-wp.md`。对应 wiki family 改为 Crypto 入口，并接入 `crypto-parameter-triage-family.md`。
+- 迁入 `raw/stego/`：`D3CTF2025-d3rpg-signin-wp.md` 与 `HGAME2026-invest-on-matrix-wp.md`，同时迁移两个同 basename 资源目录共 6 个图片文件；图像/QR Stego family 已补入两篇案例，D3RPG 仍保留到游戏状态 family 的交叉入链。
+- 用户已删除 `ACTF2026-questionnaire-wp.md`；清理 `file-triage-archives-and-one-liners.md` 与 `misc-cross-category-triage-family.md` 中的悬空案例，历史日志中的旧记录保持不变。
+- 将 `exotic-encodings-and-file-formats.md` 全部拆入 8 个现存资料卷后删除旧 aggregate：Crypto 编码与 known-prefix XOR、Reverse Verilog、Forensics SMS PDU、Stego RTF/音符/QR 网格、Pwn `String#unpack` 越界读取。同步修复 first-success 自动解码误判、错误 MaxiCode 示例和 `Array#unpack` 命名。
+- 将 `oracles-recurrences-captcha-polyglots.md` 按主障碍拆分后删除旧 aggregate：新建 `raw/crypto/algorithmic-oracles-and-linear-recurrences.md`、`raw/web/script-runtime-validation-and-timing-oracles.md`、`raw/web/captcha-font-and-browser-automation.md`；XSLT VM、hash length extension、QR format 约束、Brainfuck→Piet 和 Bytebeat 分别并入现存 Reverse、Crypto、Stego 资料卷；Levenshtein 与动态字体 CAPTCHA 从旧 Pwn/OSINT 卷迁出并去重。
+- 保留两个同名 wiki family 作为跨方向 pivot，但 raw 证据改指拆分后的正式方向资料；`index.md` 将 encoding family 归 Crypto，将图像/音频/文档 Stego family 归 Stego，并把两个混合 family 标为 cross-category。
+- 同步修改 `AGENTS.md`、`ctf-writeup`、`ctf-crypto`、`ctf-misc` 和 `ctf-solve-challenge` 的路由边界；普通编码不再进入 `ctf-misc` / `_unclassified`，Stego 由现有 `ctf-forensics` skill 承接。
+- 最终共有 614 篇 raw Markdown：`_unclassified=2`、`crypto=114`、`stego=19`、`web=129`，其余正式方向计数不变。`_unclassified` 仅剩 `NCTF2026-what-a-mess-wp.md`（通用数据清洗）与 `SUCTF2026-Artifact_OnlineWP.md`（符文映射和 cube 状态搜索混合规则题），资源目录为 0。
+- 校验结果：raw 目录严格为 14 个正式方向加 `_unclassified`；138 个 wiki 页 type 为 `family=101`、`technique=24`、`tooling=13` 且全部被 index 覆盖；检查 4,149 个 active 本地 Markdown 链接和 537 个图片引用，断链均为 0；96 个同名资源目录共 537 个文件，孤立目录和未引用资源均为 0；旧 aggregate/迁移路径残留为 0；本轮新增/改写资料的代码围栏与 79 个 TOC 锚点校验通过，`git diff --check` 无内容错误。
+
+## 2026-07-11 — 剩余 `_unclassified` WP 按个人馆藏口径归入 Stego
+
+- 按用户明确决定，将 `NCTF2026-what-a-mess-wp.md` 与 `SUCTF2026-Artifact_OnlineWP.md` 从 `_unclassified` 迁入 `raw/stego/`；两篇均无同 basename 资源目录，目标路径不存在冲突。
+- 严格题型判断仍需保留：前者的决定性操作是 Unicode/零宽字符规范化、字段校验和数据统计，后者是符文替换映射、cube 置换建模与 BFS/beam 状态搜索。这里的 Stego 归档是本库扩展口径：分别把“格式变体掩饰记录语义”和“符文/空间状态掩饰可执行命令”视为边界隐写，不应泛化为所有数据清洗题或规则求解题。
+- 同步更新 `encodings-qr-and-esolangs.md`、`exotic-encodings-and-file-formats.md`、`game-state-websocket-and-wasm.md` 与 `misc-cross-category-triage-family.md` 的 raw 路径和边界描述；保留原有跨方向下一跳，不把两题强行改写成传统媒体隐写案例。
+- 更新 `index.md` live 统计为 `_unclassified=0`、`stego=21`、总数仍为 614；空 `_unclassified/` 目录继续保留为未来待复核入口。
+- 迁移前定点备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-final-unclassified-to-stego-20260711-213910.zip`，共 9 个恢复条目、111,065 bytes。
+- 校验结果：两篇迁移后 WP 与备份内源文件的 SHA-256 均一致，说明 raw 正文未被改写；live 统计为 `_unclassified=0`、`stego=21`、总数 614；检查 4,149 个 active 本地链接和 537 个图片引用，断链为 0；15 个 raw 目录、138 个 wiki 页、96 个同名资源目录及 backups 全 ZIP 约束均通过结构检查，旧 `_unclassified` 路径残留为 0。
+
+## 2026-07-12 — CTF Skills 全量复核与边界优化
+
+- 按用户要求再次调用 `skill-creator` 对全部 CTF skills 做基线快照、并行审查、触发评测和结构验收；当前为 14 个正式方向专项 skill，加 `ctf-solve-challenge` 调度层与 `ctf-writeup` 输出层，共 16 个。用户手动删除的 `_ctf-solve-challenge-workspace` 与 `ctf-solve-challenge/evals` 未被重新创建。
+- 修改前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ctf-skills-full-optimization-20260711-235247.zip`，共 160 个条目、582,344 bytes，包含当时 16 个 `SKILL.md` 与 active wiki/root 元数据。
+- 统一重写 16 个 skill 的 frontmatter `description`：每项都同时给出正向触发条件、隐式触发信号和高频相邻方向排除项；重点消除 Malware/Reverse、Web/AI-ML、Forensics/Stego/Malware、Pwn/Pentest、Web/Blockchain/Cloud/Mobile、OSINT/Crypto 的过触发与欠触发。
+- 优化 15 个 skill 的执行正文：`ctf-solve-challenge` 补齐 Hermes、`ctf-tools`、Sage 与 RsaCtfTool 的权威调用层；Pwn 按 native、kernel、jail、restricted shell 和 runtime sandbox 分支首检；Cloud、Blockchain、AI/ML、Pentest 与 Hardware 增加外部状态、未知模型、扫描范围和真实设备安全边界；其余专项补齐高频 pivot、共享 tooling 关系和知识页直链。`ctf-osint` 正文保持精简，仅通过 description 收紧“必须依赖外部公开来源”的触发条件。
+- 同步校准 9 个 wiki 页面中的实际工具状态与共享 skill metadata：FactorDB 以 Web/API 为默认、MCP 仅在当前 callable 时使用；Burp MCP 已配置但当前不可调用，Web 首轮以 `curl` 建立 baseline；`pycdc` 使用 `/home/kali/pycdc/build/pycdc` 全路径；GDB+pwndbg 版本修正为 17.2；当前 PDF 工具以 `mutool` 为主，`pdfinfo`、`pdftotext`、`pdfimages` 标记为未安装并提供替代路径；Ghidra MCP 要求先检查活动实例。
+- 触发评测先发现并剔除了一轮方法无效的 51 项结果：该轮把 `expected` 字段暴露给评审，不能作为证据。随后将提示与答案键物理隔离，完成 51 项典型题面和 54 项相邻方向边界的两组盲测；优化前后均为 105/105，说明没有路由回归。新版平均置信度分别由 0.9896 提升到 0.9978、由 0.9861 提升到 0.9989；本轮收益主要是把原本隐含的正确判断显式化，并修复正文与工具事实，而不是虚构准确率增益。
+- `skill-creator` 的 `quick_validate.py` 对 16 个 skill 全部通过；检查 19 个 skill Markdown 中 116 处知识库/相对链接、138 个 active wiki 页的 4,908 处本地链接与 raw 路径，断链为 0；14 个正式路由齐全，wiki type 与 `skills:` 引用合法，138 页全部被 index 覆盖，raw 仍为 14 个正式方向加 `_unclassified`，backups 仍全部为 ZIP，`git diff --check` 通过。
+- 本轮未修改 raw 正文或 raw 物理结构。盲测、基线快照与静态审阅页只写入 `%TEMP%/ctf-skill-optimization-20260711-235247`；复核完成后已删除该目录共 71 个临时条目，skills 目录内没有遗留 eval/workspace。
+
+## 2026-07-11 — CTF Skills 十四方向同步与 Misc 退役
+
+- 将执行层补齐为与 raw 正式方向一一对应的 14 个专项 skill：新增 `ctf-stego`、`ctf-mobile`、`ctf-blockchain`、`ctf-hardware-embedded`、`ctf-cloud-infra`；继续保留 `ctf-solve-challenge` 调度层和 `ctf-writeup` 输出层，共 16 个 `ctf-*` skill。
+- 先迁移再退役 `ctf-misc`：普通表示层编码进入 Crypto，隐藏载荷与隐蔽信道进入 Stego，RF/总线/侧信道进入 Hardware/Embedded，语言 jail 按执行边界进入 Pwn/Web/Reverse，Kubernetes/RBAC 与 CI/CD 进入 Cloud/Infra；纯规则或证据不足的题继续留在 `ctf-solve-challenge`，不伪造专项方向。
+- 收紧相邻方向触发边界：APK/IPA 只有平台组件、权限、IPC 或沙箱语义主导时进入 Mobile；普通 APK 算法仍归 Reverse。固件只有物理接口、总线、RF、侧信道或启动链主导时进入 Hardware/Embedded；普通固件逻辑归 Reverse，利用原语归 Pwn。普通 dApp/云上 Web 漏洞仍归 Web；链上状态与合约语义归 Blockchain，云身份与控制面归 Cloud/Infra。
+- `ctf-solve-challenge` 的首轮表扩展为 14 个正式方向，并把 cross-category 明确为“继续收集最小证据”的调度状态；删除 `ctf-misc` 目录。为降低直接请求 Python/JS/shell jail 时的欠触发风险，`ctf-pwn` description 同步加入语言 jail、restricted shell 与 language sandbox escape。
+- 同步 active wiki 的 `skills:` 元数据和方向入口；将 `misc-cross-category-triage-family.md` 重命名为 `cross-category-triage-family.md`，将 `misc-tooling.md` 重命名并改写为 `cross-category-tooling.md`。active wiki 与 `index.md` 不再含 `ctf-misc` 或旧页面链接；`log.md` 中旧记录保持历史原貌。
+- 按 `skill-creator` 流程在 `ctf-solve-challenge/evals/evals.json` 保存 15 个相邻边界回归用例，并生成静态评审页 `C:/Users/LMY/.agents/skills/_ctf-solve-challenge-workspace/routing-review.html`。独立复核发现原第 3 项把 DNS label 隐蔽信道误写成 Forensics，修正为 Stego 后 15 项、60 个断言全部通过；该测试只验证路由和边界，不冒充真实解题或自动触发率基准。
+- 修改前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ctf-skills-14-directions-20260711-215607.zip`，共 157 个条目、569,032 bytes，包含当时 12 个 CTF skill 及全部 active wiki/root 元数据。
+- 本轮未修改 raw 正文或 raw 物理结构。最终校验：16 个 skill 目录齐全且 frontmatter name 一致；14 个正式方向在总分流表中无缺项；138 个 wiki 页 type 合法、全部被 index 覆盖、frontmatter 不含不存在的 skill；检查 3,625 个非代码块 active 本地链接与 85 个 skill wiki/index 直链，断链均为 0；`git diff --check` 通过。

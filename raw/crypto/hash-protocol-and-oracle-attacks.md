@@ -88,13 +88,29 @@ new_hash, new_data = hashpumpy.hashpump(
 )
 ```
 
-**关键结论：** Merkle-Damgard hashes (MD5, SHA-1, SHA-256) process data in blocks, and the hash output IS the internal state. Given `H(secret || msg)`, you can compute `H(secret || msg || padding || extension)` without knowing `secret` — just initialize the hash state from the known output and continue hashing. Only HMAC (`H(K XOR opad || H(K XOR ipad || msg))`) is immune. If the secret length is unknown, try lengths 1-32.
+```python
+# Python: hlextend
+import hlextend
+
+for secret_length in range(1, 33):
+    sha = hlextend.new("sha256")
+    forged_data = sha.extend(
+        b";admin=true",
+        b"original_data",
+        secret_length,
+        original_hash,
+    )
+    forged_hash = sha.hexdigest()
+    # Submit forged_data together with forged_hash and stop on success.
+```
+
+**关键结论：** Merkle-Damgard hashes (MD5, SHA-1, SHA-256) process data in blocks, and the hash output IS the internal state. Given `H(secret || msg)`, you can compute `H(secret || msg || padding || extension)` without knowing `secret` — just initialize the hash state from the known output and continue hashing. HMAC (`H(K XOR opad || H(K XOR ipad || msg))`) and sponge-based SHA-3 do not expose the continuation state required by this attack. If the secret length is unknown, try a bounded range such as 1-32 and verify each forged pair against the service.
 
 ---
 
 ### Hash Length Extension Attack
 
-Exploits Merkle-Damgard hashes (`hash(SECRET || user_data)`) — append arbitrary data and compute valid hash without knowing the secret. Use `hashpump` or `hashpumpy`. See hash-protocol-and-oracle-attacks.md.
+Exploits Merkle-Damgard hashes (`hash(SECRET || user_data)`) — append arbitrary data and compute valid hash without knowing the secret. Use `hashpump`, `hashpumpy`, or `hlextend`; do not apply this workflow to HMAC or SHA-3. See hash-protocol-and-oracle-attacks.md.
 
 
 ---

@@ -29,6 +29,7 @@ status: archived
   - [Common VM Patterns](#common-vm-patterns)
   - [RVA-Based Opcode Dispatching](#rva-based-opcode-dispatching)
   - [State Machine VMs (90K+ states)](#state-machine-vms-90k-states)
+  - [XSLT-Encoded Stack VM and Comparison-Only Binary Search (35C3 2018)](#xslt-encoded-stack-vm-and-comparison-only-binary-search-35c3-2018)
   - [Custom VM Reverse Engineering via Fuzzing and Instruction Set Discovery (hxp CTF 2017)](#custom-vm-reverse-engineering-via-fuzzing-and-instruction-set-discovery-hxp-ctf-2017)
   - [迁移速查：VM 分析提示](#迁移速查vm-分析提示)
 - [Anti-Debugging Techniques](#anti-debugging-techniques)
@@ -121,6 +122,29 @@ while (!agenda.isEmpty()) {
 ```
 
 **关键结论：** Custom VMs appear when the challenge bundles a bytecode blob alongside a dispatcher loop. Reverse the opcode switch table first, then write a disassembler to lift the bytecode before attempting to understand the algorithm.
+
+### XSLT-Encoded Stack VM and Comparison-Only Binary Search (35C3 2018)
+
+35C3 Juggle 把 VM 写在 XSLT 中：`course` 表示基本块，`plate` 中的元素选择指令，递归调用命名 template 推进程序计数，`drinks` 节点集承担栈。虽然载体是 XML/XSLT，决定性工作仍是恢复指令语义、控制流和栈模型，再写 assembler/emulator 生成可执行输入。
+
+当指令集只暴露“大于”比较时，仍可以合成 lower-bound 风格的二分搜索：
+
+```python
+low = 0
+high = 1 << 32
+while high > low:
+    middle = (low + high) >> 1
+    if middle + 1 > secret:
+        high = middle
+    else:
+        low = middle + 1
+```
+
+每轮比较泄漏一 bit 量级的信息，`32` 位目标只需约 `32` 次分支。实现时应先在本地 emulator 中验证栈深、跳转目标和边界条件，再由 assembler 输出最终 XML，避免直接对远端调试 Unicode、标签或栈错误。
+
+**关键结论：** 模板语言只要具备命名递归、条件分支和可累积状态，就可能充当 VM。先恢复其 ISA；缺失的算术或比较原语再用现有指令合成，不要因载体是 XSLT 就把问题误判成普通 Web 注入。
+
+**参考：** 35C3 CTF 2018 — Juggle, writeups 12803, 12908
 
 ### Custom VM Reverse Engineering via Fuzzing and Instruction Set Discovery (hxp CTF 2017)
 

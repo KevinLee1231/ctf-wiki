@@ -1,5 +1,7 @@
 # Web and DNS OSINT
 
+> 动态字体 CAPTCHA 的主要障碍是页面生成、字体解析与提交自动化，相关材料已迁至 [captcha-font-and-browser-automation.md](../web/captcha-font-and-browser-automation.md)。
+
 ## Table of Contents
 - [Google Dorking](#google-dorking)
   - [补充要点](#补充要点)
@@ -22,7 +24,6 @@
   - [Fake Service Banner Detection](#fake-service-banner-detection)
 - [Git Commit Author Mining for Credentials (Hackover 2018)](#git-commit-author-mining-for-credentials-hackover-2018)
 - [.DS_Store Directory Enumeration with Python-dsstore (35C3 2018)](#ds_store-directory-enumeration-with-python-dsstore-35c3-2018)
-- [TTF Glyph Contour Diffing for Obfuscated CAPTCHA (Square CTF 2018)](#ttf-glyph-contour-diffing-for-obfuscated-captcha-square-ctf-2018)
 - [Cross-Challenge Container IP Reuse (RITSEC 2018)](#cross-challenge-container-ip-reuse-ritsec-2018)
 - [Web / DNS OSINT 速查技巧族：公开索引、历史快照与仓库痕迹](#web-dns-osint-速查技巧族公开索引历史快照与仓库痕迹)
   - [Resources](#resources)
@@ -352,20 +353,6 @@ python3 -m dsstore .DS_Store
 **关键结论：** `.DS_Store` is generated automatically by macOS and often pushed to production by accident. It exposes filenames, not contents, but that is enough to find hidden admin panels, backup files, and uploaded flags.
 
 **参考：** 35C3 CTF 2018 — McDonald, writeup 12763
-
----
-
-## TTF Glyph Contour Diffing for Obfuscated CAPTCHA (Square CTF 2018)
-
-```bash
-ttx -t glyf -g -d glyph_out font.ttf
-# glyph_out/font.glyf/<glyph_name>.ttx holds contour XML
-diff glyph_out/font.glyf/zero.ttx reference/zero.ttx
-```
-
-**关键结论：** Visual CAPTCHAs that rely on custom fonts are trivially defeatable because the glyph *shapes* are invariant under cmap remapping. Build the reference once from any standard font and reuse it across every challenge variant.
-
-**参考：** Square CTF 2018 — C8, writeup 12161
 
 ---
 

@@ -17,6 +17,7 @@
 - [RDP Session Decryption via Extracted PKCS12 Key (HITB 2017)](#rdp-session-decryption-via-extracted-pkcs12-key-hitb-2017)
 - [RADIUS Shared Secret Cracking (UConn CyberSEED 2017)](#radius-shared-secret-cracking-uconn-cyberseed-2017)
 - [RC4 Stream Identification in Shellcode PCAP (CODE BLUE 2017)](#rc4-stream-identification-in-shellcode-pcap-code-blue-2017)
+- [SMS PDU Decoding and Concatenated-Message Reassembly (RuCTF 2013)](#sms-pdu-decoding-and-concatenated-message-reassembly-ructf-2013)
 
 ---
 
@@ -544,6 +545,49 @@ plaintext = rc4(key, ciphertext)
 ```
 
 **关键结论：** RC4 in shellcode is identifiable by the 256-byte permutation table initialization loop (KSA). The key is typically the first N bytes transmitted over the connection before encrypted data begins. Look for a fixed-length initial burst followed by encrypted traffic.
+
+---
+
+## SMS PDU Decoding and Concatenated-Message Reassembly (RuCTF 2013)
+
+An intercepted text file may contain one hexadecimal GSM SMS PDU per line. Treat it as protocol evidence: parse the SMSC/TPDU fields, locate the User Data Header (UDH), order concatenated parts by their sequence number, and only then decode the combined payload.
+
+For the common 8-bit concatenation information element, UDH bytes have the form `05 00 03 RR TT SS`: header length 5, IEI `00`, reference `RR`, total-part count `TT`, and one-based sequence `SS`. A 16-bit reference uses IEI `08`, so fixed character offsets are only a challenge-specific fallback.
+
+```python
+import base64
+from smspdu import SMS_SUBMIT
+
+pdus = [line.strip() for line in open('sms_intercept.txt') if line.strip()]
+
+def challenge_sequence(pdu_hex):
+    # RuCTF 2013 capture-specific offset after confirming UDH in a hex dump.
+    # Do not reuse this offset until the actual TPDU/UDH layout is verified.
+    return int(pdu_hex[38:40], 16)
+
+parts = []
+for pdu in sorted(pdus, key=challenge_sequence):
+    # The first octet is the SMSC-length field in this capture.
+    sms = SMS_SUBMIT.fromPDU(pdu[2:], '')
+    data = sms.user_data
+    if isinstance(data, str):
+        data = data.encode()
+    parts.append(data)
+
+joined = b''.join(parts)
+with open('reassembled.bin', 'wb') as stream:
+    stream.write(joined)
+
+# If the reassembled stream is Base64 text, decode the embedded artifact.
+try:
+    artifact = base64.b64decode(joined, validate=True)
+except ValueError:
+    artifact = joined
+with open('artifact.bin', 'wb') as output:
+    output.write(artifact)
+```
+
+`0041000B91` can identify an SMS-SUBMIT sample with a particular address layout, but it is not a universal file signature. Verify the TPDU type and UDH bit instead of matching one prefix. If the recovered artifact is an image and the challenge then asks for a real-world identity, reverse-image search is a later OSINT pivot; PDU parsing and reassembly remain the forensic stage.
 
 ---
 

@@ -238,6 +238,27 @@ Java.perform(function() {
 3. Build timing model for each action type (how many clock cycles each operation takes)
 4. Work backward from required history values to construct the correct input sequence
 
+### Translate Combinational HDL to an Executable Model
+
+For small combinational modules, preserve bit widths and translate each wire expression directly before modeling the full state machine. For example:
+
+```verilog
+wire [3:0] wire_a = input_byte[7:4];
+wire [3:0] wire_b = input_byte[3:0];
+assign out = wire_a ^ wire_b;
+```
+
+becomes:
+
+```python
+def verilog_module(input_byte):
+    wire_a = (input_byte >> 4) & 0xF
+    wire_b = input_byte & 0xF
+    return wire_a ^ wire_b
+```
+
+Mask after every fixed-width arithmetic operation, distinguish blocking from non-blocking assignments, and update sequential state only on the modeled clock edge. This prevents Python's unbounded integers and immediate assignment semantics from silently changing HDL behavior.
+
 **Timing model construction:**
 ```python
 # Map each action to its cycle count (determined from Verilog state machines)

@@ -8,6 +8,7 @@
 - [Kasiski Examination for Key Length](#kasiski-examination-for-key-length)
 - [XOR Variants](#xor-variants)
   - [Multi-Byte XOR Key Recovery via Frequency Analysis](#multi-byte-xor-key-recovery-via-frequency-analysis)
+  - [Repeating-Key XOR Recovery from a Known Prefix](#repeating-key-xor-recovery-from-a-known-prefix)
   - [Cascade XOR (First-Byte Brute Force)](#cascade-xor-first-byte-brute-force)
   - [XOR with Rotation: Power-of-2 Bit Isolation (Pragyan 2026)](#xor-with-rotation-power-of-2-bit-isolation-pragyan-2026)
   - [Weak XOR Verification Brute Force (Pragyan 2026)](#weak-xor-verification-brute-force-pragyan-2026)
@@ -239,6 +240,34 @@ print(bytes(c ^ key[i % len(key)] for i, c in enumerate(ct)))
 ```
 
 **关键结论：** Multi-byte repeating XOR splits into `key_length` independent single-byte XOR problems. English text frequency (especially space = 0x20) reliably identifies correct key bytes. Works best with ciphertext longer than ~100 bytes.
+
+### Repeating-Key XOR Recovery from a Known Prefix
+
+When a short ciphertext is decoded from another carrier, frequency analysis may be ineffective. A known flag prefix gives the corresponding repeating-key bytes directly because `key[i] = ciphertext[i] XOR plaintext[i]`.
+
+```python
+def recover_key_fragment(ciphertext, known_prefix):
+    return bytes(c ^ p for c, p in zip(ciphertext, known_prefix))
+
+def shortest_repeating_period(fragment):
+    for period in range(1, len(fragment) + 1):
+        if all(fragment[i] == fragment[i % period]
+               for i in range(len(fragment))):
+            return fragment[:period]
+    return fragment
+
+ct = bytes.fromhex(decoded_qr_hex)
+known = b'pctf{'                 # replace with the event's confirmed flag prefix
+fragment = recover_key_fragment(ct, known)
+key = shortest_repeating_period(fragment)
+
+# Only decrypt the full text once the observed fragment covers and confirms
+# a complete key period. Otherwise collect more known plaintext first.
+pt = bytes(byte ^ key[i % len(key)] for i, byte in enumerate(ct))
+print(pt)
+```
+
+Do not begin by blindly guessing keys such as `flag` or the event name. Derive bytes from confirmed plaintext, test whether they actually repeat, and validate the result against syntax and printable structure. In binary-grid-to-QR challenges, first render and decode the QR as described in [image-bitplane-qr-and-jpeg-stego.md](../stego/image-bitplane-qr-and-jpeg-stego.md), then apply this step to the recovered ciphertext.
 
 ### Cascade XOR (First-Byte Brute Force)
 

