@@ -1,26 +1,33 @@
 ---
 type: family
-tags: [misc, family, encoding, file-format, unicode, barcode, signal]
-skills: [ctf-misc, ctf-forensics]
+tags: [cross-category, family, encoding, file-format, unicode, barcode, signal, parser]
+skills: [ctf-crypto, ctf-forensics, ctf-reverse, ctf-pwn]
 raw:
-  - ../raw/misc/exotic-encodings-and-file-formats.md
-updated: 2026-06-12
+  - ../raw/crypto/encodings-qr-and-esolangs.md
+  - ../raw/crypto/classical-xor-and-substitution-ciphers.md
+  - ../raw/reverse/android-games-hardware-and-runtime-platforms.md
+  - ../raw/forensics/network-covert-auth-and-reassembly.md
+  - ../raw/stego/video-document-and-media-stego.md
+  - ../raw/stego/audio-frequency-and-archive-stego.md
+  - ../raw/stego/image-bitplane-qr-and-jpeg-stego.md
+  - ../raw/pwn/oob-jit-parser-primitives.md
+updated: 2026-07-11
 ---
 
 # Exotic Encodings and File Formats
 
 ## 作用边界
 
-本页是异常编码、低频文件格式和结构化数据清洗 family 页。它处理的不是普通 Base/hex/ROT，而是 Verilog/HDL、Gray code、二叉树编码、RTF 自定义 tag、SMS PDU、UTF-9、像素颜色编码、MaxiCode、DTMF、音乐音程、二进制网格和语言运行时格式滥用等边界题。
+本页是异常编码、低频文件格式和结构化数据清洗的跨方向 family 页。它处理的不是普通 Base/hex/ROT，而是 Verilog/HDL、Gray code、二叉树编码、RTF 自定义 tag、SMS PDU、UTF-9、像素颜色编码、MaxiCode、DTMF、音乐音程、二进制网格和语言运行时格式滥用等边界信号。
 
-它与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 的关系是上下游：普通可逆编码、QR、Unicode 首检先看编码 family；一旦证据指向特定文件/协议/信号格式或非标准解析器，就转到本页。
+它与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 的关系是上下游：普通可逆编码、QR、Unicode 首检先看编码 family；一旦证据指向特定文件、协议、信号、HDL 或非标准解析器，就在本页判断应转 Crypto、Stego、Forensics、Reverse 还是 Pwn。
 
 ## 识别信号
 
 - 数据看似文本，但包含 RTF 控制字、PDU header、UTF-9、Unicode 变体、固定宽度数字、HDL 逻辑或非标准 barcode。
 - 图片/音频不是隐写算法本身，而是颜色、音调、音程、网格或条码格式承载比特。
 - 解码需要先恢复结构字段、排序、端序、块长、版本或格式规范，而不是直接 CyberChef 多层尝试。
-- 出现语言/库解析差异，例如 Ruby `Array#unpack` 这类格式字符串导致的越界读取。
+- 出现语言/库解析差异，例如 Ruby `String#unpack` 格式字符串导致的越界读取。
 
 ## 最小证据
 
@@ -34,16 +41,19 @@ updated: 2026-06-12
 | 证据形态 | 首轮判断 | 下一跳 |
 |---|---|---|
 | Base/hex/ROT/普通 Unicode/QR 首检 | 先在轻量编码 family 中确认不是常规可逆链 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
-| Verilog/HDL、逻辑门、状态机 | 先把组合/时序逻辑翻译成可跑模型，再从输入输出关系恢复 bit | [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
-| Gray code、二叉树路径、TOPKEK 这类自定义映射 | 先确定码表、遍历顺序和旋转/偏移，再做逆映射 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
-| RTF tag、SMS PDU、UTF-9、结构化文本格式 | 先按规范拆字段和排序，再提取 payload 或嵌入文件 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
-| 像素颜色编码、二进制网格、QR 拼装、MaxiCode | 先恢复网格尺寸、模块形状和坐标，再转图像/条码解码 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
-| DTMF、多按键键盘、音乐音程 | 先提取频率/音符序列，再转键盘映射或音程编码 | [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md) |
-| Ruby `Array#unpack` 或库解析差异 | 先确认格式字符串语义和越界读取边界，再判断是否转 Web/Pwn/Reverse | [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md), [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) |
+| Verilog/HDL、逻辑门、状态机 | 若目标是恢复 HDL 行为，先按位宽、时钟边沿和赋值语义建立可运行模型 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
+| Gray code、二叉树路径、UTF-9、TOPKEK、MaxiCode | 信息存在性公开，先确定格式、码表、遍历顺序和偏移，再做逆映射 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| RTF unknown destination、自定义 tag | 查看器忽略的字段承载隐藏数据，保留原始控制字并按编号重组 | [video-document-and-media-stego.md](video-document-and-media-stego.md) |
+| SMS PDU、UDH、分片消息 | 按 TPDU/UDH 字段解析并按序号重组证据流 | [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) |
+| 像素行直接映射字符、十六进制数独、普通条码 | 载体只是显式编码，按尺寸、码表和约束恢复 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| 二进制网格需渲染、QR 块需重排、像素位平面藏第二载荷 | 先恢复隐藏矩阵、极性、方向和模块结构 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
+| DTMF 数字再映射多按键字符 | 保留停顿分组；音频提取完成后按公开键盘码表逆映射 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| 音符/音程隐蔽承载 nibble | 先提取音符序列，再用 known prefix 校准音阶映射 | [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md) |
+| Ruby `String#unpack` 或类似解析器越界 | 确认攻击者是否控制格式字符串、运行时是否受影响以及能否形成读取原语 | [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md) |
 
 ## 合并与拆分结论
 
-本页应保留为 family，不并入 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)。后者负责轻量编码和 QR/esolang 首轮判断，本页负责需要格式规范、字段清洗、信号映射或解析器语义的低频格式。当前也不拆小页，因为每个格式 raw 数量不足，拆分会只剩孤立案例。
+原始混合综述已经按决定性主障碍拆入 Crypto、Stego、Forensics、Reverse 和 Pwn 的现有 raw 资料卷。本页继续保留为 family，不与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 合并：编码页负责可逆表示本身，本页负责从异常载体或格式信号判断下一方向。这里保留的是跨方向 pivot，而不是物理兜底分类。
 
 ## 常见陷阱
 
@@ -56,20 +66,26 @@ updated: 2026-06-12
 ## 关联技巧
 
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
-- [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
+- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
+- [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
+- [video-document-and-media-stego.md](video-document-and-media-stego.md)
 - [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
 - [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md)
-- [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
-- [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
-- [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
-- [misc-tooling.md](misc-tooling.md)
+- [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
 
 ## 来自 WP 的案例索引
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [NCTF2026-what-a-mess-wp](../raw/misc/NCTF2026-what-a-mess-wp.md) | 表格字段被 Unicode、全角、零宽字符和格式变体污染，先做规范化、白名单和校验位统计。 |
+| [NCTF2026-what-a-mess-wp](../raw/stego/NCTF2026-what-a-mess-wp.md) | 本库按 Stego 边界案例归档：Unicode、全角、零宽字符和格式变体用于掩饰记录语义；首轮仍应先做规范化、白名单和校验位统计。 |
 
 ## 原始资料
 
-- [exotic-encodings-and-file-formats.md](../raw/misc/exotic-encodings-and-file-formats.md)
+- 编码与显式格式：[encodings-qr-and-esolangs.md](../raw/crypto/encodings-qr-and-esolangs.md)
+- known-prefix XOR：[classical-xor-and-substitution-ciphers.md](../raw/crypto/classical-xor-and-substitution-ciphers.md)
+- Verilog/HDL：[android-games-hardware-and-runtime-platforms.md](../raw/reverse/android-games-hardware-and-runtime-platforms.md)
+- SMS PDU：[network-covert-auth-and-reassembly.md](../raw/forensics/network-covert-auth-and-reassembly.md)
+- RTF 文档隐写：[video-document-and-media-stego.md](../raw/stego/video-document-and-media-stego.md)
+- 音频与音乐音程：[audio-frequency-and-archive-stego.md](../raw/stego/audio-frequency-and-archive-stego.md)
+- 二进制网格与 QR 恢复：[image-bitplane-qr-and-jpeg-stego.md](../raw/stego/image-bitplane-qr-and-jpeg-stego.md)
+- Ruby `String#unpack` 越界读取：[oob-jit-parser-primitives.md](../raw/pwn/oob-jit-parser-primitives.md)

@@ -4,10 +4,10 @@ tags: [osint, family, account-correlation, public-media]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/social-media.md
-  - ../raw/osint/SU_CyberTrackWP.md
-  - ../raw/misc/RCTF2025-speak-softly-love-wp.md
-  - ../raw/misc/RCTF2025-wanna-feel-love-wp.md
-  - ../raw/misc/SU_SigninWP.md
+  - ../raw/osint/SUCTF2026-CyberTrackWP.md
+  - ../raw/osint/RCTF2025-speak-softly-love-wp.md
+  - ../raw/osint/RCTF2025-wanna-feel-love-wp.md
+  - ../raw/osint/SUCTF2026-SigninWP.md
 updated: 2026-07-06
 ---
 
@@ -75,15 +75,15 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [SU_CyberTrackWP](../raw/osint/SU_CyberTrackWP.md) | 博客、GitHub commit、邮箱头像、Minecraft 历史昵称、社交平台和 Discord 需要按身份节点闭合证据链。 |
-| [RCTF2025-speak-softly-love-wp](../raw/misc/RCTF2025-speak-softly-love-wp.md) | 音乐视频、个人主页、音频文件、SVN 和 gopher 页面串联时，先保存每个公开 URL 和时间线。 |
-| [RCTF2025-wanna-feel-love-wp](../raw/misc/RCTF2025-wanna-feel-love-wp.md) | 多阶段 OSINT 可同时包含隐写、媒体元数据、购买记录和墓碑信息，避免只按音频题处理。 |
-| [SU_SigninWP](../raw/misc/SU_SigninWP.md) | 签到题给公开团队页面时，应先检查 CTFtime/主页等公开资料里的 flag-like 字符串。 |
+| [SUCTF2026-CyberTrackWP](../raw/osint/SUCTF2026-CyberTrackWP.md) | 博客、GitHub commit、邮箱头像、Minecraft 历史昵称、社交平台和 Discord 需要按身份节点闭合证据链。 |
+| [RCTF2025-speak-softly-love-wp](../raw/osint/RCTF2025-speak-softly-love-wp.md) | 音乐视频、个人主页、音频文件、SVN 和 gopher 页面串联时，先保存每个公开 URL 和时间线。 |
+| [RCTF2025-wanna-feel-love-wp](../raw/osint/RCTF2025-wanna-feel-love-wp.md) | 多阶段 OSINT 可同时包含隐写、媒体元数据、购买记录和墓碑信息，避免只按音频题处理。 |
+| [SUCTF2026-SigninWP](../raw/osint/SUCTF2026-SigninWP.md) | 签到题给公开团队页面时，应先检查 CTFtime/主页等公开资料里的 flag-like 字符串。 |
 
 ## 原始资料
 
 - [social-media.md](../raw/osint/social-media.md)
-- [SU_CyberTrackWP](../raw/osint/SU_CyberTrackWP.md)
-- [RCTF2025-speak-softly-love-wp](../raw/misc/RCTF2025-speak-softly-love-wp.md)
-- [RCTF2025-wanna-feel-love-wp](../raw/misc/RCTF2025-wanna-feel-love-wp.md)
-- [SU_SigninWP](../raw/misc/SU_SigninWP.md)
+- [SUCTF2026-CyberTrackWP](../raw/osint/SUCTF2026-CyberTrackWP.md)
+- [RCTF2025-speak-softly-love-wp](../raw/osint/RCTF2025-speak-softly-love-wp.md)
+- [RCTF2025-wanna-feel-love-wp](../raw/osint/RCTF2025-wanna-feel-love-wp.md)
+- [SUCTF2026-SigninWP](../raw/osint/SUCTF2026-SigninWP.md)

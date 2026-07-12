@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, pwn, family, vm, z3, sandbox, game, constraints]
-skills: [ctf-misc, ctf-pwn]
+tags: [cross-category, reverse, pwn, cloud-infra, family, vm, z3, sandbox, game, constraints]
+skills: [ctf-solve-challenge, ctf-reverse, ctf-pwn, ctf-cloud-infra, ctf-crypto]
 raw:
-  - ../raw/misc/vm-z3-sandbox-and-game-basics.md
+  - ../raw/pwn/vm-z3-sandbox-and-game-basics.md
   - ../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md
   - ../raw/pwn/D3CTF2019-babyrop-wp.md
 updated: 2026-07-06
@@ -13,7 +13,7 @@ updated: 2026-07-06
 
 ## 作用边界
 
-本页是 Misc 中“规则系统” family，用于处理小型 VM/解释器、WASM/Roblox/游戏资源、PyInstaller/marshal、Z3/约束求解、Kubernetes/RBAC、浮点精度、Lua/Ruby/Python sandbox 和自定义汇编器过滤等题型。
+本页是跨方向“规则系统” family，用于处理小型 VM/解释器、WASM/Roblox/游戏资源、PyInstaller/marshal、Z3/约束求解、Kubernetes/RBAC、浮点精度、Lua/Ruby/Python sandbox 和自定义汇编器过滤等题型。
 
 它只承担首轮分流：如果主要任务是逆向复杂 VM 或字节码，转 Reverse family；如果已经形成内存破坏 primitive，转 Pwn；如果是真实内网/容器提权，转 Pentest。
 
@@ -28,7 +28,7 @@ updated: 2026-07-06
 - 明确规则载体：WASM、Python bytecode、marshal、游戏资源、逻辑门网络、YARA 条件、K8s API、浮点计算、VM opcode 或 sandbox 语言。
 - 定义输入、状态、转移和胜利条件；不要只描述“像游戏”或“像 VM”。
 - 对 patch 路线，先确认校验点和可改字段；对 Z3 路线，先确认变量域和约束规模；对 sandbox 路线，先确认可用 API 和过滤阶段。
-- 如果出现读写/执行 primitive，要说明是否已经超出 Misc，是否应 pivot 到 Pwn/Reverse/Pentest。
+- 如果出现读写/执行 primitive，要说明应 pivot 到 Pwn 还是 Reverse；如果出现 ServiceAccount/RBAC/控制面能力则 pivot 到 Cloud/Infra，不能继续停留在跨方向状态。
 
 ## 首轮路由
 
@@ -52,14 +52,14 @@ updated: 2026-07-06
 | [D3CTF2019-ancient-game-v2-wp](../raw/reverse/D3CTF2019-ancient-game-v2-wp.md) | OISC/NAND 自定义 VM 实现数独约束，先抽取不跳 wrong 的控制流约束再交给 solver。 | 跨页补入 |
 | [HGAME2026-看不懂的华容道-wp](../raw/reverse/HGAME2026-看不懂的华容道-wp.md) | VMP 包裹的华容道状态反馈可转成约束和 BFS，先恢复棋盘、碰撞指纹和最短路径。 | 跨页补入 |
 | [RCTF2025-onion-wp](../raw/reverse/RCTF2025-onion-wp.md) | 自定义 VM 有 PC/HIPC/LOTAG/HITAG/虚拟栈和 50 个 64-bit 输入；先实现反汇编/解释器，再把每个 check 自动逆算。 | 跨页补入 |
-| [SU_easygalWP](../raw/reverse/SU_easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | 跨页补入 |
-| [SU_WestWP](../raw/reverse/SU_WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | 跨页补入 |
+| [SUCTF2026-easygalWP](../raw/reverse/SUCTF2026-easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | 跨页补入 |
+| [SUCTF2026-WestWP](../raw/reverse/SUCTF2026-WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | 跨页补入 |
 | [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 | 跨页补入 |
 
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 横跨游戏 patch、Python 包/字节码、约束求解、K8s、浮点、sandbox 和 VM opcode，单一 technique 无法准确概括。
-- 不并入 [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)：总 triage 只决定是否进入本页，本页负责规则系统内部二级分流。
+- 不并入 [cross-category-triage-family.md](cross-category-triage-family.md)：总 triage 只决定是否进入本页，本页负责规则系统内部二级分流。
 - 不拆 Z3、WASM、K8s 等小页：当前 raw 多为短案例集合，拆分后容易形成弱页；后续高频路线再独立成 technique。
 
 ## 常见陷阱
@@ -72,7 +72,7 @@ updated: 2026-07-06
 
 ## 关联技巧
 
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 - [game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md)
 - [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)
 - [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
@@ -83,6 +83,6 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [vm-z3-sandbox-and-game-basics.md](../raw/misc/vm-z3-sandbox-and-game-basics.md)
+- [vm-z3-sandbox-and-game-basics.md](../raw/pwn/vm-z3-sandbox-and-game-basics.md)
 - [WMCTF2025-wm-eat-some-qanux-wp](../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md)
 - [D3CTF2019-babyrop-wp](../raw/pwn/D3CTF2019-babyrop-wp.md)

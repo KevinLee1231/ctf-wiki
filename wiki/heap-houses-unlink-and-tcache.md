@@ -50,7 +50,7 @@ updated: 2026-07-06
 | [HGAME2026-heap1sez-wp](../raw/pwn/HGAME2026-heap1sez-wp.md) | 自定义 malloc 注释掉 unlink 的 `fd/bk` 一致性检查，UAF 改 freed chunk 后走 unsafe unlink 和隐藏 `hook`。 |
 | [NCTF2026-ezheap-wp](../raw/pwn/NCTF2026-ezheap-wp.md) | 常规 IO 触发面被拿掉后仍可 largebin attack 改 `mp_.tcache_bins`，再用 tcache poisoning 做 AAR/AAW。 |
 | [Spirit2026-5-large-wp](../raw/pwn/Spirit2026-5-large-wp.md) | glibc 2.39 只给 largebin 尺寸堆块，UAF 泄露后用 largebin attack 改 `g_f`，绕过 SHSTK/IBT/GOT 路线。 |
-| [SU_minivfsWP](../raw/pwn/SU_minivfsWP.md) | VFS 风格接口背后是 glibc 2.41 largebin/off-by-null/overlap 堆利用，先稳定 libc/heap leak 和 chunk 布局。 |
+| [SUCTF2026-minivfsWP](../raw/pwn/SUCTF2026-minivfsWP.md) | VFS 风格接口背后是 glibc 2.41 largebin/off-by-null/overlap 堆利用，先稳定 libc/heap leak 和 chunk 布局。 |
 
 ## 合并与拆分结论
 

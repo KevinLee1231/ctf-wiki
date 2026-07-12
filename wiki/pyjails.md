@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, web, family, pyjail, sandbox, python, oracle]
-skills: [ctf-misc, ctf-web]
+tags: [pwn, web, reverse, family, pyjail, sandbox, python, oracle]
+skills: [ctf-pwn, ctf-web, ctf-reverse]
 raw:
-  - ../raw/misc/pyjails.md
+  - ../raw/pwn/pyjails.md
   - ../raw/web/WMCTF2025-guess-wp.md
 updated: 2026-07-06
 ---
@@ -46,7 +46,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 | 对应路线 |
 |---|---|---|
 | [WMCTF2025-guess-wp](../raw/web/WMCTF2025-guess-wp.md) | `eval(payload, {'__builtin__': {}})` 在 Python 3 中键名写错，且对象继承链仍可通过 `__subclasses__()` 找到函数 `__globals__['__builtins__']` 取回 `__import__`。 | builtins 恢复 + 对象链逃逸 |
-| [D3CTF2021-scientific-calculator-wp](../raw/misc/D3CTF2021-scientific-calculator-wp.md) | CPython audit hook 沙箱绑定精确版本，先记录允许 action、compile/exec 边界和公开资料缺口。 | 跨页补入 |
+| [D3CTF2021-scientific-calculator-wp](../raw/pwn/D3CTF2021-scientific-calculator-wp.md) | CPython audit hook 沙箱绑定精确版本，先记录允许 action、compile/exec 边界和公开资料缺口。 | 跨页补入 |
 | [D3CTF2023-escape-plan-wp](../raw/web/D3CTF2023-escape-plan-wp.md) | Python Web 沙箱过滤数字/字母，先用 Unicode 同形字符、len 和切片构造可执行表达式。 | 跨页补入 |
 | [LilacCTF2026-checkin-wp](../raw/web/LilacCTF2026-checkin-wp.md) | Python eval jail 经过 IDNA/正则过滤后仍保留 `vars()`、`dir()` 和可变 `LockedList`；原地 pop/append 修改状态。 | 跨页补入 |
 | [VNCTF2026-i-really-really-really-and-revenge-wp](../raw/web/VNCTF2026-i-really-really-really-and-revenge-wp.md) | Pyjail 封数字、字符串和 builtins 后，仍可用布尔造数、类元信息造字符串、`object.__subclasses__()` 找全局模块，并用异常外带。 | 跨页补入 |
@@ -55,7 +55,7 @@ updated: 2026-07-06
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖对象链、字符集构造、装饰器、f-string、oracle、audit hook、agent sandbox 和多版本差异，路线分叉明显。
-- 不拆成 `subclasses`、decorator、oracle 等小页：当前页面作为 ctf-misc 的 jail 二级入口更有查询价值；后续某一路线积累多篇 WP 再拆 technique。
+- 不拆成 `subclasses`、decorator、oracle 等小页：当前页面作为 Pwn/Web/Reverse 之间的 jail 二级入口更有查询价值；后续某一路线积累多篇 WP 再拆 technique。
 - 不并入 [bashjails.md](bashjails.md)：Python jail 的对象模型、命名空间和 bytecode 语义与 shell jail 不同。
 
 ## 常见陷阱
@@ -68,7 +68,7 @@ updated: 2026-07-06
 
 ## 关联技巧
 
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 - [bashjails.md](bashjails.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [python-vm-and-proc-sandbox-escape.md](python-vm-and-proc-sandbox-escape.md)
@@ -78,5 +78,5 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [pyjails.md](../raw/misc/pyjails.md)
+- [pyjails.md](../raw/pwn/pyjails.md)
 - [WMCTF2025-guess-wp](../raw/web/WMCTF2025-guess-wp.md)

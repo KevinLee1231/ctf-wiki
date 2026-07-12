@@ -4,8 +4,8 @@ tags: [forensics, filesystem, archive, recovery, known-plaintext, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/disk-recovery.md
-  - ../raw/misc/WMCTF2025-githacker-wp.md
-  - ../raw/misc/SU_chaosWP.md
+  - ../raw/forensics/WMCTF2025-githacker-wp.md
+  - ../raw/crypto/SUCTF2026-chaosWP.md
 updated: 2026-07-06
 ---
 
@@ -70,11 +70,11 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md) | `.png`/`.jpg` 高熵且大小规整时不要按图片隐写死磕；如果是 VeraCrypt 容器，改密码后的容器可通过同源旧容器卷头恢复旧密码访问。 |
-| [SU_chaosWP](../raw/misc/SU_chaosWP.md) | ZipCrypto 已知明文不只用常见 magic；AVIF/ISOBMFF 头部字段也能提供稳定明文窗口。 |
+| [WMCTF2025-githacker-wp](../raw/forensics/WMCTF2025-githacker-wp.md) | `.png`/`.jpg` 高熵且大小规整时不要按图片隐写死磕；如果是 VeraCrypt 容器，改密码后的容器可通过同源旧容器卷头恢复旧密码访问。 |
+| [SUCTF2026-chaosWP](../raw/crypto/SUCTF2026-chaosWP.md) | ZipCrypto 已知明文不只用常见 magic；AVIF/ISOBMFF 头部字段也能提供稳定明文窗口。 |
 
 ## 原始资料
 
 - [disk-recovery.md](../raw/forensics/disk-recovery.md)
-- [WMCTF2025-githacker-wp](../raw/misc/WMCTF2025-githacker-wp.md)
-- [SU_chaosWP.md](../raw/misc/SU_chaosWP.md)
+- [WMCTF2025-githacker-wp](../raw/forensics/WMCTF2025-githacker-wp.md)
+- [SUCTF2026-chaosWP.md](../raw/crypto/SUCTF2026-chaosWP.md)

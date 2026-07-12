@@ -1,14 +1,14 @@
 ---
 type: family
 tags: [reverse, family, hardware, isa, bootloader, kvm, firmware]
-skills: [ctf-reverse, ctf-pwn]
+skills: [ctf-hardware-embedded, ctf-reverse, ctf-pwn]
 raw:
   - ../raw/reverse/hardware-isa-bootloader-and-kvm.md
   - ../raw/pwn/WMCTF2025-aberration-wp.md
   - ../raw/pwn/ACTF2026-acpu-wp.md
   - ../raw/pwn/ACTF2026-amcu-wp.md
   - ../raw/reverse/LilacCTF2026-justrom-wp.md
-  - ../raw/misc/VNCTF2026-ez-iot-wp.md
+  - ../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md
 updated: 2026-07-06
 ---
 
@@ -55,7 +55,7 @@ updated: 2026-07-06
 | [ACTF2026-acpu-wp](../raw/pwn/ACTF2026-acpu-wp.md) | CPU 仿真器题可能是微架构语义差异而非内存破坏；非法 load 的 forwarding/cache side effect 是关键证据。 |
 | [ACTF2026-amcu-wp](../raw/pwn/ACTF2026-amcu-wp.md) | MCU 固件题要把串口、I2C、SRAM 和执行跳板放在同一个硬件状态模型里看。 |
 | [LilacCTF2026-justrom-wp](../raw/reverse/LilacCTF2026-justrom-wp.md) | ROM/ISA 题先确认架构端序、加载基址和 MMIO register，再复现加密/比较函数。 |
-| [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md) | Xtensa ESP 固件中 `sender_task` 暴露 ESP-NOW 应用层包结构，先恢复 magic、seq、total、IV 和 AES-CBC key，再处理无线捕获。 |
+| [VNCTF2026-ez-iot-wp](../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md) | Xtensa ESP 固件中 `sender_task` 暴露 ESP-NOW 应用层包结构，先恢复 magic、seq、total、IV 和 AES-CBC key，再处理无线捕获。 |
 | [ACTF2026-计算机系统贯通实验-wp](../raw/reverse/ACTF2026-计算机系统贯通实验-wp.md) | xlsx 公式实现 RISC-V 单周期 CPU；先解包 XML 恢复 ROM/RAM/MMIO、指令解码和输出语义，再拆四段校验。 |
 | [ACTF2026-flagchecker-wp](../raw/reverse/ACTF2026-flagchecker-wp.md) | LoongArch64 Go 静态程序破坏符号恢复，通过反射派生真实方法名；再把 shellcode SM4 层和 8 段 Feistel 环分开求逆。 |
 | [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md) | CUDA fatbin 中宿主先解出 NPU bytecode；提取 `MOV_IMM` 比较常量后逆 RC4 drop-512 和多层 S-box/XOR 变换。 |
@@ -94,4 +94,4 @@ updated: 2026-07-06
 - [ACTF2026-acpu-wp](../raw/pwn/ACTF2026-acpu-wp.md)
 - [ACTF2026-amcu-wp](../raw/pwn/ACTF2026-amcu-wp.md)
 - [LilacCTF2026-justrom-wp](../raw/reverse/LilacCTF2026-justrom-wp.md)
-- [VNCTF2026-ez-iot-wp](../raw/misc/VNCTF2026-ez-iot-wp.md)
+- [VNCTF2026-ez-iot-wp](../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md)

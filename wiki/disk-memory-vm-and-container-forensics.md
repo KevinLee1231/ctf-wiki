@@ -65,9 +65,9 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [D3CTF2019-vera-wp](../raw/misc/D3CTF2019-vera-wp.md) | VeraCrypt 容器和图像光栅恢复组合，先用题面线索找密码再处理解出的媒体 artifact。 |
-| [D3CTF2021-virtual-love-revenge-2-0-wp](../raw/misc/D3CTF2021-virtual-love-revenge-2-0-wp.md) | VMware 配置损坏、零宽字符字典和单用户模式取证组合，先修复虚拟机再进入磁盘证据链。 |
-| [D3CTF2022-wannawacca-wp](../raw/misc/D3CTF2022-wannawacca-wp.md) | Windows 内存镜像、勒索样本和流量协议复现组合，先 dump 可疑进程和文件再还原加密链。 |
+| [D3CTF2019-vera-wp](../raw/forensics/D3CTF2019-vera-wp.md) | VeraCrypt 容器和图像光栅恢复组合，先用题面线索找密码再处理解出的媒体 artifact。 |
+| [D3CTF2021-virtual-love-revenge-2-0-wp](../raw/forensics/D3CTF2021-virtual-love-revenge-2-0-wp.md) | VMware 配置损坏、零宽字符字典和单用户模式取证组合，先修复虚拟机再进入磁盘证据链。 |
+| [D3CTF2022-wannawacca-wp](../raw/malware/D3CTF2022-wannawacca-wp.md) | Windows 内存镜像、勒索样本和流量协议复现组合，先 dump 可疑进程和文件再还原加密链。 |
 | [D3CTF2019-disappeared-memory-wp](../raw/reverse/D3CTF2019-disappeared-memory-wp.md) | Windows 10 compressed memory 导致关键页缺失，先从 dump/PTE/Store Manager 恢复数据页。 |
 
 ## 原始资料

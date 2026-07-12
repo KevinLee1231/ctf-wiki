@@ -1,8 +1,8 @@
 ---
 type: tooling
 tags: [reverse, tooling, tools, environment]
-skills: [ctf-reverse]
-updated: 2026-07-06
+skills: [ctf-reverse, ctf-mobile]
+updated: 2026-07-11
 ---
 
 # Reverse Tooling
@@ -38,7 +38,7 @@ updated: 2026-07-06
 | Ghidra MCP | 普通二进制的主分析入口 |
 | `file` / `strings` | 先确认载体类型和明显线索 |
 | `capa` | 未知 binary 先看能力画像 |
-| `pycdc` | 一旦确认是 `.pyc`，它就是最快路径 |
+| `/home/kali/pycdc/build/pycdc` | 一旦确认是 `.pyc`，它就是最快路径；当前不在 `PATH` 中 |
 
 ### 专项按需
 
@@ -93,7 +93,7 @@ RE 优先使用 **Ghidra MCP**。
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
 | **radare2** | `/usr/bin/r2` 6.0.5 | 命令行逆向框架 | `r2 -d ./bin; aaa; afl; pdf @ main` |
-| **GDB+pwndbg** | `/usr/bin/gdb` 17.1 + pwndbg | 动态调试 | `gdb ./bin; start; b *main` |
+| **GDB+pwndbg** | `/usr/bin/gdb` 17.2 + pwndbg | 动态调试 | `gdb ./bin; start; b *main` |
 | **objdump** | `/usr/bin/objdump` | 反汇编 | `objdump -M intel -d bin` |
 | **strings** | `/usr/bin/strings` | 提取可打印字符串 | `strings bin \| grep -i flag` |
 | **file** | `/usr/bin/file` | 识别文件类型/架构 | `file binary` |

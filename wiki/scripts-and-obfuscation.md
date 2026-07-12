@@ -4,7 +4,7 @@ tags: [malware, family, scripts, obfuscation, staged-payload, c2]
 skills: [ctf-malware]
 raw:
   - ../raw/malware/scripts-and-obfuscation.md
-  - ../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md
+  - ../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md
 updated: 2026-06-12
 ---
 
@@ -28,7 +28,7 @@ updated: 2026-06-12
 - 原始载荷入口和编码层级：MIME/base64、压缩包、XML/SVG CDATA、PowerShell encoded command、JS string table 或包安装脚本。
 - 每一阶段的输入输出：解码字符串、下载 URL、key、payload hash、落盘路径、进程名、网络域名。
 - 能在隔离环境或静态模拟中验证解混淆结果，而不是直接运行未知样本。
-- 能判断下一步是脚本恢复、C2 协议、PE/.NET、内存取证、YARA/IOC，还是普通 misc 编码题。
+- 能判断下一步是脚本恢复、C2 协议、PE/.NET、内存取证、YARA/IOC，还是普通 Crypto 表示层编码。
 
 ## 首轮路由
 
@@ -50,7 +50,7 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md) | `.eml` 发票催收附件中的 SVG 同时承载视觉诱饵和 JavaScript；分析时先解 MIME/base64，再还原脚本映射表、XOR/key 和诱饵 flag。 |
+| [WMCTF2025-shopping-company-phishing-email-wp](../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md) | `.eml` 发票催收附件中的 SVG 同时承载视觉诱饵和 JavaScript；分析时先解 MIME/base64，再还原脚本映射表、XOR/key 和诱饵 flag。 |
 | [D3CTF2021-baby-spear-wp](../raw/reverse/D3CTF2021-baby-spear-wp.md) | 隐藏 VBA 宏释放 PE 并用时间派生 AES key，先恢复 Office 宏流和 staged payload。 |
 
 ## 常见陷阱
@@ -59,7 +59,7 @@ updated: 2026-06-12
 - 只解第一层 Base64，没继续追踪下载器、二阶段 payload 和配置 blob。
 - 把诱饵 flag 当结果，忽略脚本里的真实解密路径。
 - 恢复 C2 字符串后不验证 session key、编码表和协议字段。
-- 把普通编码题误归 malware；没有恶意行为、配置或载荷链时应转 Misc。
+- 把普通编码题误归 Malware；没有恶意行为、配置或载荷链时应转 Crypto，隐藏载荷则转 Stego。
 
 ## 关联技巧
 
@@ -73,4 +73,4 @@ updated: 2026-06-12
 ## 原始资料
 
 - [scripts-and-obfuscation.md](../raw/malware/scripts-and-obfuscation.md)
-- [WMCTF2025-shopping-company-phishing-email-wp](../raw/misc/WMCTF2025-shopping-company-phishing-email-wp.md)
+- [WMCTF2025-shopping-company-phishing-email-wp](../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md)

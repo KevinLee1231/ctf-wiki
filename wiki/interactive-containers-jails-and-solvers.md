@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, family, interactive, container, jail, solver, oracle]
-skills: [ctf-misc, ctf-pentest, ctf-pwn]
+tags: [cross-category, family, interactive, container, jail, solver, oracle]
+skills: [ctf-solve-challenge, ctf-pwn, ctf-pentest, ctf-cloud-infra, ctf-reverse]
 raw:
-  - ../raw/misc/interactive-containers-jails-and-solvers.md
+  - ../raw/pwn/interactive-containers-jails-and-solvers.md
 updated: 2026-06-12
 ---
 
@@ -11,7 +11,7 @@ updated: 2026-06-12
 
 ## 作用边界
 
-本页是 Misc 中交互环境、容器边界、jail 变体和小型求解器的 family 页。它处理的不是同一个技巧，而是一类“题目给了可交互运行环境或规则系统，必须先判断可借用的边界在哪里”的问题。
+本页是交互环境、容器边界、jail 变体和小型求解器的跨方向 family 页。它处理的不是同一个技巧，而是一类“题目给了可交互运行环境或规则系统，必须先判断可借用的边界在哪里”的问题。
 
 如果证据已经明确是 Python jail、bash/rbash、纯编码链、图像隐写或 WebSocket 游戏，应转入更具体页面。本页保留的价值是把容器、交互 oracle、游戏规则、运行时 helper、虚拟化边界和受限执行环境的首轮判断串起来。
 
@@ -56,7 +56,7 @@ updated: 2026-06-12
 
 ## 关联技巧
 
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 - [bashjails.md](bashjails.md)
 - [pyjails.md](pyjails.md)
 - [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
@@ -69,8 +69,8 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [ACTF2026-farthest2026-wp](../raw/misc/ACTF2026-farthest2026-wp.md) | DOS/dosemu2/COMCOM64 sidecar 形成容器边界逃逸，先确认虚拟化边界、helper 加载和 host 侧执行点。 |
+| [ACTF2026-farthest2026-wp](../raw/pwn/ACTF2026-farthest2026-wp.md) | DOS/dosemu2/COMCOM64 sidecar 形成容器边界逃逸，先确认虚拟化边界、helper 加载和 host 侧执行点。 |
 
 ## 原始资料
 
-- [interactive-containers-jails-and-solvers.md](../raw/misc/interactive-containers-jails-and-solvers.md)
+- [interactive-containers-jails-and-solvers.md](../raw/pwn/interactive-containers-jails-and-solvers.md)

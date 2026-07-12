@@ -1,13 +1,13 @@
 ---
 type: family
-tags: [misc, family, game-state, websocket, wasm]
-skills: [ctf-misc, ctf-web, ctf-reverse]
+tags: [cross-category, family, game-state, websocket, wasm, stego]
+skills: [ctf-solve-challenge, ctf-web, ctf-reverse, ctf-stego, ctf-pentest]
 raw:
-  - ../raw/misc/game-state-websocket-and-wasm.md
-  - ../raw/misc/SU_Artifact_OnlineWP.md
-  - ../raw/misc/ACTF2026-master-of-album-wp.md
-  - ../raw/misc/VNCTF2026-minecraft-wp.md
-updated: 2026-07-06
+  - ../raw/web/game-state-websocket-and-wasm.md
+  - ../raw/stego/SUCTF2026-Artifact_OnlineWP.md
+  - ../raw/web/ACTF2026-master-of-album-wp.md
+  - ../raw/pentest/VNCTF2026-minecraft-wp.md
+updated: 2026-07-11
 ---
 
 # Game State, WebSocket and WASM
@@ -51,14 +51,14 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [SU_Artifact_OnlineWP](../raw/misc/SU_Artifact_OnlineWP.md) | `5x5` 六面 cube 的 `R/C/F` 置换和 activate 选字符规则可本地模拟；先从符文文本恢复映射，再搜索能执行 `cd ..;nl flag` 的状态。 |
-| [ACTF2026-master-of-album-wp](../raw/misc/ACTF2026-master-of-album-wp.md) | Socket.IO 问答系统没有强绑定登录态，随机 `team/token/session_id` 也能开局；重点是封面/音频识别缓存、题型分支和失败轮次丢弃策略。 |
-| [VNCTF2026-minecraft-wp](../raw/misc/VNCTF2026-minecraft-wp.md) | Minecraft 题先画代理、子服、插件和共享数据库边界；creative 侧游戏权限只是入口，后续需转 Pentest/CVE 页面处理跨服权限和 Log4Shell。 |
-| [D3CTF2023-d3craft-wp](../raw/misc/D3CTF2023-d3craft-wp.md) | Minecraft/PaperMC 移动事件和数据包语义差异可绕过，先逆插件目标位置再脚本化状态移动。 |
-| [D3CTF2025-d3rpg-signin-wp](../raw/misc/D3CTF2025-d3rpg-signin-wp.md) | RPG 地图、标牌、隐藏路径和摩斯地板是主线，先复现游戏状态和资源线索。 |
+| [SUCTF2026-Artifact_OnlineWP](../raw/stego/SUCTF2026-Artifact_OnlineWP.md) | 本库按 Stego 边界案例归档；实际解法仍是模拟 `5x5` 六面 cube 的 `R/C/F` 置换和 activate 选字符规则，再搜索能执行 `cd ..;nl flag` 的状态。 |
+| [ACTF2026-master-of-album-wp](../raw/web/ACTF2026-master-of-album-wp.md) | Socket.IO 问答系统没有强绑定登录态，随机 `team/token/session_id` 也能开局；重点是封面/音频识别缓存、题型分支和失败轮次丢弃策略。 |
+| [VNCTF2026-minecraft-wp](../raw/pentest/VNCTF2026-minecraft-wp.md) | Minecraft 题先画代理、子服、插件和共享数据库边界；creative 侧游戏权限只是入口，后续需转 Pentest/CVE 页面处理跨服权限和 Log4Shell。 |
+| [D3CTF2023-d3craft-wp](../raw/reverse/D3CTF2023-d3craft-wp.md) | Minecraft/PaperMC 移动事件和数据包语义差异可绕过，先逆插件目标位置再脚本化状态移动。 |
+| [D3CTF2025-d3rpg-signin-wp](../raw/stego/D3CTF2025-d3rpg-signin-wp.md) | RPG 地图承载标牌、隐藏路径和摩斯地板等视觉/空间隐写线索；先固定地图与交互状态，再逐处提取隐藏信息。 |
 | [NCTF2026-鸡爪流高手-wp](../raw/reverse/NCTF2026-鸡爪流高手-wp.md) | 游戏协议和 ELO 结算是主线；低分保护检查更新前状态，结算写入无符号分数字段导致下溢登榜。 |
 | [NCTF2026-pay-for-2048-wp](../raw/reverse/NCTF2026-pay-for-2048-wp.md) | Electron `app.asar` 中 JS bridge 调 WASM license 校验；先直接用 Node 调应用服务，再补 WASM digest/key 派生。 |
-| [SU_sqliWP](../raw/web/SU_sqliWP.md) | `/api/query` 注入前必须复现 Go WASM 前端签名和浏览器指纹字段；签名过后用 PostgreSQL 字符串拼接构造布尔盲注。 |
+| [SUCTF2026-sqliWP](../raw/web/SUCTF2026-sqliWP.md) | `/api/query` 注入前必须复现 Go WASM 前端签名和浏览器指纹字段；签名过后用 PostgreSQL 字符串拼接构造布尔盲注。 |
 
 ## 合并与拆分结论
 
@@ -76,7 +76,7 @@ updated: 2026-07-06
 ## 关联页面
 
 - [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [auth-jwt.md](auth-jwt.md)
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
@@ -84,7 +84,7 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [game-state-websocket-and-wasm.md](../raw/misc/game-state-websocket-and-wasm.md)
-- [SU_Artifact_OnlineWP.md](../raw/misc/SU_Artifact_OnlineWP.md)
-- [ACTF2026-master-of-album-wp.md](../raw/misc/ACTF2026-master-of-album-wp.md)
-- [VNCTF2026-minecraft-wp.md](../raw/misc/VNCTF2026-minecraft-wp.md)
+- [game-state-websocket-and-wasm.md](../raw/web/game-state-websocket-and-wasm.md)
+- [SUCTF2026-Artifact_OnlineWP.md](../raw/stego/SUCTF2026-Artifact_OnlineWP.md)
+- [ACTF2026-master-of-album-wp.md](../raw/web/ACTF2026-master-of-album-wp.md)
+- [VNCTF2026-minecraft-wp.md](../raw/pentest/VNCTF2026-minecraft-wp.md)

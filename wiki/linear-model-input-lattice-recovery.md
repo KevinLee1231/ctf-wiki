@@ -3,7 +3,7 @@ type: technique
 tags: [ai-ml, technique, linear-model, lattice, lwe, input-recovery, pytorch]
 skills: [ctf-ai-ml, ctf-crypto]
 raw:
-  - ../raw/ai-ml/SU_babyAIWP.md
+  - ../raw/ai-ml/SUCTF2026-babyAIWP.md
 updated: 2026-07-06
 ---
 
@@ -60,4 +60,4 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [SU_babyAIWP](../raw/ai-ml/SU_babyAIWP.md)
+- [SUCTF2026-babyAIWP](../raw/ai-ml/SUCTF2026-babyAIWP.md)

@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, family, triage, files, archives, one-liners]
-skills: [ctf-misc]
+tags: [forensics, cross-category, family, triage, files, archives, one-liners]
+skills: [ctf-forensics, ctf-solve-challenge]
 raw:
-  - ../raw/misc/file-triage-archives-and-one-liners.md
+  - ../raw/forensics/file-triage-archives-and-one-liners.md
 updated: 2026-06-12
 ---
 
@@ -19,7 +19,7 @@ updated: 2026-06-12
 
 - 附件很小或无明显题型，`file`/magic/strings/binwalk/metadata 仍能给出方向。
 - 压缩包嵌套、伪装扩展名、hash-like 字符串、短日志、API 返回或单行命令即可验证。
-- 当前还无法确定应走 crypto、forensics、web、misc encoding 或 OSINT。
+- 当前还无法确定应走 crypto encoding、forensics、web、cross-category 或 OSINT。
 
 ## 最小证据
 
@@ -41,7 +41,7 @@ updated: 2026-06-12
 
 ## 合并与拆分结论
 
-- 保留为 family：它是 misc/forensics/crypto/osint 的轻量入口，提供首轮分流价值。
+- 保留为 family：它是 Forensics、Crypto、OSINT 与其它专项的轻量入口，提供首轮分流价值。
 - 不把具体 archive 恢复写在本页：复杂 ZIP/磁盘/容器恢复转专门 filesystem 页。
 - 不把一次性签到和 API 流水账沉淀为 technique。
 
@@ -54,21 +54,20 @@ updated: 2026-06-12
 
 ## 关联页面
 
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 - [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
 - [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
 - [web-and-dns.md](web-and-dns.md)
-- [misc-tooling.md](misc-tooling.md)
+- [cross-category-tooling.md](cross-category-tooling.md)
 
 ## 来自 WP 的案例索引
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [ACTF2026-questionnaire-wp](../raw/misc/ACTF2026-questionnaire-wp.md) | 问卷反馈型签到没有技术利用链，先确认交互流程和返回页面，不要误挖不存在的附件。 |
 | [Bugku-week4_re3-wp](../raw/reverse/Bugku-week4_re3-wp.md) | `.exe` 扩展名是干扰项；无 `MZ` magic 且内容是文本时，先按文件首检/明文 artifact 处理。 |
 
 ## 原始资料
 
-- [file-triage-archives-and-one-liners.md](../raw/misc/file-triage-archives-and-one-liners.md)
+- [file-triage-archives-and-one-liners.md](../raw/forensics/file-triage-archives-and-one-liners.md)

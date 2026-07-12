@@ -4,7 +4,7 @@ tags: [forensics, family, pcap, covert-channel, auth, reassembly]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/network-covert-auth-and-reassembly.md
-  - ../raw/misc/WMCTF2025-voice-hacker-wp.md
+  - ../raw/forensics/WMCTF2025-voice-hacker-wp.md
 updated: 2026-06-12
 ---
 
@@ -45,7 +45,7 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [WMCTF2025-voice-hacker-wp](../raw/misc/WMCTF2025-voice-hacker-wp.md) | PCAP 中一批 UDP 包可按 RTP 解码导出目标音频；后续不是解协议 flag，而是把音频样本用于绕过 `/api/authenticate` 的 wav 特征相似度。 |
+| [WMCTF2025-voice-hacker-wp](../raw/forensics/WMCTF2025-voice-hacker-wp.md) | PCAP 中一批 UDP 包可按 RTP 解码导出目标音频；后续不是解协议 flag，而是把音频样本用于绕过 `/api/authenticate` 的 wav 特征相似度。 |
 
 ## 合并与拆分结论
 
@@ -71,4 +71,4 @@ updated: 2026-06-12
 ## 原始资料
 
 - [network-covert-auth-and-reassembly.md](../raw/forensics/network-covert-auth-and-reassembly.md)
-- [WMCTF2025-voice-hacker-wp](../raw/misc/WMCTF2025-voice-hacker-wp.md)
+- [WMCTF2025-voice-hacker-wp](../raw/forensics/WMCTF2025-voice-hacker-wp.md)

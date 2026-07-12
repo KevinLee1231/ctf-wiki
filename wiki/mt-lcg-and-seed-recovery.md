@@ -84,7 +84,7 @@ updated: 2026-07-06
 | [NCTF2026-rng-game-wp](../raw/crypto/NCTF2026-rng-game-wp.md) | 服务给出 Python `random` 大整数 seed，目标是构造另一 seed；按 32-bit 分块利用 CPython seed 扩展阶段碰撞。 |
 | [RCTF2025-yet-another-mt-game-wp](../raw/crypto/RCTF2025-yet-another-mt-game-wp.md) | Sage `random_matrix(Zmod(mod))` 小模数路径泄露 GMP MT 31-bit 输出；用 GF(2) 线性系统恢复状态，再反推 GMP seed。 |
 | [RCTF2025-yet-another-shuffled-mt-game-wp](../raw/crypto/RCTF2025-yet-another-shuffled-mt-game-wp.md) | GMP MT 输出被 Python `random.shuffle` 置乱；先从少量输出恢复 128-bit Python seed 逆置乱，再复用 GMP MT 状态恢复。 |
-| [SU_PrngWP](../raw/crypto/SU_PrngWP.md) | 256-bit LCG 输出被“高低半 XOR + 按高位 ror”非线性包装；先恢复 rotation sequence/低半候选，再用 LCG 关系约束原 seed。 |
+| [SUCTF2026-PrngWP](../raw/crypto/SUCTF2026-PrngWP.md) | 256-bit LCG 输出被“高低半 XOR + 按高位 ror”非线性包装；先恢复 rotation sequence/低半候选，再用 LCG 关系约束原 seed。 |
 | [VNCTF2026-hd-is-what-wp](../raw/crypto/VNCTF2026-hd-is-what-wp.md) | SIDH/SIKE 公钥向量先被公开 seed 的 LCG 矩阵线性混淆；恢复标准公钥后再用 Castryck-Decru attack 求共享 j。 |
 | [VNCTF2026-numberguesser-wp](../raw/crypto/VNCTF2026-numberguesser-wp.md) | 只有 10 次 hint 查询，但 Python `random.seed(os.urandom(8))` 可逆；选相隔 227 的输出 untemper/twist 反推 64-bit seed。 |
 | [VNCTF2026-schnorr-wp](../raw/crypto/VNCTF2026-schnorr-wp.md) | Schnorr 服务固定 seed 导致首轮承诺 `B` 跨连接重复；对同一 `B` 给两个 challenge，用 special soundness 相减提 witness。 |

@@ -25,14 +25,14 @@ updated: 2026-07-06
 - 附件需要先理解可执行载体、运行环境、加载方式、资源格式或语言运行时，而不是直接套固定算法。
 - 初始观察能落到入口、字符串、导入、资源、比较点、trace、dump、opcode、协议字段、key/cipher 或中间 buffer。
 - 同一题可能同时出现壳、反调试、VM、平台 runtime、文件载体和 crypto 关系，需要先判断哪个是第一障碍。
-- 已有运行结果或静态线索能支撑一个最短验证路径：抓明文、hook/patch、写 forward checker、dump 资源或转 crypto/misc。
+- 已有运行结果或静态线索能支撑一个最短验证路径：抓明文、hook/patch、写 forward checker、dump 资源，或转 Crypto/Stego/Pwn 等对应专项。
 
 ## 最小证据
 
 - 记录文件类型、架构、位数、端序、保护、入口、依赖和能否安全运行。
 - 保存至少一组最小输入、运行反馈、错误状态或断点位置，说明目前可观察到哪个内部状态。
 - 如果准备转具体 family，列出触发转向的证据：平台标记、语言 runtime、opcode stream、loader 行为、反分析检测、资源表或最终比较点。
-- 如果准备转 crypto/misc/pwn，说明 reverse 已经恢复到哪个实现边界，避免把实现恢复和后续数学/利用步骤混在同一页。
+- 如果准备转 Crypto/Stego/Pwn/Hardware/Mobile，说明 Reverse 已经恢复到哪个实现边界，避免把实现恢复和后续数学、载荷提取或利用步骤混在同一页。
 
 ## 首轮路由
 
@@ -63,7 +63,7 @@ updated: 2026-07-06
 - 看到复杂伪代码就先完整重写算法，忽略最终比较点、明文 buffer、trace 或资源 dump 这些更短路径。
 - 把壳、反调试、签名、依赖缺失或运行环境问题误当作核心算法。
 - 只按扩展名分流，没有用 magic、架构、加载器和运行时行为确认真实载体。
-- 逆向恢复出密码学或约束关系后仍留在 reverse 页内硬解，没有转到 crypto/misc 的可复用 technique。
+- 逆向恢复出密码学、隐藏载荷或约束关系后仍留在 Reverse 页内硬解，没有按决定性主障碍转到 Crypto、Stego 或其它可复用 technique。
 
 ## 关联页面
 
@@ -142,14 +142,14 @@ updated: 2026-07-06
 | [Spirit2026-5-kernelmaze-wp](../raw/reverse/Spirit2026-5-kernelmaze-wp.md) | 驱动/内核接口隐藏反馈，先确认 IOCTL、用户态/内核态边界和可观测输出。 | [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
 | [Spirit2026-5-link-start-wp](../raw/reverse/Spirit2026-5-link-start-wp.md) | VMP client/server 两段输入：迷宫路径既是第一阶段答案又是 SMC XOR key，解密后函数生成 RC4 key 校验 flag。 | [vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)、[packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
 | [Spirit2026-5-xxxtea-wp](../raw/reverse/Spirit2026-5-xxxtea-wp.md) | 程序最终先解出明文再与输入比较，先满足长度检查并在最终比较前断下读取明文。 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| [SU_easygalWP](../raw/reverse/SU_easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
-| [SU_flumelWP](../raw/reverse/SU_flumelWP.md) | Flutter/Dart 输入先经 `Rc4Warp`，再由新版 `libjunk.so` 验证 Hermes bundle 并派生 AES-CBC key/IV；旧 placeholder 会误导。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
-| [SU_LockWP](../raw/reverse/SU_LockWP.md) | Inno Setup、Rust overlay、锁屏程序和内核驱动多层嵌套；最终 IOCTL 中 XXTEA-like dword 校验在驱动层。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
-| [SU_MvsicPlayerWP](../raw/reverse/SU_MvsicPlayerWP.md) | Electron 音乐播放器先解析 `.su_mv` payload，再由 native `.node` 对 WAV 分支执行 VM bytecode 加密；目标是恢复原 WAV MD5。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| [SU_old_binWP](../raw/reverse/SU_old_binWP.md) | 固件先 XOR 解包出 IMG0 容器，再修复损坏 ELF 和 TLS 布局；最后还原网络 challenge 与自定义块校验。 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
-| [SU_protocolWP](../raw/reverse/SU_protocolWP.md) | HTTP 路由很薄，body 先 hex 再进私有协议帧；区分格式错、比较失败和 block 变换后再反推 payload。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
-| [SU_RevirdWP](../raw/reverse/SU_RevirdWP.md) | 外层魔改 AES 解出第二阶段 EXE，随后通过 `\\.\Revird` 与驱动 op case 协同完成 AES-like 校验。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
-| [SU_WestWP](../raw/reverse/SU_WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [SUCTF2026-easygalWP](../raw/reverse/SUCTF2026-easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
+| [SUCTF2026-flumelWP](../raw/reverse/SUCTF2026-flumelWP.md) | Flutter/Dart 输入先经 `Rc4Warp`，再由新版 `libjunk.so` 验证 Hermes bundle 并派生 AES-CBC key/IV；旧 placeholder 会误导。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [SUCTF2026-LockWP](../raw/reverse/SUCTF2026-LockWP.md) | Inno Setup、Rust overlay、锁屏程序和内核驱动多层嵌套；最终 IOCTL 中 XXTEA-like dword 校验在驱动层。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
+| [SUCTF2026-MvsicPlayerWP](../raw/reverse/SUCTF2026-MvsicPlayerWP.md) | Electron 音乐播放器先解析 `.su_mv` payload，再由 native `.node` 对 WAV 分支执行 VM bytecode 加密；目标是恢复原 WAV MD5。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
+| [SUCTF2026-old_binWP](../raw/reverse/SUCTF2026-old_binWP.md) | 固件先 XOR 解包出 IMG0 容器，再修复损坏 ELF 和 TLS 布局；最后还原网络 challenge 与自定义块校验。 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
+| [SUCTF2026-protocolWP](../raw/reverse/SUCTF2026-protocolWP.md) | HTTP 路由很薄，body 先 hex 再进私有协议帧；区分格式错、比较失败和 block 变换后再反推 payload。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [SUCTF2026-RevirdWP](../raw/reverse/SUCTF2026-RevirdWP.md) | 外层魔改 AES 解出第二阶段 EXE，随后通过 `\\.\Revird` 与驱动 op case 协同完成 AES-like 校验。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |
+| [SUCTF2026-WestWP](../raw/reverse/SUCTF2026-WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
 | [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)、[anti-analysis.md](anti-analysis.md)、[vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md) |
 | [VNCTF2026-login-wp](../raw/reverse/VNCTF2026-login-wp.md) | APK Java 层只组包，native so 完成魔改 AES、HTTP header 签名和 Frida/IDA 环境检测；可结合流量复算。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)、[anti-analysis.md](anti-analysis.md) |
 | [VNCTF2026-shadow-wp](../raw/reverse/VNCTF2026-shadow-wp.md) | 用户态迷宫只触发 `Sleep(0x32)`；真实校验在反射加载驱动、PTE hook、键盘记录和基于 `KeDelayExecutionThread` 参数解密的 shellcode。 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)、[windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md) |

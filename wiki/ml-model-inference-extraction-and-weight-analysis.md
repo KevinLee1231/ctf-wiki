@@ -5,11 +5,11 @@ skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/model-attacks.md
   - ../raw/ai-ml/LilacCTF2026-residue-wp.md
-  - ../raw/ai-ml/SU_谁是小偷WP.md
-  - ../raw/ai-ml/SU_我不是神偷WP.md
-  - ../raw/ai-ml/SU_babyAIWP.md
-  - ../raw/ai-ml/SU_easyLLMWP.md
-  - ../raw/ai-ml/SU_theifWP.md
+  - ../raw/ai-ml/SUCTF2026-谁是小偷WP.md
+  - ../raw/ai-ml/SUCTF2026-我不是神偷WP.md
+  - ../raw/ai-ml/SUCTF2026-babyAIWP.md
+  - ../raw/ai-ml/SUCTF2026-easyLLMWP.md
+  - ../raw/ai-ml/SUCTF2026-theifWP.md
 updated: 2026-07-06
 ---
 
@@ -76,18 +76,18 @@ updated: 2026-07-06
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
 | [LilacCTF2026-residue-wp](../raw/ai-ml/LilacCTF2026-residue-wp.md) | 已知 GPT-2 Medium 权重和目标 logits，可逐位置枚举词表并用 MSE 匹配 logits；KV cache 是可接受复杂度的关键。 | [transformer-logit-inversion.md](transformer-logit-inversion.md) |
-| [SU_谁是小偷WP](../raw/ai-ml/SU_谁是小偷WP.md) | `Conv2d -> Flatten -> Linear` 且无激活函数，`/predict` 返回完整向量；先用 basis query 恢复整体仿射映射，再拆参数。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
-| [SU_我不是神偷WP](../raw/ai-ml/SU_我不是神偷WP.md) | 附件结构与线上形状冲突，`/flag` 报错暴露真实 state_dict；先恢复共享线性层，再把两层卷积分解为等效核。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
-| [SU_babyAIWP](../raw/ai-ml/SU_babyAIWP.md) | `Conv1d -> Linear` 无激活且权重藏在 `model.pth`；展开成带小噪声的模线性方程后用 LLL/Babai 恢复 flag 字节。 | [linear-model-input-lattice-recovery.md](linear-model-input-lattice-recovery.md) |
-| [SU_easyLLMWP](../raw/ai-ml/SU_easyLLMWP.md) | LLM 输出被直接派生为 AES key，且模型、prompt、temperature 和输出格式已知；先采样候选输出并用密文/PKCS#7 oracle 碰撞验证，不要当普通 prompt injection 处理。 | [llm-attacks.md](llm-attacks.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
-| [SU_theifWP](../raw/ai-ml/SU_theifWP.md) | 模型上传接口只比较部分参数，四维卷积权重校验缺口可配合 `/predict` 输出恢复被检查线性层。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
+| [SUCTF2026-谁是小偷WP](../raw/ai-ml/SUCTF2026-谁是小偷WP.md) | `Conv2d -> Flatten -> Linear` 且无激活函数，`/predict` 返回完整向量；先用 basis query 恢复整体仿射映射，再拆参数。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
+| [SUCTF2026-我不是神偷WP](../raw/ai-ml/SUCTF2026-我不是神偷WP.md) | 附件结构与线上形状冲突，`/flag` 报错暴露真实 state_dict；先恢复共享线性层，再把两层卷积分解为等效核。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
+| [SUCTF2026-babyAIWP](../raw/ai-ml/SUCTF2026-babyAIWP.md) | `Conv1d -> Linear` 无激活且权重藏在 `model.pth`；展开成带小噪声的模线性方程后用 LLL/Babai 恢复 flag 字节。 | [linear-model-input-lattice-recovery.md](linear-model-input-lattice-recovery.md) |
+| [SUCTF2026-easyLLMWP](../raw/ai-ml/SUCTF2026-easyLLMWP.md) | LLM 输出被直接派生为 AES key，且模型、prompt、temperature 和输出格式已知；先采样候选输出并用密文/PKCS#7 oracle 碰撞验证，不要当普通 prompt injection 处理。 | [llm-attacks.md](llm-attacks.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [SUCTF2026-theifWP](../raw/ai-ml/SUCTF2026-theifWP.md) | 模型上传接口只比较部分参数，四维卷积权重校验缺口可配合 `/predict` 输出恢复被检查线性层。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
 
 ## 原始资料
 
 - [model-attacks.md](../raw/ai-ml/model-attacks.md)
 - [LilacCTF2026-residue-wp](../raw/ai-ml/LilacCTF2026-residue-wp.md)
-- [SU_谁是小偷WP](../raw/ai-ml/SU_谁是小偷WP.md)
-- [SU_我不是神偷WP](../raw/ai-ml/SU_我不是神偷WP.md)
-- [SU_babyAIWP](../raw/ai-ml/SU_babyAIWP.md)
-- [SU_easyLLMWP](../raw/ai-ml/SU_easyLLMWP.md)
-- [SU_theifWP](../raw/ai-ml/SU_theifWP.md)
+- [SUCTF2026-谁是小偷WP](../raw/ai-ml/SUCTF2026-谁是小偷WP.md)
+- [SUCTF2026-我不是神偷WP](../raw/ai-ml/SUCTF2026-我不是神偷WP.md)
+- [SUCTF2026-babyAIWP](../raw/ai-ml/SUCTF2026-babyAIWP.md)
+- [SUCTF2026-easyLLMWP](../raw/ai-ml/SUCTF2026-easyLLMWP.md)
+- [SUCTF2026-theifWP](../raw/ai-ml/SUCTF2026-theifWP.md)

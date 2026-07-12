@@ -2,7 +2,7 @@
 type: tooling
 tags: [crypto, tooling, tools, environment]
 skills: [ctf-crypto]
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 
 # Crypto Tooling
@@ -15,11 +15,11 @@ updated: 2026-07-06
 
 - 小脚本和对称/哈希实验默认走 `ctf-tools`；数论、格、ECC、Coppersmith 和 Sage 专属能力走 `sage` 环境。
 - RsaCtfTool、HashClash 属于专项全路径/独立项目工具，必须按本页路径调用，不要假设全局命令可用。
-- FactorDB MCP 是 RSA 模数首轮判断工具；先查可分解性，再决定是否进入 Sage/RsaCtfTool。
+- RSA 模数首轮先查 FactorDB Web/API；只有当前会话确实暴露 callable 的 FactorDB MCP 时才走 MCP，再决定是否进入 Sage/RsaCtfTool。
 
 ### 不应进入 Crypto 工具链的情况
 
-- 只有 Base64、hex、压缩、图片像素或文件容器异常时，先按 Misc/Forensics 处理，不先套密码分析。
+- Base64、hex、URL、ROT 和普通码表继续按 Crypto 表示层处理；压缩/文件容器证据先看 Forensics，图片像素、QR 碎片或隐藏载荷先看 Stego，不要不加判断地套密码分析。
 - JWT、JSON parser、签名接口或 TLS transcript 同时出现时，先保留请求/协议证据，再决定 crypto 方程是否真是主障碍。
 - Sage/LLL/Z3 只是“能跑”的工具，不是首轮默认答案；没有变量界和可复算方程时先回到 triage family。
 
@@ -35,7 +35,7 @@ updated: 2026-07-06
 
 | 工具 | 为什么放在首轮 |
 |---|---|
-| FactorDB MCP | RSA 模数或可疑合数出现时，能最快验证“是不是先分解” |
+| FactorDB Web/API；可选 MCP | RSA 模数或可疑合数出现时，先验证“是不是先分解”；MCP 必须 live verify |
 | SageMath | 需要数论、格、ECC、DLP 时的主工作台 |
 | `pycryptodome` | 快速识别和复现对称加密模式 |
 | RsaCtfTool | 在确认是 RSA 后，快速覆盖常见攻击族 |
@@ -62,14 +62,16 @@ updated: 2026-07-06
 
 ## 详细清单
 
-### FactorDB MCP（第一优先）
+### FactorDB Web/API 与可选 MCP
+
+当前会话未配置 callable 的 FactorDB MCP，不能把下面的 MCP 方法当作稳定入口。默认使用 FactorDB Web/API；只有工具清单实际出现相应方法时，才按下表调用。
 
 | 工具 | 功能 | 调用方式 |
 |---|---|---|
-| `factordb_query` | 查询大整数分解状态和已知因子 | MCP 直接调用，传入 `number` 参数 |
-| `factordb_query_by_id` | 按数据库 ID 查询分解结果 | MCP 直接调用，传入 `id` 参数 |
-| `factordb_report_factor` | 向 FactorDB 提交新发现的因子 | MCP 直接调用，传入 `number` + `factor` |
-| `factordb_report_factor_by_id` | 按 ID 向 FactorDB 提交因子 | MCP 直接调用，传入 `id` + `factor` |
+| `factordb_query` | 查询大整数分解状态和已知因子 | 仅当 MCP callable；传入 `number` 参数 |
+| `factordb_query_by_id` | 按数据库 ID 查询分解结果 | 仅当 MCP callable；传入 `id` 参数 |
+| `factordb_report_factor` | 向 FactorDB 提交新发现的因子 | 仅当 MCP callable，且提交外部数据前确认；传入 `number` + `factor` |
+| `factordb_report_factor_by_id` | 按 ID 向 FactorDB 提交因子 | 仅当 MCP callable，且提交外部数据前确认；传入 `id` + `factor` |
 
 ### Python 包（ctf-tools conda）
 

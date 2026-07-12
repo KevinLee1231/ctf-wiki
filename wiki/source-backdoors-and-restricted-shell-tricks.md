@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, family, source-backdoor, restricted-shell, bash, rvim, histfile, command-exec]
-skills: [ctf-misc]
+tags: [pwn, pentest, web, family, source-backdoor, restricted-shell, bash, rvim, histfile, command-exec]
+skills: [ctf-pwn, ctf-pentest, ctf-web]
 raw:
-  - ../raw/misc/source-backdoors-and-restricted-shell-tricks.md
+  - ../raw/pwn/source-backdoors-and-restricted-shell-tricks.md
 updated: 2026-07-06
 ---
 
@@ -52,7 +52,7 @@ updated: 2026-07-06
 
 ## 合并与拆分结论
 
-该页不作为单一 technique 使用。它保留为 misc family，因为源码后门、HISTFILE/`bash -v`、rvim 插件逃逸和受限 shell 工具副作用的第一步证据不同，但都属于“显式漏洞利用前先确认隐藏功能或允许工具副作用”的分流入口。若后续某一类 raw 增多，应拆出更具体 technique；现阶段由本页连接 [bashjails.md](bashjails.md)、[interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)、[pyjails.md](pyjails.md) 和 [scripts-and-obfuscation.md](scripts-and-obfuscation.md) 更合适。
+该页不作为单一 technique 使用。它保留为 Pwn/Pentest/Web 之间的跨方向 family，因为源码后门、HISTFILE/`bash -v`、rvim 插件逃逸和受限 shell 工具副作用的第一步证据不同，但都属于“显式漏洞利用前先确认隐藏功能或允许工具副作用”的分流入口。若后续某一类 raw 增多，应拆出更具体 technique；现阶段由本页连接 [bashjails.md](bashjails.md)、[interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)、[pyjails.md](pyjails.md) 和 [scripts-and-obfuscation.md](scripts-and-obfuscation.md) 更合适。
 
 ## 关联技巧
 
@@ -71,4 +71,4 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [source-backdoors-and-restricted-shell-tricks.md](../raw/misc/source-backdoors-and-restricted-shell-tricks.md)
+- [source-backdoors-and-restricted-shell-tricks.md](../raw/pwn/source-backdoors-and-restricted-shell-tricks.md)

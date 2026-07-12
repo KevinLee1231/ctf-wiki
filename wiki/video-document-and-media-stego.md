@@ -1,9 +1,9 @@
 ---
 type: family
 tags: [forensics, family, video, document, media, stego]
-skills: [ctf-forensics, ctf-reverse]
+skills: [ctf-stego, ctf-forensics, ctf-reverse]
 raw:
-  - ../raw/forensics/video-document-and-media-stego.md
+  - ../raw/stego/video-document-and-media-stego.md
   - ../raw/reverse/WMCTF2025-videoplayer-wp.md
 updated: 2026-06-12
 ---
@@ -71,5 +71,5 @@ updated: 2026-06-12
 
 ## 原始资料
 
-- [video-document-and-media-stego.md](../raw/forensics/video-document-and-media-stego.md)
+- [video-document-and-media-stego.md](../raw/stego/video-document-and-media-stego.md)
 - [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md)

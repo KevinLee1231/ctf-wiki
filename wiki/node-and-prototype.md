@@ -4,8 +4,8 @@ tags: [web, family, nodejs, prototype-pollution, vm-escape]
 skills: [ctf-web]
 raw:
   - ../raw/web/node-and-prototype.md
-  - ../raw/misc/ACTF2026-agent-wp.md
-  - ../raw/misc/VNCTF2026-huntingagent-wp.md
+  - ../raw/web/ACTF2026-agent-wp.md
+  - ../raw/ai-ml/VNCTF2026-huntingagent-wp.md
 updated: 2026-07-06
 ---
 
@@ -54,8 +54,8 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [ACTF2026-agent-wp](../raw/misc/ACTF2026-agent-wp.md) | 用户字段进入 dotted YAML path 时，`constructor.prototype` 不只是配置字段，而是可污染策略对象并改变后续 eval 分支的入口。 |
-| [VNCTF2026-huntingagent-wp](../raw/misc/VNCTF2026-huntingagent-wp.md) | LLM agent 题的后半段落点是 Node `vm.runInNewContext` escape；空上下文仍可通过 `this.constructor.constructor("return process")()` 触达宿主。 |
+| [ACTF2026-agent-wp](../raw/web/ACTF2026-agent-wp.md) | 用户字段进入 dotted YAML path 时，`constructor.prototype` 不只是配置字段，而是可污染策略对象并改变后续 eval 分支的入口。 |
+| [VNCTF2026-huntingagent-wp](../raw/ai-ml/VNCTF2026-huntingagent-wp.md) | LLM agent 题的后半段落点是 Node `vm.runInNewContext` escape；空上下文仍可通过 `this.constructor.constructor("return process")()` 触达宿主。 |
 | [D3CTF2019-ezts-wp](../raw/web/D3CTF2019-ezts-wp.md) | Sequelize JSON path 注入进入后台后，再用 lodash.defaultsDeep 原型污染 EJS RCE。 |
 | [D3CTF2021-8-bit-pub-wp](../raw/web/D3CTF2021-8-bit-pub-wp.md) | node-mysql 对象展开绕过登录，再用 shvl 原型链污染 nodemailer/sendmail 参数 RCE。 |
 | [D3CTF2023-d3node-wp](../raw/web/D3CTF2023-d3node-wp.md) | Node/Mongo NoSQL 注入、URL-like 任意读和 npm prepack 脚本串成 RCE。 |
@@ -82,5 +82,5 @@ updated: 2026-07-06
 ## 原始资料
 
 - [node-and-prototype.md](../raw/web/node-and-prototype.md)
-- [ACTF2026-agent-wp](../raw/misc/ACTF2026-agent-wp.md)
-- [VNCTF2026-huntingagent-wp](../raw/misc/VNCTF2026-huntingagent-wp.md)
+- [ACTF2026-agent-wp](../raw/web/ACTF2026-agent-wp.md)
+- [VNCTF2026-huntingagent-wp](../raw/ai-ml/VNCTF2026-huntingagent-wp.md)

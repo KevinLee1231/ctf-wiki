@@ -4,7 +4,7 @@ tags: [forensics, family, windows, registry, logs, credentials, timeline]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/windows-registry-logs-and-credentials.md
-  - ../raw/forensics/SU_forensicsWP.md
+  - ../raw/forensics/SUCTF2026-forensicsWP.md
 updated: 2026-07-06
 ---
 
@@ -69,10 +69,10 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [SU_forensicsWP](../raw/forensics/SU_forensicsWP.md) | AD1 Windows 系统盘综合题，证据横跨关机事件、Notepad TabState 删除内容、应用缓存、聊天数据库和 Ollama 日志；适合先按 artifact 类型拆证据，再统一时间线和答案拼接规则。 |
-| [D3CTF2019-find-me-wp](../raw/misc/D3CTF2019-find-me-wp.md) | Chrome Login Data 和 lsass.dmp 组合，先修复嵌入 ZIP 再提取 DPAPI master key 解密浏览器凭据。 |
+| [SUCTF2026-forensicsWP](../raw/forensics/SUCTF2026-forensicsWP.md) | AD1 Windows 系统盘综合题，证据横跨关机事件、Notepad TabState 删除内容、应用缓存、聊天数据库和 Ollama 日志；适合先按 artifact 类型拆证据，再统一时间线和答案拼接规则。 |
+| [D3CTF2019-find-me-wp](../raw/forensics/D3CTF2019-find-me-wp.md) | Chrome Login Data 和 lsass.dmp 组合，先修复嵌入 ZIP 再提取 DPAPI master key 解密浏览器凭据。 |
 
 ## 原始资料
 
 - [windows-registry-logs-and-credentials.md](../raw/forensics/windows-registry-logs-and-credentials.md)
-- [SU_forensicsWP.md](../raw/forensics/SU_forensicsWP.md)
+- [SUCTF2026-forensicsWP.md](../raw/forensics/SUCTF2026-forensicsWP.md)

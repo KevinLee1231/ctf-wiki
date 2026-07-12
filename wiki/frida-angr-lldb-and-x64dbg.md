@@ -1,10 +1,10 @@
 ---
 type: tooling
 tags: [reverse, tooling, instrumentation, symbolic-execution, debugger]
-skills: [ctf-reverse]
+skills: [ctf-reverse, ctf-mobile]
 raw:
   - ../raw/reverse/frida-angr-lldb-and-x64dbg.md
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 
 # Frida, angr, lldb and x64dbg

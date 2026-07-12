@@ -1,11 +1,11 @@
 ---
 type: family
 tags: [forensics, family, stego, pdf, png, gif, svg, text]
-skills: [ctf-forensics]
+skills: [ctf-stego, ctf-forensics]
 raw:
-  - ../raw/forensics/pdf-png-gif-and-text-stego.md
-  - ../raw/misc/HGAME2026-redacted-wp.md
-updated: 2026-07-06
+  - ../raw/stego/pdf-png-gif-and-text-stego.md
+  - ../raw/forensics/HGAME2026-redacted-wp.md
+updated: 2026-07-11
 ---
 
 # PDF, PNG, GIF and Text Stego
@@ -34,7 +34,7 @@ updated: 2026-07-06
 
 | 证据形态 | 先做什么 | 下一跳 |
 |---|---|---|
-| PDF 有遮挡、metadata、link、object stream 或 post-EOF 数据 | 先用 `pdfinfo/exiftool/pdfimages/mutool` 分层，再查 URI annotation、Flate stream、图片 LSB、redaction overlay。 | [forensics-tooling.md](forensics-tooling.md) |
+| PDF 有遮挡、metadata、link、object stream 或 post-EOF 数据 | 先用当前已确认的 `mutool`、`exiftool` 分层；若已安装再补 `pdfinfo`、`pdfimages`，随后检查 URI annotation、Flate stream、图片 LSB 和 redaction overlay。 | [forensics-tooling.md](forensics-tooling.md) |
 | PNG/APNG chunk、CRC、高度、overlay、unknown chunk 异常 | 解析 chunk 顺序和 IHDR/IDAT/IEND，检查 APNG frame、EOF overlay、CRC/高度、custom chunk 和 XOR 层。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
 | GIF 帧、palette 或 frame count 异常 | 先拆帧和 palette，判断是 frame diff、palette-to-pixel、Morse、QR 还是 ELF/文件重组。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
 | SVG/terminal/text 视觉正常但原始文本异常 | 直接看 XML/ANSI/Kitty escape 原始字节，排除渲染器隐藏、微坐标和不可见字符。 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
@@ -45,8 +45,8 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [HGAME2026-redacted-wp](../raw/misc/HGAME2026-redacted-wp.md) | PDF 脱敏题先区分视觉遮挡、文本对象残留、ToUnicode/CMap 字体反复制和增量保存历史版本；不要只跑 `strings` 或截图 OCR。 |
-| [D3CTF2023-d3gif-wp](../raw/misc/D3CTF2023-d3gif-wp.md) | GIF/PNG/QR 媒体层叠，先拆帧和图像通道，再恢复二维码或文本 artifact。 |
+| [HGAME2026-redacted-wp](../raw/forensics/HGAME2026-redacted-wp.md) | PDF 脱敏题先区分视觉遮挡、文本对象残留、ToUnicode/CMap 字体反复制和增量保存历史版本；不要只跑 `strings` 或截图 OCR。 |
+| [D3CTF2023-d3gif-wp](../raw/stego/D3CTF2023-d3gif-wp.md) | GIF/PNG/QR 媒体层叠，先拆帧和图像通道，再恢复二维码或文本 artifact。 |
 
 ## 合并与拆分结论
 
@@ -74,5 +74,5 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [pdf-png-gif-and-text-stego.md](../raw/forensics/pdf-png-gif-and-text-stego.md)
-- [HGAME2026-redacted-wp.md](../raw/misc/HGAME2026-redacted-wp.md)
+- [pdf-png-gif-and-text-stego.md](../raw/stego/pdf-png-gif-and-text-stego.md)
+- [HGAME2026-redacted-wp.md](../raw/forensics/HGAME2026-redacted-wp.md)

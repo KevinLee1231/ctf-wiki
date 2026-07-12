@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, family, bash, jail, restricted-shell, shell-escape]
-skills: [ctf-misc, ctf-pentest]
+tags: [pwn, pentest, family, bash, jail, restricted-shell, shell-escape]
+skills: [ctf-pwn, ctf-pentest]
 raw:
-  - ../raw/misc/bashjails.md
+  - ../raw/pwn/bashjails.md
 updated: 2026-06-12
 ---
 
@@ -33,7 +33,7 @@ updated: 2026-06-12
 
 | 证据形态 | 首轮判断 | 下一跳 |
 |---|---|---|
-| 不知道输入如何被执行 | 先用 harmless 字符和错误信息识别 eval 层数、引号环境、命令替换和 shell 类型 | [misc-tooling.md](misc-tooling.md) |
+| 不知道输入如何被执行 | 先用 harmless 字符和错误信息识别 eval 层数、引号环境、命令替换和 shell 类型 | [cross-category-tooling.md](cross-category-tooling.md) |
 | 只能用 `$`、`#`、反斜杠或少量字符 | 先用 `$#`、`${##}`、`$$`、变量切片、ANSI-C quoting 或 PID 数字构造字节 | [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md) |
 | 允许环境变量、`PATH`、`BASH_ENV`、`HISTFILE`、`LD_PRELOAD` | 先判断变量是否被 rbash/wrapper 接受，再用历史文件、preload 或启动文件侧写 | [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md), [linux-privesc.md](linux-privesc.md) |
 | stdout 关闭、只有 fd 0 或 CR 截断 | 先枚举 fd，再用 `1>&0`、stderr、`\r` 显示或 `/dev/tcp` 外带恢复输出 | [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md) |
@@ -43,7 +43,7 @@ updated: 2026-06-12
 
 ## 合并与拆分结论
 
-本页应保留为 family。bash jail 的关键 pivot 是 eval 上下文、字符集、输出通道和 post-shell 目标；这些判断与 Python jail 不同，也不能并入通用 Misc 首轮页。当前不拆成 `ansi-c-quoting`、`histfile`、`dev-tcp` 等小页，因为 raw 仍以短技巧集合为主。
+本页应保留为 family。bash jail 的关键 pivot 是 eval 上下文、字符集、输出通道和 post-shell 目标；这些判断与 Python jail 不同，也不能并入通用跨方向首轮页。当前不拆成 `ansi-c-quoting`、`histfile`、`dev-tcp` 等小页，因为 raw 仍以短技巧集合为主。
 
 ## 常见陷阱
 
@@ -61,8 +61,8 @@ updated: 2026-06-12
 - [linux-privesc.md](linux-privesc.md)
 - [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)
 - [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)
-- [misc-tooling.md](misc-tooling.md)
+- [cross-category-tooling.md](cross-category-tooling.md)
 
 ## 原始资料
 
-- [bashjails.md](../raw/misc/bashjails.md)
+- [bashjails.md](../raw/pwn/bashjails.md)

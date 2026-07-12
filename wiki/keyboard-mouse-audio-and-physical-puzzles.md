@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [forensics, misc, hid, audio, video, physical-signal, family]
-skills: [ctf-forensics, ctf-misc]
+tags: [hardware-embedded, stego, forensics, hid, audio, video, physical-signal, family]
+skills: [ctf-hardware-embedded, ctf-stego, ctf-forensics]
 raw:
-  - ../raw/misc/keyboard-mouse-audio-and-physical-puzzles.md
+  - ../raw/forensics/keyboard-mouse-audio-and-physical-puzzles.md
 updated: 2026-06-18
 ---
 
@@ -63,4 +63,4 @@ updated: 2026-06-18
 
 ## 原始资料
 
-- [keyboard-mouse-audio-and-physical-puzzles.md](../raw/misc/keyboard-mouse-audio-and-physical-puzzles.md)
+- [keyboard-mouse-audio-and-physical-puzzles.md](../raw/forensics/keyboard-mouse-audio-and-physical-puzzles.md)

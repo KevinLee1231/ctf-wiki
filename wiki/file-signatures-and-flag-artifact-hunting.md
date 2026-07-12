@@ -4,7 +4,7 @@ tags: [forensics, file-triage, artifact, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/file-signatures-and-flag-artifact-hunting.md
-updated: 2026-06-18
+updated: 2026-07-11
 ---
 
 # File Signatures and Flag Artifact Hunting
@@ -31,7 +31,7 @@ updated: 2026-06-18
 ## 分流流程
 
 1. 首检：`file target; xxd -l 64 target; strings -a target | head; exiftool target`。
-2. 容器检查：`7z l`、`binwalk`、`pdfinfo`、`ffprobe`、`identify -verbose`。
+2. 容器检查：`7z l`、`binwalk`、`mutool info`、`ffprobe`、`identify -verbose`；`pdfinfo` 仅在已安装时使用。
 3. 搜索 flag 位置：metadata、comments、unallocated/trailing bytes、PDF hidden object、browser/log fragments。
 4. 编码剥离：base64、hex、ROT13/ROT18、URL、gzip/zlib、xor single-byte。
 5. 每剥一层都保存输出并重新识别类型。

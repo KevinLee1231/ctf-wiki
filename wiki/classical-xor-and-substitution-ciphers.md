@@ -1,7 +1,7 @@
 ---
 type: family
 tags: [crypto, family, classical, xor, substitution]
-skills: [ctf-crypto, ctf-misc]
+skills: [ctf-crypto, ctf-stego]
 raw:
   - ../raw/crypto/classical-xor-and-substitution-ciphers.md
 updated: 2026-07-06
@@ -38,11 +38,11 @@ updated: 2026-07-06
 | many-time pad / OTP reuse | 多密文同 key、可猜明文、空格/flag 前缀和 crib dragging | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
 | 文件头/尾推 XOR key | 已知 magic、trailer、块边界和 key 周期 | [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md) |
 | book/lorenz/长文本替换 | 外部文本、同步轮、crib 和统计模型 | [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md) |
-| 图片 Caesar、semaphore、视觉编码 | 可视排列、坐标/条带偏移、手势表或图像通道 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)、[misc-cross-category-triage-family.md](misc-cross-category-triage-family.md) |
+| 图片 Caesar、semaphore、视觉编码 | 可视排列、坐标/条带偏移、手势表或图像通道 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)、[cross-category-triage-family.md](cross-category-triage-family.md) |
 
 ## 合并与拆分结论
 
-- 保留为 family：它负责轻量 crypto 与 misc 编码题之间的分流，避免把所有 XOR/替换短案例散成低密度 technique。
+- 保留为 family：它负责轻量 Crypto 与视觉/空间表示边界之间的分流，避免把所有 XOR/替换短案例散成低密度 technique。
 - 不与 `lorenz-and-book-cipher-attacks.md` 合并：后者更适合作具体历史/书本/长文本 cipher 技巧页。
 - 不与 `rc4-lfsr-and-keystream-reuse.md` 合并：本页处理简单 XOR 和古典替换，后者处理可建模 keystream/状态恢复。
 
@@ -60,7 +60,7 @@ updated: 2026-07-06
 - [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
 - [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
 - [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md)
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 
 ## 原始资料
 

@@ -3,9 +3,9 @@ type: technique
 tags: [ai-ml, model-extraction, linear-model, parameter-recovery, pytorch]
 skills: [ctf-ai-ml]
 raw:
-  - ../raw/ai-ml/SU_谁是小偷WP.md
-  - ../raw/ai-ml/SU_我不是神偷WP.md
-  - ../raw/ai-ml/SU_theifWP.md
+  - ../raw/ai-ml/SUCTF2026-谁是小偷WP.md
+  - ../raw/ai-ml/SUCTF2026-我不是神偷WP.md
+  - ../raw/ai-ml/SUCTF2026-theifWP.md
 updated: 2026-07-06
 ---
 
@@ -66,6 +66,6 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [SU_谁是小偷WP](../raw/ai-ml/SU_谁是小偷WP.md)
-- [SU_我不是神偷WP](../raw/ai-ml/SU_我不是神偷WP.md)
-- [SU_theifWP](../raw/ai-ml/SU_theifWP.md)
+- [SUCTF2026-谁是小偷WP](../raw/ai-ml/SUCTF2026-谁是小偷WP.md)
+- [SUCTF2026-我不是神偷WP](../raw/ai-ml/SUCTF2026-我不是神偷WP.md)
+- [SUCTF2026-theifWP](../raw/ai-ml/SUCTF2026-theifWP.md)

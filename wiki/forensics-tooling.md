@@ -1,8 +1,8 @@
 ---
 type: tooling
 tags: [forensics, tooling, tools, environment]
-skills: [ctf-forensics]
-updated: 2026-07-06
+skills: [ctf-forensics, ctf-stego, ctf-hardware-embedded]
+updated: 2026-07-11
 ---
 
 # Forensics Tooling
@@ -21,7 +21,7 @@ updated: 2026-07-06
 
 - 载体只是 Web 响应、API 数据或远程服务交互时，先按 Web/Pentest 保存请求链。
 - 二进制行为、混淆、VM 或反调试是主障碍时，先转 Reverse/Malware，不用取证工具硬拆。
-- 只有编码、谜题或语言 jail 特征时，先转 Misc，不把所有“附件题”都归入 Forensics。
+- 只有普通编码时转 Crypto；隐藏载荷与 QR/视觉碎片转 Stego；语言 jail 按执行边界转 Pwn/Web/Reverse；纯规则且证据不足时回到 `ctf-solve-challenge`，不把所有“附件题”都归入 Forensics。
 
 ### 补工具经验的触发条件
 
@@ -47,13 +47,13 @@ updated: 2026-07-06
 - 恢复/雕刻：`foremost`、`scalpel`、`photorec`、`testdisk`
 - 隐写：`zsteg`、`zsteg-mask`、`zsteg-reflow`、`zpng`、`steghide`、`zbarimg`
 - PCAP 修复与抓取：`pcapfix`、`tcpdump`
-- 文档与媒体：`pdfinfo`、`pdftotext`、`pdfimages`、`ffmpeg`、`olevba`、`pcodedmp`
+- 文档与媒体：当前确认 `mutool`、`ffmpeg`、`olevba`、`pcodedmp`；`pdfinfo`、`pdftotext`、`pdfimages` 使用前先检查安装状态
 - 文件系统深挖：`istat`、`blkcat`、`mmls`、`fsstat`、`debugfs` 等
 - 运行中 Python 进程：`pyrasite`、`pyrasite-shell`、`pyrasite-memory-viewer`
 
 ### 当前未装 / 建议按需补装
 
-- 当前没有必须补的基础工具。若后续经常做事件日志或注册表题，再单独评估是否补专用解析工具。
+- 当前 `pdfinfo`、`pdftotext`、`pdfimages` 未安装，PDF 首轮先用已确认的 `mutool`；只有具体题目确需 Poppler 工具时再评估安装。若后续经常做事件日志或注册表题，再单独评估专用解析工具。
 
 ## 失败信号与转向
 
@@ -132,9 +132,9 @@ updated: 2026-07-06
 
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
-| pdfinfo | /usr/bin/pdfinfo | PDF 元数据查看 | `pdfinfo document.pdf` |
-| pdftotext | /usr/bin/pdftotext | PDF 文本提取 | `pdftotext document.pdf -` |
-| pdfimages | /usr/bin/pdfimages | PDF 嵌入图像提取 | `pdfimages -j document.pdf out` |
+| pdfinfo | 当前未安装 | PDF 元数据查看 | 使用前 live verify；当前先用 `mutool info document.pdf` |
+| pdftotext | 当前未安装 | PDF 文本提取 | 使用前 live verify；当前先用 `mutool draw -F txt document.pdf` |
+| pdfimages | 当前未安装 | PDF 嵌入图像提取 | 使用前 live verify；当前可先尝试 `mutool extract document.pdf` |
 
 ### 压缩/归档
 

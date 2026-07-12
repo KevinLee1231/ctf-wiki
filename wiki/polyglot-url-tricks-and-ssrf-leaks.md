@@ -68,8 +68,8 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [SU_NoteWP](../raw/web/SU_NoteWP.md) | `/bot/` 可请求 `127.0.0.1:80` 并把内部响应 `Set-Cookie` 透传给攻击者，直接泄露 bot/admin 的 PHPSESSID 后读取 notes。 |
-| [SU_uriWP](../raw/web/SU_uriWP.md) | 后端 SSRF 只检查解析时 IP，不绑定后续连接结果；DNS rebinding 命中 Docker Remote API 后挂载宿主根目录执行 `/readflag`。 |
+| [SUCTF2026-NoteWP](../raw/web/SUCTF2026-NoteWP.md) | `/bot/` 可请求 `127.0.0.1:80` 并把内部响应 `Set-Cookie` 透传给攻击者，直接泄露 bot/admin 的 PHPSESSID 后读取 notes。 |
+| [SUCTF2026-uriWP](../raw/web/SUCTF2026-uriWP.md) | 后端 SSRF 只检查解析时 IP，不绑定后续连接结果；DNS rebinding 命中 Docker Remote API 后挂载宿主根目录执行 `/readflag`。 |
 
 ## 原始资料
 

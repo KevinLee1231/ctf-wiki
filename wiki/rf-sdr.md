@@ -1,9 +1,9 @@
 ---
 type: technique
-tags: [forensics, misc, technique, rf, sdr, iq, qam, fsk, signal]
-skills: [ctf-forensics, ctf-misc]
+tags: [hardware-embedded, forensics, technique, rf, sdr, iq, qam, fsk, signal]
+skills: [ctf-hardware-embedded, ctf-forensics]
 raw:
-  - ../raw/misc/rf-sdr.md
+  - ../raw/hardware-embedded/rf-sdr.md
 updated: 2026-06-18
 ---
 
@@ -11,7 +11,7 @@ updated: 2026-06-18
 
 ## 适用场景
 
-题目给 IQ dump、无线电采样、调制星座、频谱截图或 `.cf32/.cs16/.cu8` 原始信号，需要从物理层恢复符号、bitstream、帧结构和最终文本。这个页面属于 misc/RF，若已经是普通音频频谱文字则可转音频取证。
+题目给 IQ dump、无线电采样、调制星座、频谱截图或 `.cf32/.cs16/.cu8` 原始信号，需要从物理层恢复符号、bitstream、帧结构和最终文本。这个页面属于 Hardware/Embedded；若只是普通媒体中的频谱隐藏文字，则转 Stego。
 
 ## 识别信号
 
@@ -61,4 +61,4 @@ updated: 2026-06-18
 
 ## 原始资料
 
-- [rf-sdr.md](../raw/misc/rf-sdr.md)
+- [rf-sdr.md](../raw/hardware-embedded/rf-sdr.md)

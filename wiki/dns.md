@@ -1,9 +1,9 @@
 ---
 type: family
-tags: [misc, family, dns, rebinding, tunneling, enumeration]
-skills: [ctf-misc, ctf-web, ctf-forensics, ctf-osint]
+tags: [cross-category, family, dns, rebinding, tunneling, enumeration]
+skills: [ctf-web, ctf-forensics, ctf-osint, ctf-pentest, ctf-malware]
 raw:
-  - ../raw/misc/dns.md
+  - ../raw/pentest/dns.md
 updated: 2026-06-12
 ---
 
@@ -45,8 +45,8 @@ updated: 2026-06-12
 
 ## 合并与拆分结论
 
-- 保留为 family：DNS 题经常在 misc、web、forensics、osint 之间切换，本页提供协议层 pivot。
-- 不合并进 `misc-cross-category-triage-family.md`：总入口只决定是否进入 DNS，本页负责 DNS 内部路线。
+- 保留为 family：DNS 题经常在 Web、Forensics、OSINT、Pentest 与 Malware 之间切换，本页提供协议层 pivot。
+- 不合并进 `cross-category-triage-family.md`：总入口只决定是否进入 DNS，本页负责 DNS 内部路线。
 - 不合并进 OSINT `web-and-dns.md`：公开查询和协议利用的证据、工具和失败状态不同。
 
 ## 常见误判
@@ -58,19 +58,19 @@ updated: 2026-06-12
 
 ## 关联页面
 
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 - [web-and-dns.md](web-and-dns.md)
 - [polyglot-url-tricks-and-ssrf-leaks.md](polyglot-url-tricks-and-ssrf-leaks.md)
 - [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md)
 - [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
-- [misc-tooling.md](misc-tooling.md)
+- [cross-category-tooling.md](cross-category-tooling.md)
 
 ## 来自 WP 的案例索引
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [D3CTF2022-ohhhh-spf-wp](../raw/misc/D3CTF2022-ohhhh-spf-wp.md) | SPF/DNS 记录是主线，先查询 TXT/SPF 解析链并确认域名授权语义。 |
+| [D3CTF2022-ohhhh-spf-wp](../raw/pentest/D3CTF2022-ohhhh-spf-wp.md) | SPF/DNS 记录是主线，先查询 TXT/SPF 解析链并确认域名授权语义。 |
 
 ## 原始资料
 
-- [dns.md](../raw/misc/dns.md)
+- [dns.md](../raw/pentest/dns.md)

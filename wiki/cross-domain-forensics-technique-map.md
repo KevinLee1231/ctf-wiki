@@ -4,8 +4,8 @@ tags: [forensics, family, map]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/cross-domain-forensics-technique-map.md
-  - ../raw/forensics/SU_forensicsWP.md
-  - ../raw/forensics/SU_LightNovelWP.md
+  - ../raw/forensics/SUCTF2026-forensicsWP.md
+  - ../raw/forensics/SUCTF2026-LightNovelWP.md
 updated: 2026-07-06
 ---
 
@@ -74,10 +74,10 @@ updated: 2026-07-06
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
-| [SU_forensicsWP](../raw/forensics/SU_forensicsWP.md) | AD1 Windows 系统盘综合取证，证据集中在事件日志、Notepad TabState、应用缓存、聊天数据库和 Ollama 痕迹。 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md)、[disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
-| [SU_LightNovelWP](../raw/forensics/SU_LightNovelWP.md) | PCAP 中出现 Kerberos/NTLM、MSRPC 与 TSCH 远程任务调度，先做 stream、凭据和会话密钥恢复，再解析计划任务与 PowerShell/AES 逻辑。 | [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)、[windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
+| [SUCTF2026-forensicsWP](../raw/forensics/SUCTF2026-forensicsWP.md) | AD1 Windows 系统盘综合取证，证据集中在事件日志、Notepad TabState、应用缓存、聊天数据库和 Ollama 痕迹。 | [windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md)、[disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
+| [SUCTF2026-LightNovelWP](../raw/forensics/SUCTF2026-LightNovelWP.md) | PCAP 中出现 Kerberos/NTLM、MSRPC 与 TSCH 远程任务调度，先做 stream、凭据和会话密钥恢复，再解析计划任务与 PowerShell/AES 逻辑。 | [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)、[windows-registry-logs-and-credentials.md](windows-registry-logs-and-credentials.md) |
 
 ## 原始资料
 - [cross-domain-forensics-technique-map.md](../raw/forensics/cross-domain-forensics-technique-map.md)
-- [SU_forensicsWP.md](../raw/forensics/SU_forensicsWP.md)
-- [SU_LightNovelWP.md](../raw/forensics/SU_LightNovelWP.md)
+- [SUCTF2026-forensicsWP.md](../raw/forensics/SUCTF2026-forensicsWP.md)
+- [SUCTF2026-LightNovelWP.md](../raw/forensics/SUCTF2026-LightNovelWP.md)

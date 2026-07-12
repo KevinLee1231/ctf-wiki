@@ -68,7 +68,7 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [SU_jdbc-masterWP](../raw/web/SU_jdbc-masterWP.md) | Unicode 长 `ſ` 绕过 `/suctf` 路径过滤后，可控 JDBC driver/URL 走 Kingbase `ConfigurePath` 与 Spring XML beans 无外连加载。 |
+| [SUCTF2026-jdbc-masterWP](../raw/web/SUCTF2026-jdbc-masterWP.md) | Unicode 长 `ſ` 绕过 `/suctf` 路径过滤后，可控 JDBC driver/URL 走 Kingbase `ConfigurePath` 与 Spring XML beans 无外连加载。 |
 
 ## 原始资料
 

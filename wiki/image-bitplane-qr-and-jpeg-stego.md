@@ -1,13 +1,14 @@
 ---
 type: family
-tags: [forensics, family, image, stego, qr, jpeg, bitplane]
-skills: [ctf-forensics]
+tags: [stego, family, image, qr, jpeg, bitplane]
+skills: [ctf-stego, ctf-forensics]
 raw:
-  - ../raw/forensics/image-bitplane-qr-and-jpeg-stego.md
-  - ../raw/misc/HGAME2026-shiori不想找女友-wp.md
-  - ../raw/misc/HGAME2026-invest-on-matrix-wp.md
-  - ../raw/misc/VNCTF2026-mymnemonic-wp.md
-updated: 2026-07-06
+  - ../raw/stego/image-bitplane-qr-and-jpeg-stego.md
+  - ../raw/stego/HGAME2026-shiori不想找女友-wp.md
+  - ../raw/stego/HGAME2026-invest-on-matrix-wp.md
+  - ../raw/stego/D3CTF2025-d3rpg-signin-wp.md
+  - ../raw/crypto/VNCTF2026-mymnemonic-wp.md
+updated: 2026-07-11
 ---
 
 # Image Bitplane, QR and JPEG Stego
@@ -50,12 +51,13 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [HGAME2026-shiori不想找女友-wp](../raw/misc/HGAME2026-shiori不想找女友-wp.md) | EXIF 中的 JSON 参数直接描述像素抽样网格；先按 `start/step/column` 重排隐藏图像，再处理恢复出的线索。 |
-| [HGAME2026-invest-on-matrix-wp](../raw/misc/HGAME2026-invest-on-matrix-wp.md) | 题面给出的矩阵不是代数约束，而是 QR 小块；按 `5x5` block 和编号顺序拼回二维码后再扫码。 |
-| [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md) | 图片末尾黑白格按固定像素步长转 bitstream，图像阶段只负责稳定提取 192-bit ENT，后续 BIP39 checksum/seed 交给 crypto 长尾结构页。 |
-| [D3CTF2022-badw3ter-wp](../raw/misc/D3CTF2022-badw3ter-wp.md) | 图片图层、黑底 QR 和隐写链组合，先分离图层/背景再恢复二维码或图像隐藏信息。 |
-| [D3CTF2023-d3image-wp](../raw/misc/D3CTF2023-d3image-wp.md) | 图像/二维码/摩斯或像素模式是主线，先分离颜色层、定位图案再恢复可读编码。 |
-| [D3CTF2025-d3image-wp](../raw/misc/D3CTF2025-d3image-wp.md) | 图像块变换和隐写编码可逆，先抽出块顺序/颜色关系再写正反向恢复脚本。 |
+| [HGAME2026-shiori不想找女友-wp](../raw/stego/HGAME2026-shiori不想找女友-wp.md) | EXIF 中的 JSON 参数直接描述像素抽样网格；先按 `start/step/column` 重排隐藏图像，再处理恢复出的线索。 |
+| [HGAME2026-invest-on-matrix-wp](../raw/stego/HGAME2026-invest-on-matrix-wp.md) | QR 信息被拆成 25 组带编号的 `5x5` 二值块并隐藏在矩阵序列中；按块坐标复原 `25x25` 网格，再恢复二维码载荷。 |
+| [D3CTF2025-d3rpg-signin-wp](../raw/stego/D3CTF2025-d3rpg-signin-wp.md) | RPG 场景把线索藏在标牌、异常路径、地板明暗块和位置关系中；固定地图状态后按视觉与空间证据逐层提取，摩斯等表示层再转 Crypto 解码。 |
+| [VNCTF2026-mymnemonic-wp](../raw/crypto/VNCTF2026-mymnemonic-wp.md) | 图片末尾黑白格按固定像素步长转 bitstream，图像阶段只负责稳定提取 192-bit ENT，后续 BIP39 checksum/seed 交给 crypto 长尾结构页。 |
+| [D3CTF2022-badw3ter-wp](../raw/stego/D3CTF2022-badw3ter-wp.md) | 图片图层、黑底 QR 和隐写链组合，先分离图层/背景再恢复二维码或图像隐藏信息。 |
+| [D3CTF2023-d3image-wp](../raw/forensics/D3CTF2023-d3image-wp.md) | 图像/二维码/摩斯或像素模式是主线，先分离颜色层、定位图案再恢复可读编码。 |
+| [D3CTF2025-d3image-wp](../raw/ai-ml/D3CTF2025-d3image-wp.md) | 图像块变换和隐写编码可逆，先抽出块顺序/颜色关系再写正反向恢复脚本。 |
 
 ## 常见陷阱
 
@@ -75,7 +77,8 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [image-bitplane-qr-and-jpeg-stego.md](../raw/forensics/image-bitplane-qr-and-jpeg-stego.md)
-- [HGAME2026-shiori不想找女友-wp](../raw/misc/HGAME2026-shiori不想找女友-wp.md)
-- [HGAME2026-invest-on-matrix-wp](../raw/misc/HGAME2026-invest-on-matrix-wp.md)
-- [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md)
+- [image-bitplane-qr-and-jpeg-stego.md](../raw/stego/image-bitplane-qr-and-jpeg-stego.md)
+- [HGAME2026-shiori不想找女友-wp](../raw/stego/HGAME2026-shiori不想找女友-wp.md)
+- [HGAME2026-invest-on-matrix-wp](../raw/stego/HGAME2026-invest-on-matrix-wp.md)
+- [D3CTF2025-d3rpg-signin-wp](../raw/stego/D3CTF2025-d3rpg-signin-wp.md)
+- [VNCTF2026-mymnemonic-wp](../raw/crypto/VNCTF2026-mymnemonic-wp.md)

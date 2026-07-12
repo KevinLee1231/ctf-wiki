@@ -79,7 +79,7 @@ updated: 2026-07-06
 | [D3CTF2022-ezsql-wp](../raw/web/D3CTF2022-ezsql-wp.md) | SQL 注入或过滤 oracle 是主线，先比较错误、回显、时间和二阶触发条件。 |
 | [LilacCTF2026-safe-sql-wp](../raw/web/LilacCTF2026-safe-sql-wp.md) | PostgreSQL `E'...'` 只过滤引号时可用反斜杠让 password 逃逸成多语句；再借 BRIN autosummarize CVE 提权到 `COPY FROM PROGRAM`。 |
 | [RCTF2025-photographer-wp](../raw/web/RCTF2025-photographer-wp.md) | SQLite `SELECT *` join 中同名 `type` 字段覆盖用户权限字段，上传图片 MIME type 可写成 `-1` 绕过管理员判断。 |
-| [SU_sqliWP](../raw/web/SU_sqliWP.md) | `/api/query` 注入前必须复现 Go WASM 前端签名和浏览器指纹字段；签名过后用 PostgreSQL 字符串拼接构造布尔盲注。 |
+| [SUCTF2026-sqliWP](../raw/web/SUCTF2026-sqliWP.md) | `/api/query` 注入前必须复现 Go WASM 前端签名和浏览器指纹字段；签名过后用 PostgreSQL 字符串拼接构造布尔盲注。 |
 
 ## 原始资料
 

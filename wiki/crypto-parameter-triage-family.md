@@ -2,14 +2,14 @@
 type: family
 tags: [crypto, family, triage]
 skills: [ctf-crypto]
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 
 # Crypto Parameter and Oracle Triage
 
 ## 作用边界
 
-密文、参数、签名、oracle、PRNG 输出或自定义数学协议同时出现，首轮还不能确定是 RSA、ECC、格、PRNG、分组模式还是哈希协议。
+编码文本、密文、参数、签名、oracle、PRNG 输出或自定义数学协议同时出现，首轮还不能确定是表示层编码、RSA、ECC、格、PRNG、分组模式还是哈希协议。
 
 本页是 WP 摄入后的 pivot 页：它不按比赛或题目组织，而是把 raw WP 中重复出现的识别信号压缩成下一跳判断表。
 
@@ -28,7 +28,7 @@ updated: 2026-07-06
 ## 分流流程
 
 1. 列出 known / unknown / goal 和所有可复算方程。
-2. 按参数形态进入 RSA、ECC、格、PRNG、分组模式、哈希协议或代数页。
+2. 按证据形态进入表示层编码、RSA、ECC、格、PRNG、分组模式、哈希协议或代数页。
 3. 做一个最小验证：因数分解、小根、状态恢复、oracle 差异或明密文复算。
 4. 若失败，回到参数规模和泄露边界，换相邻技巧页。
 
@@ -37,6 +37,7 @@ updated: 2026-07-06
 | 下一跳 | 触发信号 | WP 数 |
 |---|---|---:|
 | [block-mode-misuse-family.md](block-mode-misuse-family.md) | AES/分组模式、IV、padding、MAC 或加解密 oracle。 | 2 |
+| [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) | Base/hex/URL/ROT、字符编码、自定义码表或多层可逆编码链。 | 2 |
 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) | 曲线/DLP/签名/同源/配对关系。 | 10 |
 | [exotic-secret-sharing-rabin-and-polynomials.md](exotic-secret-sharing-rabin-and-polynomials.md) | secret sharing、Rabin、扰动多项式或可替换私钥结构。 | 1 |
 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) | 哈希、PoW、协议校验或弱比较。 | 3 |
@@ -55,6 +56,8 @@ updated: 2026-07-06
 
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
+| [ACTF2026-special-day-wp](../raw/crypto/ACTF2026-special-day-wp.md) | 标准 Base64 解码后按题面规则规范化文本；主障碍是表示层编码和输出规则，不需要密码攻击。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| [HGAME2026-打好基础-wp](../raw/crypto/HGAME2026-打好基础-wp.md) | Emoji 高密度文本从 base100 开始，后续各层持续满足 Base 系列字符集与 padding 特征；逐层验证并保存中间值。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
 | [WMCTF2025-ishowsplit-wp](../raw/crypto/WMCTF2025-ishowsplit-wp.md) | `A*x+r*k=b mod p` 且隐藏数有不连续 bit 泄露，先把已知段合入 `xbar`，未知段走 EHNP LLL/Babai CVP。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
 | [WMCTF2025-lw3-wp](../raw/crypto/WMCTF2025-lw3-wp.md) | LWE error 不小但只来自少数固定随机值，先把 error 选择展开成 0/1 变量，再降维/精确 SVP。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
 | [WMCTF2025-lw5-wp](../raw/crypto/WMCTF2025-lw5-wp.md) | 可自选 LWE error 集且服务端阻止简单小化，先构造通过 check 的 error 取值，再利用少值 error 的结构恢复 secret。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
@@ -92,12 +95,12 @@ updated: 2026-07-06
 | [RCTF2025-superguess-plusplus-wp](../raw/crypto/RCTF2025-superguess-plusplus-wp.md) | HNP 参数极紧：约 93 个样本、每个只泄露 nonce MSB 2 bit；需改 Fourier/lattice-sieving HNP solver 并调整样本/线程/校验。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
 | [RCTF2025-yet-another-mt-game-wp](../raw/crypto/RCTF2025-yet-another-mt-game-wp.md) | Sage `random_matrix(Zmod(mod))` 小模数路径泄露 GMP MT 31-bit 输出；用 GF(2) 线性系统恢复状态，再反推 GMP seed。 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
 | [RCTF2025-yet-another-shuffled-mt-game-wp](../raw/crypto/RCTF2025-yet-another-shuffled-mt-game-wp.md) | GMP MT 输出被 Python `random.shuffle` 置乱；先从少量输出恢复 128-bit Python seed 逆置乱，再复用 GMP MT 状态恢复。 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
-| [SU_AESWP](../raw/crypto/SU_AESWP.md) | AES 服务允许分别更新 seed/key，导致当前 S-box 与旧 round keys 不同步；先把 S-box 压成常值恢复 `K10`，再用 probe 值域指纹恢复置换。 | [block-mode-misuse-family.md](block-mode-misuse-family.md) |
-| [SU_IsogenyWP](../raw/crypto/SU_IsogenyWP.md) | CSIDH 群作用与 2-isogeny 交换，三条 2-isogenous 共享曲线高位泄露可建 CI-HNP 小根方程，用 Automated Coppersmith 恢复参数。 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)、[lattice-and-lwe.md](lattice-and-lwe.md) |
-| [SU_LatticeWP](../raw/crypto/SU_LatticeWP.md) | 24 阶 Fibonacci LFSR 只泄露状态高 40 bit，且模数未知但靠近 2 的幂；用高位格找 annihilating polynomials、resultant gcd 恢复模数，再 BKZ 低位状态。 | [lattice-and-lwe.md](lattice-and-lwe.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
-| [SU_PrngWP](../raw/crypto/SU_PrngWP.md) | 256-bit LCG 输出被“高低半 XOR + 按高位 ror”非线性包装；先恢复 rotation sequence/低半候选，再用 LCG 关系约束原 seed。 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
-| [SU_RestaurantWP](../raw/crypto/SU_RestaurantWP.md) | Tropical semiring 验证只检查最终矩阵等式和 rank/range；可构造目标矩阵 `T`，再分别构造 `A/B/P/R/S` 压住未知 `fork` 项。 | [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md) |
-| [SU_RSAWP](../raw/crypto/SU_RSAWP.md) | 小 `d` 与 `p+q` 高位泄露同时存在；把 `ed=k(N-S-x+1)+1` 写成二元小根，修正 lattice shift 后用 Resultant 提低位 `x`。 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)、[lattice-and-lwe.md](lattice-and-lwe.md) |
+| [SUCTF2026-AESWP](../raw/crypto/SUCTF2026-AESWP.md) | AES 服务允许分别更新 seed/key，导致当前 S-box 与旧 round keys 不同步；先把 S-box 压成常值恢复 `K10`，再用 probe 值域指纹恢复置换。 | [block-mode-misuse-family.md](block-mode-misuse-family.md) |
+| [SUCTF2026-IsogenyWP](../raw/crypto/SUCTF2026-IsogenyWP.md) | CSIDH 群作用与 2-isogeny 交换，三条 2-isogenous 共享曲线高位泄露可建 CI-HNP 小根方程，用 Automated Coppersmith 恢复参数。 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)、[lattice-and-lwe.md](lattice-and-lwe.md) |
+| [SUCTF2026-LatticeWP](../raw/crypto/SUCTF2026-LatticeWP.md) | 24 阶 Fibonacci LFSR 只泄露状态高 40 bit，且模数未知但靠近 2 的幂；用高位格找 annihilating polynomials、resultant gcd 恢复模数，再 BKZ 低位状态。 | [lattice-and-lwe.md](lattice-and-lwe.md)、[rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
+| [SUCTF2026-PrngWP](../raw/crypto/SUCTF2026-PrngWP.md) | 256-bit LCG 输出被“高低半 XOR + 按高位 ror”非线性包装；先恢复 rotation sequence/低半候选，再用 LCG 关系约束原 seed。 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
+| [SUCTF2026-RestaurantWP](../raw/crypto/SUCTF2026-RestaurantWP.md) | Tropical semiring 验证只检查最终矩阵等式和 rank/range；可构造目标矩阵 `T`，再分别构造 `A/B/P/R/S` 压住未知 `fork` 项。 | [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md) |
+| [SUCTF2026-RSAWP](../raw/crypto/SUCTF2026-RSAWP.md) | 小 `d` 与 `p+q` 高位泄露同时存在；把 `ed=k(N-S-x+1)+1` 写成二元小根，修正 lattice shift 后用 Resultant 提低位 `x`。 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)、[lattice-and-lwe.md](lattice-and-lwe.md) |
 | [VNCTF2026-ezov-wp](../raw/crypto/VNCTF2026-ezov-wp.md) | UOV/OV 公钥是多组二次型矩阵，中心 oil-oil 块为 0；先恢复等价 vinegar/oil 子空间，再对 `admin` 固定 vinegar 求 oil 伪造签名。 | [homomorphic-and-exotic-algebra.md](homomorphic-and-exotic-algebra.md) |
 | [VNCTF2026-hd-is-what-wp](../raw/crypto/VNCTF2026-hd-is-what-wp.md) | SIDH/SIKE 公钥向量先被公开 seed 的 LCG 矩阵线性混淆；恢复标准公钥后再用 Castryck-Decru attack 求共享 j。 | [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)、[mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
 | [VNCTF2026-math-rsa-wp](../raw/crypto/VNCTF2026-math-rsa-wp.md) | 泄露式可因式分解为 `(x+1)^2(y-1)^2=4k`，其中 `x=phi-1`、`y=t+1`；枚举 16-bit `t/2` 即可恢复 `phi`。 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)、[number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
@@ -134,6 +137,7 @@ updated: 2026-07-06
 ## 关联技巧
 
 - [block-mode-misuse-family.md](block-mode-misuse-family.md)
+- [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
 - [exotic-secret-sharing-rabin-and-polynomials.md](exotic-secret-sharing-rabin-and-polynomials.md)
 - [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md)
@@ -146,4 +150,4 @@ updated: 2026-07-06
 
 ## 原始资料
 
-本页原始资料以“WP 案例沉淀”表中的 raw WP 链接为准，共 69 篇。
+本页原始资料以“WP 案例沉淀”表中的 raw WP 链接为准，共 71 篇。

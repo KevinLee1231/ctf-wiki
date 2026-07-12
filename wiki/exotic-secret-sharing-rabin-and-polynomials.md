@@ -5,7 +5,7 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md
   - ../raw/crypto/D3CTF2022-d3share-wp.md
-  - ../raw/misc/VNCTF2026-mymnemonic-wp.md
+  - ../raw/crypto/VNCTF2026-mymnemonic-wp.md
 updated: 2026-07-06
 ---
 
@@ -47,7 +47,7 @@ updated: 2026-07-06
 |---|---|
 | [exotic-secret-sharing-rabin-and-polynomials.md](../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md) | 原始资料内覆盖 Cayley-Purser 等价解密、Asmuth-Bloom CRT sharing、Rabin 四根/多项式素数、Vandermonde 系数恢复和 LCG 周期检测；这些都先写结构方程，再决定转 CRT、线性系统、Rabin roots 或 PRNG。 |
 | [D3CTF2022-d3share-wp](../raw/crypto/D3CTF2022-d3share-wp.md) | 扰动多项式 secret sharing 不能当普通 Shamir；先用拉格朗日插值得到扰动组合，再利用小值结构、LLL/子集和或三点等式分辨 `g/h` 分支。 |
-| [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md) | 192-bit 数据不是完整助记词索引流而是 BIP39 `ENT`；先按 `CS = ENT / 32` 补 SHA256 checksum，再按 11-bit 映射中文词表并 PBKDF2 派生 seed。 |
+| [VNCTF2026-mymnemonic-wp](../raw/crypto/VNCTF2026-mymnemonic-wp.md) | 192-bit 数据不是完整助记词索引流而是 BIP39 `ENT`；先按 `CS = ENT / 32` 补 SHA256 checksum，再按 11-bit 映射中文词表并 PBKDF2 派生 seed。 |
 
 ## 资料内长尾模式
 
@@ -84,4 +84,4 @@ updated: 2026-07-06
 
 - [exotic-secret-sharing-rabin-and-polynomials.md](../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md)
 - [D3CTF2022-d3share-wp](../raw/crypto/D3CTF2022-d3share-wp.md)
-- [VNCTF2026-mymnemonic-wp](../raw/misc/VNCTF2026-mymnemonic-wp.md)
+- [VNCTF2026-mymnemonic-wp](../raw/crypto/VNCTF2026-mymnemonic-wp.md)

@@ -72,7 +72,7 @@ updated: 2026-07-06
 | [ACTF2026-gomysql-wp](../raw/web/ACTF2026-gomysql-wp.md) | `/calc` 多语句 MariaDB 注入可写 UDF 并下载 root Go 二进制；最终利用 `/draw` 自写模板的变量替换和 safe/unsafe 顺序执行 `run('cat /flag')`。 |
 | [D3CTF2019-easyweb-wp](../raw/web/D3CTF2019-easyweb-wp.md) | 二次 SQL 注入控制 Smarty 模板，再经 php:phar 触发反序列化 POP 链。 |
 | [D3CTF2019-showhub-wp](../raw/web/D3CTF2019-showhub-wp.md) | insert 注入可用 on duplicate key update 改管理员密码，后续还需 request smuggling 绕过内网 IP 限制。 |
-| [SU_cmsAgainWP](../raw/web/SU_cmsAgainWP.md) | 前台购物车 Cookie 反序列化污染 ProductID 形成 SQLi，盲注拿后台后写 `{~...}` 模板片段触发 ThinkPHP PHP 执行。 |
+| [SUCTF2026-cmsAgainWP](../raw/web/SUCTF2026-cmsAgainWP.md) | 前台购物车 Cookie 反序列化污染 ProductID 形成 SQLi，盲注拿后台后写 `{~...}` 模板片段触发 ThinkPHP PHP 执行。 |
 
 ## 原始资料
 

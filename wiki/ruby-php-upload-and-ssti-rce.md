@@ -80,7 +80,7 @@ updated: 2026-07-06
 | [NCTF2026-openshell-wp](../raw/web/NCTF2026-openshell-wp.md) | OpenCode `/find` 把 `pattern` 拼入 ripgrep 参数并用 Bun shell `raw` 执行；用 bot 访问 GET 路由触发命令注入。 |
 | [RCTF2025-514s-heart-wp](../raw/web/RCTF2025-514s-heart-wp.md) | Koishi 插件静态路由目录穿越先读配置拿后台密码，再用配置 `${{ ... }}` 表达式执行命令。 |
 | [RCTF2025-rootkb-wp](../raw/web/RCTF2025-rootkb-wp.md) | 工具沙箱目录可写且运行时固定 `LD_PRELOAD=sandbox.so`，覆盖共享库后靠 constructor 把 flag 移到 Web 静态目录。 |
-| [SU_cmsAgainWP](../raw/web/SU_cmsAgainWP.md) | 前台购物车 Cookie 反序列化污染 ProductID 形成 SQLi，盲注拿后台后写 `{~...}` 模板片段触发 ThinkPHP PHP 执行。 |
+| [SUCTF2026-cmsAgainWP](../raw/web/SUCTF2026-cmsAgainWP.md) | 前台购物车 Cookie 反序列化污染 ProductID 形成 SQLi，盲注拿后台后写 `{~...}` 模板片段触发 ThinkPHP PHP 执行。 |
 
 ## 原始资料
 

@@ -1,7 +1,7 @@
 ---
 type: family
 tags: [reverse, family, font, shader, legacy-format, side-channel]
-skills: [ctf-reverse, ctf-misc]
+skills: [ctf-reverse, ctf-hardware-embedded, ctf-stego]
 raw:
   - ../raw/reverse/font-shader-firmware-and-legacy-patterns.md
 updated: 2026-07-06
@@ -17,7 +17,7 @@ updated: 2026-07-06
 
 - 附件或题面出现字体、shader、VRAM、LED/ioctl、BPF/JIT、MBR/16-bit、ESP32/Xtensa、BWT/popcount、batch/time lock 等低频载体。
 - 可复用信息不一定在普通函数伪代码里，而可能在渲染替换、图形状态、设备 side effect、采样序列、固件加载基址或脚本约束中。
-- 题目需要先识别“信息如何被承载或观察”，再决定是否转 VM、硬件、反分析、约束求解或 misc。
+- 题目需要先识别“信息如何被承载或观察”，再决定是否转 VM、Hardware/Embedded、反分析、Stego 或其它正式专项。
 - raw 证据通常包含截图、glyph 表、shader 输出、系统调用、日志、设备状态、采样轨迹或非标准格式字段。
 
 ## 最小证据
@@ -31,7 +31,7 @@ updated: 2026-07-06
 
 | 信号 | 先确认 | 下一跳 |
 |---|---|---|
-| OpenType/字体/ligature/私用区字符 | 字体表、glyph substitution、动态加载字体和文本渲染路径 | [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md) |
+| OpenType/字体/ligature/私用区字符 | 字体表、glyph substitution、动态加载字体和文本渲染路径 | [cross-category-triage-family.md](cross-category-triage-family.md) |
 | GLSL/shader/VRAM/图形 VM | shader 状态、self-modifying store、输出图像和可 trace 的渲染路径 | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
 | LED/ioctl、BPF JIT、syscall side effect | 系统调用、设备状态、kernel log 或 side effect 是否承载输出 | [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)、[mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
 | BWT、popcount、single-line Python/Z3、DNN inversion | 能否把变换转为约束、逆变换或小范围枚举 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
@@ -41,7 +41,7 @@ updated: 2026-07-06
 ## 合并与拆分结论
 
 - 保留为 family：raw 覆盖的格式和副作用差异很大，但共同价值是提示“别把它当普通二进制读”。
-- 不合并进 Misc family：本页仍有大量 reverse 执行模型和工具链判断；Misc family 只作为跨方向入口。
+- 不合并进跨方向总入口：本页仍有大量 Reverse 执行模型和工具链判断；总入口只负责首轮分流。
 - 暂不拆字体/shader/BPF 子页：当前案例数量不足以支撑独立 technique，先通过分流表链接到更具体页面。
 
 ## 常见误判
@@ -58,13 +58,13 @@ updated: 2026-07-06
 - [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)
 - [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
 - [anti-analysis.md](anti-analysis.md)
-- [misc-cross-category-triage-family.md](misc-cross-category-triage-family.md)
+- [cross-category-triage-family.md](cross-category-triage-family.md)
 
 ## 来自 WP 的案例索引
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [D3CTF2019-c-c-wp](../raw/misc/D3CTF2019-c-c-wp.md) | 私用区字符依赖动态加载字体，先脱壳跟进字体 hook 并 dump 解密后的字体资源。 |
+| [D3CTF2019-c-c-wp](../raw/reverse/D3CTF2019-c-c-wp.md) | 私用区字符依赖动态加载字体，先脱壳跟进字体 hook 并 dump 解密后的字体资源。 |
 
 ## 原始资料
 

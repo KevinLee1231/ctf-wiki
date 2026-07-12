@@ -1,9 +1,9 @@
 ---
 type: technique
-tags: [misc, pentest, network, bgp, rpki, technique]
-skills: [ctf-misc, ctf-pentest]
+tags: [pentest, network, bgp, rpki, technique]
+skills: [ctf-pentest]
 raw:
-  - ../raw/misc/D3CTF2025-d3rpki-wp.md
+  - ../raw/pentest/D3CTF2025-d3rpki-wp.md
 updated: 2026-07-06
 ---
 
@@ -54,4 +54,4 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [D3CTF2025-d3rpki-wp.md](../raw/misc/D3CTF2025-d3rpki-wp.md)
+- [D3CTF2025-d3rpki-wp.md](../raw/pentest/D3CTF2025-d3rpki-wp.md)

@@ -2,7 +2,7 @@
 type: tooling
 tags: [web, tooling, tools, environment]
 skills: [ctf-web]
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 
 # Web Tooling
@@ -13,7 +13,7 @@ updated: 2026-07-06
 
 ### 入口选择
 
-- Web 首轮优先 Burp MCP + `curl`：先保存请求/响应、cookie、redirect、认证状态和差异样本。
+- Web 首轮无条件用 `curl` 建 baseline；先检查 Burp MCP 是否 callable，可用时再结合 Burp 保存请求/响应、cookie、redirect、认证状态和差异样本。
 - fuzz/扫描要有边界：确认应用面不足时才用 `ffuf/gobuster/feroxbuster`，确认注入信号后才用 `sqlmap`。
 - Java/PHP 反序列化、hash length extension、JWT/JWE、PDF 附件等专项工具按本页路径进入，不要和普通请求测试混在一起。
 
@@ -35,7 +35,7 @@ updated: 2026-07-06
 
 | 工具 | 为什么放在首轮 |
 |---|---|
-| Burp MCP | 直接看请求/响应、认证流和参数，是 Web 题最有信息密度的入口 |
+| Burp Suite / Burp MCP | 先检查是否 callable；可用时查看请求/响应、认证流和参数，不可用时回退 `curl` |
 | `curl` | 快速看跳转、响应头、Cookie 和基础行为 |
 | `gobuster` / `ffuf` | 当应用面还不完整时，用来补隐藏路由 |
 | `sqlmap` | 只有在已出现注入信号时，才作为快速验证工具进入首轮 |
@@ -62,7 +62,9 @@ updated: 2026-07-06
 
 ## 详细清单
 
-### Burp Suite MCP（第一优先）
+### Burp Suite MCP（可选，先检查）
+
+Burp MCP 是高信息密度入口，但不是稳定常驻事实。当前桥接端口不可达且工具清单未暴露 Burp 方法；每次使用前先检查 callable，失败时用 `curl`、浏览器开发者工具或手工 Burp 建 baseline。
 
 | 工具 | 功能 | 调用方式 |
 |---|---|---|
@@ -127,7 +129,7 @@ updated: 2026-07-06
 
 ## Burp Suite MCP 详细操作
 
-Burp Suite 已连接为 MCP 服务器，可通过工具直接控制 Burp 功能。以下工具可在 CTF 解题中直接调用：
+以下是 Burp MCP callable 时可用的方法参考；不要据此推断当前已经连接。当前工具清单没有相应方法时，不得直接调用：
 
 ### 编码/解码工具
 

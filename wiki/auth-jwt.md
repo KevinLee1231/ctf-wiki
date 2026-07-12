@@ -70,7 +70,7 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [ACTF2026-aaa26-wp](../raw/web/ACTF2026-aaa26-wp.md) | Mongo `$regex` 盲注恢复 reviewer invite code，vm2 里用 Buffer slab 泄露 JWT secret，伪造 admin 后上传伪 PDF/SVG 让 ImageMagick `text:/flag` 渲染。 |
-| [D3CTF2025-d3invitation-wp](../raw/web/D3CTF2025-d3invitation-wp.md) | MinIO STS session token 是 JWT，object_name 可注入 policy 影响对象访问权限。 |
+| [D3CTF2025-d3invitation-wp](../raw/cloud-infra/D3CTF2025-d3invitation-wp.md) | MinIO STS session token 是 JWT，object_name 可注入 policy 影响对象访问权限。 |
 
 ## 原始资料
 

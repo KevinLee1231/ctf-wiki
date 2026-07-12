@@ -2,7 +2,7 @@
 type: tooling
 tags: [pwn, tooling, tools, environment]
 skills: [ctf-pwn]
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 
 # Pwn Tooling
@@ -89,7 +89,7 @@ conda deactivate
 
 | 工具 | 路径 | 版本 | 功能 | 典型用法 |
 |---|---|---|---|---|
-| **GDB + pwndbg** | `/usr/bin/gdb` + `/home/kali/pwndbg` | 17.1 | 源码/汇编级调试，`~/.gdbinit` 已配置自动加载 pwndbg | `gdb -q ./bin -ex 'start' -ex 'checksec'` |
+| **GDB + pwndbg** | `/usr/bin/gdb` + `/home/kali/pwndbg` | 17.2 | 源码/汇编级调试，`~/.gdbinit` 已配置自动加载 pwndbg | `gdb -q ./bin -ex 'start' -ex 'checksec'` |
 | **objdump** | `/usr/bin/objdump` | 2.46 | 二进制反汇编 | `objdump -d ./bin \| grep -B1 "pop.*rdi"` |
 | **readelf** | `/usr/bin/readelf` | 2.46 | ELF 结构分析（节头/段头/符号表/动态表） | `readelf -h ./bin; readelf -S ./bin` |
 | **nm** | `/usr/bin/nm` | 2.46 | 符号表列出 | `nm ./bin \| grep win` |

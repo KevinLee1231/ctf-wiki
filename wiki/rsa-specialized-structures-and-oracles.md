@@ -8,7 +8,7 @@ raw:
   - ../raw/crypto/LilacCTF2026-myrsa-wp.md
   - ../raw/crypto/NCTF2026-ez-rsa-wp.md
   - ../raw/crypto/NCTF2026-hard-rsa-wp.md
-  - ../raw/crypto/SU_RSAWP.md
+  - ../raw/crypto/SUCTF2026-RSAWP.md
   - ../raw/crypto/VNCTF2026-math-rsa-wp.md
 updated: 2026-07-06
 ---
@@ -58,7 +58,7 @@ updated: 2026-07-06
 | [LilacCTF2026-myrsa-wp](../raw/crypto/LilacCTF2026-myrsa-wp.md) | 三素数 RSA 中 `p=pp^2+3pp+3` 可整理成 CM 曲线 trace 关系；平方根 oracle 给出一个点后，可用 ECM 型点乘和 `gcd` 分解 `n`。 |
 | [NCTF2026-ez-rsa-wp](../raw/crypto/NCTF2026-ez-rsa-wp.md) | hint 从两端约束 `p/q` bit；DFS 时同时检查乘积上下界和低位乘积模约束。 |
 | [NCTF2026-hard-rsa-wp](../raw/crypto/NCTF2026-hard-rsa-wp.md) | RSA-like `phi_6(N)` 需要 generalized Wiener：连分数恢复小参数，再把 `p_hat` 近似转成 Coppersmith 或近邻分解。 |
-| [SU_RSAWP](../raw/crypto/SU_RSAWP.md) | 小 `d` 与 `p+q` 高位泄露组合成 Boneh-Durfee/Coppersmith 二元小根；格构造要按 `k,x` 的绑定关系调整 shift。 |
+| [SUCTF2026-RSAWP](../raw/crypto/SUCTF2026-RSAWP.md) | 小 `d` 与 `p+q` 高位泄露组合成 Boneh-Durfee/Coppersmith 二元小根；格构造要按 `k,x` 的绑定关系调整 shift。 |
 | [VNCTF2026-math-rsa-wp](../raw/crypto/VNCTF2026-math-rsa-wp.md) | 大整数 `k` 不是分解线索，而是可因式分解的 `phi` 恒等式；枚举短参数即可恢复 `phi` 直接解密。 |
 | [D3CTF2019-bivariate-wp](../raw/crypto/D3CTF2019-bivariate-wp.md) | RSA 素数中间位泄露可写成二元小根，先估计未知高低位界并构造 Coppersmith 格。 |
 | [D3CTF2019-common-wp](../raw/crypto/D3CTF2019-common-wp.md) | 共模 RSA 小私钥指数变体，先把 Wiener/Guo 方程转成低维格再恢复 phi。 |
@@ -67,7 +67,7 @@ updated: 2026-07-06
 | [D3CTF2025-d3sys-p2-2-0-wp](../raw/crypto/D3CTF2025-d3sys-p2-2-0-wp.md) | RSA/CRT 因子有已知线性近似且修正项很小，优先建 partial factoring 小根模型。 |
 | [HGAME2026-babyrsa-wp](../raw/crypto/HGAME2026-babyrsa-wp.md) | `p,q` 公开但模数小于完整 flag，密文只约束 `m mod n`；结合前后缀、长度和字符集用格恢复原明文字节。 |
 | [HGAME2026-ezrsa-wp](../raw/crypto/HGAME2026-ezrsa-wp.md) | 指数 bit-flip 加密 oracle 可恢复 `n` 和 50-bit `e`，拿到 flag 密文后再用解密 oracle 做低字节推进。 |
-| [ACTF2026-zjuam-just-uses-awful-math-wp](../raw/misc/ACTF2026-zjuam-just-uses-awful-math-wp.md) | HTTP 抓包里暴露弱 RSA 公钥和密文，虽然归在 misc raw，首轮应 pivot 到 crypto/RSA 参数分解。 |
+| [ACTF2026-zjuam-just-uses-awful-math-wp](../raw/crypto/ACTF2026-zjuam-just-uses-awful-math-wp.md) | HTTP 抓包里暴露弱 RSA 公钥和密文；载体是 HTTP，但决定性主障碍是 Crypto/RSA 参数分解。 |
 
 ## 合并与拆分结论
 
@@ -98,5 +98,5 @@ updated: 2026-07-06
 - [LilacCTF2026-myrsa-wp](../raw/crypto/LilacCTF2026-myrsa-wp.md)
 - [NCTF2026-ez-rsa-wp](../raw/crypto/NCTF2026-ez-rsa-wp.md)
 - [NCTF2026-hard-rsa-wp](../raw/crypto/NCTF2026-hard-rsa-wp.md)
-- [SU_RSAWP](../raw/crypto/SU_RSAWP.md)
+- [SUCTF2026-RSAWP](../raw/crypto/SUCTF2026-RSAWP.md)
 - [VNCTF2026-math-rsa-wp](../raw/crypto/VNCTF2026-math-rsa-wp.md)

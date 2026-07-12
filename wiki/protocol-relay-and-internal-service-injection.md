@@ -64,7 +64,7 @@ updated: 2026-07-06
 | [WMCTF2025-rustdesk-change-client-backend-wp](../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md) | RustDesk hbbs 只在部分消息路径校验 key，伪造 `RequestRelay` 让受控端连接 `127.0.0.1:6379`，再用 uuid 中的 CRLF Redis 命令触发主从同步加载模块 RCE。 |
 | [HGAME2026-my-little-assistant-wp](../raw/web/HGAME2026-my-little-assistant-wp.md) | MCP 工具只暴露 `py_request`，但 Playwright 禁用 Web 安全后外部页面可请求 localhost MCP JSON-RPC 调用 `py_eval`。 |
 | [RCTF2025-rootkb-dash-wp](../raw/web/RCTF2025-rootkb-dash-wp.md) | 工具沙箱可连默认口令 Redis，Celery token key 使用 pickle 且类加载限制不足，写恶意 pickle 等管理员会话触发。 |
-| [SU_uriWP](../raw/web/SU_uriWP.md) | 后端 SSRF 只检查解析时 IP，不绑定后续连接结果；DNS rebinding 命中 Docker Remote API 后挂载宿主根目录执行 `/readflag`。 |
+| [SUCTF2026-uriWP](../raw/web/SUCTF2026-uriWP.md) | 后端 SSRF 只检查解析时 IP，不绑定后续连接结果；DNS rebinding 命中 Docker Remote API 后挂载宿主根目录执行 `/readflag`。 |
 
 ## 原始资料
 

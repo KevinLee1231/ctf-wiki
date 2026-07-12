@@ -1,7 +1,7 @@
 ---
 type: family
 tags: [pwn, family, sandbox, vm, proc, emulator]
-skills: [ctf-pwn, ctf-misc, ctf-reverse]
+skills: [ctf-pwn, ctf-reverse]
 raw:
   - ../raw/pwn/python-vm-and-proc-sandbox-escape.md
 updated: 2026-06-12

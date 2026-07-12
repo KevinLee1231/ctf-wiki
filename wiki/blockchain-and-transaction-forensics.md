@@ -1,9 +1,9 @@
 ---
 type: technique
 tags: [forensics, osint, technique, blockchain, transaction, bitcoin, ethereum, utxo]
-skills: [ctf-forensics, ctf-osint]
+skills: [ctf-blockchain, ctf-forensics, ctf-osint]
 raw:
-  - ../raw/forensics/blockchain-and-transaction-forensics.md
+  - ../raw/blockchain/blockchain-and-transaction-forensics.md
 updated: 2026-07-06
 ---
 
@@ -63,4 +63,4 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [blockchain-and-transaction-forensics.md](../raw/forensics/blockchain-and-transaction-forensics.md)
+- [blockchain-and-transaction-forensics.md](../raw/blockchain/blockchain-and-transaction-forensics.md)

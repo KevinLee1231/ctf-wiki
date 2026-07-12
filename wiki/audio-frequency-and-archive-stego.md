@@ -1,10 +1,10 @@
 ---
 type: family
-tags: [forensics, misc, family, audio, frequency, archive, stego]
-skills: [ctf-forensics, ctf-misc]
+tags: [stego, forensics, family, audio, frequency, archive]
+skills: [ctf-stego, ctf-forensics]
 raw:
-  - ../raw/forensics/audio-frequency-and-archive-stego.md
-  - ../raw/misc/WMCTF2025-voice-hacker-wp.md
+  - ../raw/stego/audio-frequency-and-archive-stego.md
+  - ../raw/forensics/WMCTF2025-voice-hacker-wp.md
 updated: 2026-07-06
 ---
 
@@ -47,7 +47,7 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [WMCTF2025-voice-hacker-wp](../raw/misc/WMCTF2025-voice-hacker-wp.md) | 从 RTP 导出的参考音频可以用 TTS/语音克隆生成口令音频，但真正验收条件是后端比较的 wav 长度、振幅、采样数和相似度阈值。 |
+| [WMCTF2025-voice-hacker-wp](../raw/forensics/WMCTF2025-voice-hacker-wp.md) | 从 RTP 导出的参考音频可以用 TTS/语音克隆生成口令音频，但真正验收条件是后端比较的 wav 长度、振幅、采样数和相似度阈值。 |
 
 ## 合并与拆分结论
 
@@ -72,5 +72,5 @@ updated: 2026-07-06
 
 ## 原始资料
 
-- [audio-frequency-and-archive-stego.md](../raw/forensics/audio-frequency-and-archive-stego.md)
-- [WMCTF2025-voice-hacker-wp](../raw/misc/WMCTF2025-voice-hacker-wp.md)
+- [audio-frequency-and-archive-stego.md](../raw/stego/audio-frequency-and-archive-stego.md)
+- [WMCTF2025-voice-hacker-wp](../raw/forensics/WMCTF2025-voice-hacker-wp.md)

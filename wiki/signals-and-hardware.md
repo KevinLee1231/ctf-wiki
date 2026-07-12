@@ -1,9 +1,9 @@
 ---
 type: family
 tags: [forensics, family, signal, hardware, side-channel, bus]
-skills: [ctf-forensics, ctf-reverse, ctf-misc]
+skills: [ctf-hardware-embedded, ctf-forensics, ctf-reverse]
 raw:
-  - ../raw/forensics/signals-and-hardware.md
+  - ../raw/hardware-embedded/signals-and-hardware.md
 updated: 2026-06-12
 ---
 
@@ -66,4 +66,4 @@ updated: 2026-06-12
 
 ## 原始资料
 
-- [signals-and-hardware.md](../raw/forensics/signals-and-hardware.md)
+- [signals-and-hardware.md](../raw/hardware-embedded/signals-and-hardware.md)

@@ -1,7 +1,7 @@
 ---
 type: family
 tags: [web, family, oauth, oidc, saml, cors, cicd]
-skills: [ctf-web]
+skills: [ctf-web, ctf-cloud-infra]
 raw:
   - ../raw/web/oauth-saml-cors-and-cicd.md
 updated: 2026-06-12

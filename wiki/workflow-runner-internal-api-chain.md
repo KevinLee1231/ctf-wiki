@@ -1,7 +1,7 @@
 ---
 type: technique
 tags: [web, pentest, workflow, runner, internal-api, graphql, mcp, build, token, lateral-movement]
-skills: [ctf-web, ctf-pentest]
+skills: [ctf-web, ctf-cloud-infra, ctf-pentest]
 raw:
   - ../raw/web/Spirit2026-5-flowforge-wp.md
 updated: 2026-07-06
