@@ -1,0 +1,67 @@
+# week4我也不知道取啥名捏
+
+## 题目简述
+
+题目给出一组 RSA 参数 $(n,e,c)$。素数 $p$ 正常生成，但 $q$ 由 $p$ 的 1024 位按位取反、扰动低 16 位后再取下一个素数得到。目标是利用两个因子的强相关性分解 $n$，再进行标准 RSA 解密。
+
+## 解题过程
+
+设 $L=2^{1024}-1$。对 1024 位整数异或 $L$ 等价于在该宽度内逐位取反，因此
+
+$$
+p\oplus L=L-p.
+$$
+
+题目只在结果的低 16 位异或随机数，随后调用 `next_prime()`，所以高位上仍有 $q\approx L-p$，即
+
+$$
+p+q\approx2^{1024}.
+$$
+
+若暂时把近似和记为 $S=2^{1024}$，由 $pq=n$ 可把 $p,q$ 看作方程
+
+$$
+X^2-SX+n=0
+$$
+
+的两个根，较大的根近似为
+
+$$
+p_0=\frac{S+\sqrt{S^2-4n}}{2}.
+$$
+
+误差只来自低位扰动和相邻素数间隔，因此从 $p_0$ 向上枚举后续素数，很快就能找到整除 $n$ 的真实因子。完整解密脚本如下：
+
+~~~python
+from Crypto.Util.number import inverse, long_to_bytes
+from gmpy2 import isqrt, next_prime
+
+n = 0x2D664B36D81E6B469D7ECF3E92B4635A9361B834484478CDD58258A2A68ABC3EBC4A5CD75CD2B9F2E2A851955F7DC08253D39EC9CC0443FCF3836BEF9FBFD1F66FAC032247D573EE6F647B40DE0B76DD1250EC2FF0DE257C3E9D8626AA0F9627852669492476F399878E26B8744089EBDF3D1D5B58ADC6CE080A49C27D1D04440A692ECAA4621642C034B516F5B11E25D448E970F8212C72A63F30DEE5658BB97D72C3216DCF5FBF111D14F0945BDA5F3CD79769ECF867A28EA581986D1E906322542D114F021E2BC5597C57CAD9BE1E284B5AD3632A827A052B4EF6DA125E8987AECCDDBA47C1201E9156E5245C753A5806D5D6A7BFD0C1E627A6694DB42FA1
+c = 0x51D7E86E676E3816646D9B1DDDC60505B08004176DED1F4DCFBC2BE43B4AD7DB28E750E923B2C31A67E61C75A1080C8D2E984F5180186085739D2E1EE591837C3579D1E399AABEB28C0ADCC0851791C865E4B2EAFC4753E274B0A3240A96FB07C9B5E99F1FE524913FAF082161AAF4CEDA5367805642E7B3FE4C2A34289AEE31F95D54AA70BBD2356D0FF634F9118D93BDF1D7FEF44EE291C37DE0BC19CC2CFBCDE8F2D35A0083A543FE073ECBF5F599091A2E4C49F914BF7001111FE28BAA1726CBFE23964D743DB93091F9486399B5F611E94CF0891707D69B4BA9299EDA098A0F157A5CDDE2279C3E7291FC2E1A63B158B37D767B7D3B5EE333E2681779C
+e = 65537
+
+S = 1 << 1024
+discriminant = S * S - 4 * n
+p = int((S + isqrt(discriminant)) // 2)
+
+while n % p != 0:
+    p = int(next_prime(p))
+
+q = n // p
+phi = (p - 1) * (q - 1)
+d = inverse(e, phi)
+plaintext = long_to_bytes(pow(c, d, n))
+print(plaintext.decode())
+~~~
+
+输出为：
+
+~~~text
+0xGame{c3c7bca98ce4dc4cce797d8197597a40}
+~~~
+
+也可以按位恢复：先令 $p$ 的高位全为 1、$q$ 的高位全为 0，再从高位到低位尝试交换互补位，并根据候选乘积是否小于 $n$ 决定该位。低约 20 位受随机扰动影响，最后再枚举附近素数即可。两种方法利用的都是同一个弱点——$p$ 与 $q$ 的高位几乎完全互补。
+
+## 方法总结
+
+RSA 要求两个素数彼此独立。这里虽然 $p$ 本身是强素数，但由其按位取反派生 $q$，等于泄露了两者的近似和，使分解退化为求二次方程近似根并搜索很小的低位误差。检查自定义密钥生成器时，应优先寻找因子之间的和、差、异或或共享位关系。

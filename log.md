@@ -1618,8 +1618,48 @@
 - 修改前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ctf-skills-14-directions-20260711-215607.zip`，共 157 个条目、569,032 bytes，包含当时 12 个 CTF skill 及全部 active wiki/root 元数据。
 - 本轮未修改 raw 正文或 raw 物理结构。最终校验：16 个 skill 目录齐全且 frontmatter name 一致；14 个正式方向在总分流表中无缺项；138 个 wiki 页 type 合法、全部被 index 覆盖、frontmatter 不含不存在的 skill；检查 3,625 个非代码块 active 本地链接与 85 个 skill wiki/index 直链，断链均为 0；`git diff --check` 通过。
 
+## 2026-07-15 — 0xGame2025 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、优化并完成图片筛选的 115 篇单题 WP 归档到 `raw/<category>/`；归档名统一为 `0xGame2025-weekX-<challenge>-wp.md`，其中 `X` 保留四周赛程信息，文件名和资源目录只使用文字、数字与连字符。
+- 按决定性主障碍归档：AI/ML 2 篇、Blockchain 1 篇、Crypto 30 篇、Forensics 9 篇、OSINT 3 篇、Pentest 3 篇、Pwn 22 篇、Reverse 26 篇、Stego 2 篇、Web 17 篇。
+- 对 6 篇源目录分类作了复核调整：`ezShiro` 从 Web 改为 Forensics；`旧吊带袜天使：想吃真蛋糕的Stocking` 改为 AI/ML；`消栈逃出沙箱(1)反正不会有2` 改为 Pwn；`New_Python!` 改为 Crypto；`你好，爪洼脚本` 改为 Reverse；`放开我的变量` 改为 Pentest。
+- 移动并规范化 11 个图片目录、15 张图片，目标目录与归档 Markdown 同 basename；归档 WP 使用同层相对链接，源 WP 改为指向 raw 新位置，源目录不再残留旧图片文件夹。
+- 本轮只新增 raw 资料并更新 `index.md` 的 live 统计与本日志，不新增或修改 `wiki/*.md`；raw 总数由 614 增至 729。
+- 归档前备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2025-wp-before-archive-20260715-201052.zip`，共 135 个条目、8,682,669 bytes。
+- 校验结果：四周题量为 30、33、28、24；115 篇归档 WP 均保留“题目简述、解题过程、方法总结”三段且代码围栏闭合；104 篇无图 WP 与源文件 SHA-256 完全相同，全部 115 篇在忽略图片目标路径后内容一致；源与归档各 15 个图片引用均可解析，赛事资源目录无孤立项、资源文件无未引用项，目标命名冲突和非法名称均为 0。
+
+## 2026-07-16 — 0xGame2024 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、优化并完成图片筛选的 110 篇单题 WP 归档到 `raw/<category>/`；归档名统一为 `0xGame2024-weekX-<challenge>-wp.md`，其中 `X` 保留四周赛程信息，文件名和资源目录只使用文字、数字与连字符，Markdown 一级标题继续保留完整题目名和原有特殊字符。
+- 按决定性主障碍归档：Blockchain 3 篇、Crypto 26 篇、Forensics 8 篇、Hardware/Embedded 1 篇、Malware 3 篇、OSINT 2 篇、Pwn 20 篇、Reverse 20 篇、Stego 4 篇、Web 23 篇。
+- 对 3 篇源目录分类作了复核调整：`FirstSight-Android` 与 `JustSoSo` 都是普通 APK/JNI 算法还原，从 Mobile 改归 Reverse；`Encrypted file` 的决定性步骤是恢复冰蝎 WebShell 通信、命令流和加密配置，从 Forensics 改归 Malware。
+- 移动并规范化 12 个图片目录、19 张图片，目标目录与归档 Markdown 同 basename；归档 WP 全部使用同层相对链接。目标端校验通过后，源 `wp` 下 110 篇 Markdown、12 个图片目录和剩余空方向目录均已清理，`wp` 根目录现为空。
+- 本轮只新增 raw 资料、更新 `index.md` live 统计和本日志，不新增或修改 `wiki/*.md`；raw 总数由 729 增至 839。
+- 归档前备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2024-wp-before-archive-20260716-102805.zip`，共 129 个文件、8,257,102 bytes。
+- 校验结果：110 篇归档 WP 均保留“题目简述、解题过程、方法总结”三段，代码围栏和展示数学公式标记闭合；19 个图片引用全部可解析，赛事资源目录无孤立项、资源文件无未引用项，目标命名冲突、旧版本冲突和非法名称均为 0。
+
+## 2026-07-16 — 0xGame2023 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/0xGame2023-main/wp` 中已经拆分、优化并完成图片筛选的 100 篇单题 WP 归档到 `raw/<category>/`；归档名统一为 `0xGame2023-weekX-<challenge>-wp.md`，文件名和资源目录只使用文字、数字与连字符，Markdown 一级标题继续保留题目原有空格和标点。
+- 按决定性主障碍归档：Blockchain 5 篇、Crypto 22 篇、Forensics 4 篇、OSINT 1 篇、Pwn 23 篇、Reverse 21 篇、Stego 3 篇、Web 19 篇；另有 2 篇保留在 `_unclassified`。
+- 逐篇复核后没有机械调整 98 篇正式方向题；`高数大师` 的主障碍是 SymPy 自动交互，`魔方大师` 的主障碍是魔方表示转换与限时求解，两者均不具备稳定的安全技术主方向，因此明确保留为待复核纯规则题，而不是硬归 Crypto、Reverse 或 Pwn。
+- 移动并规范化 4 个图片目录、6 张图片，目标目录与归档 Markdown 同 basename；归档版使用同层相对链接，源 WP 改为指向 raw 新位置，源树不再残留旧图片目录。
+- 本轮只新增 raw 资料、更新 `index.md` live 统计和本日志，不新增或修改 `wiki/*.md`；raw 总数由 839 增至 939，`_unclassified` 由 0 增至 2。
+- 归档前备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2023-wp-before-archive-20260716-153420.zip`；另将归档前未提交的 `index.md`、`log.md` 定点备份到 `D:/文档/markdown文件/ctf-wiki/backups/pre-0xGame2023-raw-archive-20260716-153420.zip`。
+- 校验结果：四周题量为 29、26、25、20；96 篇无图 WP 与源文件 SHA-256 完全相同，4 篇含图 WP 除链接目标外内容一致；100 篇归档 WP 三段结构完整，代码围栏和展示数学公式标记闭合；源与归档各 6 个图片引用均可解析，赛事资源目录无孤立项、资源文件无未引用项，目标命名冲突、旧版本冲突和非法名称均为 0。
+
+## 2026-07-16 — 0xGame2022 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、优化并完成图片筛选的 87 篇单题 WP 归档到 `raw/<category>/`；归档名统一为 `0xGame2022-weekX-<challenge>-wp.md`，文件名和资源目录只使用文字、数字与连字符，Markdown 一级标题继续保留题目原有空格和标点。
+- 按决定性主障碍归档：Crypto 23 篇、Forensics 5 篇、OSINT 1 篇、Pwn 23 篇、Reverse 15 篇、Stego 6 篇、Web 14 篇。
+- 逐篇复核后调整 1 篇分类：`week1re3` 全文只涉及标准 Base64 识别与解码，不依赖程序行为还原，按现行表示层编码边界从 Reverse 改归 Crypto；其余 86 篇保持原方向。
+- 迁移并规范化 5 个图片目录、6 张图片，目标目录与归档 Markdown 同 basename，6 条图片引用均改为新的同层相对路径。目标端预验收通过后，源 `wp` 各方向下的 87 篇 Markdown 与 5 个图片目录已清理，一级方向目录保留为空目录。
+- 本轮只新增 raw 资料、更新 `index.md` live 统计和本日志，不新增或修改 `wiki/*.md`；raw 总数由 939 增至 1026。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2022-wp-before-archive-20260716-154514.zip`，共 93 个文件、453,273 bytes；另将归档前未提交的 `index.md`、`log.md` 定点备份到 `D:/文档/markdown文件/ctf-wiki/backups/pre-0xGame2022-raw-archive-20260716-154514.zip`。
+- 校验结果：四周题量为 26、22、24、15；87 篇归档 WP 与源文件内容一致，仅 5 篇按目标资源目录改写图片路径；三段结构、代码围栏和数学标记均闭合；6 个图片引用全部可解析，赛事资源目录无孤立项、资源文件无未引用项，目标命名冲突、旧版本冲突和非法名称均为 0；源 `wp` 下剩余 Markdown、文件和嵌套资源目录均为 0。
+
 ## 2026-07-16 — Bugku 前缀 0xGame2022 逆向重复 WP 清理
 
 - 删除 `raw/reverse/` 下 14 篇 `Bugku-week*_re*-wp.md` 旧归档；这些 WP 已由 `0xGame2022-week*-re*-wp.md` 归档承接，未发现同 basename 资源目录需要迁移。
 - 将 `wiki/*.md` 中指向旧 Bugku raw 的案例链接改为新的 0xGame2022 raw 路径；其中 `week1re3` 按表示层编码边界指向 `raw/crypto/0xGame2022-week1-re3-wp.md`，其余 13 篇指向 `raw/reverse/`。
-- 同步 `index.md` 提交内 raw 统计：Crypto 从 114 增至 115，Reverse 从 136 降至 135，总数保持 614；工作区中后续 0xGame raw 归档统计继续留在未提交修改中。
+- 同步 `index.md` live raw 统计：Reverse 从 218 降至 204，raw 总数从 1026 降至 1012。
