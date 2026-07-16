@@ -60,7 +60,7 @@ updated: 2026-06-12
 | [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | VMP 程序可用 TitanHide 或 CE VEH 调试，断 `GetSystemTimeAsFileTime` 找 OEP，再 dump 后处理真实登录和解密逻辑。 |
 | [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Java 层检测 Frida 端口、Flutter 检测 Java hook，native `nativeadd` 还 self-hook libart；检测绕过和真实算法恢复需要一起建模。 |
 | [Bugku-foolme-wp](../raw/reverse/Bugku-foolme-wp.md) | 早期 sleep/exit 和 decoy target 误导动态运行，先区分反分析门槛与真正静态校验逻辑。 |
-| [Bugku-week2_re3-wp](../raw/reverse/Bugku-week2_re3-wp.md) | `.init_array` 中 `ptrace` 控制代码自解密；先静态复现 XOR patch，再对真实 RC4 函数提 key 和密文。 |
+| [0xGame2022-week2-re3-wp](../raw/reverse/0xGame2022-week2-re3-wp.md) | `.init_array` 中 `ptrace` 控制代码自解密；先静态复现 XOR patch，再对真实 RC4 函数提 key 和密文。 |
 | [D3CTF2023-d3hell-wp](../raw/reverse/D3CTF2023-d3hell-wp.md) | exe+dll 通过 DllMain 注入真假输入和反调试，先区分 TEA 解密真参数与 fake flag。 |
 | [D3CTF2025-aliceinpuzzle-wp](../raw/reverse/D3CTF2025-aliceinpuzzle-wp.md) | 父进程 ptrace、实时信号、SMC 和 memfd/fexecve 串联，先分离反分析外壳和内层 puzzle。 |
 | [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | SIGSEGV/SIGTRAP/SIGFPE handler 改 RC4 状态，`TracerPid` 混入 key；先 patch 反调试或复现 handler 后断 `memcmp`。 |

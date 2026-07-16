@@ -70,8 +70,8 @@ updated: 2026-06-12
 | [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md) | CUDA fatbin 中宿主先解出 NPU bytecode；提取 `MOV_IMM` 比较常量后逆 RC4 drop-512 和多层 S-box/XOR 变换。 |
 | [Bugku-BabyRE-wp](../raw/reverse/Bugku-BabyRE-wp.md) | 主函数只做自定义 base8 第一层，第二层藏在 `atexit` 回调；用输入尾部 6 位十进制 RC4 key 约束反解。 |
 | [Bugku-EasyVT-wp](../raw/reverse/Bugku-EasyVT-wp.md) | `EasyVT.sys` 模拟 VT-x，驱动 VM-exit handler 只是调度壳；核心校验是 TEA 变体和 RC4，优先静态恢复 handler switch。 |
-| [Bugku-week2_re3-wp](../raw/reverse/Bugku-week2_re3-wp.md) | `.init_array` 中 `ptrace` 控制代码自解密；先静态复现 XOR patch，再对真实 RC4 函数提 key 和密文。 |
-| [Bugku-week3_re3-wp](../raw/reverse/Bugku-week3_re3-wp.md) | 256 字节 S-box、双索引 `i/j`、swap 和 PRGA 输出是 RC4 强特征；确认 key `0xGame2022` 后同算法解密密文。 |
+| [0xGame2022-week2-re3-wp](../raw/reverse/0xGame2022-week2-re3-wp.md) | `.init_array` 中 `ptrace` 控制代码自解密；先静态复现 XOR patch，再对真实 RC4 函数提 key 和密文。 |
+| [0xGame2022-week3-re3-wp](../raw/reverse/0xGame2022-week3-re3-wp.md) | 256 字节 S-box、双索引 `i/j`、swap 和 PRGA 输出是 RC4 强特征；确认 key `0xGame2022` 后同算法解密密文。 |
 | [D3CTF2021-zigzag-encryptor-wp](../raw/reverse/D3CTF2021-zigzag-encryptor-wp.md) | Zigzag 图形编码叠加 LFSR 流密码，先还原图像排列再用已知明文恢复递推。 |
 | [D3CTF2023-d3rc4-wp](../raw/reverse/D3CTF2023-d3rc4-wp.md) | RC4 或流密码恢复是主线，先确认 key 调度、明密文边界和 keystream 可复用性。 |
 | [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | SIGSEGV/SIGTRAP/SIGFPE handler 改 RC4 状态，`TracerPid` 混入 key；先 patch 反调试或复现 handler 后断 `memcmp`。 |

@@ -67,7 +67,7 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [Bugku-week2_re2-wp](../raw/reverse/Bugku-week2_re2-wp.md) | Go `math/big` 调用链是 RSA 校验；重点是提取 `n/c/e` 并注意 `SetString` 的 base 参数，密文是八进制。 |
+| [0xGame2022-week2-re2-wp](../raw/reverse/0xGame2022-week2-re2-wp.md) | Go `math/big` 调用链是 RSA 校验；重点是提取 `n/c/e` 并注意 `SetString` 的 base 参数，密文是八进制。 |
 
 ## 原始资料
 

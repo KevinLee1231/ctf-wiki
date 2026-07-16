@@ -51,7 +51,7 @@ updated: 2026-07-11
 | [SUCTF2026-Artifact_OnlineWP](../raw/stego/SUCTF2026-Artifact_OnlineWP.md) | 本库按 Stego 边界案例归档：符文文本掩饰字符映射，六面 cube 的空间状态再决定可选命令；完成 rune/plain 映射后应转游戏状态 family。 |
 | [D3CTF2021-shellgen2-wp](../raw/web/D3CTF2021-shellgen2-wp.md) | 无字母数字 PHP 生成器本质是受限字符表达式构造，先建字符索引表和递增优化。 |
 | [Bugku-MaybeNotStandrad-wp](../raw/reverse/Bugku-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 |
-| [Bugku-week1_re3-wp](../raw/reverse/Bugku-week1_re3-wp.md) | 标准 Base64 表、3 字节到 4 字符和 `=` padding 同时出现；目标串按 `int` 数组存储时只取低字节解码。 |
+| [0xGame2022-week1-re3-wp](../raw/crypto/0xGame2022-week1-re3-wp.md) | 标准 Base64 表、3 字节到 4 字符和 `=` padding 同时出现；目标串按 `int` 数组存储时只取低字节解码。 |
 | [NCTF2026-vm-encryptor-wp](../raw/reverse/NCTF2026-vm-encryptor-wp.md) | 先写自定义 VM disassembler 理清 opcode；真实算法是循环位移/XOR 后进魔改 Base64，再整体 XOR。 |
 
 ## 合并与拆分结论

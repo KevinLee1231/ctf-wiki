@@ -63,7 +63,7 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [Bugku-week2_re4-wp](../raw/reverse/Bugku-week2_re4-wp.md) | PyInstaller/Python 编码逻辑是主边界，先恢复 Python 代码、常量和自定义 Base58 变换。 |
+| [0xGame2022-week2-re4-wp](../raw/reverse/0xGame2022-week2-re4-wp.md) | PyInstaller/Python 编码逻辑是主边界，先恢复 Python 代码、常量和自定义 Base58 变换。 |
 | [D3CTF2023-d3recover-wp](../raw/reverse/D3CTF2023-d3recover-wp.md) | Cython/Python 扩展可用带符号版本 BinDiff 迁移语义，先恢复 Pyx API 调用和约束。 |
 | [LilacCTF2026-ezpython-wp](../raw/reverse/LilacCTF2026-ezpython-wp.md) | PyInstaller runtime hook 把自定义 `a85decode/b64decode` 写入 `builtins`，并动态改 `MX.__code__` 后才是 XXTEA 真实轮函数。 |
 | [LilacCTF2026-lambda-m-wp](../raw/reverse/LilacCTF2026-lambda-m-wp.md) | Lambda calculus/Scott encoding 只是表达层，真实语义是 GF(2^8) 有理函数插值；把 40 个点转成齐次线性方程组。 |

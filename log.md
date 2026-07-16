@@ -1617,3 +1617,9 @@
 - 按 `skill-creator` 流程在 `ctf-solve-challenge/evals/evals.json` 保存 15 个相邻边界回归用例，并生成静态评审页 `C:/Users/LMY/.agents/skills/_ctf-solve-challenge-workspace/routing-review.html`。独立复核发现原第 3 项把 DNS label 隐蔽信道误写成 Forensics，修正为 Stego 后 15 项、60 个断言全部通过；该测试只验证路由和边界，不冒充真实解题或自动触发率基准。
 - 修改前备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ctf-skills-14-directions-20260711-215607.zip`，共 157 个条目、569,032 bytes，包含当时 12 个 CTF skill 及全部 active wiki/root 元数据。
 - 本轮未修改 raw 正文或 raw 物理结构。最终校验：16 个 skill 目录齐全且 frontmatter name 一致；14 个正式方向在总分流表中无缺项；138 个 wiki 页 type 合法、全部被 index 覆盖、frontmatter 不含不存在的 skill；检查 3,625 个非代码块 active 本地链接与 85 个 skill wiki/index 直链，断链均为 0；`git diff --check` 通过。
+
+## 2026-07-16 — Bugku 前缀 0xGame2022 逆向重复 WP 清理
+
+- 删除 `raw/reverse/` 下 14 篇 `Bugku-week*_re*-wp.md` 旧归档；这些 WP 已由 `0xGame2022-week*-re*-wp.md` 归档承接，未发现同 basename 资源目录需要迁移。
+- 将 `wiki/*.md` 中指向旧 Bugku raw 的案例链接改为新的 0xGame2022 raw 路径；其中 `week1re3` 按表示层编码边界指向 `raw/crypto/0xGame2022-week1-re3-wp.md`，其余 13 篇指向 `raw/reverse/`。
+- 同步 `index.md` 提交内 raw 统计：Crypto 从 114 增至 115，Reverse 从 136 降至 135，总数保持 614；工作区中后续 0xGame raw 归档统计继续留在未提交修改中。

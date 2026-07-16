@@ -77,7 +77,7 @@ updated: 2026-07-06
 |---|---|
 | [ACTF2026-计算机系统贯通实验-wp](../raw/reverse/ACTF2026-计算机系统贯通实验-wp.md) | xlsx 公式实现 RISC-V 单周期 CPU；先解包 XML 恢复 ROM/RAM/MMIO、指令解码和输出语义，再拆四段校验。 |
 | [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md) | CUDA fatbin 中宿主先解出 NPU bytecode；提取 `MOV_IMM` 比较常量后逆 RC4 drop-512 和多层 S-box/XOR 变换。 |
-| [Bugku-week4_re1-wp](../raw/reverse/Bugku-week4_re1-wp.md) | 简单 VM 执行固定长度字节码，输入/寄存器/输出数组模式重复；可直接抽象每字符通项公式再正向验证。 |
+| [0xGame2022-week4-re1-wp](../raw/reverse/0xGame2022-week4-re1-wp.md) | 简单 VM 执行固定长度字节码，输入/寄存器/输出数组模式重复；可直接抽象每字符通项公式再正向验证。 |
 | [D3CTF2023-d3sky-wp](../raw/reverse/D3CTF2023-d3sky-wp.md) | TLS 反调试和 RC4 加密 opcode 的自修改 VM，先恢复正确异常路径和滑动 XOR 关系。 |
 | [D3CTF2023-d3syscall-wp](../raw/reverse/D3CTF2023-d3syscall-wp.md) | 内核模块把保留 syscall 映射成 VM 指令，先 strace 参数并恢复 syscall 到 opcode 的语义。 |
 | [HGAME2026-androuge-wp](../raw/reverse/HGAME2026-androuge-wp.md) | APK 释放魔改 Lua 5.4 VM 与加密 `game` bytecode；先还原 XOR 载入层和 opcode 位域，再提密文数组与 seed。 |

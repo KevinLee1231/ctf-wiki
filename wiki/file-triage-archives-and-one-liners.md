@@ -66,7 +66,7 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [Bugku-week4_re3-wp](../raw/reverse/Bugku-week4_re3-wp.md) | `.exe` 扩展名是干扰项；无 `MZ` magic 且内容是文本时，先按文件首检/明文 artifact 处理。 |
+| [0xGame2022-week4-re3-wp](../raw/reverse/0xGame2022-week4-re3-wp.md) | `.exe` 扩展名是干扰项；无 `MZ` magic 且内容是文本时，先按文件首检/明文 artifact 处理。 |
 
 ## 原始资料
 
