@@ -1663,3 +1663,9 @@
 - 删除 `raw/reverse/` 下 14 篇 `Bugku-week*_re*-wp.md` 旧归档；这些 WP 已由 `0xGame2022-week*-re*-wp.md` 归档承接，未发现同 basename 资源目录需要迁移。
 - 将 `wiki/*.md` 中指向旧 Bugku raw 的案例链接改为新的 0xGame2022 raw 路径；其中 `week1re3` 按表示层编码边界指向 `raw/crypto/0xGame2022-week1-re3-wp.md`，其余 13 篇指向 `raw/reverse/`。
 - 同步 `index.md` live raw 统计：Reverse 从 218 降至 204，raw 总数从 1026 降至 1012。
+
+## 2026-07-16 — Bugku 前缀历史来源文件名修正
+
+- 将 13 篇仍带 `Bugku-` 前缀但实际来源明确的 raw WP 重命名为真实赛事来源前缀：DownUnderCTF2023、TJCTF2024、moeCTF2022、西湖论剑2023、TamilCTF2021、强网杯2019、Xp0intCTF2017、TAMUctf2021 和 TAMUctf2022。
+- 这些文件均未发现同 basename 图片资源目录，因此本轮只移动 Markdown 文件；raw 正文和 wiki 技巧语义不改。
+- 同步更新 `wiki/*.md` 中指向旧 `Bugku-*` raw 的案例链接；历史 `log.md` 旧记录保留当时文件名作为审计痕迹。

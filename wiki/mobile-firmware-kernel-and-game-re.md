@@ -5,7 +5,7 @@ skills: [ctf-mobile, ctf-reverse, ctf-hardware-embedded]
 raw:
   - ../raw/reverse/mobile-firmware-kernel-and-game-re.md
   - ../raw/reverse/ACTF2026-abyssgate-wp.md
-  - ../raw/reverse/Bugku-Berkeley-wp.md
+  - ../raw/reverse/西湖论剑2023-Berkeley-wp.md
   - ../raw/reverse/HGAME2026-noncesense-wp.md
   - ../raw/reverse/D3CTF2025-d3kernel-wp.md
   - ../raw/reverse/D3CTF2022-d3w0w-wp.md
@@ -63,7 +63,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md) | 第二阶段 ELF、eBPF tracepoint 和 `abyss.ko` 共同决定 ioctl 参数和 token/tweak 派生，平台边界比单个用户态函数更重要。 |
-| [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md) | ELF 中的 libbpf-bootstrap、`attach_uprobe` 和 BPF map 表明真实校验在内核侧 instrumentation，不能只信用户态 `check_flag`。 |
+| [西湖论剑2023-Berkeley-wp](../raw/reverse/西湖论剑2023-Berkeley-wp.md) | ELF 中的 libbpf-bootstrap、`attach_uprobe` 和 BPF map 表明真实校验在内核侧 instrumentation，不能只信用户态 `check_flag`。 |
 | [HGAME2026-noncesense-wp](../raw/reverse/HGAME2026-noncesense-wp.md) | Client/driver 协议题要先枚举设备对象、IOCTL、nonce、token、blob 生命周期，再分析 AES/HMAC 或 VM 变换。 |
 | [D3CTF2025-d3kernel-wp](../raw/reverse/D3CTF2025-d3kernel-wp.md) | Windows kernel/userland 混合逆向要把 R3/R0 反调试、DeviceIoControl 分发表和驱动内 VM 分层处理。 |
 | [D3CTF2022-d3w0w-wp](../raw/reverse/D3CTF2022-d3w0w-wp.md) | WoW64 隐藏 64 位逻辑时，先 dump 或切换到正确位宽解析，再把方向序列约束转成 puzzle 求解。 |
@@ -83,7 +83,7 @@ updated: 2026-07-06
 
 - [mobile-firmware-kernel-and-game-re.md](../raw/reverse/mobile-firmware-kernel-and-game-re.md)
 - [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md)
-- [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md)
+- [西湖论剑2023-Berkeley-wp](../raw/reverse/西湖论剑2023-Berkeley-wp.md)
 - [HGAME2026-noncesense-wp](../raw/reverse/HGAME2026-noncesense-wp.md)
 - [D3CTF2025-d3kernel-wp](../raw/reverse/D3CTF2025-d3kernel-wp.md)
 - [D3CTF2022-d3w0w-wp](../raw/reverse/D3CTF2022-d3w0w-wp.md)

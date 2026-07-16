@@ -66,7 +66,7 @@ updated: 2026-06-12
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [Bugku-syscall-wp](../raw/pwn/Bugku-syscall-wp.md) | 程序泄露 PIE 且自带 `syscall`/`/bin/sh` gadget；第二次 `read` 精确发送 59 字节让 `RAX=SYS_execve`。 |
+| [moeCTF2022-syscall-wp](../raw/pwn/moeCTF2022-syscall-wp.md) | 程序泄露 PIE 且自带 `syscall`/`/bin/sh` gadget；第二次 `read` 精确发送 59 字节让 `RAX=SYS_execve`。 |
 
 ## 原始资料
 

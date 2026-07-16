@@ -5,7 +5,7 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/loader-vm-image-and-kernel-patterns.md
   - ../raw/reverse/ACTF2026-abyssgate-wp.md
-  - ../raw/reverse/Bugku-Berkeley-wp.md
+  - ../raw/reverse/西湖论剑2023-Berkeley-wp.md
 updated: 2026-07-06
 ---
 
@@ -58,7 +58,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md) | 用户态 loader 释放第二阶段 ELF，eBPF 在 ioctl 进入/返回时改写参数，内核模块再完成协议状态机；必须把三层数据流合并建模。 |
-| [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md) | 用户态校验是诱饵，真实逻辑在 libbpf-bootstrap 挂载到自身 `check_flag` 的 uprobe/uretprobe 中；先提取 BPF 程序和 map 常量，再还原双层变换。 |
+| [西湖论剑2023-Berkeley-wp](../raw/reverse/西湖论剑2023-Berkeley-wp.md) | 用户态校验是诱饵，真实逻辑在 libbpf-bootstrap 挂载到自身 `check_flag` 的 uprobe/uretprobe 中；先提取 BPF 程序和 map 常量，再还原双层变换。 |
 | [D3CTF2019-ch1pfs-wp](../raw/reverse/D3CTF2019-ch1pfs-wp.md) | 自定义文件系统镜像和 RC4 文件层加密，先恢复元数据结构和已知明文 keystream。 |
 | [SUCTF2026-LockWP](../raw/reverse/SUCTF2026-LockWP.md) | Inno Setup、Rust overlay、锁屏程序和内核驱动多层嵌套；最终 IOCTL 中 XXTEA-like dword 校验在驱动层。 |
 | [SUCTF2026-old_binWP](../raw/reverse/SUCTF2026-old_binWP.md) | 固件先 XOR 解包出 IMG0 容器，再修复损坏 ELF 和 TLS 布局；最后还原网络 challenge 与自定义块校验。 |
@@ -78,4 +78,4 @@ updated: 2026-07-06
 
 - [loader-vm-image-and-kernel-patterns.md](../raw/reverse/loader-vm-image-and-kernel-patterns.md)
 - [ACTF2026-abyssgate-wp](../raw/reverse/ACTF2026-abyssgate-wp.md)
-- [Bugku-Berkeley-wp](../raw/reverse/Bugku-Berkeley-wp.md)
+- [西湖论剑2023-Berkeley-wp](../raw/reverse/西湖论剑2023-Berkeley-wp.md)

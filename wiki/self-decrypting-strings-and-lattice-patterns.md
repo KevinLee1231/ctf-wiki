@@ -61,9 +61,9 @@ updated: 2026-07-06
 | [WMCTF2025-catfriend-wp](../raw/reverse/WMCTF2025-catfriend-wp.md) | 魔改 ChaCha20 仍是流密码，恢复轮数、QR 函数和 VM 实现的 xor 后，加密流程可直接复用为解密流程。 |
 | [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Flutter 层魔改 AES 调整 S-box 和 AddRoundKey/MixColumns 顺序，Java 层魔改 XXTEA 改移位方向和轮数；恢复脚本必须按真实执行流逆序。 |
 | [0xGame2022-week2-re1-wp](../raw/reverse/0xGame2022-week2-re1-wp.md) | 只有汇编文本和 `enc[]` 时，关键是按倒序循环模拟原位数组变换；`input[i + 1]` 已经是新值，遍历方向比反汇编工具选择更重要。 |
-| [Bugku-GoldDigger-wp](../raw/reverse/Bugku-GoldDigger-wp.md) | 验证函数形如 `input[index[i]] + const == target[i]`；提取置换表和目标数组后直接反填输入。 |
-| [Bugku-JustRe-wp](../raw/reverse/Bugku-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 |
-| [Bugku-MaybeNotStandrad-wp](../raw/reverse/Bugku-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 |
+| [TamilCTF2021-GoldDigger-wp](../raw/reverse/TamilCTF2021-GoldDigger-wp.md) | 验证函数形如 `input[index[i]] + const == target[i]`；提取置换表和目标数组后直接反填输入。 |
+| [强网杯2019-JustRe-wp](../raw/reverse/强网杯2019-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 |
+| [Xp0intCTF2017-MaybeNotStandrad-wp](../raw/reverse/Xp0intCTF2017-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 |
 | [0xGame2022-week1-re2-wp](../raw/reverse/0xGame2022-week1-re2-wp.md) | 36 字符中间段经过带反馈的 `uint32` 乘加/XOR 哈希，目标数组固定；用 Z3 保留 32 位溢出语义求解。 |
 | [0xGame2022-week1-re4-wp](../raw/reverse/0xGame2022-week1-re4-wp.md) | 识别 TEA 常量 `0x9e3779b9`、4 个 32-bit key 和 32 轮 Feistel；按反编译的 key 下标反向解密。 |
 | [0xGame2022-week3-re1-wp](../raw/reverse/0xGame2022-week3-re1-wp.md) | 12x12 线性方程组由 `coeff * local_var` 累加到常量表；提取矩阵时保留未满 4 字节和 memset 零变量。 |

@@ -65,7 +65,7 @@ updated: 2026-07-06
 | [NCTF2026-yqs-wp](../raw/crypto/NCTF2026-yqs-wp.md) | 格攻击只负责恢复坐标 XOR 所需的 LWE 私钥；后半段是无效曲线小子群和 CRT，不应停在 LWE 解密。 |
 | [RCTF2025-superguess-plusplus-wp](../raw/crypto/RCTF2025-superguess-plusplus-wp.md) | HNP 仅泄露 2 bit MSB 且样本数接近下界；普通 LLL 往往不够，需 lattice sieving/Fourier predicate 并接受概率性成功。 |
 | [SUCTF2026-LatticeWP](../raw/crypto/SUCTF2026-LatticeWP.md) | 高位截断线性递推在未知模数场景下要先用高位格和 resultant gcd 找模数，再切回 known modulus 格恢复反馈多项式和低位状态。 |
-| [Bugku-apbq-rsa-ii-wp](../raw/crypto/Bugku-apbq-rsa-ii-wp.md) | 三条 `a*p+b*q` 小系数 hint 可构成缩放格，LLL 找短关系后对候选分量与 `n` 取 gcd 分解。 |
+| [DownUnderCTF2023-apbq-rsa-ii-wp](../raw/crypto/DownUnderCTF2023-apbq-rsa-ii-wp.md) | 三条 `a*p+b*q` 小系数 hint 可构成缩放格，LLL 找短关系后对候选分量与 `n` 取 gcd 分解。 |
 | [D3CTF2021-baby-lattice-simple-group-wp](../raw/crypto/D3CTF2021-baby-lattice-simple-group-wp.md) | 小矩阵/RSA 模数上的线性关系可转成低维格，先恢复小等价表示或秘密比值。 |
 | [D3CTF2022-equivalent-wp](../raw/crypto/D3CTF2022-equivalent-wp.md) | Knapsack/子集和公钥可构造等效私钥，先取正交格再找满足奇偶和大小条件的短向量。 |
 | [D3CTF2023-d3bdd-wp](../raw/crypto/D3CTF2023-d3bdd-wp.md) | LWE/RLWE dual attack 和理想格短向量是主线，先检查 PRNG 与模多项式是否破坏格结构。 |

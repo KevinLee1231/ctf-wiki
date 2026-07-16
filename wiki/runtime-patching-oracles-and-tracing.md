@@ -50,7 +50,7 @@ updated: 2026-07-11
 | [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | 只把机器校验函数返回值改成 1 会登录成功但解密失败，因为后续还使用 MD5 vector；必须把用于解密的 MD5 数据本身替换成目标机器值。 |
 | [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md) | Frida 检测和 libart self-hook 干扰动态 hook 时，smali trace 能确认 Java 层魔改 XXTEA 的真实移位方向和轮数。 |
 | [HGAME2026-steins-gate-wp](../raw/pwn/HGAME2026-steins-gate-wp.md) | 逐字节比较错误会在不同位置 panic，PIE 仍保留稳定页内低 12 位偏移；用崩溃地址作为比较进度 oracle 爆破输入。 |
-| [Bugku-BabyRE-wp](../raw/reverse/Bugku-BabyRE-wp.md) | 主函数只做自定义 base8 第一层，第二层藏在 `atexit` 回调；用输入尾部 6 位十进制 RC4 key 约束反解。 |
+| [西湖论剑2023-BabyRE-wp](../raw/reverse/西湖论剑2023-BabyRE-wp.md) | 主函数只做自定义 base8 第一层，第二层藏在 `atexit` 回调；用输入尾部 6 位十进制 RC4 key 约束反解。 |
 | [HGAME2026-marionette-wp](../raw/reverse/HGAME2026-marionette-wp.md) | 父进程用 `ptrace` 调度子进程 `int3; ret` block；hook 记录 RIP trace 后，还原输入差分和 AES-NI 校验。 |
 | [LilacCTF2026-ezpython-wp](../raw/reverse/LilacCTF2026-ezpython-wp.md) | PyInstaller runtime hook 把自定义 `a85decode/b64decode` 写入 `builtins`，并动态改 `MX.__code__` 后才是 XXTEA 真实轮函数。 |
 | [NCTF2026-hook-my-secret-wp](../raw/reverse/NCTF2026-hook-my-secret-wp.md) | 运行时 hook、patch 或 oracle 可观测关键状态，先选断点和最小输入。 |

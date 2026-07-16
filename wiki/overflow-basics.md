@@ -47,7 +47,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [D3CTF2023-d3op-wp](../raw/pwn/D3CTF2023-d3op-wp.md) | ubus RPC 的 base64 服务输出长度计算和索引检查不一致，最终是协议入口触发的 AArch64 栈溢出；先量化溢出长度和保护，再转跨平台 ROP。 |
-| [Bugku-syscall-wp](../raw/pwn/Bugku-syscall-wp.md) | 程序泄露 PIE 且自带 `syscall`/`/bin/sh` gadget；第二次 `read` 精确发送 59 字节让 `RAX=SYS_execve`。 |
+| [moeCTF2022-syscall-wp](../raw/pwn/moeCTF2022-syscall-wp.md) | 程序泄露 PIE 且自带 `syscall`/`/bin/sh` gadget；第二次 `read` 精确发送 59 字节让 `RAX=SYS_execve`。 |
 | [HGAME2026-adrift-wp](../raw/pwn/HGAME2026-adrift-wp.md) | 整数边界绕过转正逻辑并影响 canary/栈执行，先验证偏移、泄露和 shellcode 条件。 |
 
 ## 合并与拆分结论

@@ -79,8 +79,8 @@ updated: 2026-07-06
 |---|---|
 | [NCTF2026-encryption-wp](../raw/crypto/NCTF2026-encryption-wp.md) | pwn 后 dump `libcipher.so`，发现魔改 AES 的 S-box 被线性化；把整块加密建成 GF(2) 仿射变换矩阵再求逆。 |
 | [SUCTF2026-AESWP](../raw/crypto/SUCTF2026-AESWP.md) | AES 服务允许分别更新 seed/key，导致当前 S-box 与旧 round keys 不同步；先把 S-box 压成常值恢复 `K10`，再用 probe 值域指纹恢复置换。 |
-| [Bugku-EasyVT-wp](../raw/reverse/Bugku-EasyVT-wp.md) | `EasyVT.sys` 模拟 VT-x，驱动 VM-exit handler 只是调度壳；核心校验是 TEA 变体和 RC4，优先静态恢复 handler switch。 |
-| [Bugku-JustRe-wp](../raw/reverse/Bugku-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 |
+| [西湖论剑2023-EasyVT-wp](../raw/reverse/西湖论剑2023-EasyVT-wp.md) | `EasyVT.sys` 模拟 VT-x，驱动 VM-exit handler 只是调度壳；核心校验是 TEA 变体和 RC4，优先静态恢复 handler switch。 |
+| [强网杯2019-JustRe-wp](../raw/reverse/强网杯2019-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 |
 | [0xGame2022-week1-re4-wp](../raw/reverse/0xGame2022-week1-re4-wp.md) | 识别 TEA 常量 `0x9e3779b9`、4 个 32-bit key 和 32 轮 Feistel；按反编译的 key 下标反向解密。 |
 | [0xGame2022-week4-re2-wp](../raw/reverse/0xGame2022-week4-re2-wp.md) | AES-128-ECB 校验，key 为 `00..0f`，输入 42 字节但比较 48 字节说明最后 block 零填充。 |
 | [HGAME2026-marionette-wp](../raw/reverse/HGAME2026-marionette-wp.md) | 父进程用 `ptrace` 调度子进程 `int3; ret` block；hook 记录 RIP trace 后，还原输入差分和 AES-NI 校验。 |

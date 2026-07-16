@@ -75,7 +75,7 @@ updated: 2026-07-06
 |---|---|
 | [ACTF2026-12307-wp](../raw/web/ACTF2026-12307-wp.md) | SSO continuation 只做字符串包含建立 settlement 信任，随后 ORDER BY 盲注泄露 `claim_salt`，最终用 duplicate-key print plan 混淆进入私有打印通道。 |
 | [ACTF2026-aaa26-wp](../raw/web/ACTF2026-aaa26-wp.md) | Mongo `$regex` 盲注恢复 reviewer invite code，vm2 里用 Buffer slab 泄露 JWT secret，伪造 admin 后上传伪 PDF/SVG 让 ImageMagick `text:/flag` 渲染。 |
-| [Bugku-API-2-The-SeQueL-wp](../raw/web/Bugku-API-2-The-SeQueL-wp.md) | PostgreSQL 字符串型 UNION 注入，错误信息暴露列数和第三列 `contlevel` 枚举；用合法枚举值占位后读 `users` 表。 |
+| [TAMUctf2021-API-2-The-SeQueL-wp](../raw/web/TAMUctf2021-API-2-The-SeQueL-wp.md) | PostgreSQL 字符串型 UNION 注入，错误信息暴露列数和第三列 `contlevel` 枚举；用合法枚举值占位后读 `users` 表。 |
 | [D3CTF2022-ezsql-wp](../raw/web/D3CTF2022-ezsql-wp.md) | SQL 注入或过滤 oracle 是主线，先比较错误、回显、时间和二阶触发条件。 |
 | [LilacCTF2026-safe-sql-wp](../raw/web/LilacCTF2026-safe-sql-wp.md) | PostgreSQL `E'...'` 只过滤引号时可用反斜杠让 password 逃逸成多语句；再借 BRIN autosummarize CVE 提权到 `COPY FROM PROGRAM`。 |
 | [RCTF2025-photographer-wp](../raw/web/RCTF2025-photographer-wp.md) | SQLite `SELECT *` join 中同名 `type` 字段覆盖用户权限字段，上传图片 MIME type 可写成 `-1` 绕过管理员判断。 |
