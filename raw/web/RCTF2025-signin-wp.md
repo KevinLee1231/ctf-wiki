@@ -2,62 +2,43 @@
 
 ## 题目简述
 
-签到题的网页前端会把涂色完成度作为 `score` 参数提交到 `/?score=<value>`。直接阅读源码可知分数达到 100 时会返回 flag。
+题目页面是一幅可交互涂色图，前端计算完成度并把结果作为 `score` 查询参数提交给当前页面。服务端没有重新计算实际涂色状态，而是直接依据客户端提供的数值决定是否返回 flag，因此不必手工完成涂色。
 
 ## 解题过程
 
-### 关键观察
+阅读页面中的 `submitResult()` 可见核心请求：
 
-签到题的网页前端会把涂色完成度作为 `score` 参数提交到 `/?score=<value>`。
+```javascript
+const score = parseFloat(
+    document.getElementById('progressText').textContent
+);
 
-### 求解步骤
-
-阅读题目网页源码：
-       function submitResult() {
-            const score =
-parseFloat(document.getElementById('progressText').textContent);
-
-            // 使用fetch获取结果，不刷新页面
-            fetch(`/?score=${score}`)
-                .then(response => response.text())
-                .then(html => {
-                    // 解析返回的HTML，提取结果信息
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-
-猜测 score=100 时就会给 flag，于是访问 http://<challenge-host>/?score=100 得到 flag
-RCTF{W3lc0m3_T0_RCTF_2025!!!}
-
-### PDF 外链
-
-- <http://<challenge-host>/?score=100>
-
-### 跨页补回：前端提交逻辑收尾
-
-// 检查是否成功
-                    if (score >= 100) {
-                        const flagMatch = html.match(/ROIS\\{[^}]+\\}/);
-                        if (flagMatch) {
-                            console.log('🎉 恭喜你！完美涂色！🎉');
-                            console.log('Flag: ' + flagMatch[0]);
-                            alert('🎉 恭喜你！\\n\\n' + flagMatch[0]);
-                        }
-                    } else {
-                        console.log(`涂色完成度: ${score.toFixed(1)}%，继续加油！
-`);
-                    }
-
-                    // 更新URL但不刷新页面
-                    window.history.pushState({score: score}, '', `/?
-score=${score}`);
-                })
-                .catch(error => {
-                    console.error('提交失败', error);
-                });
+fetch(`/?score=${score}`)
+    .then(response => response.text())
+    .then(html => {
+        if (score >= 100) {
+            // 从返回 HTML 中提取 flag 并弹窗显示
         }
+        window.history.pushState({score}, '', `/?score=${score}`);
+    });
+```
+
+这里的涂色进度只存在于浏览器端，提交给服务端的却是一个可任意修改的普通 GET 参数。直接访问：
+
+```text
+/?score=100
+```
+
+即可走满分分支，响应正文中返回：
+
+```text
+RCTF{W3lc0m3_T0_RCTF_2025!!!}
+```
+
+总 PDF 中记录的比赛 IP 已属于临时服务入口，赛后没有复现价值，故不保留具体地址；路径和参数已经完整表达解法。
 
 ## 方法总结
 
-- 核心技巧：前端源码审计。
-- 识别信号：客户端直接把完成度作为查询参数提交。
-- 复用要点：签到题先读 JS，尝试边界值而不是手动完成交互。
+- 关键问题是服务端信任客户端提交的 `score`，而不是前端显示逻辑本身。
+- 遇到签到网页、小游戏或进度条时，应先查看请求参数和响应分支，再决定是否需要完成界面交互。
+- 前端校验只能改善用户体验，不能证明状态真实；服务端若要防篡改，必须根据可信状态重新计算得分。

@@ -2,152 +2,116 @@
 
 ## 题目简述
 
-本题在上一题 GMP MT 输出恢复外增加了 Python `random.shuffle`。解法先从少量 32-bit 输出恢复 Python MT 的 128-bit seed，逆置乱输出序列，再回到 GMP MT 线性恢复和 seed 反推。
+本题沿用 `yet another MT game` 的 512-bit secret 与 Sage/GMP MT19937，但只允许 3 次查询，未破损状态下累计最多泄露 16400 bit。一旦累计量首次超过上限，服务会先生成矩阵，再用 Sage 的 `shuffle()` 打乱每个元素的 bit 和整个输出列表。`random_matrix` 的小模数路径使用 GMP-MT，而 `shuffle()` 使用另一套懒初始化的 Python MT；利用点正是两套 PRNG 之间的初始化依赖。
 
 ## 解题过程
 
-### 关键观察
+### 先区分 GMP-MT 与 PY-MT
 
-本题在上一题 GMP MT 输出恢复外增加了 Python `random.shuffle`。
+`set_random_seed(secret)` 立即初始化 Sage 的 GMP randstate，却不会立刻创建 Python `random.Random`。第一次调用 `sage.misc.prandom` 或 `shuffle()` 时，`python_random()` 才执行：
 
-### 求解步骤
+```python
+rand = random.Random()
+rand.seed(int(ZZ.random_element(1 << 128)))
+```
 
-这题相比前一题加入了 shuffle 机制，shuffle 调用的是 pyrand。
-考虑用第一轮的结果恢复 pyrand 的种子；实测只需要不到 300 个 32 位输出就能恢复 128 位的整
-数种子，远小于题目给的 16400 位。
-有了 pyrand 的状态，就可以逆向 shuffle。此时问题转化为了前一题的 gmp random 恢复。
-需要注意，在生成 pyrand 种子时，它额外调用了几次 gmp random 的函数。
-def saveList(lst, filename):
-    try:
-        with open(filename, 'w') as file:
-            json.dump(lst, file)
-    except IOError:
-        print("An error occurred while saving the list.")
+这个 128-bit Python seed 来自 GMP randstate。对应 Sage/GMP 实现还会额外消耗一个 32-bit word，所以初始化 PY-MT 总共推进 GMP MT 5 个 32-bit 输出。初始化完成后，两套 MT 独立演化。
 
+源码的查询顺序也很关键：
 
-def loadList(filename):
-    try:
-        with open(filename, 'r') as file:
-            lst = json.load(file)
-        return lst
-    except IOError:
-        print("An error occurred while loading the list.")
-        return []
+```python
+leaked += nbits * nrow * ncol
+if leaked > 16400 and not IS_BROKEN:
+    IS_BROKEN = True
+outs = random_matrix(...)
+if IS_BROKEN:
+    outs = [shuffle_bits(x) for x in outs]
+    shuffle(outs)
+```
 
-from pwn import process, remote
-from ast import literal_eval
-from magic import crackme
-import random
-import gmpy2
+也就是说，第一次越过上限的那次输出已经会被置乱。
 
-# io = process(["sage", "mtv2.py"])
-io = remote("<challenge-host>", 42102)
+### 比赛中采用的非预期解：先恢复 Python seed
 
-io.sendline(str(2**32 - 2).encode() + b" 1 300")
-io.recvuntil(b"output:")
-output = literal_eval(io.recvline().decode())
-seed = crackme(output)[0]
-r = random.Random(seed)
-for i in range(300):
-    assert r.getrandbits(32) == output[i]
-print(f"[+] {seed = }")
+第一问提交：
 
-io.sendline(str(2).encode() + b" 1 20000")
-io.recvuntil(b"output:")
-output = literal_eval(io.recvline().decode())
+```text
+mod = 2^32 - 2,  nrow = 1,  ncol = 300
+```
 
-n = 20000
-indices = list(range(n))
+这只计入 `32*300=9600` bit，不会触发破损。该模数走通用矩阵路径，元素来自 Python `random.randint(0, mod-1)`。这也是 PY-MT 的第一次使用，因此在生成 300 个元素前，Sage 先从 GMP-MT 取得 128-bit 整数种子。
+
+由于上界非常接近 `2^32`，每个元素几乎总是 Python MT 的一个完整 32-bit 输出。利用 CPython 的整数 seed 初始化关系，不必收集 624 个完整输出；不到 300 个输出便足以反推短至 128 bit 的 seed。PDF 使用的辅助实现提供两个关键接口：
+
+```python
+breaker.get_required_output_indices_for_integer_seed_recovery(128, True)
+breaker.recover_all_integer_seeds_from_few_outputs(
+    128, selected_outputs, True
+)
+```
+
+它先计算哪些输出位置足以约束 128-bit 整数 seed，再逆向 CPython 的 `init_by_array` 初始化并枚举候选。实现见 [python_random_breaker.py](https://github.com/Aeren1564/CTF_Library/blob/master/CTF_Library/Cryptography/MersenneTwister/python_random_breaker.py)；正文已经说明它在本题中的输入、输出和用途。
+
+恢复后必须用候选 `Random(seed)` 重放第一问，确认 300 个值完全一致。更稳妥的推进方式是调用与 Sage 相同的 `randrange(2**32-2)`，而不是假设永远没有 rejection sampling；若 seed 恢复阶段恰遇极小概率的拒绝取样导致输出错位，直接重连即可。
+
+### 重放 PY-MT 并逆置乱 GMP 输出
+
+第二问提交：
+
+```text
+mod = 2,  nrow = 1,  ncol = 20000
+```
+
+累计泄露超过上限，于是服务先生成 20000 个 GMP-MT 最低位，再置乱。每个元素只有 1 bit，`shuffle([bit])` 不进行交换，也不消耗随机数；真正起作用的只有最后一次 `shuffle(outs)`。
+
+用恢复出的 Python RNG 重放第一问消耗后，对索引列表执行同一 shuffle：
+
+```python
+indices = list(range(20000))
 r.shuffle(indices)
-real_output = [None for i in range(n)]
-for i in range(n):
-    real_output[indices[i]] = output[i]
-output = real_output
 
-io.sendline(str(2).encode() + b" 1 1")
+real = [None] * 20000
+for shuffled_pos, original_pos in enumerate(indices):
+    real[original_pos] = observed[shuffled_pos]
+```
 
-from gf2bv import LinearSystem
-from gf2bv.crypto.mt import MT19937
-from tqdm import tqdm
+此时 `real` 就是按真实时间顺序排列的 20000 个 GMP-MT LSB。第三次查询可以发送一个最小合法请求，使服务进入 secret 提交阶段；它不会影响已经收集的方程。
 
-lin = LinearSystem([32] * 624)
-mt = lin.gens()
-rng = MT19937(mt)
-zeros = [mt[0] & 0x7FFFFFFF]
-for i in range(2000 - 624):
-    rng.getrandbits(32)
+### 对齐额外的 160 bit 消耗并恢复 GMP seed
 
-rng.getrandbits(128)
-rng.getrandbits(32)
+后半部分与未置乱版本相同：用 624 个符号 32-bit word 模拟 GMP MT，在 GF(2) 上加入固定状态位和 20000 个最低位方程。但输出起点多了 PY-MT 初始化消耗，必须在 2000 次 GMP warm-up 后再推进 160 bit：
 
-for i in tqdm(range(len(output))):
-    zeros.append((rng.getrandbits(32) & 1) ^ output[i])
+```python
+align_gmp_warmup(symbolic_rng, 2000)
+symbolic_rng.getrandbits(128)
+symbolic_rng.getrandbits(32)   # 合计 5 个 MT word
 
-print("COMPUTING INVERSE...")
-P = 2**19937 - 20023
-I = pow(1074888996 // 12, -1, (P - 1) // 12)
-print("COMPUTED INVERSE...")
+for bit in real:
+    equations.append((symbolic_rng.getrandbits(32) & 1) ^ bit)
+```
 
-for sol in lin.solve_all(zeros):
-    seed = 0
-    for i in sol[1:][::-1]:
-        seed = (seed << 32) | i
-    if sol[0] == 0x80000000:
-        seed |= 1 << 19936
+解出 19937-bit GMP 初始化值后，仍使用上一题的映射：
 
-对于恢复 pyrand 种子的部分，我直接调用了上周 Infobahn CTF ’25 的 crypto 出题人的 repo（htt
-ps://github.com/Aeren1564/CTF_Library/blob/master/CTF_Library/Cryptography/MersenneTw
-ister/python_random_breaker.py），里面有不少 MT 相关的妙妙小工具。
-（Infobahn 的那题要求恢复 19936 位的整数种子，这题因为种子较短，不需要所有 624 个输
-出）
-    print("COMPUTING POWER...")
-    seed = gmpy2.powmod(seed, I, P)
-    print("COMPUTED POWER...")
-    seed, ok = gmpy2.iroot(seed, 12)
+```text
+P = 2^19937 - 20023
+E = 1074888996
+seed2 = (secret + 2)^E mod P
+```
 
-    if ok:
-        seed -= 2
-        print(hex(seed))
-        io.sendlineafter(b"secret", int(seed).to_bytes(64,
-"big").hex().encode())
-        io.interactive()
-from python_random_breaker import python_random_breaker
+先求 `E/12` 在 `(P-1)/12` 下的逆，再对结果做精确整数 12 次根，减 2 并编码为固定 64 字节，即可提交 secret。
 
-import random
-def crackme(outputs):
-    breaker = python_random_breaker()
-    bit_len = 128
-    is_exact = 1
-    indices = [i for i in
-breaker.get_required_output_indices_for_integer_seed_recovery(bit_len,
-is_exact)]
-    cur_outputs = [outputs[i] for i in indices]
-    # print(indices)
-    return (breaker.recover_all_integer_seeds_from_few_outputs(bit_len,
-cur_outputs, True))
+### 官方预期路线
 
-if __name__ == "__main__":
-    seed = random.getrandbits(128)
-    rng = random.Random(seed)
-    outputs = [rng.getrandbits(32) for i in range(300)]
-    print(seed)
-    print(crackme(outputs))
+仓库单题 WP 还给出了不依赖 PY-MT 短 seed 逆向工具的预期思路。先取得 16400 个确定的 GMP 输出方程 `M*s=y`；方程不足以唯一确定 19937-bit 状态，但可以求一个特解和核空间基：
 
-### 参考链接补充
+```text
+s = s0 + c1*k1 + ... + cd*kd
+```
 
-参考库用于处理“Python `random` 的少量输出恢复 seed”这一子问题。本题的置乱层不是 GMP 直接输出，而是先用一个 128-bit Python `random.Random(seed)` 对输出序列 `shuffle`，所以解法分两步：
+继续符号模拟 GMP MT，未来每个输出位都可写成残余变量 `c_i` 的线性式。寻找一个偏移，使即将用于 PY-MT 懒初始化的连续 160 bit 全部退化为常数；在该位置首次触发 shuffle，就能预测其 128-bit seed。之后重建所有置换，再把更多乱序输出还原为确定的 GMP 方程，最终解出状态。
 
-- 先调用 `get_required_output_indices_for_integer_seed_recovery(bit_len, is_exact)` 取出恢复 128-bit seed 所需的输出下标，而不是把全部 300 个输出都纳入搜索。
-- 再把这些位置的 32-bit 输出传给 `recover_all_integer_seeds_from_few_outputs(bit_len, cur_outputs, True)`，枚举/恢复候选 Python seed。
-- 恢复出 Python seed 后，重新生成同一轮 `shuffle` 置换，把观测到的 GMP 输出恢复成真实顺序。
-- 后续线性恢复与 `yet another MT game` 相同，继续利用 GMP MT 的输出关系求回底层状态。
-
-### PDF 外链
-
-- <https://github.com/Aeren1564/CTF_Library/blob/master/CTF_Library/Cryptography/MersenneTwister/python_random_breaker.py>
+预期解和比赛解利用的是同一根因：PY-MT 虽与 GMP-MT 独立运行，但 seed 来自 GMP-MT 的可预测状态。区别只是前者从欠定 GMP 方程中寻找“未来常量窗口”，后者先直接泄露 PY-MT 输出并逆向其短 seed。
 
 ## 方法总结
 
-- 核心技巧：先破 Python MT shuffle，再破底层 GMP MT。
-- 识别信号：输出被 `random.shuffle` 置乱，但 shuffle seed 位数较短。
-- 复用要点：恢复置乱源状态后把输出还原为真实顺序，再复用未置乱版本的线性恢复。
+看到“MT 输出 + shuffle”不能只把置乱当信息损失；应先查 shuffle 使用哪套 PRNG、何时初始化、seed 从哪里来以及具体消耗多少底层输出。本题通过第一问选择通用矩阵主动暴露 PY-MT，再通过第二问选择 1-bit 元素让逐元素 shuffle 退化为空操作，最终把置乱恢复成普通的 GMP MT 线性方程。PRNG 分层与懒初始化往往比单个 MT19937 本身更值得审计。

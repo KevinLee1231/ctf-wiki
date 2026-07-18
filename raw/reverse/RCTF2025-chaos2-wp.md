@@ -2,102 +2,39 @@
 
 ## 题目简述
 
-程序包含大量 `jnz` 到 `mov 22222222` 的花指令，并在多个小函数中做反调试和动态修改密钥字符。清理花指令后定位构造函数，恢复最终 RC4 密钥并解密。
+程序先用固定模式的 x86 花指令干扰反编译，再把 RC4 密钥拆散到多个反调试函数中动态修正。静态数据里的密钥是故意写错的 `flag:{Th1sflaglsG00ds}`；只有还原“未被调试”时的各条分支，才能得到真正的 128 字节 RC4 密钥并解出 flag。
 
 ## 解题过程
 
-### 关键观察
+反编译结果中反复出现一组 `jnz`、内嵌字节和 `mov ..., 0x22222222`。这些代码不参与有效计算，只会破坏控制流识别；把同模式指令手工 NOP 后，构造函数、TLS 回调和几个反调试函数会恢复成清晰的调用关系。
 
-程序包含大量 `jnz` 到 `mov 22222222` 的花指令，并在多个小函数中做反调试和动态修改密钥字符。
+程序在模块头之后的前 `0x10000` 字节中搜索标记 `0x12345678`，并把紧随其后的 128 字节缓冲区作为密钥。缓冲区初值为：
 
-### 求解步骤
+```text
+flag:{Th1sflaglsG00ds}\x00...
+```
 
-jnz到mov 22222222的都是花指令，全部nop
-构造函数中检索了密钥的位置：
-散装出现在各个小函数中的是反调试和动态修改：
-int SetIndex_0x00_u()
-{
-  HMODULE ModuleHandleA; // [esp+4h] [ebp-8h]
-  unsigned int n0x10000; // [esp+8h] [ebp-4h]
+其中四个错误字符分别由不同检测逻辑改回：
 
-  ModuleHandleA = GetModuleHandleA(0);
-  for ( n0x10000 = 0; n0x10000 < 0x10000; ++n0x10000 )
-  {
-    if ( *(_DWORD *)((char *)ModuleHandleA + n0x10000) == 0x12345678 && *
-((_BYTE *)ModuleHandleA + n0x10000 + 4) != 'u' )
-    {
-      dword_D1440C = (int)ModuleHandleA + n0x10000 + 4;// "flag:
-{Th1sflaglsG00ds}"
-      // "flag:{Th1sflaglsG00ds}"
-      return dword_D1440C;
-    }
-  }
-  // "flag:{Th1sflaglsG00ds}"
-  return dword_D1440C;
-}
-int SetIndex_0x08_i()
-{
-  int v1; // [esp+Ch] [ebp-Ch]
-  uint8_t BeingDebugged; // [esp+13h] [ebp-5h]
+| 下标 | 初值 | 正确值 | 检测机制与正常分支 |
+|---:|:---:|:---:|---|
+| 8 | `1` | `i` | 读取 PEB 的 `BeingDebugged`；值为 0 时写入 |
+| 14 | `l` | `I` | `NtQueryInformationProcess(ProcessDebugPort=7)`；调试端口为 0 时写入 |
+| 17 | `0` | `o` | 对无效句柄调用 `NtClose(0x99999999)`；正常产生异常并进入 SEH 时写入 |
+| 18 | `0` | `o` | `NtQueryInformationProcess(ProcessDebugFlags=31)`；返回 1 时写入 |
 
-  BeingDebugged = NtCurrentPeb()->BeingDebugged;
-  SetIndex_0x00_u();
-  index = 8;
-  if ( !BeingDebugged )
-    *(_BYTE *)(index + off_D1440C) = 'i';       // "flag:{Th1sflaglsG00ds}"
-  return v1;
-}
+TLS 回调还会调用 `IsDebuggerPresent`，检测到调试器便直接退出。因此不必强行单步跑完整个程序：按源码语义取所有“未调试”结果，就能把密钥恢复为：
 
-int __cdecl SetIndex_0x0E_I(int (__stdcall *a1)(HANDLE, int, int *, int,
-_DWORD))
-{
-密钥最终变为flag:{ThisflagIsGoods} ，填充0x00到128字节，RC4解密即可
+```text
+flag:{ThisflagIsGoods}
+```
+
+程序调用 `rc4_init(keybuffer, 128)`，所以密钥并非只有上述可见字符串，而是该字符串后继续以 `0x00` 填充到 128 字节。用这个完整密钥对内置的 128 字节密文执行 RC4，明文开头即为：
+
+```text
 RCTF{AntiDbg_Reversing_2025_v2.0_Ch4llenge}
-  int result; // eax
-  HANDLE CurrentProcess; // [esp+Ch] [ebp-10h]
-  int v3; // [esp+14h] [ebp-8h] BYREF
-
-  CurrentProcess = GetCurrentProcess();
-  result = a1(CurrentProcess, 7, &v3, 4, 0);
-  index = 14;
-  if ( v3 )
-    off_D1440C[index] = 'I';                    // "flag:{Th1sflaglsG00ds}"
-  return result;
-}
-
-HMODULE SetIndex_0x11_o()
-{
-  HMODULE hModule; // eax
-
-  hModule = LoadLibraryW(L"Ntdll.dll");
-  if ( hModule )
-  {
-    index = 0x11;
-    hModule = (HMODULE)GetProcAddress(hModule, "NtClose");
-    if ( hModule )
-      return (HMODULE)((int (__stdcall *)(unsigned int))hModule)(0x99999999);
-//异常处理，修改为o
-  }
-  return hModule;
-}
-
-int __cdecl SetIndex_0x12_o(int (__stdcall *a1)(HANDLE, int, int *, int,
-_DWORD))
-{
-  int result; // eax
-  HANDLE CurrentProcess; // [esp+Ch] [ebp-10h]
-  int v3; // [esp+14h] [ebp-8h] BYREF
-
-  CurrentProcess = GetCurrentProcess();
-  result = a1(CurrentProcess, 31, &v3, 4, 0);
-  index = 0x12;
-  if ( v3 == 1 )
-    off_D1440C[index] = 'o';                    // "flag:{Th1sflagIsGo0ds}"
-  return result;
-}
+```
 
 ## 方法总结
 
-- 核心技巧：去花指令、识别反调试动态改 key、RC4 解密。
-- 识别信号：大量固定模式跳转、PEB/NtQueryInformationProcess/NtClose 异常检测。
-- 复用要点：动态修改字符串时要按实际反调试分支恢复最终密钥。
+本题的关键不是枚举密钥，而是同时处理两层干扰：先识别并清除重复花指令以恢复控制流，再把各个反调试 API 的“正常运行结果”翻译成密钥字符。复现 RC4 时还要严格遵守调用参数，保留 128 字节缓冲区中的尾随零；只用可见字符串作为短密钥会得到错误结果。

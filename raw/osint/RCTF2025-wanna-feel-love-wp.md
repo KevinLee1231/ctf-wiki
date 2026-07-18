@@ -2,151 +2,98 @@
 
 ## 题目简述
 
-多阶段 OSINT/音频题，线索围绕 “I Feel Fantastic”。需要依次处理 spammimic 隐写、XM sample 的二进制节拍、Ghostarchive 视频元数据、AndroidWorld/PayPal 购买信息和 Find a Grave 页面。
+这是一道按顺序解锁的五阶段综合题，附件为一封带 `challenge.xm` 的邮件。前两关要从伪装垃圾邮件和 XM sample 中提取隐藏文本，后三关则围绕 “I Feel Fantastic” 视频、歌唱机器人 Tara、开发者 John Bergeron 及其公开资料进行 OSINT。
+
+平台源码表明五关答案必须依次提交；全部通过后才返回最终 flag。总 PDF 在第三关日期和第五关 URL 拼写上存在笔误，以下以仓库内实际校验器为准，并在相应位置说明差异。
 
 ## 解题过程
 
-### 关键观察
+### 1. 垃圾邮件正文中的 SpamMimic 隐写
 
-多阶段 OSINT/音频题，线索围绕 “I Feel Fantastic”。
+`.eml` 是 `multipart/mixed` 邮件，文本正文看似普通垃圾广告，附件则是 `challenge.xm`。第一关的“email trying to tell you”指向正文而非音频；把纯文本部分粘贴到 [SpamMimic Decode](https://www.spammimic.com/decode.shtml)，即可恢复：
 
-### 求解步骤
+```text
+Don't just listen to the sound; this file is hiding an 'old relic.' Try looking for the 'comments' that the player isn't supposed to see.
+```
 
-Challenge 1
-将邮件的文字部分用 spammimic (https://www.spammimic.com/decode.cgi) 解码得到：
-Challenge 2
-challenge.xm 的 samples 有个 5: feel，是二进制数据，每 0.05s 是一个 bit
-Don't just listen to the sound; this file is hiding an 'old relic.' Try
-looking for the 'comments' that the player isn't supposed to see.
-import soundfile as sf
-import numpy as np
+这段明文既是第一关答案，也明确提示下一关要检查音频容器中“播放器看不到的 comments/旧遗物”。链接只承担解码器入口作用；其功能和解码结果已在此完整记录。
 
-def solve_ask_clustering(filename):
-    print(f"正在分析文件: {filename}")
-    data, samplerate = sf.read(filename)
+### 2. XM 第五个 sample 的波形比特
 
-    if len(data.shape) > 1:
-        data = data[:, 0]
+用 OpenMPT 检查 XM 结构，可见标题 `How Do you Feel?`、tracker 名称 `the OpenMPT knows`，以及提示：
 
-    # 1. 计算每个 0.05s 切片的能量 (RMS)
-    bit_duration = 0.05
-    samples_per_bit = int(samplerate * bit_duration)
-    total_bits = len(data) // samples_per_bit
+```text
+They say if you trace the peaks carefully enough, it spells a sentence that was never meant to be heard.
+```
 
-    rms_values = []
+五个 sample 中，第五个 `Feel` 从未被曲目调用，波形却呈现规则的高低能量块，这是实际隐写载体。将它无损导出后按以下步骤恢复：
 
-    for i in range(total_bits):
-        start = i * samples_per_bit
-        end = start + samples_per_bit
-        chunk = data[start:end]
+1. 按原采样率每 `0.05 s` 切一段，计算每段 RMS 能量；
+2. 对 RMS 排序，取相邻值最大间隙两端的中点作为动态阈值；
+3. 高于阈值记为 `1`，否则记为 `0`；
+4. 从头开始每 8 bit 按高位在前转成 ASCII。
 
-        # 计算均方根值 (RMS) 作为能量指标，比单纯看最大值更准确
-        if len(chunk) > 0:
-            rms = np.sqrt(np.mean(chunk**2))
-            rms_values.append(rms)
-        else:
-            rms_values.append(0)
+结果为：
 
-    # 2. 寻找动态阈值
-
-    sorted_rms = sorted(rms_values)
-    # 找相邻差值最大的位置，通常就是 0 和 1 的分界线
-    diffs = np.diff(sorted_rms)
-    split_index = np.argmax(diffs)
-
-    # 阈值设为分界线两边的中间值
-    threshold = (sorted_rms[split_index] + sorted_rms[split_index + 1]) / 2
-    # 3. 重新生成二进制串
-    binary_bits = []
-    for rms in rms_values:
-        if rms > threshold:
-            binary_bits.append('1')
-        else:
-            binary_bits.append('0')
-
-    binary_str = "".join(binary_bits)
-
-Challenge 3
-打开 https://ghostarchive.org/varchive/rLy-AwdCOmI ，可看到：
-<video>  源指向 .../rLy-AwdCOmI.mp4 ，即视频 ID。
-同一段落显示 Uploader: Creepyblog  与 Original upload date: Thu, 16 Apr 20
-09 。发现交上去不对。
-后续找到Mallory Marlowe 的 Substack 文章（https://mallorymarlowe.substack.com/p/
-4-i-feel-fantastic-hey-hey-hey ）说明 Creepyblog 在 2009-04-15 上传。
-答案
-Video Id：rLy-AwdCOmI
-Upload Date：2009-04-16
-Uploader：Creepyblog
-Challenge 4
-1. 打开
-（Android Music Videos 订购页）：
-    # 检查是否匹配
-    if binary_str.startswith("0100100100"):
-        print(">>> 开头匹配成功！正在解码...")
-    else:
-        print(">>> 开头有差异，请检查输出的阈值是否合理。")
-    print("-" * 30)
-    # 5. 转 ASCII
-    result = ""
-    for i in range(0, len(binary_str), 8):
-        byte = binary_str[i:i+8]
-        if len(byte) == 8:
-            try:
-                result += chr(int(byte, 2))
-            except:
-                result += "?"
-    print("解码结果:")
-    print(result)
-    print("-" * 30)
-if __name__ == "__main__":
-    solve_ask_clustering('Feel.flac')
+```text
 I Feel Fantastic heyheyhey
+```
+
+不要对整个 XM 混音做能量切片；正常乐器会污染门限。必须先定位并导出未使用的第五个 sample，而且应避免 MP3 等有损转码改变高低能量边界。
+
+### 3. 追溯原始 YouTube 上传
+
+第二关明文对应著名的 Tara 歌唱机器人视频。已删除原视频的 [Ghostarchive 归档](https://ghostarchive.org/varchive/rLy-AwdCOmI)仍暴露视频资源名、上传者和日期元数据，可确定：
+
+```text
+Video ID: rLy-AwdCOmI
+Uploader: Creepyblog
+```
+
+日期需要额外交叉验证。归档展示可能因时区或页面解析显示 `Thu, 16 Apr 2009`，但更早的页面记录及 [Mallory Marlowe 对该视频来源的整理](https://mallorymarlowe.substack.com/p/4-i-feel-fantastic-hey-hey-hey)都指向 Creepyblog 于 2009-04-15 上传。更关键的是，仓库内平台源码的实际校验值为：
+
+```text
+Upload Date: 2009-04-15
+```
+
+总 PDF 最后的答案列表把日期写成 `2009-04-16`，与它前文“该值提交不对”的叙述及平台校验器均冲突，应视为 WP 笔误，不能照抄。
+
+### 4. 确认 DVD 购买入口、发件人和创作年份
+
+[Android Music Videos 商品页](https://androidworld.com/prod68.htm)说明 John Bergeron 制作了一张约 15 分钟的歌唱机器人 DVD，包含五段各约 3 分钟的曲目，并在页面底部提供购买入口。题目要求提交的购买链接就是该商品页本身：
+
+```text
 https://androidworld.com/prod68.htm
-页面底部提供 PayPal 表单，action="<https://www.paypal.com/cgi-bin/webscr
->" ，即唯一购买入口。
-表单中的 business  字段为 crwillis@androidworld.com （Chris Willis），即售卖
-者/收款邮箱。
-2. 创作年份：
-Substack 文章写明 Tara 的音乐视频诞生于 2003-2004。该页面列出的 5 首曲目即在此期间
-制作。
-尝试提交邮箱发现不正确，找到一篇晒单的blog，可以找到Sender是Chris Wills： https://yitzilit
-t.medium.com/the-story-behind-i-feel-fantastic-tara-the-singing-android-and-john-berger
-on-fc83de9e8f36
-答案
-Purchase Link：https://androidworld.com/prod68.htm
-Sender（付款接收邮箱）：Chris Willis
-Creation Year：2004 （音乐首次成形于 2003-2004，DVD 版在 2004 年最终成形）
-Challenge 5
-1. 通过 Bing RSS 与 Reddit 贴讨论，提到“John Louis Bergeron” 葬于 Resurrection Park
-Cemetery。
-2. 进一步访问 Find a Grave，检索 John Louis Bergeron，即可确认其纪念页面（题目要求去掉末
-尾 /）
-https://www.findagrave.com/memorial/63520325/john_louis-bergeron
-答案
-Developer’s Digital Grave：https://www.findagrave.com/memorial/63520325/john_
-louis-bergeron
+```
 
-### 参考链接补充
+页面留下的联系/PayPal 收款邮箱是 `crwillis@androidworld.com`，但题目字段问的是收到实体包裹时的 `Sender`，校验器也不接受邮箱。[Yitzi Litt 的实购调查](https://yitzilitt.medium.com/the-story-behind-i-feel-fantastic-tara-the-singing-android-and-john-bergeron-fc83de9e8f36)记录了几个月后收到的 DVD 和随包纸条，由此确认发件人姓名为：
 
-本题的外链是分阶段证据链，不应只保留 URL：
+```text
+Chris Willis
+```
 
-- `spammimic` 的 `decode.cgi` 是 Challenge 1 的文本隐写解码器；邮件正文看似垃圾广告文本，实际应丢进 decoder 得到下一阶段提示。
-- Ghostarchive 页面用于验证视频 ID、上传者和原始上传时间：`rLy-AwdCOmI` 指向归档视频，页面元数据给出 `Uploader: Creepyblog` 与原始上传日期线索；最终提交时以题目接受的 `2009-04-16` 为准。
-- Mallory Marlowe/Substack 与 Medium 文章用于补背景：`I Feel Fantastic`/Tara 相关音乐视频形成于 2003-2004，解释为什么 Creation Year 应取 `2004`，并辅助区分 uploader、creator、seller/sender 这几个容易混淆的字段。
-- AndroidWorld 的 `prod68.htm` 是购买入口证据：页面提供 PayPal 购买表单，正文中的 `business`/收款字段用于定位销售者邮箱或姓名；若题目不接受邮箱，应继续用晒单/文章交叉确认显示名。
-- Find a Grave 页面是最后一阶段的确认页：检索 `John Louis Bergeron` 并确认 memorial URL，提交时按题目要求去掉末尾 `/`。
+同一调查还检查了 DVD 文件元数据，其中修改时间是 `December 6, 2004 at 9:29 PM`。这比笼统的“2003–2004 年间制作”更能支撑题目所需的单一年份：
 
-### PDF 外链
+```text
+Creation Year: 2004
+```
 
-- <https://www.spammimic.com/decode.cgi>
-- <https://ghostarchive.org/varchive/rLy-AwdCOmI>
-- <https://mallorymarlowe.substack.com/p/4-i-feel-fantastic-hey-hey-hey>
-- <https://androidworld.com/prod68.htm>
-- <https://yitzilitt.medium.com/the-story-behind-i-feel-fantastic-tara-the-singing-android-and-john-bergeron-fc83de9e8f36>
-- <https://www.findagrave.com/memorial/63520325/john_louis-bergeron>
+### 5. 定位开发者的数字墓碑
+
+继续沿 John Bergeron 的全名、讣告和墓园线索检索，可定位 [Find a Grave 纪念页](https://www.findagrave.com/memorial/63520325/john-louis-bergeron)。题目要求 URL 不带末尾斜杠，平台源码中的精确答案为：
+
+```text
+https://www.findagrave.com/memorial/63520325/john-louis-bergeron
+```
+
+总 PDF 将 slug 写成 `john_louis-bergeron`，但实际页面和校验器使用 `john-louis-bergeron`，这里同样应以平台源码为准。完成五关后返回：
+
+```text
+RCTF{sh3_ju5t_f33ls_l0v3_thr0ugh_w1r3s_4nd_t1m3}
+```
 
 ## 方法总结
 
-- 核心技巧：文本隐写、音频比特恢复和互联网档案 OSINT。
-- 识别信号：邮件文字像垃圾文本、XM sample 可疑、视频元数据和购买页面可交叉验证。
-- 复用要点：音频题不要只听声音，优先检查 sample、comment、metadata 和外部存档。
+- 多媒体题不要只播放成品：邮件正文、容器注释、未被调用的 sample、波形能量和文件元数据都可能是独立通道。先检查结构，再决定是否需要频谱或信号分析。
+- 对二值波形用固定时窗统计 RMS，再从数据本身寻找两簇间阈值，比手写固定振幅门限更耐采样幅度变化；同时保留时窗、bit 顺序和字节端序，确保过程可复现。
+- OSINT 多来源冲突时，要区分页面展示时间、二手文章、题目叙述与实际校验值。本题两个官方 WP 笔误均可由随题平台源码直接裁决，不能为了“忠实 PDF”保留错误答案。

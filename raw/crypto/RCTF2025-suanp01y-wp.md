@@ -2,101 +2,91 @@
 
 ## 题目简述
 
-题目给出稀疏多项式构造的提示，核心关系可看成 `h1 * h0^{-1}` 在 `GF(2)[X]/(X^r-1)` 中的像。利用有界次数做 rational reconstruction 可恢复分母多项式，再枚举循环位移得到 AES-CTR 密钥。
+题目在商环
+
+```text
+S = GF(2)[X] / (X^16381 - 1)
+```
+
+中生成两个低重量多项式，将它们分别循环移位后，只公开商 `hint = h1 / h0`。flag 使用 `MD5(str(h0))` 作为 AES-CTR 密钥加密。由于未移位的两个秘密多项式次数都不超过 `floor(r/3)`，可以把求解建模成模 `X^r-1` 的多项式有理重构，再枚举不可避免的循环移位等价类。
 
 ## 解题过程
 
-### 关键观察
+### 还原生成关系
 
-题目给出稀疏多项式构造的提示，核心关系可看成 `h1 * h0^{-1}` 在 `GF(2)[X]/(X^r-1)` 中的像。
+源码参数为：
 
-### 求解步骤
+```python
+r, d = 16381, 41
 
-h0 and h1 are sparse polynomials built by summing 41 monomials drawn from indices ≤
-⌊16381/3⌋ and then rotated by random exponents. Since h1 and h0 are coprime and we know
-their quotient modulo X^r−1, we can treat the hint polynomial as the image of h1 * h0^{-1} in
-GF(2)[X]/(X^r−1) and run rational reconstruction to recover h0 (up to a cyclic rotation).
-from sage.all import *
-from Crypto.Cipher import AES
-from hashlib import md5
-import sys
+def sparse_poly():
+    return sum(x^i for i in set(sample(range(r // 3 + 1), d)))
+```
 
+生成互素的 `t0,t1` 后，题目选择随机移位 `a,b`：
+
+```text
+h0 = t0 * X^a
+h1 = t1 * X^b
+hint = h1 / h0
+```
+
+所有运算都在 `S` 中进行，乘 `X^k` 等价于把系数向量循环移位。因此：
+
+```text
+hint = (t1 * X^(b-a)) / t0  mod (X^r - 1)
+```
+
+也就是说，已知一个模多项式意义下的商，分母是次数不超过 `r/3` 的稀疏多项式。源码还保证 `gcd(t0,t1)=1` 且 `h0` 在商环中可逆，满足有理重构所需条件。
+
+### 用扩展欧几里得算法做有理重构
+
+目标是找到 `N,D`，使：
+
+```text
+hint * D == N  mod (X^r - 1)
+```
+
+并满足分子、分母的次数边界。Sage 的 `rational_reconstruction()` 内部使用多项式扩展欧几里得算法，可以直接写成：
+
+```python
 r = 16381
-R = PolynomialRing(GF(2), 'x')
-x = R.gen()
-mod_poly = x**r - 1
+R.<x> = PolynomialRing(GF(2))
+mod_poly = x^r - 1
 
-def parse_polynomial(poly_str):
-    poly = R.zero()
-    for term in poly_str.replace(' ', '').split('+'):
-        if not term:
-            continue
-        if term == '1':
-            poly += 1
-        elif term == 'X':
-            poly += x
-        elif term.startswith('X^'):
-            exponent = int(term[2:])
-            poly += x**exponent
-        else:
-            raise ValueError(f"Unknown term: {term}")
-    return poly
+den_bound = r // 3
+num_bound = r - den_bound
+num, den = hint.rational_reconstruction(
+    mod_poly, num_bound, den_bound
+)
+```
 
-def format_poly(exps):
-    terms = []
-    for e in sorted(exps, reverse=True):
-        if e == 0:
-            terms.append('1')
-        elif e == 1:
-            terms.append('X')
-        else:
-            terms.append(f'X^{e}')
-    return ' + '.join(terms) if terms else '0'
+`den` 恢复出 `t0` 的一个循环移位代表。GF(2) 中不存在额外的非平凡常数倍歧义，但在模 `X^r-1` 的环里，同时给分子和分母乘 `X^k` 不改变商，所以仅靠 `hint` 无法确定绝对移位 `a`。
 
-def recover_denominator(hint_poly):
-    den_bound = r // 3
-    num_bound = r - den_bound
-    num, den = hint_poly.rational_reconstruction(mod_poly, num_bound,
-den_bound)
-    den_exps = sorted(m.degree() for m in den.monomials())
-    return den_exps
+### 枚举移位并解密
 
-def brute_force_flag(den_exps, ciphertext_hex):
-    ciphertext = bytes.fromhex(ciphertext_hex.strip())
-    nonce = b'suanp01y'
-    for shift in range(r):
-        shifted = [ (e + shift) % r for e in den_exps ]
-        poly_str = format_poly(shifted)
-        key = md5(poly_str.encode()).digest()
-        cipher = AES.new(key, AES.MODE_CTR, nonce=nonce)
-        plaintext = cipher.decrypt(ciphertext)
-        if plaintext.startswith(b'RCTF{'):
-            print(f'Shift: {shift}')
-            print(plaintext.decode())
-            return plaintext.decode()
-    raise ValueError('Flag not found')
+取出 `den` 中系数为 1 的指数集合，然后枚举全部 `r` 个循环移位：
 
-def main(path):
-    with open(path, 'r') as f:
-        lines = [line.strip() for line in f if line.strip()]
-    if len(lines) < 2 or not lines[0].startswith('hint = '):
-        raise ValueError('Unexpected file format')
-    hint_str = lines[0].split('hint = ', 1)[1]
+```python
+den_exps = [m.degree() for m in den.monomials()]
+ciphertext = bytes.fromhex(ciphertext_hex)
 
-### 跨页补回：多项式恢复脚本收尾
+for shift in range(r):
+    exps = [(e + shift) % r for e in den_exps]
+    candidate = sum(x^e for e in exps)
 
-myexample.py
-    ciphertext_hex = lines[1]
-    hint_poly = parse_polynomial(hint_str)
-    den_exps = recover_denominator(hint_poly)
-    brute_force_flag(den_exps, ciphertext_hex)
+    # 必须使用 Sage 对多项式的原始字符串格式
+    key = md5(str(candidate).encode()).digest()
+    cipher = AES.new(key, AES.MODE_CTR, nonce=b'suanp01y')
+    plaintext = cipher.decrypt(ciphertext)
 
-if __name__ == '__main__':
-    path = sys.argv[1] if len(sys.argv) > 1 else 'output.txt'
-    main(path)
+    if plaintext.startswith(b'RCTF{'):
+        print(shift, plaintext.decode())
+        break
+```
+
+实现时最容易忽略的是密钥输入不是系数向量，而是 `str(h0)`。若自行格式化多项式，必须与 Sage 保持完全一致：指数降序、`X`/`X^n` 的写法以及项之间的空格都会影响 MD5。直接在同一个 Sage 多项式环中重建候选并调用 `str()` 最稳妥。
 
 ## 方法总结
 
-- 核心技巧：多项式有理重构恢复稀疏分母。
-- 识别信号：已知商多项式、分子/分母次数有界且在循环商环中互素。
-- 复用要点：恢复结果常有旋转等价类，需要枚举位移并用 flag 格式验证。
+题目公开的是循环多项式商，但秘密分子、分母具有远小于模次数的结构边界，这正是有理重构的适用信号。扩展欧几里得算法负责从模同余中找回短分母，枚举负责消除商环中的循环移位等价。最后还要严格复现序列化到密钥的过程；数学对象恢复正确，不代表它的字符串编码也自动一致。

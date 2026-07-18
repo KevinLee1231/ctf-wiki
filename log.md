@@ -1695,3 +1695,13 @@
 - 确认 `Fibonacci` 属于 0xGame2020、`Roundabout` 属于 0xGame2021 后，删除旧的 `Bugku-Fibonacci-RSA-wp.md` 与 `Bugku-Roundabout-wp.md`，保留新归档的 `0xGame2020-week1-Fibonacci-wp.md` 与 `0xGame2021-week1-Roundabout-wp.md` 作为 raw 证据来源。
 - 同步更新 5 个 `wiki/*.md` 中的原始资料和案例索引链接，避免 wiki 继续指向已删除的 Bugku 前缀 WP；技巧语义不改，只替换来源文件。
 - 更新 `index.md` raw live 统计：Crypto 由 252 降至 251，Reverse 由 232 降至 231，raw 总数由 1152 降至 1150。
+
+## 2026-07-18 — RCTF2025 全量 Raw WP 逐题完善
+
+- 以 `D:/文档/网络安全竞赛/RCTF2025-main/RCTF 2025 Writeup by Nu1L.pdf` 的书签为题目边界，对总 PDF 收录的 33 篇 WP 逐题、逐页渲染并视觉核对；同时阅读仓库内单题 WP、题目源码、部署文件和官方 exp，手工重写 `raw/` 中对应正文，没有使用脚本批量替换。
+- 将 33 篇现有 WP 统一完善为“题目简述、解题过程、方法总结”三段，在正文中补齐漏洞成因、关键状态、精确利用顺序、答案/flag 与证据边界；对仓库只有 TODO、缺附件或缺源码的 `Chaos`、`only_rev` 等题明确保留不可验证边界，不把推测伪装成源码结论。
+- 总 PDF 未收录但赛事仓库存在的 4 题已补入 raw：`raw/web/RCTF2025-hyperfun-wp.md`、`raw/reverse/RCTF2025-fakevdi-wp.md`、`raw/reverse/RCTF2025-determinism-wp.md`、`raw/reverse/RCTF2025-revme-wp.md`。RCTF2025 覆盖由 33 篇增至 37 篇。
+- 依据随题源码纠正关键文档错误：`no_check_WASM` 的缺陷是 merge-point 类型/arity/subtype 校验被移除，并非 element section；`Wanna Feel Love` 平台实际校验上传日期 `2009-04-15` 和纪念页 slug `john-louis-bergeron`，覆盖总 PDF 中互相矛盾的 `2009-04-16` 与下划线写法；`514` 同时保留官方未鉴权 WebSocket 热重载路线和 PDF 的 `pjsk-pptr@1.1.7` 注入路线。
+- 外链只保留稳定上游源码、论文/作者实现及题目答案本身需要的公开页面；每条保留链接的关键结论已写入正文。比赛期间的远程服务、Discord 邀请、临时 IP、失效推文和无必要二手链接均未保留为解题依赖。
+- 资源审计共发现 15 个 RCTF2025 图片文件；正文只保留并成功解析 `asgard-web-file-list.png` 与 `challenge-sticker-flag-hint.png` 两张必要视觉证据。其余 13 个终端/聊天/代码截图和破图占位符已完成文本转写，确认引用数为 0 后按用户明确授权删除。
+- 更新 `index.md` live raw 统计：Reverse 由 231 增至 234，Web 由 234 增至 235，总数由 1150 增至 1154；其它方向数量不变。本轮未新增或修改 `wiki/*.md`。
