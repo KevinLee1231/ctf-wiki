@@ -4,13 +4,13 @@ tags: [crypto, family, rsa, coppersmith, oracle, signature]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/rsa-specialized-structures-and-oracles.md
-  - ../raw/crypto/Bugku-Fibonacci-RSA-wp.md
+  - ../raw/crypto/0xGame2020-week1-Fibonacci-wp.md
   - ../raw/crypto/LilacCTF2026-myrsa-wp.md
   - ../raw/crypto/NCTF2026-ez-rsa-wp.md
   - ../raw/crypto/NCTF2026-hard-rsa-wp.md
   - ../raw/crypto/SUCTF2026-RSAWP.md
   - ../raw/crypto/VNCTF2026-math-rsa-wp.md
-updated: 2026-07-06
+updated: 2026-07-18
 ---
 
 # RSA Specialized Structures and Oracles
@@ -54,7 +54,7 @@ updated: 2026-07-06
 
 | Raw WP | 可复用联系 |
 |---|---|
-| [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md) | `p = next_prime(S**16)` 且 `S` 来自 Fibonacci 模小整数的长和；先用 Pisano period 快速恢复 `S`，再验证 `p*q == N` 并常规解密。 |
+| [0xGame2020-week1-Fibonacci-wp](../raw/crypto/0xGame2020-week1-Fibonacci-wp.md) | `p = next_prime(S**16)` 且 `S` 来自 Fibonacci 模小整数的长和；先用 Pisano period 快速恢复 `S`，再验证 `p*q == N` 并常规解密。 |
 | [LilacCTF2026-myrsa-wp](../raw/crypto/LilacCTF2026-myrsa-wp.md) | 三素数 RSA 中 `p=pp^2+3pp+3` 可整理成 CM 曲线 trace 关系；平方根 oracle 给出一个点后，可用 ECM 型点乘和 `gcd` 分解 `n`。 |
 | [NCTF2026-ez-rsa-wp](../raw/crypto/NCTF2026-ez-rsa-wp.md) | hint 从两端约束 `p/q` bit；DFS 时同时检查乘积上下界和低位乘积模约束。 |
 | [NCTF2026-hard-rsa-wp](../raw/crypto/NCTF2026-hard-rsa-wp.md) | RSA-like `phi_6(N)` 需要 generalized Wiener：连分数恢复小参数，再把 `p_hat` 近似转成 Coppersmith 或近邻分解。 |
@@ -94,7 +94,7 @@ updated: 2026-07-06
 ## 原始资料
 
 - [rsa-specialized-structures-and-oracles.md](../raw/crypto/rsa-specialized-structures-and-oracles.md)
-- [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md)
+- [0xGame2020-week1-Fibonacci-wp](../raw/crypto/0xGame2020-week1-Fibonacci-wp.md)
 - [LilacCTF2026-myrsa-wp](../raw/crypto/LilacCTF2026-myrsa-wp.md)
 - [NCTF2026-ez-rsa-wp](../raw/crypto/NCTF2026-ez-rsa-wp.md)
 - [NCTF2026-hard-rsa-wp](../raw/crypto/NCTF2026-hard-rsa-wp.md)

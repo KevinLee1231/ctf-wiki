@@ -1689,3 +1689,9 @@
 - 本轮只新增 raw 资料、更新 `index.md` live 统计和本日志，不新增或修改 `wiki/*.md`；raw 总数由 1075 增至 1152。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2021-wp-before-archive-20260718-130916.zip`，含 77 个文件；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-0xGame2021-raw-archive-20260718-130916.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：77 篇归档 WP 与源文件 SHA-256 完全一致，三段结构、代码围栏、数学标记、目标命名和周次均无异常；全库 4,200 条本地 Markdown 链接和 587 条图片引用均可解析，132 个资源目录及其中 587 个文件无孤立或未引用项；目标命名冲突、旧版本冲突和非法名称均为 0，源 `wp` 下剩余文件和嵌套资源目录均为 0。
+
+## 2026-07-18 — 0xGame 重复 Bugku WP 去重
+
+- 确认 `Fibonacci` 属于 0xGame2020、`Roundabout` 属于 0xGame2021 后，删除旧的 `Bugku-Fibonacci-RSA-wp.md` 与 `Bugku-Roundabout-wp.md`，保留新归档的 `0xGame2020-week1-Fibonacci-wp.md` 与 `0xGame2021-week1-Roundabout-wp.md` 作为 raw 证据来源。
+- 同步更新 5 个 `wiki/*.md` 中的原始资料和案例索引链接，避免 wiki 继续指向已删除的 Bugku 前缀 WP；技巧语义不改，只替换来源文件。
+- 更新 `index.md` raw live 统计：Crypto 由 252 降至 251，Reverse 由 232 降至 231，raw 总数由 1152 降至 1150。

@@ -4,7 +4,7 @@ tags: [reverse, family, triage]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/reverse-first-pass-workflow-and-debugging.md
-updated: 2026-07-06
+updated: 2026-07-18
 ---
 
 # First-Pass Workflow and Debugging
@@ -100,7 +100,7 @@ updated: 2026-07-06
 | [TamilCTF2021-GoldDigger-wp](../raw/reverse/TamilCTF2021-GoldDigger-wp.md) | 验证函数形如 `input[index[i]] + const == target[i]`；提取置换表和目标数组后直接反填输入。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | [强网杯2019-JustRe-wp](../raw/reverse/强网杯2019-JustRe-wp.md) | Flag 分两段：前半段是 DWORD 加法/低字节 XOR 约束，后半段是固定 3DES-ECB 密文和 24 字节 key。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
 | [Xp0intCTF2017-MaybeNotStandrad-wp](../raw/reverse/Xp0intCTF2017-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)、[self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
-| [Bugku-Roundabout-wp](../raw/reverse/Bugku-Roundabout-wp.md) | UPX/壳是首要边界，先脱壳或 dump 后再处理 XOR/key 与比较表。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
+| [0xGame2021-week1-Roundabout-wp](../raw/reverse/0xGame2021-week1-Roundabout-wp.md) | UPX/壳是首要边界，先脱壳或 dump 后再处理 XOR/key 与比较表。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
 | [0xGame2022-week1-re1-wp](../raw/reverse/0xGame2022-week1-re1-wp.md) | 入门 PE 中 flag 明文硬编码在 `.rdata`，先用 strings/Ghidra Strings 和交叉引用确认真实输出。 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
 | [0xGame2022-week1-re2-wp](../raw/reverse/0xGame2022-week1-re2-wp.md) | 36 字符中间段经过带反馈的 `uint32` 乘加/XOR 哈希，目标数组固定；用 Z3 保留 32 位溢出语义求解。 | [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | [0xGame2022-week1-re3-wp](../raw/crypto/0xGame2022-week1-re3-wp.md) | 标准 Base64 表、3 字节到 4 字符和 `=` padding 同时出现；目标串按 `int` 数组存储时只取低字节解码。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |

@@ -231,7 +231,7 @@
 | ai-ml | 19 |
 | blockchain | 19 |
 | cloud-infra | 4 |
-| crypto | 252 |
+| crypto | 251 |
 | forensics | 64 |
 | hardware-embedded | 5 |
 | malware | 12 |
@@ -239,10 +239,10 @@
 | osint | 16 |
 | pentest | 11 |
 | pwn | 232 |
-| reverse | 232 |
+| reverse | 231 |
 | stego | 48 |
 | web | 234 |
-| **Total** | **1152** |
+| **Total** | **1150** |
 
 ## 维护入口
 

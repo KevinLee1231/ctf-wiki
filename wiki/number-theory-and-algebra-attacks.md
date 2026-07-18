@@ -5,8 +5,8 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/number-theory-and-algebra-attacks.md
   - ../raw/crypto/WMCTF2025-lemonpepper-wp.md
-  - ../raw/crypto/Bugku-Fibonacci-RSA-wp.md
-updated: 2026-07-06
+  - ../raw/crypto/0xGame2020-week1-Fibonacci-wp.md
+updated: 2026-07-18
 ---
 
 # Number Theory and Algebra Attacks
@@ -48,7 +48,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md) | `Lemon` 部分是模 `q^e` 上的重根多项式，普通 `.roots()`/Hensel 可能卡住；先通过求导保留高重数根，再结合 `Pepper` 的 p-adic 候选和 MCG 递推剪枝恢复状态。 |
-| [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md) | Fibonacci 模 `n` 的长和可用 Pisano period 压缩到一个周期内计算；求和下标要与题目代码一致，结果再回到 RSA 素数生成结构。 |
+| [0xGame2020-week1-Fibonacci-wp](../raw/crypto/0xGame2020-week1-Fibonacci-wp.md) | Fibonacci 模 `n` 的长和可用 Pisano period 压缩到一个周期内计算；求和下标要与题目代码一致，结果再回到 RSA 素数生成结构。 |
 | [ACTF2026-inverse-pow-wp](../raw/crypto/ACTF2026-inverse-pow-wp.md) | `2^n` 十进制前缀匹配可转成 `{n log10(2)}` 命中窄区间，先用固定点 BSGS/LLL 找足够小的 `n`。 |
 | [ACTF2026-pandora-wp](../raw/crypto/ACTF2026-pandora-wp.md) | 二次域 ideal / binary quadratic form 泄露判别式小数、`A` 高位和 `B`，先恢复判别式与 `A`，再做二元 Coppersmith 小根。 |
 | [D3CTF2019-noise-wp](../raw/crypto/D3CTF2019-noise-wp.md) | 带噪声取模 oracle 需要维护候选区间，构造固定商查询把随机噪声转成强收缩。 |
@@ -87,4 +87,4 @@ updated: 2026-07-06
 
 - [number-theory-and-algebra-attacks.md](../raw/crypto/number-theory-and-algebra-attacks.md)
 - [WMCTF2025-lemonpepper-wp](../raw/crypto/WMCTF2025-lemonpepper-wp.md)
-- [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md)
+- [0xGame2020-week1-Fibonacci-wp](../raw/crypto/0xGame2020-week1-Fibonacci-wp.md)

@@ -2,7 +2,7 @@
 type: family
 tags: [crypto, family, triage]
 skills: [ctf-crypto]
-updated: 2026-07-11
+updated: 2026-07-18
 ---
 
 # Crypto Parameter and Oracle Triage
@@ -69,7 +69,7 @@ updated: 2026-07-11
 | [ACTF2026-pandora-wp](../raw/crypto/ACTF2026-pandora-wp.md) | 二次域 ideal / binary quadratic form 泄露判别式小数、`A` 高位和 `B`，先恢复判别式与 `A`，再做二元 Coppersmith 小根。 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | [TJCTF2024-alkane-wp](../raw/crypto/TJCTF2024-alkane-wp.md) | 已知明文 XOR 出 128 bit keystream，`schedule` 把 key bit 线性组合到输出 bit，直接建 GF(2) 线性方程并枚举少量自由变量。 | [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md) |
 | [DownUnderCTF2023-apbq-rsa-ii-wp](../raw/crypto/DownUnderCTF2023-apbq-rsa-ii-wp.md) | 三条 `a*p+b*q` 小系数 hint 可构成缩放格，LLL 找短关系后对候选分量与 `n` 取 gcd 分解。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
-| [Bugku-Fibonacci-RSA-wp](../raw/crypto/Bugku-Fibonacci-RSA-wp.md) | RSA 素数由 `next_prime(S^16)` 生成，`S` 是 Fibonacci 模小 `n` 的长和，先用 Pisano period 快速恢复 `S`。 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)、[rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) |
+| [0xGame2020-week1-Fibonacci-wp](../raw/crypto/0xGame2020-week1-Fibonacci-wp.md) | RSA 素数由 `next_prime(S^16)` 生成，`S` 是 Fibonacci 模小 `n` 的长和，先用 Pisano period 快速恢复 `S`。 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)、[rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) |
 | [HGAME2026-babyrsa-wp](../raw/crypto/HGAME2026-babyrsa-wp.md) | `p,q` 公开但模数小于完整 flag，密文只约束 `m mod n`；结合前后缀、长度和字符集用格恢复原明文字节。 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) |
 | [HGAME2026-classic-wp](../raw/crypto/HGAME2026-classic-wp.md) | RSA 泄露 `p >> 230`，直接令 `p=p_high+x` 做一元 Coppersmith；解密后还要按明文提示走 Vigenere 二层。 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)、[lattice-and-lwe.md](lattice-and-lwe.md) |
 | [HGAME2026-decision-wp](../raw/crypto/HGAME2026-decision-wp.md) | 每个 flag bit 对应一个 chunk：bit=1 是同一 LWE 的 15 样本，bit=0 是随机；先合并两个真 chunk 格恢复共享 `s`，再按误差大小分类。 | [lattice-and-lwe.md](lattice-and-lwe.md) |
