@@ -1714,3 +1714,22 @@
 - `pwn/SU_fullchian` 暂未生成 raw WP：仓库内 `writeup/README.md` 为 0 字节，未提供漏洞源码或 exp，总 PDF 也未收录该题；现有资料只有知识点摘要和约 25 GB 环境镜像下载地址。为避免把“V8 内存破坏、V8/Chrome 沙箱逃逸”几个标签扩写成未经验证的利用链，本轮明确保留该缺口，等待实际 WP、exp 或附件授权后再补。
 - 更新 `index.md` live raw 统计：Web 由 235 增至 236，raw 总数由 1154 增至 1155；其它方向数量不变。本轮未新增或修改 `wiki/*.md`。
 - 校验结果：39 篇 SUCTF2026 WP 的三段结构和代码围栏均正确，本地 Markdown/图片链接全部可解析，未写入本机工作路径，结尾换行和行尾空白检查通过；全部已跟踪文件的 `git diff --check` 通过，新文件另经同等文本检查。
+
+## 2026-07-18 — MoeCTF2025 精选 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中完成拆分、逐题完善和两轮价值筛选后保留的 13 篇 MoeCTF2025 单题 WP 归档到 `raw/<category>/`。归档文件统一使用 `MoeCTF2025-<challenge>-wp.md`，文件名只保留文字、数字和必要连字符；Markdown 一级标题继续保留题目原有空格、下划线、省略号、间隔号、冒号和括号。
+- 按最小预期解法中的决定性主障碍归档为 Pwn 6 篇、Web 7 篇。Pyjail 5/6 的核心是突破 Python AST/运行时沙箱，归 Pwn；`这是……Webshell？Revenge` 的关键绕过依赖 PHP 请求生命周期、multipart 临时文件与 Web 输入处理，归 Web；其余题目与源方向一致。
+- 本批源树没有图片文件、图片引用或嵌套资源目录，因此没有创建空资源目录，也没有执行无意义的图片链接改写。目标端预验收通过后，源 `wp` 下 13 篇 Markdown 已清理；文件和嵌套目录均为 0，15 个一级方向目录保留为空目录。
+- 更新 `index.md` live raw 统计：Pwn 由 232 增至 238，Web 由 236 增至 243，raw 总数由 1155 增至 1168；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2025-wp-before-archive-20260718-225702.zip`，包含 13 个文件；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2025-raw-archive-20260718-225702.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：13 篇归档 WP 与源文件 SHA-256 完全一致，三段结构、代码围栏、结尾换行、行尾空白和目标命名均无异常；全库本地 Markdown 链接断链为 0。本轮没有新增资源文件；全库资源审计另发现 11 个既有 SUCTF2026 未引用图片，均与本次归档无关并保持不动。
+
+## 2026-07-19 — ACTF2025 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、逐篇完善并完成图片筛选的 17 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `ACTF2025-<challenge>-wp.md`，文件名和资源目录只保留英文字母、数字与必要连字符，Markdown 一级标题继续保留题目原有空格、下划线和问号。
+- 按决定性主障碍归档为 AI/ML 1 篇、Crypto 4 篇、OSINT 1 篇、Pentest 1 篇、Pwn 3 篇、Reverse 3 篇、Stego 1 篇、Web 3 篇。逐篇复核后无需调整现有分类：`Hard guess` 是信息收集、SSH 初始访问与本地提权链，仍归 Pentest；`QQQRcode` 以三维空间投影重组隐藏信息，仍归 Stego；`ezFPGA` 只需恢复 HDL 与波形中的程序行为，不依赖物理硬件机制，仍归 Reverse。
+- 迁移并规范化 2 个图片目录、4 张图片；目标目录分别为 `ACTF2025-yolov-cls-wp` 和 `ACTF2025-master-of-movie-wp`，均与归档 Markdown 同 basename，4 条图片引用同步改为新的同层相对路径，图片文件继续使用语义化英文名称。
+- 目标端预验收通过后，源 `wp` 各一级方向下的 17 篇 Markdown 与 2 个图片目录已清理；源树剩余文件和嵌套目录均为 0，15 个一级方向目录保留为空目录。
+- 更新 `index.md` live raw 统计：AI/ML 由 19 增至 20、Crypto 由 251 增至 255、OSINT 由 16 增至 17、Pentest 由 11 增至 12、Pwn 由 238 增至 241、Reverse 由 234 增至 237、Stego 由 48 增至 49、Web 由 243 增至 246，raw 总数由 1168 增至 1185；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/ACTF2025-wp-before-archive-20260719-003419.zip`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ACTF2025-raw-archive-20260719-003419.zip`。
+- 校验结果：15 篇无图 WP 与备份内源文件 SHA-256 完全一致，2 篇带图 WP 除图片目标路径外内容一致，4 个图片文件与备份内源资源哈希一致；17 篇三段结构、代码围栏、数学标记和目标命名均无异常。全库 1327 篇 active Markdown 中解析出 4180 条本地链接和 567 条图片引用，断链为 0；ACTF2025 资源引用与文件一一对应，源树清理结果符合授权范围。

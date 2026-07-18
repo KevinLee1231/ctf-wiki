@@ -228,21 +228,21 @@
 | Direction | Markdown |
 |---|---:|
 | _unclassified（暂存） | 2 |
-| ai-ml | 19 |
+| ai-ml | 20 |
 | blockchain | 19 |
 | cloud-infra | 4 |
-| crypto | 251 |
+| crypto | 255 |
 | forensics | 64 |
 | hardware-embedded | 5 |
 | malware | 12 |
 | mobile | 2 |
-| osint | 16 |
-| pentest | 11 |
-| pwn | 232 |
-| reverse | 234 |
-| stego | 48 |
-| web | 236 |
-| **Total** | **1155** |
+| osint | 17 |
+| pentest | 12 |
+| pwn | 241 |
+| reverse | 237 |
+| stego | 49 |
+| web | 246 |
+| **Total** | **1185** |
 
 ## 维护入口
 
