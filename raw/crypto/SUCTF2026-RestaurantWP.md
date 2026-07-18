@@ -1,425 +1,141 @@
 # SUCTF2026-Restaurant
 
 ## 题目简述
-题目是 tropical semiring 下的矩阵构造题。附件 `main.py` 用 `Point/Block` 抽象实现 min-plus 运算，服务端给出 `cook/eat` 两类交互：`cook(msg)` 会按内部秘密 `fork` 为消息矩阵生成一组矩阵，`eat(msg, A, B, P, R, S)` 则验证选手提交的 JSON 矩阵。目标是提交满足 rank 和取值范围约束的 `A,B,P,R,S`，让 tropical 乘法表达式相等，同时还要满足 `A * B != S`。
 
-题目原型来自 tropical signature 相关构造。预期识别信号是同一秘密 `fork` 会参与多次 `cook` 签名，理论上可以通过约束求解恢复秘密并伪造；本题验证器还存在更直接的构造空间：不恢复 `fork`，而是构造目标 tropical 矩阵 `T`，让右侧各项取最小值后被压成 `T`，同时构造 `A * B = T` 且 `A * B != S`。
+题目实现了一套基于热带半环的矩阵签名。这里的运算不是普通线性代数，而是 min-plus 运算：
+
+$$
+a\oplus b=\min(a,b),\qquad a\otimes b=a+b,
+$$
+
+$$
+(A\otimes B)_{i,j}=\min_k(A_{i,k}+B_{k,j}).
+$$
+
+服务启动时随机生成私钥矩阵 $X\in[0,255]^{8\times7}$、$Y\in[0,255]^{7\times8}$，并保存 $T=X\otimes Y$。消息经 SHA3-512 映射为 $8\times8$ 矩阵 $M$。一次正常签名随机选择 $U,V$，输出：
+
+$$
+\begin{aligned}
+A&=(M\otimes X)\oplus U,& B&=(Y\otimes M)\oplus V,\\
+P&=X\otimes V,& R&=U\otimes Y,& S&=U\otimes V.
+\end{aligned}
+$$
+
+验签计算
+
+$$
+Z=(M\otimes T\otimes M)\oplus(M\otimes P)\oplus(R\otimes M)\oplus S,
+\qquad W=A\otimes B,
+$$
+
+并要求 `W == Z`、`W != S`。此外，所有提交元素必须位于 `[0,256]`，`A/B` 的普通 NumPy 秩至少为 7，`P/R/S` 的普通 NumPy 秩为 8。注意这些是实数域上的 `numpy.linalg.matrix_rank`，不是热带秩。
+
+题目来源论文 [Tropical cryptography IV](https://eprint.iacr.org/2026/095) 把安全性建立在给定尺寸的热带矩阵分解困难性上；后续论文 [A Comprehensive Break of the Tropical Matrix-Based Signature Scheme](https://eprint.iacr.org/2026/387) 指出，签名方程本身可被利用，给出了 chosen-hash 伪造、可塑性攻击和 SMT 私钥恢复。后者在“已知公钥和一份签名”的原方案模型中即可恢复完整私钥；本题没有直接给出公钥，因此官方解法利用服务允许取得的两份签名，共同约束 $X,Y$。
 
 ## 解题过程
-题目信息
 
-题目给了一个 “餐厅” 交互程序，里面有两个重要接口：
-- cook(msg) ：正常出菜，返回 A, B, P, R, S
-- eat(msg, A, B, P, R, S) ：服务端验菜，如果满足条件就给 flag
+### 官方解法：把 min-plus 方程交给 SMT
 
-交互里真正拿 flag 的逻辑是：
+菜单选项 1 最多可调用两次。每次返回已知消息 $m_i$ 以及签名 $(A_i,B_i,P_i,R_i,S_i)$，而 $X,Y$ 在两次签名间不变，只有 $U_i,V_i$ 独立随机。
 
-1. 服务端随机生成一个 36 字符串 msg
-
-2. 我们提交 JSON 格式的 A,B,P,R,S
-
-3. 服务端检查：
-
-- `rank(A) >= 7`
-- `rank(B) >= 7`
-- `rank(P) == rank(R) == rank(S) == 8`
-- 所有元素都在 `[0, 256]`
-- 在 tropical semiring 下满足：
+把 $X,Y,U_i,V_i$ 的每个元素声明为 `[0,255]` 内的 Z3 整数。热带乘法的一个输出元素满足
 
 $$
-A * B = (M * fork * M) + (M * P) + (R * M) + S
+c=\min(t_0,t_1,\ldots,t_{d-1}),
 $$
 
-- 同时要求 `A * B != S`。
-
-这里的 * 和 + 不是普通矩阵乘法和加法，而是 tropical semiring（min-plus 代数）：
-- 点加法：a + b = min(a,b)
-
-- 点乘法：`a * b = a + b`
-- 矩阵乘法：(A*B)[i][j] = min_k (A[i][k] + B[k][j])
-
-因此这题本质不是常规线性代数，而是 tropical 矩阵构造题。
-
-### 官方/论文视角
-
-出题人给出的预期攻击更接近论文 `A Comprehensive Break of the Tropical Stickel Protocol` 里的思路：向服务端调用两次 `cook`，拿到同一个秘密 `fork` 对两个不同消息矩阵生成的签名，然后把 tropical 方程转成约束求解问题。对每个元素建立取最小值时的约束，使用 Z3 之类的 SMT solver 恢复一组满足条件的 `fork`，最后按正常签名流程伪造 `A,B,P,R,S`。
-
-这条路线的价值在于说明题目本来模拟的是 tropical 签名方案的密钥恢复/伪造问题；但在本题验证器里，`eat` 只检查等式和 rank/range 条件，不强制提交的矩阵必须来自真实 `fork` 签名过程，所以可以走下面这条直接构造路线。
-
-关键观察
-
-### 1.6 服务端真正比较的是两个 tropical 矩阵
-
-设消息矩阵为 M ，则服务端验证的是：
-
-```
-W = A * B
-Z = (M * fork * M) + (M * P) + (R * M) + S
-```
-
-其中右边的 + 也是按元素取最小值，所以：
-
-```
-Z[i][j] = min((M*fork*M)[i][j], (M*P)[i][j], (R*M)[i][j], S[i][j])
-```
-
-这意味着：
-
-我们不需要知道 fork ，只要能构造别的三项把它压住，让整个最小值固定成我们想要的矩阵即可。
-
-### 1.2 目标矩阵可以取成一个特殊的 rank-1 tropical 形式
-
-定义：
-
-- row_min[i] = min_j M[i][j]
-- col_min[j] = min_i M[i][j]
-
-然后选一个向量 y ，满足：
-- 0 <= y[j] <= col_min[j]
-- row_min[i] + y[j] <= 250
-- y 不能全相同
-
-于是定义目标矩阵：
-
-```
-T[i][j] = row_min[i] + y[j]
-```
-
-因为 fork 的元素非负，所以：
-
-```
-(M * fork * M)[i][j] >= row_min[i] + col_min[j] >= row_min[i] + y[j] = T[i][j]
-```
-
-也就是说，未知项 M*fork*M 一定不会比 T 更小。
-
-这样我们只要让 (M*P) 、(R*M) 、S 的最小值恰好等于 T ，那么整个 Z 就会被钉死成 T 。
-
-利用思路
-
-目标：构造 A,B,P,R,S ，满足：
-
-```
-A * B = T
-Z = min(M*fork*M, M*P, R*M, S) = T
-```
-
-并同时满足 rank 和元素范围限制。
-
-### 第一步：构造 S
-
-令 `S` 的非对角元等于 `T`，对角元比 `T` 稍微大一点：
-
-```text
-S[i][j] = T[i][j]                       (i != j)
-S[i][i] = T[i][i] + random(1..20)
-```
-
-这样得到的效果：
-
-- 非对角位置由 `S` 直接给出 `T`。
-- 对角位置的 `S` 不会成为最小项，需要靠 `M*P` 精确给出 `T[i][i]`。
-- 反复随机直到 `rank(S)=8`。
-
-### 第二步：构造 P
-
-目标是让：
-
-```
-M * P >= T
-且 diag(M * P) = diag(T)
-```
-
-做法是：对每一列 j ，找到第 j 行里一个最小值位置 t_j ，令：
-
-```
-P[t_j][j] = y[j]
-```
-
-其余元素设成更大一些。
-
-这样对于对角元 (j,j) ：
-
-```
-(M*P)[j][j] = min_t (M[j][t] + P[t][j])
-```
-
-当取到 t=t_j 时：
-
-```
-M[j][t_j] + P[t_j][j] = row_min[j] + y[j] = T[j][j]
-```
-
-而其他位置都更大，所以能保证：
-
-- 对角元刚好等于 T
-
-- 整体不小于 T
-
-### 第三步：构造 R
-
-目标：
-
-```
-R * M >= T
-```
-
-让 R[i][t] >= row_min[i] ，于是：
-
-```
-(R*M)[i][j] = min_t(R[i][t]+M[t][j]) >= row_min[i] + col_min[j] >= T[i][j]
-```
-
-所以 R*M 永远不会比 T 小，只是个托底项。
-
-同时随机到 rank(R)=8 为止。
-
-### 第四步：构造 A,B ，使 A*B=T
-
-脚本把 A 做成 8x7 ，B 做成 7x8 ，并让第 0 个中间维主导：
-- A[:,0] = row_min
-- B[0,:] = y
-
-这样在 tropical 乘法下，k=0 这一项给出：
-
-```
-A[i,0] + B[0,j] = row_min[i] + y[j] = T[i][j]
-```
-
-然后对 k=1..6 的所有项，故意让它们都比 T 大：
-
-```
-A[i,k] = row_min[i] + random(1..20)
-B[k,j] = y[j] + random(0..20)
-```
-
-于是：
-
-```
-A[i,k] + B[k,j] > row_min[i] + y[j] = T[i][j]
-```
-
-最终：
-
-```
-(A*B)[i][j] = min_k (A[i,k]+B[k][j]) = T[i][j]
-```
-
-同时反复随机直到普通线性代数意义下 rank(A) >= 7 且 rank(B) >= 7 。
-
-为什么一定能过 W == Z and W != S
-
-$$
-1. W = A*B = T
-$$
-
-由上面的构造直接成立。
-
-$$
-2. Z = T
-$$
-
-因为：
-
-- M*fork*M >= T
-
-，且对角线等于 T • M*P >= T
-- R*M >= T
-
-在非对角线上等于 T ，对角线上大于 T • S
-
-所以对任意位置：
-
-直接把最小值压成 T • 非对角元：S
-
-比 T 大，但 M*P 对角线正好等于 T • 对角元：S
-
-因此整体最小值恰好是 T 。
-
-$$
-3. W != S
-$$
-
-因为 S 的对角线被故意加大过，而 W=T ，所以 W 不可能等于 S 。
-
-### Exp:
+它可精确编码为：
 
 ```python
-import json
-import os
-import random
-import re
-import subprocess
-import sys
-from hashlib import sha3_512
+for t in terms:
+    solver.add(c <= t)
+solver.add(Or(*(c == t for t in terms)))
+```
 
-import numpy as np
+第一组约束保证 $c$ 不大于所有候选值，第二组保证至少有一个候选值真正取得最小值。逐元素展开两份签名的五组等式：
 
-def H(x: bytes):
-h = sha3_512(x).hexdigest()
-return [int(h[i:i+2], 16) for i in range(0, 128, 2)]
+$$
+\begin{cases}
+A_i=(M_i\otimes X)\oplus U_i,\\
+B_i=(Y\otimes M_i)\oplus V_i,\\
+P_i=X\otimes V_i,\\
+R_i=U_i\otimes Y,\\
+S_i=U_i\otimes V_i,
+\end{cases}
+\qquad i\in\{1,2\}.
+$$
 
-def hash_to_M(msg: str) -> np.ndarray:
-return np.array(H(msg.encode()), dtype=int).reshape(8, 8)
+其中 $A_i$ 的逐元素约束可写成：
 
-def trop_mul(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-n, m = X.shape
-m2, p = Y.shape
-assert m == m2
-Z = np.full((n, p), 10**9, dtype=int)
-for i in range(n):
-for j in range(p):
-Z[i, j] = min(int(X[i, k]) + int(Y[k, j]) for k in range(m))
-return Z
+```python
+MX = minplus_product_vars(M_i, X)
+solver.add(A_i[r][c] <= MX[r][c])
+solver.add(A_i[r][c] <= U_i[r][c])
+solver.add(Or(A_i[r][c] == MX[r][c],
+              A_i[r][c] == U_i[r][c]))
+```
 
-def build_ab(r: np.ndarray, v: np.ndarray):
-W = r[:, None] + v[None, :]
+`B_i` 同理；`P_i/R_i/S_i` 则直接用上面的“常量等于若干项最小值”模板。求得一组与两份签名兼容的 $X,Y$ 后，选择菜单 2，读取随机的 36 字符目标消息，重新随机 $U,V$ 并按正常签名公式生成五个矩阵即可。利用流程为：
 
-A = np.zeros((8, 7), dtype=int)
-A[:, 0] = r
-for k in range(1, 7):
-A[:, k] = np.minimum(r + 20, 256)
-A[k - 1, k] = int(r[k - 1]) + 1
+```text
+取两份 (msg, A, B, P, R, S)
+  -> 建立共享 X/Y、各自 U/V 的 SMT 约束
+  -> 求解 X/Y
+  -> 读取服务端目标消息并计算 M
+  -> 随机 U/V，生成合法签名
+  -> 提交 JSON
+```
 
-B = np.zeros((7, 8), dtype=int)
-B[0, :] = v
-for k in range(1, 7):
-B[k, :] = np.minimum(v + 20, 256)
-B[k, k - 1] = int(v[k - 1]) + 1
+生成签名时还应像源码一样重试，直到 `A != U` 且 `B != V`；提交前在本地复算五个普通秩、元素范围和 min-plus 验签等式。官方利用脚本中的比赛 IP、端口只是临时靶机信息，不属于解法机制，因此不保留。
 
-assert np.linalg.matrix_rank(A) >= 7
-assert np.linalg.matrix_rank(B) >= 7
-assert np.array_equal(trop_mul(A, B), W)
-return A, B, W
+### 参赛解法：不恢复私钥，直接构造验签等式
 
-def build_p(M: np.ndarray, W: np.ndarray, v: np.ndarray):
-row_argmin = np.argmin(M, axis=1)
-for _ in range(10000):
-P = np.zeros((8, 8), dtype=int)
-for j in range(8):
-vals = np.random.randint(int(v[j]) + 1, 257, size=8)
-vals[row_argmin[j]] = int(v[j])
-P[:, j] = vals
-MP = trop_mul(M, P)
-if (MP >= W).all() and np.all(np.diag(MP) == np.diag(W)) and
-np.linalg.matrix_rank(P) == 8:
-return P, MP
-raise RuntimeError('build_p failed')
+总 PDF 还给出了一条更直接的验证器绕过。它利用 `eat` 只检查最终矩阵关系、普通秩和范围，并不验证提交的五元组是否确由某个 $U,V$ 按签名算法产生。
 
-def build_r(M: np.ndarray, W: np.ndarray, r: np.ndarray):
-for _ in range(10000):
-R = np.zeros((8, 8), dtype=int)
-for i in range(8):
-vals = np.random.randint(int(r[i]) + 1, 257, size=8)
-vals[i] = int(r[i])
-R[i, :] = vals
-RM = trop_mul(R, M)
-if (RM >= W).all() and np.linalg.matrix_rank(R) == 8:
-return R, RM
-raise RuntimeError('build_r failed')
+令
 
-def build_s(W: np.ndarray, MP: np.ndarray, RM: np.ndarray):
-cover = (MP == W) | (RM == W)
-slack = 256 - W
+$$
+r_i=\min_j M_{i,j},\qquad c_j=\min_i M_{i,j}.
+$$
 
-cand = np.argwhere(cover & (slack > 0))
-if len(cand) == 0:
-raise RuntimeError('build_s failed: no cover with slack')
+选择向量 $v$，使 $0\le v_j\le c_j$ 且 $r_i+v_j\le256$，定义目标矩阵
 
-for _ in range(20000):
-S = W.copy()
-cnt = random.randint(1, min(20, len(cand)))
-idxs = np.random.choice(len(cand), size=cnt, replace=False)
-for idx in idxs:
-i, j = cand[idx]
-S[i, j] += random.randint(1, int(slack[i, j]))
-if np.linalg.matrix_rank(S) == 8 and not np.array_equal(S, W):
-return S
-raise RuntimeError('build_s failed')
+$$
+Q_{i,j}=r_i+v_j.
+$$
 
-def forge_payload(msg: str):
-M = hash_to_M(msg)
-r = M.min(axis=1)
-c = M.min(axis=0)
+因为私钥矩阵元素非负，所以未知项满足
 
-# 关键：取 v_j <= col_min_j，并强制 r_i + v_j <= 256，
-# 这样 W 本身就能直接作为合法的 S 基底提交。
-vmax = 256 - int(r.max())
-v = np.minimum(c, vmax)
+$$
+(M\otimes T\otimes M)_{i,j}\ge r_i+c_j\ge r_i+v_j=Q_{i,j}.
+$$
 
-A, B, W = build_ab(r, v)
-P, MP = build_p(M, W, v)
-R, RM = build_r(M, W, r)
-S = build_s(W, MP, RM)
+于是只要让其余三项都不小于 $Q$，并让每个位置至少有一项等于 $Q$，整个 `Z` 就会被压成已知矩阵 $Q$，完全不需要知道私钥。
 
-return {
-'A': A.tolist(),
-'B': B.tolist(),
-'P': P.tolist(),
-'R': R.tolist(),
-'S': S.tolist(),
-}
+具体构造如下。
 
-def run_local_once():
-proc = subprocess.Popen(
-[sys.executable, '-u', 'main.py'],
-cwd=os.path.dirname(__file__),
-stdin=subprocess.PIPE,
-stdout=subprocess.PIPE,
-stderr=subprocess.STDOUT,
-text=True,
-bufsize=1,
+1. 构造 $A\in\mathbb Z^{8\times7}$、$B\in\mathbb Z^{7\times8}$。令 `A[:,0]=r`、`B[0,:]=v`，其余六条中间路径全部严格大于对应的 $r_i+v_j$，便有 $A\otimes B=Q$。通过给其余列、行设置不同扰动，可同时让普通秩达到 7。
+2. 对 $P$ 的第 $j$ 列，取 $t_j=\arg\min_k M_{j,k}$，设置 $P_{t_j,j}=v_j$，其余元素严格大于 $v_j$。于是 $M\otimes P\ge Q$，且对角线精确等于 $Q$。
+3. 令第 $i$ 行的所有 $R_{i,k}\ge r_i$，则 $R\otimes M\ge r_i+c_j\ge Q_{i,j}$。随机扰动到 `rank(R)==8`。
+4. 先令 $S=Q$，再只在已被 `M⊗P` 或 `R⊗M` 精确覆盖、且仍有数值余量的位置上增大若干元素，直到 `rank(S)==8` 且 $S\ne Q$。这样被抬高的位置仍由另一项给出 $Q$，未抬高的位置由 $S$ 给出 $Q$。
 
-)
+最后得到
 
-def read_until(token: str):
-buf = ''
-while token not in buf:
-ch = proc.stdout.read(1)
-if not ch:
-break
-buf += ch
-return buf
+$$
+W=A\otimes B=Q=Z,qquad W\ne S,
+$$
 
-sys.stdout.write(read_until('>>> '))
-proc.stdin.write('2\n')
-proc.stdin.flush()
+同时满足所有普通秩和 `[0,256]` 范围检查。相较 SMT 路线，这条构造利用的是本题验证器的自由度；它不代表原签名方案的一般攻击，但在本题中更短、更稳定。
 
-buf = read_until('>>> ')
-sys.stdout.write(buf)
-m = re.search(r'Please make (.+?) for me!', buf)
-if not m:
-raise RuntimeError('challenge not found')
-msg = m.group(1)
-print(f'[solver] challenge = {msg}')
+成功后得到：
 
-proc.stdin.write(json.dumps(forge_payload(msg)) + '\n')
-proc.stdin.flush()
-
-out = ''
-while True:
-ch = proc.stdout.read(1)
-if not ch:
-break
-out += ch
-if 'FLAG:' in out or 'This is not what I wanted!' in out or 'These are
-illegal food ingredients' in out:
-# 再读到本行结束
-while True:
-ch2 = proc.stdout.read(1)
-if not ch2:
-break
-out += ch2
-if ch2 == '\n':
-break
-break
-sys.stdout.write(out)
-
-if __name__ == '__main__':
-run_local_once()
+```text
+SUCTF{W3lc0m3_t0_SU_R3stAur4nt_n3Xt_t1me!:-)}
 ```
 
 ## 方法总结
-- 核心技巧：tropical 矩阵构造；预期方向还可以抽象成 tropical 签名的约束求解伪造。
-- 识别信号：矩阵运算不是普通代数，而是 min-plus；验证条件同时包含 rank、范围和不等式，且只检查最终矩阵关系。
-- 复用要点：若验证器只检查等式，可先构造目标 tropical 矩阵，再分别构造 `S/P/R/A/B` 满足等式和 rank 条件；若必须遵循真实签名流程，则应利用多组 `cook` 输出建立 tropical min 约束，用 SMT 求解隐藏矩阵后再伪造。
+
+- 遇到自定义代数结构，先确认运算符的真实语义；本题的矩阵加法是逐元素取最小值，矩阵乘法是“加后取最小值”。
+- 官方攻击把每个 min-plus 等式编码为整数 SMT 约束，用两份共享私钥的签名恢复一组可用的 $X,Y$，再按正常流程伪造。
+- 验证器只检查最终等式时，还应检查能否先选定目标矩阵，再让各个 `min` 分支共同覆盖它；这可绕过对未知私钥项的求解。
+- 普通矩阵秩与热带秩不同。利用代码必须按服务端实际使用的 `numpy.linalg.matrix_rank` 验证，并同时检查元素上界 256。

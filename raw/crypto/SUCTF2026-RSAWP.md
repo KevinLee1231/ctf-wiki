@@ -1,195 +1,172 @@
 # SUCTF2026-RSA
 
 ## 题目简述
-题目是 RSA 部分信息泄露。附件 `SU_RSA.py` 的价值在于确认参数生成方式：`d` 偏小，同时 `p+q` 的高位已知、低位未知；真正解法是把 `ed = kφ(N)+1` 与 `φ(N)=N-(p+q)+1` 结合，构造关于小未知量的 Coppersmith/Boneh-Durfee 问题。密文和大整数只作为输入数据，不需要在简述中全文展开。
 
-## 解题过程
-这是一道非常经典的基于 Coppersmith 方法和 Boneh-Durfee 攻击的 RSA 部分密钥泄露（Partial
-Key Exposure）题目。
-
-从给定的代码中可以提取出以下关键信息：
-
-1. `d` 较小：`d` 的长度约为 `1024 * 0.33 ≈ 337` bits。
-
-2. 部分 `p + q` 已知：$S$ 保留了 `p + q` 的高位，将低约 399 bits 清零。也就是说 $p+q=S+x$，其中 $x < 2^{399}$。
-
-3. 根据 RSA 的原理，存在整数 $k$ 使得：
-
-$$
-e d = k \varphi(N) + 1
-$$
-
-4. 代入 $\varphi(N)=N-(p+q)+1=N-S-x+1$。
-
-5. 令已知常量 $A=N-S+1$，方程变为：
-
-$$
-e d = k(A-x)+1
-$$
-
-6. 两边对 $e$ 取模，得到二元同余方程：
-
-$$
-k(A-x)+1 \equiv 0 \pmod e
-$$
-
-由于 $k < 2^{337}$ 且 $x < 2^{399}$，它们的乘积约小于 $2^{736}$，远小于 $e \approx 2^{1024}$。这符合 Boneh-Durfee 攻击，也可以视作二维 Coppersmith 小根问题。
-
-我们可以通过构建格（Lattice）并使用 LLL 算法来求出小根 x 和 $k$，进而还原 ϕ(N) 并解出 d
-
-为了使用 LLL 算法规约，我们需要构建一个方阵。原脚本尝试把 33 个多项式填入 63 行的矩阵中，当
-循环到第 34 行（即 i=33 ）时，polys[i] 就越界了，直接触发了 IndexError: list
-index out of range 。
-
-导致单项式数量“爆炸”的原因在于，在这个特制的方程 $f(k,x)=kx-Ak-1$ 中，$x$ 是从
-不单独出现的（它总是和 k 绑定在一起）。原脚本错误地用 xj 进行了“常规位移”，导致生成了大
-量无法互相抵消的高次项。
-
-我们需要：
-
-1. 修正循环边界：常规位移（k-shifts）的边界应该是 m - i + 1 ，而不是 i + 1 。
-
-2. 对调位移变量：用 kj 进行常规位移，用 xj 进行扩展位移，这样生成的多项式数量和提取出的单
-项式数量就会完美匹配（例如 m = 5, t = 3 时，都是 39 个）。
-
-3. 优化求根逻辑：`ideal.variety()` 在某些版本的 Sage 中处理整数环上的多元方程组不稳定，因此改用 CTF 中更稳的结式（Resultant）消元法。
+题目生成两个 512 位素数 $p,q$，令 $N=pq$，并直接选择一个约 337 位的素数私钥指数：
 
 ```python
-from sage.all import *
-from Crypto.Util.number import long_to_bytes
-
-N =
-
-e =
-
-c =
-
-S =
-
 bits = 1024
 delta0 = 0.33
 gamma = 0.39
-
-A = N - S + 1
-X_bound = int(2**(bits * gamma)) # x 的上限边界
-K_bound = int(2**(bits * delta0)) # k 的上限边界
-
-# 修正：适当调整 m 和 t 以保证方阵及规约精度
-m_val = 5
-t_val = 3
-
-PR = PolynomialRing(ZZ, names=('k', 'x'))
-k, x = PR.gens()
-f = k*x - A*k - 1
-
-print("[*] 正在构造位移多项式...")
-
-polys = []
-
-# 1. 修正的常规位移：使用 k，且边界为 m_val - i + 1
-for i in range(m_val + 1):
-for j in range(m_val - i + 1):
-polys.append((k**j) * (f**i) * (e**(m_val - i)))
-
-# 2. 修正的扩展位移：使用 x
-for i in range(m_val + 1):
-for j in range(1, t_val + 1):
-polys.append((x**j) * (f**i) * (e**(m_val - i)))
-
-# 提取并排序所有的单项式
-monomials = set()
-for p in polys:
-monomials.update(p.monomials())
-monomials = sorted(list(monomials))
-dim = len(monomials)
-
-print(f"[*] 多项式数量: {len(polys)}")
-print(f"[*] 单项式数量: {dim}")
-print(f"[*] 格的维度: {dim} x {dim}")
-
-if len(polys) != dim:
-print("[-] 错误：多项式数量与单项式数量不一致，无法构造方阵！请检查位移逻辑。")
-exit()
-
-# 构建格的基矩阵
-print("[*] 正在构建矩阵...")
-M = Matrix(ZZ, dim, dim)
-for i in range(dim):
-p = polys[i]
-for j in range(dim):
-mon = monomials[j]
-coeff = p.monomial_coefficient(mon)
-M[i, j] = coeff * mon(K_bound, X_bound)
-
-print("[*] 正在执行 LLL 规约 (通常几秒到十几秒完成)...")
-M_LLL = M.LLL()
-
-print("[*] 正在重构多项式...")
-roots_polys = []
-for i in range(dim):
-p_lll = 0
-for j in range(dim):
-coeff = M_LLL[i, j] // monomials[j](K_bound, X_bound)
-p_lll += coeff * monomials[j]
-
-roots_polys.append(p_lll)
-
-print("[*] 正在通过 Resultant (结式) 提取根...")
-try:
-# 切换到有理数域 QQ，求结式更稳定
-PR_QQ = PolynomialRing(QQ, names=('k', 'x'))
-k_qq, x_qq = PR_QQ.gens()
-
-p1 = PR_QQ(roots_polys[0])
-found = False
-
-# 防止多项式非代数独立，尝试前几个短向量
-for p_idx in range(1, 4):
-p2 = PR_QQ(roots_polys[p_idx])
-res = p1.resultant(p2, k_qq) # 消去 k，得到只含 x 的多项式
-
-if res.is_zero():
-continue
-
-res_roots = res.univariate_polynomial().roots()
-for x_val, _ in res_roots:
-if x_val.is_integer():
-x_val = int(x_val)
-print(f"\n[+] 成功找到未知量 x: {x_val}")
-
-# 还原真实参数并解密
-phi = A - x_val
-d = int(inverse_mod(e, phi))
-m_pt = int(pow(c, d, N))
-
-flag = long_to_bytes(m_pt)
-print(f"[+] FLAG: {flag.decode('utf-8', errors='ignore')}")
-found = True
-break
-if found:
-break
-
-if not found:
-print("[-] LLL 成功，但未能在整数域内找到对应的 x 根。")
-
-except Exception as err:
-print("[-] 求解过程出现异常:", err)
+d = getPrime(int(bits * delta0))
+e = inverse(d, (p - 1) * (q - 1))
+S = (p + q) - (p + q) % 2**int(bits * gamma)
 ```
 
-脚本运行后能够构造 `39 x 39` 的格，并通过 Resultant 找到未知低位 `x`，随后还原 `phi` 和私钥：
+因此公开的 $S$ 是 $p+q$ 清零低 399 位后的结果。记
+
+$$
+p+q=S+w,qquad 0\le w<2^{399}.
+$$
+
+附件中另有 `delta=0.08`，但它没有参与任何计算；真正控制 $d$ 的是 `delta0=0.33`。题目同时给出 $N,e,c,S$，目标是利用小 $d$ 与近似素数和恢复私钥。
+
+官方设计参考论文 [Improving RSA Cryptanalysis: Combining Continued Fractions and Coppersmith's Techniques](https://eprint.iacr.org/2025/1281)。论文把连分数提供的关键关系与 Coppersmith 结合，并研究了已知 $p+q$ 近似值时更大的小私钥指数攻击范围；其主结果以 $\alpha=\log_Ne$、$\gamma=\log_N|p+q-S|$ 表示可攻击界。作者的 [RSA_CFL](https://github.com/MengceZheng/RSA_CFL) 仓库提供相应 Sage 实现及参数化入口。
+
+不过出题参数没有卡到必须使用论文三元模型：把 RSA 密钥方程直接写成关于 $k$ 与 $w$ 的二元小根，便能更快求解。这是官方 WP 明确记录的非预期简化路线，也是本题实际采用的主解。
+
+## 解题过程
+
+### 1. 官方预期：连分数关系转三元小根
+
+RSA 密钥方程为
+
+$$
+ed-k(p-1)(q-1)=1.
+$$
+
+论文方法取 $e/N$ 的一对相邻连分数逼近
+
+$$
+\frac{p_{r-1}}{q_{r-1}},\qquad\frac{p_r}{q_r},
+$$
+
+并将小私钥乘子写为
+
+$$
+d=u q_r+v q_{r-1},qquad k=u p_r+v p_{r-1}.
+$$
+
+再代入
+
+$$
+\varphi(N)=N+1-(p+q)=N+1-S-w,
+$$
+
+即可在模 $e q_r$ 下整理出
+
+$$
+f(w,u,v)=wu+a_1wv+a_2u+a_3v+a_4\equiv0\pmod{e q_r},
+$$
+
+其中 $a_i$ 都由 $N,e,S$ 和两组连分数逼近确定。对有界未知量 $(w,u,v)$ 构造移位多项式格，LLL 后提取代数独立的小系数多项式，便可用三元 Coppersmith 恢复根。论文方法的价值在于连分数先把 $d,k$ 投影到较小的 $u,v$ 上，从而扩大可攻击参数区间。
+
+本题可以调用作者仓库的实现，但官方记录其在生成数据上约需数分钟；由于下面的二元界已经足够宽，没有必要承担三元格的额外成本。
+
+### 2. 实际解法：直接构造二元模方程
+
+令
+
+$$
+A=N-S+1.
+$$
+
+则
+
+$$
+\varphi(N)=A-w.
+$$
+
+存在整数
+
+$$
+k=\frac{ed-1}{\varphi(N)}
+$$
+
+满足
+
+$$
+1+k(A-w)\equiv0\pmod e.
+$$
+
+因为 $0<e<\varphi(N)$，有 $k<d<2^{338}$；同时 $w<2^{399}$。令
+
+$$
+x=k,qquad y=-w,
+$$
+
+得到二元小根：
+
+$$
+f(x,y)=1+x(A+y)\equiv0\pmod e,
+$$
+
+$$
+|x|<X=2^{338},qquad |y|<Y=2^{399}.
+$$
+
+其乘积界约为 $2^{737}$，明显小于约 1024 位的模数 $e$，本题参数给了足够的格攻击余量。
+
+### 3. 构造 Herrmann–May 风格二元格
+
+官方 `exp.py` 引入辅助变量
+
+$$
+u=xy+1,qquad |u|<U=XY+1,
+$$
+
+并在商环 $\mathbb Z[u,x,y]/(xy+1-u)$ 中处理 `f`。这样所有 $xy$ 项都被线性化成 $u-1$，可避免单项式集合无控制膨胀。
+
+利用参数 `M=3, T=1` 构造两类移位：
 
 ```text
-[*] 正在构造位移多项式...
-[*] 多项式数量: 39
-[*] 单项式数量: 39
-[*] 格的维度: 39 x 39
-[*] 正在执行 LLL 规约...
-[*] 正在通过 Resultant 提取根...
-[+] 成功找到未知量 x: <low bits of p+q>
-[+] FLAG: SUCTF{congratulation_you_know_small_d_with_hint_factor}
+x^i * e^(M-k) * f^k
+y^j * e^(M-k) * f^k    # 在商环中约化
 ```
 
+对每个单项式按界 $(U,X,Y)$ 缩放系数形成整数格，LLL 后从前若干短向量重建在真根处取整值 0 的多项式。总 PDF 另写了一套 39 维手工移位矩阵，并记录了循环边界、变量选择导致方阵不匹配的问题；官方仓库中的商环构造更短，也与最终验证逻辑一致，优先采用。
+
+### 4. 用 resultant 提根并严格验真
+
+将约减后多项式中的 $u$ 替换回 $xy+1$，取两条非平凡多项式，对 $y$ 或 $x$ 求 resultant 消元。遍历前若干短向量组合，取得整数根候选 $(k,-w)$ 后依次检查：
+
+```python
+phi = A - w
+assert (1 + k * phi) % e == 0
+d = (1 + k * phi) // e
+
+s = N - phi + 1                 # p + q
+Delta = s * s - 4 * N
+assert is_square(Delta)
+p = (s + isqrt(Delta)) // 2
+q = (s - isqrt(Delta)) // 2
+assert p * q == N
+```
+
+直接用 `inverse_mod(e, phi)` 虽可能得到相同 $d$，但不能代替上述因子判定；resultant 可能给出无关整数根，必须用判别式完全平方和 $pq=N$ 过滤。
+
+最后解密：
+
+```python
+m = pow(c, d, N)
+flag = long_to_bytes(m)
+```
+
+得到：
+
+```text
+SUCTF{congratulation_you_know_small_d_with_hint_factor}
+```
+
+### 5. 两条路线的边界
+
+- 连分数 + 三元 Coppersmith 是题目原定知识点，也是在更紧参数下应使用的通用方法。
+- 本实例的 $d$ 只有约 $N^{0.33}$，且 $p+q$ 的误差仅约 $N^{0.39}$；二元方程中的 $k$、$w$ 已足够小，所以无需先用连分数把它们改写成 $u,v$。
+- 这不等于经典 Boneh–Durfee“只给 $N,e$”场景；成功依赖额外泄露的 $p+q$ 高位。更准确的描述是带素数和近似值的二元 Coppersmith/Herrmann–May 小根攻击。
+
 ## 方法总结
-- 核心技巧：Boneh-Durfee / Coppersmith 小根
-- 识别信号：小私钥指数与 `p+q` 高位泄露同时存在。
-- 复用要点：引入未知低位 `x` 和乘子 `k`，构造二元小根方程；求出 `p+q` 后分解 `N` 解密。
+
+- 先确认实际参数：`delta0=0.33` 决定 337 位 $d$，`gamma=0.39` 决定 399 位未知素数和低位；不要被未使用的 `delta` 误导。
+- 官方预期用相邻连分数把 $d,k$ 表成两个小系数，再求三元小根；论文和作者仓库链接已保留并在正文中概括其用途。
+- 本实例可直接利用 $1+k(N-S+1-w)\equiv0\pmod e$，以 $k<2^{338}$、$w<2^{399}$ 构造二元格，速度更快。
+- 小根候选必须通过 RSA 方程、判别式平方、`p*q==N` 和最终明文格式四层校验。

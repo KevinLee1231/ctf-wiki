@@ -1,437 +1,185 @@
 # SUCTF2026-babyAI
 
 ## 题目简述
-附件给出 `task.py` 和 `model.pth`。`task.py` 将 `FLAG` 转成字节向量，送入一个小型 PyTorch 卷积/线性网络，输出再添加 `[-160,160]` 小噪声并模 `q` 公开；`model.pth` 不是缺失材料，而是隐藏了权重。问题本质是带小噪声的模线性方程组，正文只需要保留模型结构、模数和噪声范围，不需要写入完整 `model.pth` 二进制内容。
 
-## 解题过程
-题目信息
-
-附件里只有两个文件：
-
-- task.py
-
-- model.pth
-
-题目提示是：
-
-It seems like something is missing.
-
-结合附件名和提示，第一反应是先审 task.py ，再看 model.pth 里到底存了什么。
-
-代码审计
-
-task.py 的核心逻辑并不复杂，本质上是把 FLAG 当作字节序列输入一个非常小的神经网络，然
-后把输出加一点噪声后模 q 输出出来。
-
-关键参数如下：
-
-```
-FLAG = b"SUCTF{fake_flag_xxx}"
-q = 1000000007
-n = len(FLAG) # 41
-m = 15
-```
-
-模型结构：
-
-```
-self.conv = nn.Conv1d(1, 1, 3, stride=2, bias=False)
-self.fc = nn.Linear(conv_out_size, m_out, bias=False)
-```
-
-然后权重会被随机初始化为 0 ~ q-1 之间的整数，并保存到 model.pth ：
+附件包含生成脚本 `task.py` 和 PyTorch 权重 `model.pth`。生成脚本把 41 字节 flag 输入一个没有 bias、没有激活函数的小网络：
 
 ```python
-torch.save(model.state_dict(), "model.pth")
+Conv1d(1, 1, kernel_size=3, stride=2, bias=False)
+Linear(20, 15, bias=False)
 ```
 
-输出生成过程可以写成：
+卷积核和全连接权重是模数范围内的整数，最终输出加入独立小噪声再模 $q$：
 
-```
-conv_out[i] = w0*x[2i] + w1*x[2i+1] + w2*x[2i+2]
-Y[j] = sum(fc[j][i] * conv_out[i]) + noise (mod q)
-```
-
-其中 noise 满足：
-
-```
-noise ∈ [-160, 160]
-```
-
-题目给出的公开信息是：
-
-```
+```text
+q = 1_000_000_007
 n = 41
 m = 15
-q = 1000000007
-Y = [776038603, 454677179, 277026269, 279042526, 78728856, 784454706,
-29243312, 291698200, 137468500, 236943731, 733036662, 421311403, 340527174,
-804823668, 379367062]
+|e_i| <= 160
 ```
 
-关键观察
+公开结果是 15 维向量 $Y$。`model.pth` 并非无关的模型附件：它完整保存了两层权重。由于网络全程线性，展开卷积后可得到一个带小误差的模线性系统
 
-1.`model.pth` 不是“缺失”了，而是权重就藏在里面
+$$
+Y\equiv WX+E\pmod q,
+$$
 
-model.pth 是 PyTorch 的 state_dict ，虽然本地环境没有装 torch ，但它本质上是一个
-zip 格式的归档文件，可以直接拆。
+其中 $W$ 是已知 `15×41` 矩阵，$X$ 是 flag 的 ASCII 字节，$E$ 是小噪声。这是一个带有短秘密和短误差的 LWE/BDD 型格问题。
 
-里面最重要的两个数据块是：
+## 解题过程
 
-- model/data/0 ：conv.weight
-- model/data/1 ：fc.weight
+### 从模型权重构造等效矩阵
 
-也就是说，题目里“似乎缺了点什么”，其实缺的不是文件，而是选手要主动意识到：
+一维卷积产生 20 个输出：
 
-既然权重已经给了，那这个网络根本不是黑盒。
+$$
+c_i=w_0x_{2i}+w_1x_{2i+1}+w_2x_{2i+2},\qquad 0\le i<20.
+$$
 
-2. 整个网络本质上是一个模`q` 的线性方程组
+全连接层再计算
 
-因为没有 bias，也没有激活函数，所以整个模型是线性的。
+$$
+Y_j=\sum_{i=0}^{19}F_{j,i}c_i+e_j\pmod q.
+$$
 
-设 flag 字节为：
+将卷积写成变体 Toeplitz 矩阵 $M_{conv}\in\mathbb{Z}^{20\times41}$，即可合并两层：
 
-```
-x0, x1, ..., x40
-```
+$$
+W=F M_{conv}\bmod q.
+$$
 
-卷积层 stride=2，kernel size=3，所以会得到 20 个卷积输出：
-
-```
-c_i = a0*x_{2i} + a1*x_{2i+1} + a2*x_{2i+2}
-```
-
-全连接层再做一次线性组合：
-
-```
-Y_j = Σ b_{j,i} * c_i + e_j (mod q)
-```
-
-把卷积展开后，就能整理成：
-
-```
-Y = A * X + E (mod q)
-```
-
-其中：
-
-- `A` 是 `15 x 41` 的已知矩阵；
-- `X` 是长度 41 的 flag 字节向量；
-- `E` 是每一维都很小的噪声向量，满足 `|E_i| <= 160`。
-
-这一步就是整个题的核心化简。
-
-为什么 15 个方程还能解出 41 个字符
-
-表面上看，15 < 41 ，方程数量远远不够。
-
-但这里还有几个非常强的额外约束：
-
-格式已知，以 SUCTF{ 开头、以 } 结尾• flag
-
-字符基本都在可打印 ASCII 范围内• flag
-
-- 噪声非常小，只有 ±160
-
-- 模数 q = 1000000007 很大，远大于字符范围
-
-这就把问题从“欠定线性方程组”变成了“带小误差的小范围整数解搜索”，本质上非常接近 LWE /
-BDD / CVP 一类问题。
-
-这种情况下，格方法是很自然的选择。
-
-求解思路
-
-1. 直接从`model.pth` 提取权重
-
-因为 model.pth 是 zip，可以用 zipfile + struct 直接读出 float32：
-
-```
-with zipfile.ZipFile("model.pth") as archive:
-conv = struct.unpack("<3f", archive.read("model/data/0"))
-fc = struct.unpack("<300f", archive.read("model/data/1"))
-```
-
-再转成整数即可。
-
-2. 展开得到总系数矩阵`A`
-
-如果卷积核是 w_conv = [w0, w1, w2] ，全连接某一行是 w_fc[row][i] ，那么：
-
-```
-A[row][2i + 0] += w_fc[row][i] * w0
-A[row][2i + 1] += w_fc[row][i] * w1
-A[row][2i + 2] += w_fc[row][i] * w2
-```
-
-全部对 q 取模。
-
-3. 先消掉已知字符
-
-flag 头尾基本是板上钉钉的：
-
-```
-S U C T F { ... }
-```
-
-所以可以先把这些已知字符对应的贡献从 Y 中减掉，只留下未知位置。
-
-4. 把字符平移到中心区间
-
-可打印 ASCII 大概在 [32, 126] ，中心大约是 79 。
-
-令未知字符：
-
-```
-x_i = 79 + u_i
-```
-
-那么 u_i 的范围就很小，大概落在 [-47, 47] 。
-
-这样做的好处是，格里要找的向量会更短，更适合 LLL + Babai。
-
-5. 构造格并做最近向量搜索
-
-构造列基：
-
-- 前 15 列是 q * e_i
-- 后面每一列对应一个未知字符，列向量形如：
-
-```
-(A'_j, λ * e_j)
-```
-
-其中：
-
-是未知字符在 15 个方程里的系数列• A'_j
-
-是一个小权重，这里取 1 就够了• λ
-
-目标向量取：
-
-```
-(Y' - A' * 79, 0, 0, ..., 0)
-```
-
-然后：
-
-1. 对基做 LLL 约化
-
-2. 用 Babai nearest plane 找最近格点
-
-3. 还原出每个 u_i
-
-4. 再加回 79 得到真实字符
-
-本地脚本
+用 PyTorch 读取权重时，应以附件中实际保存的 `float32` 整数值为准：
 
 ```python
-import struct
-import zipfile
+state = torch.load("model.pth", map_location="cpu", weights_only=True)
+w_conv = [int(v) for v in state["conv.weight"].squeeze().tolist()]
+w_fc = [[int(v) for v in row] for row in state["fc.weight"].tolist()]
 
-from sympy import Matrix
-
-Q = 1_000_000_007
-Y = [
-776038603,
-454677179,
-277026269,
-279042526,
-78728856,
-784454706,
-29243312,
-291698200,
-137468500,
-236943731,
-733036662,
-421311403,
-340527174,
-804823668,
-379367062,
-
-]
-KNOWN = {
-0: ord("S"),
-1: ord("U"),
-2: ord("C"),
-3: ord("T"),
-4: ord("F"),
-5: ord("{"),
-40: ord("}"),
-}
-
-def centered_mod(value):
-if value > Q // 2:
-value -= Q
-return value
-
-def gram_schmidt_columns(columns):
-dim = len(columns)
-length = len(columns[0])
-ortho = [[0.0] * length for _ in range(dim)]
-norms = [0.0] * dim
-
-for i in range(dim):
-vector = [float(x) for x in columns[i]]
-for j in range(i):
-if norms[j] == 0:
-continue
-mu = sum(vector[k] * ortho[j][k] for k in range(length)) / norms[j]
-for k in range(length):
-vector[k] -= mu * ortho[j][k]
-ortho[i] = vector
-norms[i] = sum(x * x for x in vector)
-return ortho, norms
-
-def babai_nearest_plane(columns, target):
-ortho, norms = gram_schmidt_columns(columns)
-coeffs = [0] * len(columns)
-residue = [float(x) for x in target]
-
-for i in range(len(columns) - 1, -1, -1):
-if norms[i] == 0:
-coeff = 0
-else:
-coeff = round(sum(residue[k] * ortho[i][k] for k in
-range(len(target))) / norms[i])
-coeffs[i] = int(coeff)
-for k in range(len(target)):
-
-residue[k] -= coeff * columns[i][k]
-return coeffs
-
-def load_weights(path):
-with zipfile.ZipFile(path) as archive:
-conv = list(map(int, struct.unpack("<3f",
-archive.read("model/data/0"))))
-fc = list(map(int, struct.unpack("<300f",
-archive.read("model/data/1"))))
-return conv, [fc[i * 20 : (i + 1) * 20] for i in range(15)]
-
-def build_matrix(conv, fc):
-matrix = [[0] * 41 for _ in range(15)]
-for row in range(15):
+M_conv = np.zeros((20, 41), dtype=object)
 for i in range(20):
-for offset, weight in enumerate(conv):
-matrix[row][2 * i + offset] = (matrix[row][2 * i + offset] +
-fc[row][i] * weight) % Q
-return matrix
+    M_conv[i, 2 * i:2 * i + 3] = w_conv
+W_total = (np.array(w_fc, dtype=object) @ M_conv) % q
+```
 
-def solve_flag(matrix):
-unknown_positions = [index for index in range(41) if index not in KNOWN]
-shifted_target = []
+没有 PyTorch 时，`.pth` 仍是 ZIP 容器。本题中 `model/data/0` 是 3 个小端 `float32` 卷积权重，`model/data/1` 是 300 个全连接权重；可用 `zipfile` 和 `struct.unpack` 读取后转成整数。
 
-for row in range(15):
-value = Y[row]
-for index, known_value in KNOWN.items():
-value = (value - matrix[row][index] * known_value) % Q
-shifted_target.append(value)
+### 为什么欠定系统仍可恢复
 
-midpoint = 79
-unknown_count = len(unknown_positions)
-target_top = []
-for row in range(15):
-value = shifted_target[row]
-for position in unknown_positions:
-value = (value - matrix[row][position] * midpoint) % Q
-target_top.append(centered_mod(value))
+只有 15 个方程却有 41 个未知字节，普通高斯消元不可能唯一确定 $X$。但本题还有强约束：
 
-dim = 15 + unknown_count
-columns = []
+- flag 字节是很小的可打印 ASCII 值；
+- flag 格式以 `SUCTF{` 开头、以 `}` 结尾；
+- 每个误差绝对值至多 160；
+- 模数约为 $10^9$，远大于秘密和误差。
 
-for row in range(15):
-column = [0] * dim
-column[row] = Q
-columns.append(column)
+因此正确解对应格中的异常短向量。直接把 ASCII 值放入格时，41 个约 `50–120` 的分量会使目标向量偏长；官方解法先做中心化。
 
-for offset, position in enumerate(unknown_positions):
-column = [matrix[row][position] for row in range(15)] + [0] *
-unknown_count
-column[15 + offset] = 1
-columns.append(column)
+### 中心化秘密
 
-basis = Matrix(dim, dim, lambda r, c: columns[c][r])
-reduced_rows, transform = basis.T.lll_transform()
-reduced_columns = reduced_rows.T
-reduced_basis = [[int(reduced_columns[r, c]) for r in range(dim)] for c in
-range(dim)]
+取可打印字符中心值 $\mu=80$，令
 
-reduced_coeffs = babai_nearest_plane(reduced_basis, target_top + [0] *
-unknown_count)
-original_coeffs = list((transform.T *
-Matrix(reduced_coeffs)).applyfunc(int))
-solved_unknowns = [midpoint + value for value in original_coeffs[15:]]
+$$
+X=\Delta X+\mu\mathbf{1}.
+$$
 
-flag_bytes = [KNOWN.get(index, 0) for index in range(41)]
-for position, value in zip(unknown_positions, solved_unknowns):
-flag_bytes[position] = value
-return bytes(flag_bytes)
+则
 
-def verify(flag, matrix):
+$$
+Y'=Y-\mu W\mathbf{1}\equiv W\Delta X+E\pmod q.
+$$
+
+原本约为几十到一百多的 ASCII 值被换成围绕 0 的偏移量，目标短向量从 $(X,-E,C)$ 变成 $(\Delta X,-E,C)$，显著降低范数。
+
+### 官方路线：57 维嵌入格与 BKZ
+
+取 $C=160$，构造维数 $n+m+1=57$ 的行格基：
+
+$$
+B=
+\begin{pmatrix}
+I_n & W^T & 0\\
+0 & qI_m & 0\\
+0 & -Y'^T & C
+\end{pmatrix}.
+$$
+
+存在整数向量 $(\Delta X,K,1)$，使它与 $B$ 的线性组合为
+
+$$
+(\Delta X,-E,C),
+$$
+
+该向量的秘密偏移、误差和嵌入常数都很小。用 BKZ 约化后，枚举末坐标为 $\pm C$ 的短行，统一符号，再把前 41 项加回 $\mu$：
+
+```python
+mu = 80
+Y_prime = vector(ZZ, (Y_vec - mu * W * vector(ZZ, [1] * n)) % q)
+
+dim = n + m + 1
+B = Matrix(ZZ, dim, dim)
+for i in range(n):
+    B[i, i] = 1
+    for j in range(m):
+        B[i, n + j] = W[j, i]
+for i in range(m):
+    B[n + i, n + i] = q
+    B[dim - 1, n + i] = -Y_prime[i]
+B[dim - 1, dim - 1] = 160
+
+for block_size in [15, 20, 25, 30]:
+    reduced = B.BKZ(block_size=block_size)
+    for row in reduced:
+        if abs(row[-1]) != 160:
+            continue
+        vec = row if row[-1] == 160 else -row
+        candidate = bytes(int(v + mu) for v in vec[:n])
+        if candidate.startswith(b"SUCTF{"):
+            print(candidate, list(vec[n:n + m]))
+```
+
+逐级增加 block size，可以先用较低成本尝试；噪声扩大到 160 后，单纯 LLL 不一定稳定，BKZ 是官方更稳妥的方案。
+
+### 参赛队变体：已知格式消元后做 LLL + Babai
+
+总 PDF 给出的解法先把 `SUCTF{` 和末尾 `}` 这 7 个已知字节对 $Y$ 的贡献减掉，只为剩余 34 个未知字符建格。再取中心值 79，使未知偏移大致位于 `[-47,47]`，构造：
+
+- 15 列 $q e_i$，处理模数倍数；
+- 每个未知字符一列 $(W'_{:,j},e_j)$；
+- 目标为 $(Y'-W'\cdot79,0,\ldots,0)$。
+
+对该基做 LLL 约化，再用 Babai nearest plane 找目标最近格点，就能恢复字符偏移。这条路线利用了更多格式先验，维度更低；本题实例上能够直接成功，但一般不如更深的 BKZ 稳定。
+
+### 回代验证
+
+无论使用哪种格路线，都不能只凭可打印字符串或前缀判断成功。应按原系统逐行计算中心化残差：
+
+```python
 errors = []
 for row in range(15):
-value = sum(matrix[row][i] * flag[i] for i in range(41)) % Q
-diff = (value - Y[row]) % Q
-if diff > Q // 2:
-diff -= Q
-errors.append(diff)
-return max(abs(error) for error in errors) <= 160, errors
-
-def main():
-conv, fc = load_weights("model.pth")
-matrix = build_matrix(conv, fc)
-flag = solve_flag(matrix)
-ok, errors = verify(flag, matrix)
-print(flag.decode())
-print(errors)
-if not ok:
-raise SystemExit("verification failed")
-
-if __name__ == "__main__":
-main()
+    value = sum(int(W_total[row, i]) * flag[i] for i in range(41)) % q
+    diff = (value - Y[row]) % q
+    if diff > q // 2:
+        diff -= q
+    errors.append(diff)
+assert max(map(abs, errors)) <= 160
 ```
 
-脚本会：
+恢复结果为：
 
-1. 从 model.pth 直接提取权重
-
-2. 重建系数矩阵
-
-3. 用 sympy 的 lll_transform() 做格约化
-
-4. 用 Babai nearest plane 恢复未知字符
-
-5. 最后校验所有噪声是否都在 [-160, 160] 范围内
-
-验证结果
-
-脚本跑出的结果为：
-
-```
+```text
 SUCTF{PyT0rch_m0del_c4n_h1d3_LWE_pr0bl3m}
 ```
 
-对应残差为：
+对应 15 个残差为：
 
-```
+```text
 [-53, 105, 105, -55, 9, -17, 65, -2, 140, -111, 101, 76, 81, 126, -109]
 ```
 
-可以看到每一项都满足：
-
-```
-|noise| <= 160
-```
-
-因此解是正确的。
-
-最终 Flag
-
-```
-SUCTF{PyT0rch_m0del_c4n_h1d3_LWE_pr0bl3m}
-```
+每一项均满足生成脚本的噪声界。
 
 ## 方法总结
-- 核心技巧：PyTorch 权重提取 + LWE/格约化
-- 识别信号：公开输出满足模线性关系且噪声范围很小，附件包含模型权重。
-- 复用要点：从 state_dict 提取权重，重建线性方程，扣除已知 flag 位置后用 LLL/Babai 找最近向量，再回代验证噪声界。
+
+- 核心技巧：把无激活的卷积/线性网络展开为已知模线性矩阵，再用中心化嵌入格恢复短 ASCII 秘密。
+- 识别信号：模型权重公开、网络只有线性算子、输出在大模数下加入远小于模数的噪声，且秘密字符范围很小。
+- 复用要点：先从真实 `.pth` 提取权重并核对矩阵维度；中心化能显著缩短目标向量。LLL/Babai 可结合已知格式降维，噪声更大时应转向 BKZ；最终必须回代验证每个残差都满足噪声界。

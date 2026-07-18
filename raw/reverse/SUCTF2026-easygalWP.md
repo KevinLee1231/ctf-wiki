@@ -1,142 +1,184 @@
 # SUCTF2026-easygal
 
 ## 题目简述
-题目是 Unity/IL2CPP galgame 逆向。题干说明需要在 60 个剧情节点中不断选择，唯一正确路线对应真正结局；核心数据在 Unity 资源中反序列化为 `Story` 结构，而不是靠人工试剧情分支。
 
-每个节点包含多个 choice，每个 choice 带 `weight/value/flag/marker`。完成 60 个节点后，程序要求总 `weight` 不超过阈值且总 `value` 精确等于目标值，再把所选路径的 `marker` 串接后取 MD5 作为答案。解题本质是从 IL2CPP/资源中恢复 Story 数据，并把选择过程建模为带路径恢复的背包/DP。
+题目是 Unity IL2CPP 打包的 galgame。玩家必须依次走完 60 个剧情节点，每个节点二选一；每个选项带有 `weight`、`value`、`flag` 和 `marker`。结算时只有总 `weight <= 132` 且总 `value == 322` 才进入真结局，真结局再将所选选项的 `marker` 按顺序拼接并计算 MD5，生成 `SUCTF{...}`。
+
+直接枚举共有 `2^60` 条路线，不可行。题目数据把真结局设计为唯一最优路径，适合用带路径计数和恢复的分阶段背包 DP 求解。
 
 ## 解题过程
-IL2CPP 打包程序可先用 Il2CppDumper 恢复符号，再用 IDA 打开 `GameAssembly.dll`。关键逻辑是加载剧情数据并反序列化为 `Story` 对象；如果加载失败，程序会使用内置默认剧情数据。
 
-逆向后可以把核心数据结构概括成：
+### 1. 从 IL2CPP 程序定位剧情数据与结算逻辑
 
-```text
-Story.meta.maxWeight = 132
-Story.meta.targetValue = 322
-Story.nodes.length = 60
+用 Il2CppDumper 一类工具将 `GameAssembly.dll` 与 `global-metadata.dat` 配对恢复类型和方法名后，关键类是 `GameManager`、`GameStateStore`、`FlagUtility` 与 `StoryDatabase`。
 
-Node.choices[]:
-  weight: 本次选择消耗
-  value:  本次选择得分
-  flag:   用于记录路径
-  marker: 用于最终 MD5
+`GameManager.LoadStory()` 通过 `Resources.Load<TextAsset>(...)` 读取 `story` TextAsset，再用 `JsonUtility.FromJson<StoryDatabase>()` 反序列化。当前 `story.json` 的元数据为：
+
+```json
+{
+  "maxWeight": 132,
+  "trueEndingValue": 322,
+  "nodeCount": 60,
+  "verificationMethod": "DP count exact optimum paths"
+}
 ```
 
-每做一个选择，程序会把 `weight/value` 累加，把 `flag` 放入集合，把 `marker` 按顺序放入列表。60 个节点全部选择完成后，要求总 `weight <= 132` 且总 `value == 322`；最终把所有 `marker` 拼接后取 MD5 得到答案。因此这题可以直接建模为带路径恢复的背包/DP。
+选项点击后的状态更新为：
 
-核心求解脚本如下：
+```text
+currentWeight += choice.weight
+currentValue  += choice.value
+flags.Add(choice.flag)       # HashSet，仅记录
+markers.Add(choice.marker)   # List，保留选择顺序
+```
+
+60 个节点全部走完后，源码按以下顺序结算：
+
+```text
+currentWeight > maxWeight              -> Failure
+currentWeight <= maxWeight
+  且 currentValue == trueEndingValue   -> True
+其它                                     -> Normal
+```
+
+这里有两个容易误读的点：
+
+- `flags` 集合不参与真结局判定，也不参与最终哈希；
+- 程序本身只检查 `value == 322`，并不检查“最大值”或“路径唯一”。`322` 恰好是全局最大值且只有一条路线达到它，是当前数据集经独立 DP 验证得到的性质。
+
+`FlagUtility.BuildTrueEndingFlag()` 会跳过空 marker，按原顺序拼接其 UTF-8 字节，计算小写十六进制 MD5，再包成 `SUCTF{digest}`。
+
+### 2. 提取 `story.json`
+
+最稳妥的方法是从 Unity 的 `resources.assets` 导出名为 `story` 的 TextAsset。总 PDF 给出的当前实例还可以直接按资源名和长度字段取出 JSON：
 
 ```python
-import csv
-import hashlib
 import json
-import sys
 from pathlib import Path
 
 
-def extract_story_json(resources_assets: Path) -> dict:
-    data = resources_assets.read_bytes()
-    needle = b"story\x00\x00\x00"
-    idx = data.find(needle)
-    if idx < 0:
-        raise RuntimeError("未找到名为 story 的嵌入资源")
-
-    length = int.from_bytes(data[idx + 8:idx + 12], "little")
-    json_bytes = data[idx + 12:idx + 12 + length]
-    return json.loads(json_bytes.decode("utf-8"))
-
-
-def solve_story(story: dict) -> dict:
-    max_weight = int(story["meta"]["maxWeight"])
-
-    # dp[当前总重量] = (最大价值, 达到该最大价值的路径数, 一条代表路径)
-    dp = {0: (0, 1, [])}
-    for node in story["nodes"]:
-        ndp = {}
-        for cur_w, (cur_v, cur_count, cur_path) in dp.items():
-            for choice in node["choices"]:
-                nw = cur_w + int(choice["weight"])
-                if nw > max_weight:
-                    continue
-                nv = cur_v + int(choice["value"])
-                npath = cur_path + [choice]
-
-                if nw not in ndp or nv > ndp[nw][0]:
-                    ndp[nw] = (nv, cur_count, npath)
-                elif nv == ndp[nw][0]:
-                    ndp[nw] = (nv, ndp[nw][1] + cur_count, ndp[nw][2])
-        dp = ndp
-
-    best_value = max(v for v, _, _ in dp.values())
-    best_weights = [w for w, (v, _, _) in dp.items() if v == best_value]
-    best_count = sum(c for _, (v, c, _) in dp.items() if v == best_value)
-
-    chosen_weight = best_weights[0]
-    chosen_path = next(
-        path for w, (v, _, path) in dp.items()
-        if w == chosen_weight and v == best_value
-    )
-
-    markers = [choice["marker"] for choice in chosen_path]
-    marker_string = "".join(markers)
-    final_flag = f"SUCTF{{{hashlib.md5(marker_string.encode()).hexdigest()}}}"
-
-    return {
-        "meta": story["meta"],
-        "optimal_weight": chosen_weight,
-        "optimal_value": best_value,
-        "optimal_path_count": best_count,
-        "chosen_flags": [choice["flag"] for choice in chosen_path],
-        "markers": markers,
-        "marker_string": marker_string,
-        "final_flag": final_flag,
-        "path": chosen_path,
-    }
-
-
-def write_optimal_csv(story: dict, solved: dict, out_csv: Path) -> None:
-    with out_csv.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow([
-            "node", "chosen", "weight", "value", "flag",
-            "marker", "dayLabel", "speaker", "choice_text",
-        ])
-        for i, (node, choice) in enumerate(zip(story["nodes"], solved["path"]), 1):
-            w.writerow([
-                i,
-                choice["flag"][-1],
-                choice["weight"],
-                choice["value"],
-                choice["flag"],
-                choice["marker"],
-                node["dayLabel"],
-                node["speaker"],
-                choice["text"],
-            ])
-
-
-def main() -> None:
-    resources_assets = Path(sys.argv[1])
-    outdir = Path(sys.argv[2]) if len(sys.argv) == 3 else Path.cwd()
-    outdir.mkdir(parents=True, exist_ok=True)
-
-    story = extract_story_json(resources_assets)
-    solved = solve_story(story)
-    write_optimal_csv(story, solved, outdir / "optimal_path.csv")
-
-    print("meta =", json.dumps(story["meta"], ensure_ascii=False))
-    print("optimal_weight =", solved["optimal_weight"])
-    print("optimal_value =", solved["optimal_value"])
-    print("optimal_count =", solved["optimal_path_count"])
-    print("marker_string =", solved["marker_string"])
-    print("final_flag =", solved["final_flag"])
-
-
-if __name__ == "__main__":
-    main()
+def extract_story(resources_assets):
+    data = Path(resources_assets).read_bytes()
+    marker = b"story\x00\x00\x00"
+    offset = data.find(marker)
+    if offset < 0:
+        raise RuntimeError("未找到 story TextAsset")
+    length = int.from_bytes(data[offset + 8:offset + 12], "little")
+    payload = data[offset + 12:offset + 12 + length]
+    return json.loads(payload.decode("utf-8"))
 ```
 
+若不同 Unity 版本的序列化布局使该固定偏移失效，应改用 Unity 资源解析工具导出 TextAsset，而不是继续猜长度字段。官方源码仓库中也直接提供了 `Assets/Resources/Story/story.json`，可用于核对附件提取结果。
+
+### 3. 用 DP 同时求最优值、路径数和唯一路径
+
+设 `dp[w]` 表示处理完当前若干节点、总重量恰为 `w` 时的最优状态。状态保存：
+
+```text
+value    该重量下最大价值
+count    达到该最大价值的路径数
+path     仅当 count == 1 时保留的选择序列
+markers  仅当 count == 1 时保留的 marker 串
+```
+
+每个节点必须选一个选项，因此每轮都从旧 `dp` 构造全新的 `next_dp`。同一重量出现更大价值时覆盖；价值相同时累加路径数并丢弃代表路径，避免把“随便保存一条”误写成“答案唯一”。
+
+```python
+import hashlib
+import json
+from pathlib import Path
+
+
+def solve_story(story):
+    max_weight = int(story["meta"]["maxWeight"])
+    target_value = int(story["meta"]["trueEndingValue"])
+
+    # weight -> (best_value, path_count, path_flags, marker_string)
+    dp = {0: (0, 1, [], "")}
+
+    for node in story["nodes"]:
+        next_dp = {}
+        for weight, (value, count, path, markers) in dp.items():
+            for choice in node["choices"]:
+                new_weight = weight + int(choice["weight"])
+                if new_weight > max_weight:
+                    continue
+
+                new_value = value + int(choice["value"])
+                candidate_path = path + [choice["flag"]] if count == 1 else None
+                candidate_markers = markers + choice["marker"] if count == 1 else None
+                previous = next_dp.get(new_weight)
+
+                if previous is None or new_value > previous[0]:
+                    next_dp[new_weight] = (
+                        new_value,
+                        count,
+                        candidate_path,
+                        candidate_markers,
+                    )
+                elif new_value == previous[0]:
+                    next_dp[new_weight] = (
+                        new_value,
+                        previous[1] + count,
+                        None,
+                        None,
+                    )
+        dp = next_dp
+
+    best_value = max(value for value, _, _, _ in dp.values())
+    optimal = [
+        (weight, state)
+        for weight, state in dp.items()
+        if state[0] == best_value
+    ]
+    optimal_count = sum(state[1] for _, state in optimal)
+
+    if best_value != target_value:
+        raise RuntimeError(
+            f"配置目标 {target_value} 与 DP 最大值 {best_value} 不一致"
+        )
+    if optimal_count != 1:
+        raise RuntimeError(f"最优路径不唯一：{optimal_count}")
+
+    weight, (_, _, path, markers) = optimal[0]
+    digest = hashlib.md5(markers.encode("utf-8")).hexdigest()
+    return weight, path, markers, f"SUCTF{{{digest}}}"
+
+
+story = json.loads(Path("story.json").read_text(encoding="utf-8"))
+weight, path, markers, flag = solve_story(story)
+print("OptimalWeight=", weight)
+print("UniquePath=", ",".join(path))
+print("MarkerString=", markers)
+print("Flag=", flag)
+```
+
+运行结果为：
+
+```text
+OptimalWeight=132
+BestValue=322
+OptimalPathCount=1
+UniquePath=N1B,N2B,N3A,N4B,N5A,N6A,N7B,N8A,N9A,N10A,
+N11A,N12A,N13A,N14A,N15B,N16B,N17A,N18B,N19A,N20A,
+N21A,N22A,N23B,N24B,N25B,N26B,N27A,N28B,N29B,N30B,
+N31B,N32B,N33B,N34B,N35B,N36A,N37A,N38A,N39B,N40A,
+N41A,N42A,N43B,N44A,N45B,N46A,N47A,N48A,N49B,N50B,
+N51B,N52A,N53B,N54B,N55B,N56B,N57A,N58A,N59A,N60B
+```
+
+按这条唯一路径拼接 marker 并计算 MD5，得到：
+
+```text
+SUCTF{92d1c2c3f6e55fabbc3a6ffde57c7341}
+```
+
+官方 WP 中指向作者本机 `E:/Unity down/...` 的绝对路径只是源码位置提示，其他环境无法访问；其关键信息已在正文中完整展开，因此不保留这些失效链接。
+
 ## 方法总结
-- 核心技巧：IL2CPP 数据恢复 + DP/背包
-- 识别信号：剧情选择节点有权重和收益约束，最终校验是总和条件。
-- 复用要点：恢复 Story 数据结构后，把选择问题建模为动态规划/背包，求满足约束的 marker 序列。
+
+- Unity IL2CPP 题先恢复类型/方法，再追 `Resources.Load`、反序列化对象和最终结算函数；不要靠手玩剧情猜条件。
+- 60 次二选一共有 `2^60` 条路线，应按“阶段 + 总重量”做 DP，而不是爆搜。
+- DP 若需要证明唯一性，必须在并列最优时累加路径数；保存一条代表路径并不能证明只有一条路径。
+- 区分程序显式条件与数据集性质：代码只要求 `value == 322`，而“322 是唯一全局最优”来自对当前 `story.json` 的验证。
+- 最终 flag 使用有序 marker 列表，不使用无序的 flags 集合；容器类型会直接影响哈希输入顺序。

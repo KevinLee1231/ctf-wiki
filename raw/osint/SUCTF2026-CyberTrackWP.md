@@ -1,83 +1,142 @@
-# SUCTF2026-CyberTrack
+# SUCTF 2026 - SU_CyberTrack
 
 ## 题目简述
 
-这是 OSINT/社工轨迹题。题面入口是一个安全爱好者个人博客，要求从公开站点、GitHub、邮箱头像、Minecraft 历史昵称、社交平台和 Discord 线索中还原两部分信息：真实姓名和 `string`。题目实际检查的不是某个服务漏洞，而是身份链路能否闭合；flag 规则把“姓在前、名在后”的姓名与 `string` 拼接后做小写 MD5。
+这是一道人物轨迹关联 OSINT 题。题面给出一个个人博客，要求分别恢复目标人物的姓名和一个特殊字符串，再按以下规则计算 flag：
 
-这题有两个解法分支：
+```text
+md5(lowercase(<姓><名> + "_" + <字符串>))
+```
 
-- 非预期捷径：GitHub commit patch 泄露了邮箱 `evanlin1123@foxmail.com`，给邮箱发信可以收到自动回复，从而直接拿到姓名。
-- 出题人预期：先从博客和头像识别到 Gravatar，利用 Gravatar 头像 URL 中的 SHA-256 邮箱哈希，结合公开昵称、生日、猫名、Minecraft 用户名等信息生成候选邮箱并爆破出 `evanlin1123@foxmail.com`。
-
-`string` 分支主要依靠博客文章中的 Minecraft 线索。题目给出 `Mnzn233` 这个 MC 用户名后，可通过 NameMC 找到历史昵称，再把历史昵称拿去社交平台检索，最终定位到 Twitter/X 上的 Discord 邀请链接，并在 Discord 自我介绍中拿到 `string`。
+姓名必须“姓在前、名在后”，删除空格且不加其它分隔符。两条调查线可以并行：博客头像和邮箱自动回复用于确认姓名；Minecraft 用户名、历史昵称和社交账号用于找到特殊字符串。
 
 ## 解题过程
 
-先从题面给出的博客入口整理可用信息。博客里的文章并不是都直接给答案，但它们提供了构造身份候选的高价值信号：
+### 1. 从博客建立线索表
+
+题目入口是 [EvanLin-SUCTF 的博客](https://evanlin-suctf.github.io/)。历史站点日后可能下线，因此关键内容必须写进题解，而不能只留链接。七篇日记提供的高价值信息是：
 
 ```text
-Don't spam      -> evanlin1123@foxmail.com
-Happy birthday  -> 2024-11-23
-Today           -> Momo 是一只布偶猫
-Play with me_t_t -> MC 用户名 Mnzn233
+today               -> 宠物 Momo，是布偶猫
+sad                 -> 最近更换过头像
+normal life         -> 出现 shukuang、kanna.seto 等人名
+don't spam          -> 邮箱域为 foxmail.com，且开启自动回复
+how they found me?? -> 旧网名能关联到其它平台
+Happy birthday      -> 生日线索 11 月 23 日
+play with me T_T    -> Minecraft 用户名 Mnzn233
+博客昵称             -> EvanLin
 ```
 
-现有题解里使用了一个更直接的非预期路径：从博客跳到 GitHub 仓库，查看提交记录的 patch：
+不要把所有词都平均看待。`foxmail.com`、`1123`、`EvanLin` 和头像哈希可以直接收敛邮箱；`Mnzn233` 与“旧网名”则明确指向游戏平台历史昵称。
+
+### 2. 姓名分支：Gravatar 邮箱哈希
+
+博客头像来自：
 
 ```text
-https://github.com/EvanLin-SUCTF/EvanLin-SUCTF.github.io/commit/2796f3b4537dc0c1891da002dc9d02ab9f71b008.patch
+https://gravatar.com/avatar/
+105e127d86711d05460e6072f7d809c5c9e0fe095ca7631e4c2e0ffc4acc3fa9
 ```
 
-patch 中暴露了邮箱 `evanlin1123@foxmail.com`。向这个邮箱发送邮件后会收到自动回复，自动回复中包含真实姓名 `Zeyuan Lin`。因为题目要求姓名拼接时姓在前、名在后，所以用于最终计算的是 `LinZeyuan`。
+Gravatar 当前的官方说明指出，头像地址中的标识可由“邮箱去除首尾空白、转小写后计算 SHA-256”得到；见 [Gravatar 头像文档](https://docs.gravatar.com/sdk/images/)。因此目标哈希不是加密邮箱，而是一个可离线验证的候选判定器。
 
-出题人预期路径不依赖 commit 泄露。博客头像使用 Gravatar，头像链接本身包含邮箱小写后的 SHA-256 哈希。由题面和博客可收集的关键词包括：
+根据博客线索生成小规模社工字典，例如组合：
 
 ```text
-EvanLin
-EvanLin1123
-Mnzn233
-Momo
-Ragdoll
-foxmail.com
-20241123 / 1123
+evan / lin / evanlin
+1123 / 20241123
+mnzn233 / momo
+@foxmail.com
 ```
 
-把这些关键词组合成邮箱候选，统一转小写后计算 SHA-256，与 Gravatar 哈希比较。命中后即可得到同一个邮箱 `evanlin1123@foxmail.com`，再走邮件自动回复拿姓名。
+逐个验证：
 
-`string` 的获取路线如下。先根据 `Play with me_t_t` 里的 Minecraft 用户名 `Mnzn233` 查询 NameMC：
+```python
+import hashlib
 
-```text
-https://namemc.com/profile/Mnzn233.1
+target = '105e127d86711d05460e6072f7d809c5c9e0fe095ca7631e4c2e0ffc4acc3fa9'
+
+for local in candidates:
+    email = (local + '@foxmail.com').strip().lower()
+    if hashlib.sha256(email.encode()).hexdigest() == target:
+        print(email)
+        break
 ```
 
-NameMC 能看到历史昵称，其中 `TurbidCloud` 是后续检索的关键。继续用这个历史昵称在社交平台搜索，能找到关联的 Twitter/X 账号，并看到一个 Discord 邀请链接。
-
-![NameMC 和社交平台线索](SUCTF2026-CyberTrackWP/namemc-和社交平台线索.png)
-
-进入 Discord 后查看用户自我介绍，可以看到 `Flag@here` 一类提示和最终 `string = ddc7-4622-8a97`：
-
-![Discord 线索](SUCTF2026-CyberTrackWP/discord-线索.png)
-
-![Discord 自我介绍](SUCTF2026-CyberTrackWP/discord-自我介绍.png)
-
-因此整条链路可以概括为：
+命中邮箱：
 
 ```text
-博客入口
-  -> GitHub / Gravatar 邮箱哈希
-  -> 邮箱自动回复
-  -> 真实姓名 Zeyuan Lin
+evanlin1123@foxmail.com
+```
 
-博客 Minecraft 线索
-  -> Mnzn233
-  -> NameMC 历史昵称 TurbidCloud
-  -> Twitter/X
-  -> Discord
-  -> string = ddc7-4622-8a97
+博客已经提示该邮箱启用了自动回复。向它发送普通邮件后，自动回复签名给出姓名 `Zeyuan Lin`。按题目要求改成姓在前、名在后并删除空格，最终姓名部分是：
+
+```text
+linzeyuan
+```
+
+### 3. 邮箱的非预期捷径
+
+出题人把博客部署到 GitHub Pages 时，提交元数据中意外保留了邮箱。查看 [泄露邮箱的 GitHub commit patch](https://github.com/EvanLin-SUCTF/EvanLin-SUCTF.github.io/commit/2796f3b4537dc0c1891da002dc9d02ab9f71b008.patch)，可直接看到 `evanlin1123@foxmail.com`，从而跳过 Gravatar 字典构造。
+
+这条链接应保留：commit hash 固定，且它本身就是非预期路径的原始证据。它只能替代“找邮箱”这一步，仍需通过自动回复确认真实姓名，不能仅凭邮箱本地部分猜测姓名。
+
+### 4. 字符串分支：Minecraft 历史昵称
+
+在 [NameMC 的 Mnzn233 档案](https://namemc.com/profile/Mnzn233.1) 中可以看到多个历史昵称，其中关键旧名是：
+
+```text
+TurbidCloud
+```
+
+![NameMC 历史昵称与后续社交线索](SUCTF2026-CyberTrackWP/namemc-和社交平台线索.png)
+
+以 `TurbidCloud` 搜索其它公开社交平台，能够定位到同名账号。该账号发布过寻找 Minecraft 玩家并附带 Discord 邀请的内容，服务器名包含 `Flag@here`，说明身份关联已经闭合。
+
+![社交平台中的 Discord 线索](SUCTF2026-CyberTrackWP/discord-线索.png)
+
+进入服务器后，题目 bot/账号直接给出特殊字符串：
+
+```text
+ddc7-4622-8a97
+```
+
+![Discord 中给出的特殊字符串](SUCTF2026-CyberTrackWP/discord-自我介绍.png)
+
+Discord 邀请和社交帖子具有时效性，长期题解不必保留可能失效的邀请 URL；这里已经记录了用于关联的账号名、服务器提示和最终字符串，不依赖外链也能理解证据链。
+
+### 5. 计算 flag
+
+严格按题目规则拼接：
+
+```text
+linzeyuan_ddc7-4622-8a97
+```
+
+复算：
+
+```python
+import hashlib
+
+s = 'linzeyuan_ddc7-4622-8a97'.lower()
+print(hashlib.md5(s.encode()).hexdigest())
+```
+
+结果为：
+
+```text
+c4d1df3b3dbea17c886b447b7f913048
+```
+
+所以提交：
+
+```text
+SUCTF{c4d1df3b3dbea17c886b447b7f913048}
 ```
 
 ## 方法总结
 
-- 核心技巧：OSINT 身份关联、邮箱哈希还原、跨平台昵称追踪。
-- 识别信号：题面给出个人博客、头像、GitHub 链接、生日、昵称、游戏平台用户名时，应优先建立“邮箱/昵称/生日/头像哈希”的候选图。
-- 复用要点：GitHub commit patch、Gravatar 哈希、邮件自动回复、NameMC 历史昵称和社交平台邀请链接都可能成为身份闭环证据。写 WP 时应保留能复现关联链的 URL、关键昵称和验证点，而不是只写最后的 flag。
+- 先把线索按目标拆成两条证据链：邮箱/姓名与游戏昵称/特殊字符串；不要在线性浏览中混淆不同线索的用途。
+- Gravatar URL 中的 SHA-256 是候选验证器。结合邮箱域、生日和昵称构造小而有依据的字典，比无边界爆破更可靠。
+- Git 历史、邮件自动回复、游戏历史昵称和社交邀请分别提供“邮箱”“姓名”“旧身份”和“最终落点”；只有把这些证据闭环，结论才不是同名猜测。
+- 外链分为两类：稳定的原始证据（固定 commit、公开档案）应保留；临时邀请和易失效帖子应把关键信息写入正文后省略 URL。

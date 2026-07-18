@@ -1,404 +1,157 @@
 # SUCTF2026-protocol
 
 ## 题目简述
-题目是自实现 HTTP `/flag` 服务和自定义二进制协议。题干提示长度字段后一个字节必须为 `0x80`，末尾字节必须为 `0x16`，`you_input` 需要全部小写；程序实际只注册 `POST /flag`，其他请求不会进入核心逻辑。
 
-HTTP body 不是直接明文，而是先经过一层 hex 解码，再按私有协议解析出 payload。payload 会被切成 13 个 8-byte block，反复调用解密/变换函数后与固定目标比较。最终答案不是服务端直接回显的字符串，而是构造能通过校验的 `you_input`，再按提示提交 `SUCTF{md5(you_input)}`。
+程序实现了一个只接受 `POST /flag` 的 HTTP 服务，但 HTTP body 还要经过两层十六进制解码，才能得到真正的二进制协议帧。合法帧中包含 121 字节 payload：1 字节内部 magic、104 字节 TEA 密文和 16 字节 key。服务端用运行时被修改过的 TEA 参数解密 13 个分组，与固定目标字符串比较；通过后只提示 flag 是最外层请求体的 MD5。
+
+题目提示“长度字段后一字节为 `0x80`、最后一字节为 `0x16`、输入全小写”分别约束协议头、帧尾和外层 hex 编码。
 
 ## 解题过程
-程序启动后只注册了一个真正的 HTTP 路由：POST /flag 。
 
-0x140002124 开始的代码如下：
+### 1. 确认路由和三层输入
 
-```
-0x140002124: mov byte ptr [rbp - 0x18], 0xa
-0x140002128: mov dword ptr [rbp - 0x17], 0x616c662f
-0x14000212f: mov word ptr [rbp - 0x13], 0x67
-0x140002135: lea rcx, [rbp - 0x30]
-0x140002139: lea rdx, [rbp - 0x18]
-0x14000213d: call 0x140004790
-0x140002142: lea rcx, [rip + 0x597d7]
-0x140002149: mov qword ptr [rbp - 0x60], rcx
-0x14000214d: lea rcx, [rip - 0xc84]
-0x140002154: mov qword ptr [rbp - 0x58], rcx
-0x140002158: lea rsi, [rbp - 0x60]
-0x14000215c: mov qword ptr [rbp - 0x40], rsi
-0x140002160: mov rcx, rsi
-0x140002163: mov rdx, rax
-0x140002166: call 0x14003bab0
+程序构造路由时，常量 `0x616c662f` 按小端展开为 `/fla`，后接 `0x67`，因此真实路由是 `/flag`。方法分发只给 `POST` 注册了业务处理器；`GET /flag` 返回 404 并不是服务未启动。
+
+处理函数依次完成：
+
+1. 将 HTTP body 当作小写 ASCII hex 解码一次；
+2. 要求解码结果形如 `#<inner_frame_hex>\n`；
+3. 再解码 `inner_frame_hex`，解析二进制帧并验证 checksum；
+4. 按 type 分发，提取 payload 后执行块解密和目标比较。
+
+因此真正提交的 HTTP body 是：
+
+```python
+outer_body = ("#" + inner_frame.hex() + "\n").encode().hex().encode()
 ```
 
-0x616c662f 按小端展开就是 /fla ，后面的 0x67 就是 g ，所以这里明确注册的是
-/flag 。
+不要直接把 `inner_frame.hex()` 作为 body；那会少掉外层的 `#`、换行和第二次 hex 编码。
 
-实际行为也能验证这一点：
+### 2. 恢复协议帧
 
-返回 404 • GET /flag
-- POST /flag 才会进入业务逻辑
+解析器要求第一个字节为 `0x60`，第 2～3 字节是大端长度。type 分发进一步要求 `raw[4] == 0x55`，payload 长度必须为 `0x79`。完整结构为：
 
-handle_flag 主逻辑：
+| 偏移 | 长度 | 含义 |
+|---:|---:|---|
+| 0 | 1 | 帧 magic：`0x60` |
+| 1 | 2 | 大端长度：`0x007c`，即 payload 长度 `0x79` 加 3 |
+| 3 | 1 | 题目提示约束的 header：`0x80` |
+| 4 | 1 | `/flag` 类型：`0x55` |
+| 5 | 1 | padding/保留字节，官方帧取 `0x00` |
+| 6 | 121 | payload |
+| 127 | 1 | checksum |
+| 128 | 1 | 帧尾：`0x16` |
 
-handle_flag 在 0x1400014d0 。
+checksum 为：
 
-核心代码如下：
-
-```
-0x1400014d0: push rsi
-0x1400014d1: push rdi
-0x1400014d2: push rbx
-0x1400014d3: sub rsp, 0xd0
-...
-0x140001518: lea rcx, [rsp + 0x38]
-0x14000151d: lea rdx, [rsp + 0x20]
-0x140001522: call 0x140003e30
-0x140001527: lea rcx, [rsp + 0x57]
-0x14000152c: lea rdx, [rsp + 0x38]
-0x140001531: call 0x140003a50
-...
-0x140001556: lea rdi, [rsp + 0x58]
-0x14000155b: lea rbx, [rsp + 0xc0]
-0x140001563: mov rcx, rdi
-0x140001566: mov rdx, rbx
-0x140001569: call 0x140001450
-...
-0x140001612: lea rcx, [rsp + 0xb8]
-0x14000161a: mov rdx, rbx
-0x14000161d: call 0x140001450
-0x140001622: lea rdx, [rip + 0x51f05]
-0x140001629: mov r8d, 0x68
-0x14000162f: mov rcx, rdi
-0x140001632: call 0x140052480
-0x140001637: test eax, eax
-0x140001639: je 0x14000168c
+```python
+checksum = (raw[3] + raw[4] + raw[5] + sum(payload)) & 0xff
 ```
 
-这里可以拆成三步：
+payload 不是 121 字节连续密文，而是一个结构体：
 
-1. 0x140003e30 先处理 HTTP body。
+| payload 偏移 | 长度 | 含义 |
+|---:|---:|---|
+| 0 | 1 | 内部 magic：`0x80` |
+| 1 | 104 | 13 个 8 字节 TEA 密文块 |
+| 105 | 16 | TEA key：`su2026-keysecret` |
 
-2. 0x140003a50 再做协议解析和 payload 提取。
+官方 WP 的结构表有一处把 key 写成下划线，但实际 payload 尾部为：
 
-3. 把 payload 切成 13 个 8-byte block，反复调用 0x140001450 解密，再和固定目标比较。
-
-比较失败时返回 wrong input ，格式错时返回 invalid input ，比较成功时返回提示：
-
-flag may be SUCTF{md5(you_input)}
-
-第一层：HTTP body 不是直接协议，而是“协议字符串再 hex 一次”
-
-0x140003e30 是第一层 hex 解码器。
-
-```
-0x140003e30: push r15
-...
-0x140003f8e: movzx r10d, byte ptr [rdi + r8]
-0x140003f93: lea r9d, [r10 - 0x30]
-0x140003f97: cmp r9b, 0xa
-...
-0x140003f9d: lea r9d, [r10 - 0x61]
-0x140003fa1: cmp r9b, 5
-...
-0x140003fb4: lea r11d, [r10 - 0x30]
-...
-0x140003fbe: lea r11d, [r10 - 0x61]
-```
-
-这一段很典型，就是把 ASCII hex 还原成字节，并且明确接受的是小写字母 a-f 。
-
-后面真正的协议入口在 0x14004fed0 / 0x14004ff30 ，它们都要求数据形如：
-
-#<hex>\n
-
-对应代码：
-
-```
-0x14004fed8: mov rcx, qword ptr [rdx]
-0x14004fedb: mov rdx, qword ptr [rdx + 8]
-...
-0x14004fee7: cmp byte ptr [rcx], 0x23
-0x14004feea: jne 0x14004ff05
-0x14004feec: cmp byte ptr [rdx - 1], 0xa
-0x14004fef0: jne 0x14004ff05
-0x14004fef2: inc rcx
-...
-0x14004ff15: call 0x14004e9e0
-```
-
-所以 HTTP body 的真实格式不是：
-
-60007c... 其实是：23363030303763...
-
-也就是：("#" + inner_frame_hex + "\n").encode().hex()
-
-第二层：协议帧结构
-
-0x14004e9e0 和 0x14004f4b0 是真正的协议解析器。
-
-其中 0x14004e9e0 负责：
-
-- 对 #... 中的 hex 再解一次
-
-- 检查帧头
-
-- 抽出 payload
-
-- 校验 checksum
-
-关键位置如下：
-
-```
-0x14004f17c: cmp rsi, r13
-0x14004f17f: je 0x14004f1f0
-0x14004f181: sub r13, rsi
-0x14004f184: cmp r13, 9
-0x14004f188: jb 0x14004f1f0
-0x14004f18a: cmp byte ptr [rsi], 0x60
-0x14004f18d: jne 0x14004f1f0
-0x14004f18f: movzx eax, word ptr [rsi + 1]
-0x14004f193: rol ax, 8
-0x14004f197: cmp ax, 3
-0x14004f19b: jbe 0x14004f421
-0x14004f1a1: movzx r14d, ax
-0x14004f1a5: add r14d, -3
-```
-
-这里直接说明：
-
-- 第 1 个字节必须是 0x60
-
-- 第 2~3 字节是大端长度
-
-- 实际 payload 长度是 length - 3
-
-后面复制 payload 和做校验：
-
-```
-0x14004f2c0: movdqu xmm2, xmmword ptr [rsi + rcx + 6]
-0x14004f2c6: movdqu xmm3, xmmword ptr [rsi + rcx + 0x16]
-0x14004f2cc: movdqu xmmword ptr [rbx + rcx], xmm2
-0x14004f2d1: movdqu xmmword ptr [rbx + rcx + 0x10], xmm3
-...
-0x14004f3d9: add dl, byte ptr [rsi + 3]
-
-0x14004f3dc: add dl, byte ptr [rsi + 4]
-0x14004f3df: add dl, byte ptr [rsi + 5]
-0x14004f3e2: cmp dl, byte ptr [rsi + r13 - 2]
-0x14004f3e7: je 0x14004f200
-```
-
-这里能看出协议的大致结构：
-
-0x60 | len_hi len_lo | byte3 | byte4 | byte5 | payload... | checksum |
-0x16
-
-并且 payload 从 raw[6] 开始。
-
-结合实际跑通后的帧，可以还原出成功分支吃的 inner frame 形状：
-
-$$
-60 00 7c 80 55 ?? <121-byte payload> <checksum> 16
-$$
-
-题目 hint 对应的就是：
-
-- 长度字段后面那个字节是 0x80
-
-- 协议最后一个字节是 0x16
-
-第三层：只接受 type = 0x55 且 payload 长度为 0x79
-
-0x140003a50 是协议类型分发。
-
-```
-0x140003a5c: lea rcx, [rsp + 0x40]
-0x140003a61: call 0x14004fed0
-0x140003a66: lea rcx, [rsp + 0x28]
-0x140003a6b: mov rdx, rdi
-0x140003a6e: call 0x14004ff30
-...
-0x140003ab8: movzx edx, byte ptr [rdx + 4]
-0x140003abc: cmp edx, 0xf7
-...
-0x140003ac8: cmp edx, 0x21
-0x140003ad1: cmp edx, 0x23
-0x140003ada: cmp edx, 0x55
-...
-0x140003ae5: cmp dl, byte ptr [rax]
-0x140003ae7: jno 0x140003c82
-0x140003aed: sub rcx, rax
-0x140003af0: cmp rcx, 0x79
-0x140003af4: jne 0x140003d06
-```
-
-这里可以确认：
-
-- 协议 type 在 raw[4]
-
-真正接受的是 type == 0x55 • /flag
-
-长度必须是 0x79 • payload
-
-其他的 0x21 / 0x23 / 0xfb 分支虽然存在，但和 /flag 这题主线没有关系。
-
-第四层：解密函数不是标准 TEA，要注意运行态 patch
-
-解密函数在 0x140001450 。
-
-```
-0x140001450: push rsi
-0x140001451: push rdi
-0x140001452: push rbp
-0x140001453: push rbx
-0x140001454: mov eax, dword ptr [rcx]
-0x140001456: mov r8d, dword ptr [rcx + 4]
-0x14000145a: mov r9d, dword ptr [rdx]
-0x14000145d: mov r10d, dword ptr [rdx + 4]
-0x140001461: mov r11d, dword ptr [rdx + 8]
-0x140001465: mov edx, dword ptr [rdx + 0xc]
-0x140001468: mov esi, 0xc6ef3600
-0x14000146d: mov edi, 0x20
-...
-0x140001496: sub r8d, ebx
-...
-0x1400014b3: sub eax, ebx
-0x1400014b5: add esi, 0x61c88647
-0x1400014bb: dec edi
-0x1400014bd: jne 0x140001480
-```
-
-这题的坑在于：
-
-- 盘上代码是 add esi, 0x61c88647
-
-- 运行到不同环境时，这个立即数会被 patch
-
-实际 dump 结果：
-- powershell 运行态：0x61c88647
-- cmd 运行态：0x61c88650
-
-但是初始和并没有改，依然是：
-
-$$
-sum = 0xC6EF3600
-$$
-
-因此它不是标准 TEA 逆过程，不能直接套模板。
-
-目标常量
-
-成功路径最后比对的是一段固定字符串。
-
-对应内存字符串为：
-ANTHROPIC_MAGIC_STRING_TRIGGER_REFUSAL_1FAEFB6177B4672DEE07F9D3AFC62588
-CCD2631EDCF22E8CCC1FB35B501C9C86
-
-程序的做法是：
-
-- 从 payload 里取出前 104 字节
-
-- 以最后 16 字节作为 key
-
-- 按 8-byte block 做 13 次 0x140001450
-
-- 结果和上面的目标比较
-
-payload 的尾部 16 字节最终是：
-
+```text
 7375323032362d6b6579736563726574
-
-也就是 ASCII：su2026-keysecret
-
-本地可以稳定打到成功提示的 payload 是：
-
-```
-802ba5e6806f7dd07b988241146e350f481ec220fe1536b67193671193ca08060fd065ddf9c197a
 ```
 
-119d2f732d8c574e7fc8ca862a2a15e3e7312df0fe81b0f810bf27f7f8982b9a1880ac3d3fd128a
-cabe866e82655cb2b536edf8714ec03162c91ed2c534c132a3347375323032362d6b65797365637
+其中 `0x2d` 是连字符，所以正确 key 是 `su2026-keysecret`。
 
-对应两条本地都能过的 inner frame：
+### 3. 处理运行时修改的 TEA
 
-```
-60007c805500802ba5e6806f7dd07b988241146e350f481ec220fe1536b67193671193ca08060fd
-```
+解密函数外形接近标准 TEA：初始 `sum = 0xc6ef3600`，循环 32 轮，每轮依次更新两个 32 位半部。陷阱在于程序会根据父进程/运行环境修改循环中的立即数。
 
-065ddf9c197a119d2f732d8c574e7fc8ca862a2a15e3e7312df0fe81b0f810bf27f7f8982b9a188
-0ac3d3fd128acabe866e82655cb2b536edf8714ec03162c91ed2c534c132a3347375323032362d6
-b65797365637265744516
+盘上指令为：
 
-```
-60007c805580802ba5e6806f7dd07b988241146e350f481ec220fe1536b67193671193ca08060fd
+```asm
+add esi, 0x61c88647
 ```
 
-065ddf9c197a119d2f732d8c574e7fc8ca862a2a15e3e7312df0fe81b0f810bf27f7f8982b9a188
-0ac3d3fd128acabe866e82655cb2b536edf8714ec03162c91ed2c534c132a3347375323032362d6
-b6579736563726574c516
+这等价于每轮从 `sum` 减去标准 TEA delta `0x9e3779b9`。触发题目设计的运行时修补后，立即数变为 `0x61c88650`，对应有效 delta：
 
-注意这里的 raw[5] 并不会影响 /flag 本地成功，所以本地样本存在歧义。
+```text
+delta = 0x9e3779b0
+```
 
-输入层次总结
+而 32 轮后的初始解密和仍恰好为：
 
-本题一共至少有三层输入：
+```text
+(0x9e3779b0 * 32) mod 2^32 = 0xc6ef3600
+```
 
-1. HTTP body：ASCII hex
+因此不能仅凭常量外形套标准 TEA 模板，必须在实际运行态确认立即数。官方成功帧使用 `delta = 0x9e3779b0`；用 `0x61c88650` 逐轮回退，可将其中 104 字节密文解成：
 
-2. #<inner_frame>\n
+```text
+ANTHROPIC_MAGIC_STRING_TRIGGER_REFUSAL_1FAEFB6177B4672DEE07F9D3AFC62588CCD2631EDCF22E8CCC1FB35B501C9C86\x00
+```
 
-3. inner frame 内部的 payload
+反向生成密文时，按小端把每 8 字节分为两个 `uint32`，使用从 0 开始累加的 `0x9e3779b0` 执行 TEA 加密即可。所有加减和移位后的结果都要截断到 32 位。
 
-真正提交到服务端的是第 1 层。
+### 4. 构造成功帧
 
-也就是说，POST /flag 的 body 应该是：
+将目标字符串按 13 个分组加密并拼上内部 magic 与 key，得到 payload：
 
-$$
-("#" + inner_frame_hex + "\n").encode().hex()
-$$
+```text
+802ba5e6806f7dd07b988241146e350f481ec220fe1536b67193671193ca08060f
+d065ddf9c197a119d2f732d8c574e7fc8ca862a2a15e3e7312df0fe81b0f810b
+f27f7f8982b9a1880ac3d3fd128acabe866e82655cb2b536edf8714ec03162c91
+ed2c534c132a3347375323032362d6b6579736563726574
+```
 
-本地验证脚本
+官方 inner frame 为：
+
+```text
+60007c805500802ba5e6806f7dd07b988241146e350f481ec220fe1536b6719367
+1193ca08060fd065ddf9c197a119d2f732d8c574e7fc8ca862a2a15e3e7312df
+0fe81b0f810bf27f7f8982b9a1880ac3d3fd128acabe866e82655cb2b536edf87
+14ec03162c91ed2c534c132a3347375323032362d6b65797365637265744516
+```
+
+去掉换行拼接后，帧长为 129 字节，长度字段为 124，payload 长度为 121，计算出的 checksum 与倒数第二字节同为 `0x45`。可用下面的最小代码完成最终封装和自检：
 
 ```python
 import hashlib
-import urllib.request
 
-FRAME_00 = (
+frame_hex = """60007c805500802ba5e6806f7dd07b988241146e350f481ec220fe1536b6719367
+1193ca08060fd065ddf9c197a119d2f732d8c574e7fc8ca862a2a15e3e7312df
+0fe81b0f810bf27f7f8982b9a1880ac3d3fd128acabe866e82655cb2b536edf87
+14ec03162c91ed2c534c132a3347375323032362d6b65797365637265744516"""
+frame_hex = "".join(frame_hex.split())
+frame = bytes.fromhex(frame_hex)
+
+assert len(frame) == 129
+assert int.from_bytes(frame[1:3], "big") == 0x7c
+assert len(frame[6:-2]) == 0x79
+assert (sum(frame[3:-2]) & 0xff) == frame[-2] == 0x45
+assert frame[-1] == 0x16
+
+outer_body = ("#" + frame_hex + "\n").encode().hex().encode()
+digest = hashlib.md5(outer_body).hexdigest()
+print(digest)
 ```
 
-"60007c805500802ba5e6806f7dd07b988241146e350f481ec220fe1536b67193671193ca08060f
-d065ddf9"
+计算结果为：
 
-"c197a119d2f732d8c574e7fc8ca862a2a15e3e7312df0fe81b0f810bf27f7f8982b9a1880ac3d3
-fd128acabe"
+```text
+ad1b51464c1b679fe731c7d718af241f
+```
 
-"866e82655cb2b536edf8714ec03162c91ed2c534c132a3347375323032362d6b65797365637265
-744516"
+因此提交：
 
-```python
-)
-
-def build_outer_body(frame_hex: str) -> bytes:
-return ("#" + frame_hex + "\n").encode().hex().encode()
-
-def post_flag(body: bytes) -> bytes:
-req = urllib.request.Request("http://127.0.0.1:8080/flag", data=body,
-method="POST")
-with urllib.request.urlopen(req, timeout=3) as resp:
-return resp.read()
-
-def main() -> None:
-outer = build_outer_body(FRAME_00)
-result = post_flag(outer)
-print(f"response = {result.decode()}")
-print(f"outer_body = {outer.decode()}")
-print(f"md5(outer_body) = {hashlib.md5(outer).hexdigest()}")
-
-print(f"flag = SUCTF{{{hashlib.md5(outer).hexdigest()}}}")
-
-if __name__ == "__main__":
-main()
+```text
+SUCTF{ad1b51464c1b679fe731c7d718af241f}
 ```
 
 ## 方法总结
-- 核心技巧：自定义协议解析与块加密反解
-- 识别信号：HTTP 层很薄，真正约束在 body parser 和固定 block 解密。
-- 复用要点：先区分路由/格式错误/比较失败，再恢复 block 算法，反推出合法 payload。
+
+- 先利用 404、`invalid input`、`wrong input` 和成功提示区分路由层、格式层、协议层与密码比较层，避免把所有失败都归因于 TEA。
+- 还原协议时同时记录字段偏移、字节序、长度语义、checksum 覆盖范围和嵌套编码；仅知道几个 magic 不足以构造请求。
+- 动态自修改会改变密码常量。应从运行态指令和已知明密文交叉验证 delta，而不是机械套用标准 TEA。
+- 最终 MD5 的对象是最外层 ASCII hex 请求体，不是 payload、inner frame，也不是 `#...\n` 的中间层。
