@@ -1669,3 +1669,23 @@
 - 将 13 篇仍带 `Bugku-` 前缀但实际来源明确的 raw WP 重命名为真实赛事来源前缀：DownUnderCTF2023、TJCTF2024、moeCTF2022、西湖论剑2023、TamilCTF2021、强网杯2019、Xp0intCTF2017、TAMUctf2021 和 TAMUctf2022。
 - 这些文件均未发现同 basename 图片资源目录，因此本轮只移动 Markdown 文件；raw 正文和 wiki 技巧语义不改。
 - 同步更新 `wiki/*.md` 中指向旧 `Bugku-*` raw 的案例链接；历史 `log.md` 旧记录保留当时文件名作为审计痕迹。
+
+## 2026-07-17 — 0xGame2020 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、优化并完成图片筛选的 63 篇单题 WP 归档到 `raw/<category>/`；归档名统一为 `0xGame2020-weekX-<challenge>-wp.md`，文件名和资源目录只使用文字、数字与连字符，Markdown 一级标题继续保留题目原有空格、标点和问号。
+- 按决定性主障碍归档：Crypto 14 篇、Forensics 2 篇、Pwn 13 篇、Reverse 13 篇、Stego 5 篇、Web 16 篇；四周题量分别为 24、12、14、13。
+- 逐篇复核后调整 1 篇分类：`week4Hex酱` 的决定性步骤是绕过 Python `eval` 表达式过滤并逃逸语言执行边界，不是 HTTP 应用逻辑，因此从 Web 改归 Pwn；其余 62 篇保持原方向。
+- 迁移并规范化 4 个图片目录、4 张图片，目标目录与归档 Markdown 同 basename，4 条图片引用均改为新的同层相对路径。目标端预验收通过后，源 `wp` 各一级方向下的 63 篇 Markdown 与 4 个图片目录已清理，15 个一级方向目录保留为空目录。
+- 本轮只新增 raw 资料、更新 `index.md` live 统计和本日志，不新增或修改 `wiki/*.md`；raw 总数由 1012 增至 1075。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2020-wp-before-archive-20260717-000050.zip`，共 76 个 ZIP 条目、843,742 bytes；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-0xGame2020-raw-archive-20260717-000050.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：59 篇无图 WP 与源文件 SHA-256 完全相同，4 篇带图 WP 除图片目标路径外内容一致；63 篇三段结构完整，代码围栏和展示数学公式标记闭合；全库 4,200 条本地 Markdown 链接和 587 条图片引用均可解析，赛事资源目录无孤立项、资源文件无未引用项，目标命名冲突、旧版本冲突和非法名称均为 0；源 `wp` 下剩余文件和嵌套资源目录均为 0。
+
+## 2026-07-18 — 0xGame2021 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、优化并完成图片筛选的 77 篇单题 WP 归档到 `raw/<category>/`；归档名统一为 `0xGame2021-weekX-<challenge>-wp.md`，文件名只使用文字、数字与连字符，Markdown 一级标题继续保留题目原有空格、标点、问号和下划线。
+- 按决定性主障碍归档：Crypto 23 篇、Forensics 5 篇、Pwn 11 篇、Reverse 15 篇、Stego 7 篇、Web 16 篇；四周题量分别为 27、19、16、15。
+- 逐篇复核后没有调整现有分类：`EasyPcap` 与 `Strobe Memory` 的主线是证据恢复，仍归 Forensics；`Despacito`、`茶谈室` 与 `Thread_TLS` 的主线是程序行为还原，仍归 Reverse；表示层编码链归 Crypto，隐藏载荷链归 Stego。
+- 本次归档时源树中没有图片文件、图片引用或嵌套资源目录；前一阶段已将仅有的两张纯代码截图转写为 Markdown 代码块，因此没有创建空资源目录，也没有执行无意义的图片链接改写。目标端预验收通过后，源 `wp` 下 77 篇 Markdown 已清理，15 个一级方向目录保留为空目录。
+- 本轮只新增 raw 资料、更新 `index.md` live 统计和本日志，不新增或修改 `wiki/*.md`；raw 总数由 1075 增至 1152。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/0xGame2021-wp-before-archive-20260718-130916.zip`，含 77 个文件；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-0xGame2021-raw-archive-20260718-130916.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：77 篇归档 WP 与源文件 SHA-256 完全一致，三段结构、代码围栏、数学标记、目标命名和周次均无异常；全库 4,200 条本地 Markdown 链接和 587 条图片引用均可解析，132 个资源目录及其中 587 个文件无孤立或未引用项；目标命名冲突、旧版本冲突和非法名称均为 0，源 `wp` 下剩余文件和嵌套资源目录均为 0。
