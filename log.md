@@ -1743,3 +1743,13 @@
 - 更新 `index.md` live raw 统计：AI/ML 由 20 增至 21、Blockchain 由 19 增至 20、Cloud/Infra 由 4 增至 5、Crypto 由 255 增至 258、Pwn 由 241 增至 246、Reverse 由 237 增至 240、Web 由 246 增至 251，raw 总数由 1185 增至 1204；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/ACTF2023-wp-before-archive-20260722-122157.zip`，包含 19 个文件；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ACTF2023-raw-archive-20260722-122157.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：19 篇归档 WP 与源文件 SHA-256 完全一致，三段结构、代码围栏、数学标记、UTF-8、结尾换行、行尾空白和目标命名均无异常；全库 1346 篇 active Markdown 中解析出 4180 条本地链接和 567 条图片引用，断链为 0；ACTF2023 不存在孤立资源目录，源树清理结果符合授权范围。
+
+## 2026-07-22 — ACTF2022 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、逐篇完善并完成图片筛选的 12 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `ACTF2022-<challenge>-wp.md`，文件名和资源目录只保留英文字母、数字与必要连字符，Markdown 一级标题继续保留题目原有大小写、空格和韩文题名。
+- 按决定性主障碍归档为 Blockchain 1 篇、Crypto 3 篇、Pwn 1 篇、Reverse 1 篇、Stego 2 篇、Web 4 篇。分类复核后将源目录中的 `bet2loss` 从 Blockchain 调整到 Web：最短预期解依赖 `/log` 下载接口泄露 `password.txt` 与 `keystore.txt`，属于普通 dApp 后端漏洞；纯链上构造期绕过只是替代路线。其余 11 篇保持现有方向。
+- 将 `탕쿠쿠의유혹` 的 1 张必要视觉证据迁移到与 Markdown 同 basename 的 `raw/stego/ACTF2022-tang-keke-temptation-wp/`，图片继续使用语义化名称 `recovered-flag.webp`，正文图片引用同步改为新的同层相对路径；没有创建其它空资源目录。
+- 目标端预验收通过后，源 `wp` 各一级方向下的 12 篇 Markdown 与 1 个图片目录已移入 Windows 回收站；源树剩余文件和嵌套资源目录均为 0，15 个一级方向目录保留为空目录。
+- 更新 `index.md` live raw 统计：Blockchain 由 20 增至 21、Crypto 由 258 增至 261、Pwn 由 246 增至 247、Reverse 由 240 增至 241、Stego 由 49 增至 51、Web 由 251 增至 255，raw 总数由 1204 增至 1216；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/ACTF2022-wp-before-archive-20260722-152025.zip`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ACTF2022-raw-archive-20260722-152025.zip`。
+- 校验结果：11 篇无图 WP 与源文件 SHA-256 完全一致，1 篇带图 WP 除图片目标路径外内容一致，图片文件迁移前后 SHA-256 一致；12 篇三段结构、代码围栏、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1358 篇 active Markdown 中解析出 4181 条本地链接和 568 条图片引用，断链为 0；ACTF2022 资源引用与文件一一对应，源树清理结果符合授权范围。
