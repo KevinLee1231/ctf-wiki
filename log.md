@@ -1733,3 +1733,13 @@
 - 更新 `index.md` live raw 统计：AI/ML 由 19 增至 20、Crypto 由 251 增至 255、OSINT 由 16 增至 17、Pentest 由 11 增至 12、Pwn 由 238 增至 241、Reverse 由 234 增至 237、Stego 由 48 增至 49、Web 由 243 增至 246，raw 总数由 1168 增至 1185；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/ACTF2025-wp-before-archive-20260719-003419.zip`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ACTF2025-raw-archive-20260719-003419.zip`。
 - 校验结果：15 篇无图 WP 与备份内源文件 SHA-256 完全一致，2 篇带图 WP 除图片目标路径外内容一致，4 个图片文件与备份内源资源哈希一致；17 篇三段结构、代码围栏、数学标记和目标命名均无异常。全库 1327 篇 active Markdown 中解析出 4180 条本地链接和 567 条图片引用，断链为 0；ACTF2025 资源引用与文件一一对应，源树清理结果符合授权范围。
+
+## 2026-07-22 — ACTF2023 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分、逐篇完善并完成图片筛选的 19 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `ACTF2023-<challenge>-wp.md`，文件名只保留英文字母、数字与必要连字符，Markdown 一级标题继续保留题目原有大小写、空格、下划线、撇号、波浪号和感叹号。
+- 按决定性主障碍归档为 AI/ML 1 篇、Blockchain 1 篇、Cloud/Infra 1 篇、Crypto 3 篇、Pwn 5 篇、Reverse 3 篇、Web 5 篇。`CTFer simulator` 的核心是 Express 状态与事件重放逻辑，归 Web；`hooks` 的核心是 SaaS SCM Webhook 与内网 CI/CD 信任边界，归 Cloud/Infra；其余题目保持逐篇复核后的方向。
+- 本批源树没有图片文件、图片引用或嵌套资源目录；前一阶段已将 `hooks` 的两张纯文本界面截图转写为 Markdown 代码块，因此没有创建空的 ACTF2023 资源目录，也没有执行无意义的图片链接改写。
+- 目标端预验收通过后，源 `wp` 各一级方向下的 19 篇 Markdown 已移入 Windows 回收站；源树剩余文件和嵌套资源目录均为 0，15 个一级方向目录保留为空目录。
+- 更新 `index.md` live raw 统计：AI/ML 由 20 增至 21、Blockchain 由 19 增至 20、Cloud/Infra 由 4 增至 5、Crypto 由 255 增至 258、Pwn 由 241 增至 246、Reverse 由 237 增至 240、Web 由 246 增至 251，raw 总数由 1185 增至 1204；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/ACTF2023-wp-before-archive-20260722-122157.zip`，包含 19 个文件；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ACTF2023-raw-archive-20260722-122157.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：19 篇归档 WP 与源文件 SHA-256 完全一致，三段结构、代码围栏、数学标记、UTF-8、结尾换行、行尾空白和目标命名均无异常；全库 1346 篇 active Markdown 中解析出 4180 条本地链接和 567 条图片引用，断链为 0；ACTF2023 不存在孤立资源目录，源树清理结果符合授权范围。
