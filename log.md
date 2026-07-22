@@ -1753,3 +1753,13 @@
 - 更新 `index.md` live raw 统计：Blockchain 由 20 增至 21、Crypto 由 258 增至 261、Pwn 由 246 增至 247、Reverse 由 240 增至 241、Stego 由 49 增至 51、Web 由 251 增至 255，raw 总数由 1204 增至 1216；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/ACTF2022-wp-before-archive-20260722-152025.zip`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-ACTF2022-raw-archive-20260722-152025.zip`。
 - 校验结果：11 篇无图 WP 与源文件 SHA-256 完全一致，1 篇带图 WP 除图片目标路径外内容一致，图片文件迁移前后 SHA-256 一致；12 篇三段结构、代码围栏、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1358 篇 active Markdown 中解析出 4181 条本地链接和 568 条图片引用，断链为 0；ACTF2022 资源引用与文件一一对应，源树清理结果符合授权范围。
+
+## 2026-07-22 — MoeCTF2024 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中已经拆分并完成图片筛选的 64 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `MoeCTF2024-<challenge>-wp.md`，文件名和资源目录只保留文字、数字与必要连字符，Markdown 一级标题继续保留题目原有空格、下划线、括号、问号、感叹号和带圈数字。
+- 按决定性主障碍归档为 Crypto 14 篇、Forensics 3 篇、Mobile 1 篇、OSINT 1 篇、Pwn 17 篇、Reverse 18 篇、Stego 3 篇、Web 7 篇。分类复核后将源目录中的 `这是什么？random！` 从 Pwn 调整到 Crypto：最短解法只需利用 `tm_yday` 固定种子预测 glibc `random()` 序列，不依赖内存破坏或执行边界突破；其余 63 篇保持现有方向。
+- 将 4 个图片目录、5 张必要视觉证据迁移并重命名为与归档 Markdown 相同的 basename；5 条图片引用同步改为新的同层相对路径，图片文件继续使用语义化名称。没有创建空资源目录。
+- 目标端预验收通过后，源 `wp` 各一级方向下的 64 篇 Markdown 与 4 个图片目录已清理；源树剩余 Markdown 和嵌套资源目录均为 0，15 个一级方向目录继续保留。
+- 更新 `index.md` live raw 统计：Crypto 由 261 增至 275、Forensics 由 64 增至 67、Mobile 由 2 增至 3、OSINT 由 17 增至 18、Pwn 由 247 增至 264、Reverse 由 241 增至 259、Stego 由 51 增至 54、Web 由 255 增至 262，raw 总数由 1216 增至 1280；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2024-wp-before-archive-20260722-211936.zip`，包含 88 个 ZIP 条目，SHA-256 为 `30af298914bc803e195320064aee7ccb8c21168e86254426d6a119ec27e9b969`，压缩包完整性检查通过。
+- 校验结果：60 篇无图 WP 与源文件字节完全一致，4 篇带图 WP 除图片目标路径外内容一致，5 张图片迁移前后 SHA-256 一致；64 篇三段结构、代码围栏、UTF-8 和目标命名均无异常。全库解析出 4186 条本地链接，断链为 0；MoeCTF2024 资源引用与文件一一对应，源树清理结果符合授权范围。
