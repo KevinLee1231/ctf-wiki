@@ -1773,3 +1773,13 @@
 - 更新 `index.md` live raw 统计：AI/ML 由 21 增至 23、Crypto 由 275 增至 281、Forensics 由 67 增至 68、Pentest 由 12 增至 13、Reverse 由 259 增至 260、Stego 由 54 增至 55、Web 由 262 增至 264，raw 总数由 1280 增至 1294；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2023-wp-before-archive-20260723-093847.zip`，包含 15 个文件，SHA-256 为 `d310836bac2e96db2516767d1a6dfbb0a875e6d09822e5e8bfc082f792cc4512`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2023-raw-archive-20260723-093847.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：13 篇无图 WP 与备份内源文件逐字节一致，1 篇带图 WP 除图片目标路径外内容一致，图片文件迁移前后 SHA-256 一致；14 篇三段结构、62 个代码围栏、28 个 Python 代码块、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1436 篇 active Markdown 中解析出 4187 条本地链接和 574 条图片引用，断链为 0；MoeCTF2023 资源引用与文件一一对应，源树清理结果符合授权范围。
+
+## 2026-07-23 — MoeCTF2022 精选 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中经过机制去重、逐篇完善和图片筛选后保留的 4 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `MoeCTF2022-<challenge>-wp.md`，文件名只保留文字、数字和必要连字符，Markdown 一级标题继续保留题目原有大小写、空格和下划线。
+- 按决定性主障碍归档为 Crypto 1 篇、Reverse 2 篇、Web 1 篇：`LittLe_FSR` 依赖 $GF(2)$ 线性递推与不可观测状态恢复，归 Crypto；`Art` 与 `broken hash` 都以恢复二进制校验行为为主线，归 Reverse；`支付系统` 依赖 Web 回调字段序列化歧义与签名重用，归 Web。既有 `raw/pwn/moeCTF2022-syscall-wp.md` 是另一道题，保持不动。
+- 本批源树没有图片文件、图片引用或嵌套资源目录，因此没有创建空资源目录，也没有执行无意义的图片链接改写。
+- 目标端预验收通过后，源 `wp` 下 4 篇 Markdown 已清理；源树剩余文件和嵌套资源目录均为 0，15 个一级方向目录继续保留。
+- 更新 `index.md` live raw 统计：Crypto 由 281 增至 282、Reverse 由 260 增至 262、Web 由 264 增至 265，raw 总数由 1294 增至 1298；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2022-wp-before-archive-20260723-105925.zip`，包含 4 篇 WP，SHA-256 为 `da841cfc45c5fcab6080936549fc7bed040818bb3d0cd53a637c301d70539e4b`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2022-raw-archive-20260723-105925.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：复制预验收时 4 篇归档 WP 与源文件 SHA-256 完全一致；提交前仅移除 `LittLe_FSR`、`broken hash`、`支付系统` 文件末尾的多余空白行，正文内容不变。4 篇的三段结构、代码围栏、Python 语法、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1440 篇 active Markdown 中解析出 4187 条本地链接和 574 条图片引用，断链为 0；raw 仍只使用 14 个正式方向和 `_unclassified`，backups 仍全部为 ZIP。
