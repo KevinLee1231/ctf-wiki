@@ -1783,3 +1783,13 @@
 - 更新 `index.md` live raw 统计：Crypto 由 281 增至 282、Reverse 由 260 增至 262、Web 由 264 增至 265，raw 总数由 1294 增至 1298；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2022-wp-before-archive-20260723-105925.zip`，包含 4 篇 WP，SHA-256 为 `da841cfc45c5fcab6080936549fc7bed040818bb3d0cd53a637c301d70539e4b`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2022-raw-archive-20260723-105925.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：复制预验收时 4 篇归档 WP 与源文件 SHA-256 完全一致；提交前仅移除 `LittLe_FSR`、`broken hash`、`支付系统` 文件末尾的多余空白行，正文内容不变。4 篇的三段结构、代码围栏、Python 语法、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1440 篇 active Markdown 中解析出 4187 条本地链接和 574 条图片引用，断链为 0；raw 仍只使用 14 个正式方向和 `_unclassified`，backups 仍全部为 ZIP。
+
+## 2026-07-23 — 0xGame 与 MoeCTF Raw WP 价值去重
+
+- 对 0xGame2020–2025 与 MoeCTF2022–2025 共 648 篇系列 WP 做价值复核；删除条件是决定性技巧和技术细节已由 0xGame、MoeCTF 之外的 raw 完整覆盖，不按篇幅、题名或比赛标签机械筛选。
+- 删除 113 篇低价值重复 WP：Crypto 28 篇、Forensics 2 篇、Pwn 29 篇、Reverse 27 篇、Stego 4 篇、Web 23 篇；其中 0xGame 110 篇、MoeCTF2024 3 篇。同步删除 5 个与 Markdown 同 basename 的资源目录及其中 5 张仅由对应 WP 使用的图片。
+- 删除对象主要覆盖 HTTP 基础字段、robots、查看源码、基础 SQLi/XXE/LFI/上传，Netcat、ret2win、基础 ROP/ret2libc/格式串，明文字符串、标准 UPX/PYC/Base/XOR，以及普通编码、古典密码和教科书式 RSA；这些机制分别已有 Web 首轮链路、Pwn 栈与格式串、Reverse 基础工具与去壳、Crypto 编码与 RSA、PCAP 恢复和图像隐写等非目标系列 raw 提供更完整的可复用材料。
+- 保留其余 535 篇系列 WP：所有 17 篇已有 wiki 引用的 WP 均保留；MoeCTF2022、MoeCTF2023、MoeCTF2025 全部保留，MoeCTF2024 仅移除 3 篇。稀有方向、独立协议或状态边界、随机数入口、沙箱、异常控制流、复杂 oracle 和具有明确 pivot 的题目不因篇幅短而删除。
+- 更新 `index.md` live raw 统计：Crypto 由 282 减至 254、Forensics 由 68 减至 66、Pwn 由 264 减至 235、Reverse 由 262 减至 235、Stego 由 55 减至 51、Web 由 265 减至 242，raw 总数由 1298 减至 1185；本轮未新增或修改 `wiki/*.md`。
+- 所有删除对象原本均由 Git 跟踪，将通过本轮本地提交保留可恢复历史；为避免用额外备份抵消瘦身效果，本轮不另建文件副本。
+- 校验结果：全库 1327 篇 active Markdown 中解析出 4182 条本地链接，其中图片引用 569 条，断链为 0；剩余 535 篇系列 WP 数量正确，129 个资源目录均有同 basename Markdown 且无空目录，本轮新增零引用资源为 0。另识别出 11 张在本轮开始前即为零引用的 SUCTF2026 图片，因不属于本次授权范围而保持不动；raw 一级目录、wiki 页面类型与 index 覆盖、backups ZIP 约束以及 Git 差异检查均通过。
