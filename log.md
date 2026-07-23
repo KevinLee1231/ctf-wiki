@@ -1813,3 +1813,13 @@
 - 更新 `index.md` live raw 统计：Crypto 由 259 增至 262、Forensics 由 67 增至 68、Reverse 由 241 增至 246、Stego 由 52 增至 53、Web 由 249 增至 250，raw 总数由 1217 增至 1228；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2021-wp-before-archive-20260723-183839.zip`，包含 11 篇 WP 和 2 张图片，SHA-256 为 `f0f518d6fc37f862fedb4e77eb61de2e52c09118dfeaa5451767d9b13cab959c`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2021-raw-archive-20260723-183839.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：9 篇无图 WP 与备份内源文件逐字节一致，2 篇带图 WP 除图片目标路径外内容一致，两张图片迁移前后字节一致；11 篇三段结构、代码围栏、Python 语法、UTF-8、结尾换行和目标命名均无异常。全库 1370 篇 active Markdown 中解析出 4186 条本地链接和 573 条图片引用，断链为 0；133 个资源目录均有同 basename Markdown，本次新增资源的未引用项为 0。138 篇 wiki 页面全部被 `index.md` 覆盖，raw 一级目录、wiki 页面类型和 backups ZIP 约束均通过检查。
+
+## 2026-07-23 — UMDCTF2026 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中完成拆分、逐篇完善和图片价值筛选的 34 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `UMDCTF2026-<challenge>-wp.md`，文件名和资源目录只保留英文字母、数字与必要连字符，Markdown 一级标题继续保留题目原有空格、下划线和问号。归档开始时用户已经删除 `sanity-check` 与 `survey`，两道签到题不在本次范围。
+- 按决定性主障碍归档为 AI/ML 5 篇、Crypto 4 篇、OSINT 4 篇、Pentest 2 篇、Pwn 6 篇、Reverse 5 篇、Stego 1 篇、Web 7 篇。`nuclear_codes` 以椭圆曲线求解为主归 Crypto；两道 `security-breach` 以网络中间人与压缩侧信道攻击链为主归 Pentest；`closing-bell` 以隐藏载荷重组为主归 Stego；DNS 与 TCP 流控题不涉及内存执行边界突破，仍归 Web/应用协议方向。
+- 将 3 个必要视觉资源目录迁移并规范化为与归档 Markdown 同 basename 的 `UMDCTF2026-road-1-wp`、`UMDCTF2026-road-2-wp` 和 `UMDCTF2026-road-3-wp`；图片继续使用语义化名称 `ahead-yield-road.png`、`route-shields-intersection.png` 与 `wyoming-highway-landscape.png`，三条 Markdown 引用同步改为新的同层相对路径。
+- 目标端预验收通过后，源 `wp` 下 34 篇 Markdown、3 张图片和 3 个嵌套资源目录均已移入 Windows 回收站；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。
+- 更新 `index.md` live raw 统计：AI/ML 由 23 增至 28、Crypto 由 262 增至 266、OSINT 由 18 增至 22、Pentest 由 13 增至 15、Pwn 由 239 增至 245、Reverse 由 246 增至 251、Stego 由 53 增至 54、Web 由 250 增至 257，raw 总数由 1228 增至 1262；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/UMDCTF2026-wp-before-archive-20260723-205347.zip`，包含 34 篇 WP 和 3 张图片，SHA-256 为 `af781e3ea3a119ecbd7f520bfcfc0c9479fc35593d3449e13b941bdd2a0e9b0d`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-UMDCTF2026-raw-archive-20260723-205347.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：31 篇无图 WP 与源文件逐字节一致，3 篇带图 WP 除图片目标路径外内容一致，三张图片迁移前后 SHA-256 一致；34 篇三段结构、代码围栏、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1404 篇 active Markdown 中解析出 4189 条本地链接和 576 条图片引用，断链为 0；UMDCTF2026 资源引用与文件一一对应，raw 一级目录和 backups ZIP 约束均通过检查。
