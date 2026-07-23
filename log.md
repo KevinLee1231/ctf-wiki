@@ -1763,3 +1763,13 @@
 - 更新 `index.md` live raw 统计：Crypto 由 261 增至 275、Forensics 由 64 增至 67、Mobile 由 2 增至 3、OSINT 由 17 增至 18、Pwn 由 247 增至 264、Reverse 由 241 增至 259、Stego 由 51 增至 54、Web 由 255 增至 262，raw 总数由 1216 增至 1280；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2024-wp-before-archive-20260722-211936.zip`，包含 88 个 ZIP 条目，SHA-256 为 `30af298914bc803e195320064aee7ccb8c21168e86254426d6a119ec27e9b969`，压缩包完整性检查通过。
 - 校验结果：60 篇无图 WP 与源文件字节完全一致，4 篇带图 WP 除图片目标路径外内容一致，5 张图片迁移前后 SHA-256 一致；64 篇三段结构、代码围栏、UTF-8 和目标命名均无异常。全库解析出 4186 条本地链接，断链为 0；MoeCTF2024 资源引用与文件一一对应，源树清理结果符合授权范围。
+
+## 2026-07-23 — MoeCTF2023 精选 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中经过机制去重、逐篇完善和图片筛选后保留的 14 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `MoeCTF2023-<challenge>-wp.md`，文件名和资源目录只保留文字、数字与必要连字符，Markdown 一级标题继续保留题目原有空格、下划线、斜杠、括号和标点。
+- 按决定性主障碍归档为 AI/ML 2 篇、Crypto 6 篇、Forensics 1 篇、Pentest 1 篇、Reverse 1 篇、Stego 1 篇、Web 2 篇。分类复核后确认 `magnet_network` 的主线是从 Torrent 元数据、piece 边界和文件顺序中恢复数字证据，归 Forensics；`moeworld` 的主线是会话伪造、调试控制台、内网枚举、凭据复用和 Redis/SSH 横向移动链，归 Pentest；其余 12 篇保持现有方向。
+- 将 Feistel 题的 1 个图片目录迁移并重命名为与 Markdown 同 basename 的 `MoeCTF2023-feistel-1-2-wp`，必要结构图继续使用语义化文件名 `feistel-network-inverse.jpg`，正文图片引用同步改为新的同层相对路径；没有创建其它空资源目录。
+- 目标端预验收通过后，源 `wp` 各一级方向下的 14 篇 Markdown 与 1 个图片目录均已清理；源树剩余文件和嵌套资源目录均为 0，15 个一级方向目录继续保留。
+- 更新 `index.md` live raw 统计：AI/ML 由 21 增至 23、Crypto 由 275 增至 281、Forensics 由 67 增至 68、Pentest 由 12 增至 13、Reverse 由 259 增至 260、Stego 由 54 增至 55、Web 由 262 增至 264，raw 总数由 1280 增至 1294；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2023-wp-before-archive-20260723-093847.zip`，包含 15 个文件，SHA-256 为 `d310836bac2e96db2516767d1a6dfbb0a875e6d09822e5e8bfc082f792cc4512`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2023-raw-archive-20260723-093847.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：13 篇无图 WP 与备份内源文件逐字节一致，1 篇带图 WP 除图片目标路径外内容一致，图片文件迁移前后 SHA-256 一致；14 篇三段结构、62 个代码围栏、28 个 Python 代码块、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1436 篇 active Markdown 中解析出 4187 条本地链接和 574 条图片引用，断链为 0；MoeCTF2023 资源引用与文件一一对应，源树清理结果符合授权范围。
