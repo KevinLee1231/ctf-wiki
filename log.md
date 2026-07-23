@@ -1793,3 +1793,13 @@
 - 更新 `index.md` live raw 统计：Crypto 由 282 减至 254、Forensics 由 68 减至 66、Pwn 由 264 减至 235、Reverse 由 262 减至 235、Stego 由 55 减至 51、Web 由 265 减至 242，raw 总数由 1298 减至 1185；本轮未新增或修改 `wiki/*.md`。
 - 所有删除对象原本均由 Git 跟踪，将通过本轮本地提交保留可恢复历史；为避免用额外备份抵消瘦身效果，本轮不另建文件副本。
 - 校验结果：全库 1327 篇 active Markdown 中解析出 4182 条本地链接，其中图片引用 569 条，断链为 0；剩余 535 篇系列 WP 数量正确，129 个资源目录均有同 basename Markdown 且无空目录，本轮新增零引用资源为 0。另识别出 11 张在本轮开始前即为零引用的 SUCTF2026 图片，因不属于本次授权范围而保持不动；raw 一级目录、wiki 页面类型与 index 覆盖、backups ZIP 约束以及 Git 差异检查均通过。
+
+## 2026-07-23 — SekaiCTF 2026 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中完成拆分、逐篇完善和图片价值筛选的 32 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `SekaiCTF2026-<challenge>-wp.md`，文件名和资源目录只保留英文字母、数字与必要连字符，Markdown 一级标题继续保留题目原有大小写、空格和标点。归档开始时源树即为 32 篇，已不存在的 `sanity-check` 与 `survey` 不在本次范围。
+- 按决定性主障碍归档为 Blockchain 4 篇、Crypto 5 篇、Forensics 1 篇、Mobile 1 篇、Pwn 4 篇、Reverse 6 篇、Stego 1 篇、Web 7 篇，并将 3 篇无法映射到正式安全方向的题暂存于 `_unclassified`：`67-hunt` 是纯逻辑谜题，`bejeweled` 是消除游戏求解，`skyblock` 是非安全游戏经济机制。`minions-in-16k` 以客户端协议和状态语义恢复为主归 Reverse，`SekaiID` 依赖 Android IPC/URI grant 归 Mobile，`DeadGame2` 以回放事件证据恢复为主归 Forensics。
+- 将两套必要视觉资源迁移并规范化为与归档 Markdown 同 basename 的 `SekaiCTF2026-deadgame2-wp` 和 `SekaiCTF2026-impossible-stego-wp`；图片继续使用语义化文件名 `unit-coordinate-message.png` 与 `flag-lsb-carrier.png`，两条 Markdown 引用同步改为新的同层相对路径。
+- 目标端预验收通过后，源 `wp` 各一级方向下的 32 篇 Markdown 与 2 个图片目录已移入 Windows 回收站；源树剩余文件和嵌套资源目录均为 0，15 个一级方向目录继续保留。
+- 更新 `index.md` live raw 统计：`_unclassified` 由 2 增至 5、Blockchain 由 21 增至 25、Crypto 由 254 增至 259、Forensics 由 66 增至 67、Mobile 由 3 增至 4、Pwn 由 235 增至 239、Reverse 由 235 增至 241、Stego 由 51 增至 52、Web 由 242 增至 249，raw 总数由 1185 增至 1217；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/SekaiCTF2026-wp-before-archive-20260723-164620.zip`，包含 34 个文件，SHA-256 为 `f20cffd930bdce85104e2bc8f28787acdbd49000a4b55d8a33ecd60326aa6ac9`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-SekaiCTF2026-raw-archive-20260723-164620.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：30 篇无图 WP 与源文件逐字节一致，2 篇带图 WP 除图片目标路径外内容一致，两张图片迁移前后 SHA-256 一致；32 篇三段结构、代码围栏、UTF-8、结尾换行和目标命名均无异常。全库 1359 篇 active Markdown 中解析出 4184 条本地链接和 571 条图片引用，断链为 0；131 个资源目录均有同 basename Markdown，本次新增资源的未引用项为 0。另有 11 个任务开始前已经存在的 SUCTF2026 零引用资源，因不属于本次授权范围而保持不动；138 篇 wiki 页面全部被 `index.md` 覆盖，raw 一级目录、wiki 页面类型和 backups ZIP 约束均通过检查。
