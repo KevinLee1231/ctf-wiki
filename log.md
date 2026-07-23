@@ -1823,3 +1823,13 @@
 - 更新 `index.md` live raw 统计：AI/ML 由 23 增至 28、Crypto 由 262 增至 266、OSINT 由 18 增至 22、Pentest 由 13 增至 15、Pwn 由 239 增至 245、Reverse 由 246 增至 251、Stego 由 53 增至 54、Web 由 250 增至 257，raw 总数由 1228 增至 1262；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/UMDCTF2026-wp-before-archive-20260723-205347.zip`，包含 34 篇 WP 和 3 张图片，SHA-256 为 `af781e3ea3a119ecbd7f520bfcfc0c9479fc35593d3449e13b941bdd2a0e9b0d`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-UMDCTF2026-raw-archive-20260723-205347.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：31 篇无图 WP 与源文件逐字节一致，3 篇带图 WP 除图片目标路径外内容一致，三张图片迁移前后 SHA-256 一致；34 篇三段结构、代码围栏、UTF-8、结尾换行、行尾空白和目标命名均无异常。全库 1404 篇 active Markdown 中解析出 4189 条本地链接和 576 条图片引用，断链为 0；UMDCTF2026 资源引用与文件一一对应，raw 一级目录和 backups ZIP 约束均通过检查。
+
+## 2026-07-23 — UMDCTF2025 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中完成拆分、逐篇完善和图片价值筛选的 43 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `UMDCTF2025-<challenge>-wp.md`，文件名和资源目录只保留英文字母、数字与必要连字符，Markdown 一级标题继续保留题目原有空格、标点和特殊字符。归档开始时用户已经删除 `sanity-check` 与 `survey`，两道签到题不在本次范围。
+- 按决定性主障碍归档为 `_unclassified` 1 篇、AI/ML 1 篇、Crypto 9 篇、Malware 1 篇、OSINT 6 篇、Pwn 11 篇、Reverse 7 篇、Stego 1 篇、Web 6 篇。分类复核后将 `sudoku` 从 `_unclassified` 调整到 Reverse，其主线是还原 Python 校验器的链式比较约束并求出合法输入；将 `tiktok-ban` 与 `tiktok-ban-revenge` 调整到 Web，其主线是利用 DNS 线格式、压缩指针与解析语义绕过原始字节过滤；`spindle` 是不依赖安全原语的有限状态单词路径谜题，保留在 `_unclassified`。
+- 将 8 个具有必要视觉信息的图片目录迁移并重命名为与归档 Markdown 相同的 basename；8 张图片继续使用 `target-shark.jpg`、`columbus-skyline.jpg`、`hillcrest-road.jpg`、`house-number-356.jpg`、`putnam-bridge.jpg`、`alligator-mound.jpg`、`lore-city-church.jpg` 与 `convolved-alien.png` 等语义化文件名，8 条 Markdown 图片引用同步改为新的同层相对路径。
+- 目标端预验收通过后，源 `wp` 下 43 篇 Markdown、8 张图片和 8 个嵌套资源目录均已精确清理；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。删除内容可由归档前源备份恢复。
+- 更新 `index.md` live raw 统计：`_unclassified` 由 5 增至 6、AI/ML 由 28 增至 29、Crypto 由 266 增至 275、Malware 由 12 增至 13、OSINT 由 22 增至 28、Pwn 由 245 增至 256、Reverse 由 251 增至 258、Stego 由 54 增至 55、Web 由 257 增至 263，raw 总数由 1262 增至 1305；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/UMDCTF2025-wp-before-archive-20260723-230408.zip`，包含 43 篇 WP 和 8 张图片，SHA-256 为 `460bd1377aa314bc8ab8cf72a95d12e330a946162d9ac9e95a3b9157b3372cd0`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-UMDCTF2025-raw-archive-20260723-230408.zip`，包含原 `index.md` 与 `log.md`，SHA-256 为 `e11913a8b3a4d37583248615b7f44ac8ff82a8933858f268ca16e539e25b9849`。两份 ZIP 均通过 CRC 完整性检查。
+- 校验结果：35 篇无图 WP 与源文件逐字节一致，8 篇带图 WP 除预定图片路径外内容一致，8 张图片迁移前后 SHA-256 一致；43 篇三段结构、代码围栏、UTF-8、结尾换行和目标命名均无异常。全库 1447 篇 active Markdown 中解析出 4197 条本地链接和 584 条图片引用，断链为 0；144 个 raw 资源目录均有同 basename Markdown 且无空目录，UMDCTF2025 的 8 张资源图片均被正文唯一引用，raw 一级目录、wiki 扁平结构和 backups ZIP 约束均通过检查。
