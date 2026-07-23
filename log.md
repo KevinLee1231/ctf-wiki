@@ -1803,3 +1803,13 @@
 - 更新 `index.md` live raw 统计：`_unclassified` 由 2 增至 5、Blockchain 由 21 增至 25、Crypto 由 254 增至 259、Forensics 由 66 增至 67、Mobile 由 3 增至 4、Pwn 由 235 增至 239、Reverse 由 235 增至 241、Stego 由 51 增至 52、Web 由 242 增至 249，raw 总数由 1185 增至 1217；本轮未新增或修改 `wiki/*.md`。
 - 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/SekaiCTF2026-wp-before-archive-20260723-164620.zip`，包含 34 个文件，SHA-256 为 `f20cffd930bdce85104e2bc8f28787acdbd49000a4b55d8a33ecd60326aa6ac9`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-SekaiCTF2026-raw-archive-20260723-164620.zip`，包含原 `index.md` 与 `log.md`。
 - 校验结果：30 篇无图 WP 与源文件逐字节一致，2 篇带图 WP 除图片目标路径外内容一致，两张图片迁移前后 SHA-256 一致；32 篇三段结构、代码围栏、UTF-8、结尾换行和目标命名均无异常。全库 1359 篇 active Markdown 中解析出 4184 条本地链接和 571 条图片引用，断链为 0；131 个资源目录均有同 basename Markdown，本次新增资源的未引用项为 0。另有 11 个任务开始前已经存在的 SUCTF2026 零引用资源，因不属于本次授权范围而保持不动；138 篇 wiki 页面全部被 `index.md` 覆盖，raw 一级目录、wiki 页面类型和 backups ZIP 约束均通过检查。
+
+## 2026-07-23 — MoeCTF2021 精选 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/wp` 中经过机制去重、逐篇完善和图片筛选后保留的 11 篇单题 WP 归档到 `raw/<category>/`；归档文件统一使用 `MoeCTF2021-<challenge>-wp.md`，文件名和资源目录只保留文字、数字与必要连字符，Markdown 一级标题继续保留题目原有大小写、空格、问号和下划线。
+- 按决定性主障碍归档为 Crypto 3 篇、Forensics 1 篇、Reverse 5 篇、Stego 1 篇、Web 1 篇。分类复核后确认 `easyForensics` 的主线是从 E01 文件系统证据中恢复删除对象，归 Forensics；`Homework` 依赖 Word 版式与离页文本框隐藏信息，归 Stego；`baby-bc`、`PEPEPE` 等题虽包含编码或异或运算，但决定性步骤是恢复 LLVM IR、PE 结构或程序行为，仍归 Reverse。
+- 将 2 个必要视觉资源目录迁移并规范化为与归档 Markdown 同 basename 的 `MoeCTF2021-easyforensics-wp` 和 `MoeCTF2021-homework-wp`；图片继续使用语义化名称 `e01-deleted-entries.png` 与 `word-hidden-flag-layout.png`，两条 Markdown 引用同步改为新的同层相对路径。
+- 目标端预验收通过后，源 `wp` 下 11 篇 Markdown、2 张图片和 2 个嵌套资源目录均已精确清理；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。
+- 更新 `index.md` live raw 统计：Crypto 由 259 增至 262、Forensics 由 67 增至 68、Reverse 由 241 增至 246、Stego 由 52 增至 53、Web 由 249 增至 250，raw 总数由 1217 增至 1228；本轮未新增或修改 `wiki/*.md`。
+- 归档前源备份：`D:/文档/新建文件夹/wp-archive-backups/MoeCTF2021-wp-before-archive-20260723-183839.zip`，包含 11 篇 WP 和 2 张图片，SHA-256 为 `f0f518d6fc37f862fedb4e77eb61de2e52c09118dfeaa5451767d9b13cab959c`；归档前目标元数据备份：`D:/文档/markdown文件/ctf-wiki/backups/pre-MoeCTF2021-raw-archive-20260723-183839.zip`，包含原 `index.md` 与 `log.md`。
+- 校验结果：9 篇无图 WP 与备份内源文件逐字节一致，2 篇带图 WP 除图片目标路径外内容一致，两张图片迁移前后字节一致；11 篇三段结构、代码围栏、Python 语法、UTF-8、结尾换行和目标命名均无异常。全库 1370 篇 active Markdown 中解析出 4186 条本地链接和 573 条图片引用，断链为 0；133 个资源目录均有同 basename Markdown，本次新增资源的未引用项为 0。138 篇 wiki 页面全部被 `index.md` 覆盖，raw 一级目录、wiki 页面类型和 backups ZIP 约束均通过检查。
