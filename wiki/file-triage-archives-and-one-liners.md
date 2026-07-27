@@ -4,7 +4,7 @@ tags: [forensics, cross-category, family, triage, files, archives, one-liners]
 skills: [ctf-forensics, ctf-solve-challenge]
 raw:
   - ../raw/forensics/file-triage-archives-and-one-liners.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # File Triage, Archives and One-Liners
@@ -61,12 +61,6 @@ updated: 2026-06-12
 - [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)
 - [web-and-dns.md](web-and-dns.md)
 - [cross-category-tooling.md](cross-category-tooling.md)
-
-## 来自 WP 的案例索引
-
-| Raw WP | 可复用联系 |
-|---|---|
-| [0xGame2022-week4-re3-wp](../raw/reverse/0xGame2022-week4-re3-wp.md) | `.exe` 扩展名是干扰项；无 `MZ` magic 且内容是文本时，先按文件首检/明文 artifact 处理。 |
 
 ## 原始资料
 

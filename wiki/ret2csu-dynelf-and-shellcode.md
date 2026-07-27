@@ -4,7 +4,7 @@ tags: [pwn, family, rop, ret2csu, dynelf, shellcode, badchars]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/ret2csu-dynelf-and-shellcode.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # ret2csu, DynELF and Shellcode
@@ -61,12 +61,6 @@ updated: 2026-06-12
 - [overflow-basics.md](overflow-basics.md)
 - [windows-arm-and-cross-platform-exploits.md](windows-arm-and-cross-platform-exploits.md)
 - [pwn-tooling.md](pwn-tooling.md)
-
-## 来自 WP 的案例索引
-
-| Raw WP | 可复用联系 |
-|---|---|
-| [moeCTF2022-syscall-wp](../raw/pwn/moeCTF2022-syscall-wp.md) | 程序泄露 PIE 且自带 `syscall`/`/bin/sh` gadget；第二次 `read` 精确发送 59 字节让 `RAX=SYS_execve`。 |
 
 ## 原始资料
 

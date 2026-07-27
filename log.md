@@ -1927,3 +1927,14 @@
 - 使用审计清单中的精确路径执行 `git rm`，删除 213 篇 Markdown 和 43 个同 basename 资源目录中的 45 个文件，共 258 个已跟踪文件；预计减少 `141555212` 字节（约 135 MiB）。按方向删除 `_unclassified` 6、AI/ML 1、Crypto 37、Forensics 26、Hardware/Embedded 6、OSINT 34、Pentest 3、Pwn 17、Reverse 37、Stego 20、Web 26 篇；没有越权清理其它历史资源。
 - UMDCTF 保留量按年份为：2017 15、2018 15、2019 10、2020 11、2021 13、2022 19、2023 37、2024 22、2025 28、2026 23。`index.md` live raw 统计同步更新：`_unclassified` 7、AI/ML 32、Blockchain 26、Cloud/Infra 6、Crypto 299、Forensics 85、Hardware/Embedded 8、Malware 16、Mobile 6、OSINT 24、Pentest 15、Pwn 266、Reverse 284、Stego 74、Web 273，raw 总数由 1634 降至 1421；本轮未修改 `wiki/*.md`。
 - 结构与链接验收通过：候选 WP 剩余 0，UMDCTF 剩余 193 篇且三段结构完整；全库 1563 篇 active Markdown 中解析出 4218 条本地链接和 605 条图片引用，断链为 0；161 个 raw 资源目录均有同 basename Markdown 且无空目录，138 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 101、technique 24、tooling 13。11 个既存历史零引用资源文件保持未修改，不属于本轮授权范围。
+
+## 2026-07-27 — 0xGame / MoeCTF 系列 Raw WP 再审计
+
+- 对 `0xGame2020` 至 `0xGame2025`、`MoeCTF2021` 至 `MoeCTF2025` 的 546 篇 raw WP 逐篇阅读全文，并与不属于 0xGame / MoeCTF 的 raw 交叉核对；最终删除 380 篇、保留 166 篇。删除项要么只有单步入门套路或一次性路径，要么其识别信号、技术细节和解法骨架已被非系列 raw 或同系列更强变体完整覆盖；没有按文件大小或标题机械删除。
+- 删除量按赛事为：MoeCTF2021 4、MoeCTF2022 2、MoeCTF2023 4、MoeCTF2024 39、MoeCTF2025 5，0xGame2020 37、0xGame2021 49、0xGame2022 65、0xGame2023 55、0xGame2024 64、0xGame2025 56。按方向删除 `_unclassified` 1、AI/ML 1、Blockchain 5、Crypto 91、Forensics 24、OSINT 6、Pwn 82、Reverse 78、Stego 24、Web 68 篇。
+- 交叉覆盖的代表性原语包括 RSA parity/radix oracle、Boneh–Durfee、Smart anomalous curve、矩阵 DLP、RSA 故障与非互素指数开根、DSA HNP、截断 LCG、普通 LFSR/Berlekamp–Massey、Zip CRC/ZipCrypto、MyBatis Provider `${}`、恶意 MySQL、SoapClient CRLF、JDBC Connector/J、伪造 `link_map`、ZIP symlink、CSS 属性外带、NTFS ADS、盲水印、常规 SMC/VMProtect、基础 ret2dlresolve 和 `read` 返回值控制 `RAX`。
+- 反向检查现有 wiki 证据链后，将三篇原候选移回保留清单：`0xGame2020-week1-Fibonacci-wp.md` 保留 Pisano 周期压缩超长模递推求和到 RSA 因子恢复的完整链；`0xGame2022-week1-re2-wp.md` 保留相邻字符反馈递推的精确逆向公式；`0xGame2022-week2-re2-wp.md` 保留 Go `math/big.SetString` ABI/进制参数与八进制 RSA 密文的独有细节。
+- 使用审计报告中的精确路径执行 `git rm`，删除 380 篇 Markdown 和 24 个同 basename 资源目录中的 33 个文件，共 413 个已跟踪文件；WP 与资源合计约 16.68 MiB，删除后候选 WP 和候选资源目录残留均为 0。删除内容仍可从本次提交的父提交恢复。
+- 同步清理 14 篇 `wiki/*.md` 中指向 14 篇删除候选的 34 行物理引用；其中审计报告的 32 是“页面—候选”唯一组合数，额外两行来自同一 WP 在 frontmatter、案例表和原始资料中的重复落点。移除空案例表、将受影响页面的 `updated` 统一改为 `2026-07-27`，历史 `log.md` 路径仍作为维护记录保留。
+- `index.md` live raw 统计同步更新：`_unclassified` 6、AI/ML 31、Blockchain 21、Cloud/Infra 6、Crypto 208、Forensics 61、Hardware/Embedded 8、Malware 16、Mobile 6、OSINT 18、Pentest 15、Pwn 184、Reverse 206、Stego 50、Web 205，raw 总数由 1421 降至 1041。
+- 结构与链接验收通过：全库 1183 篇 active Markdown 中解析出 4133 条本地链接和 572 条图片引用，断链为 0；137 个 raw 资源目录均有同 basename Markdown 且无空目录，138 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 101、technique 24、tooling 13。0xGame / MoeCTF 保留清单与当前 166 篇逐路径一致，三段结构完整；11 个既存历史零引用资源文件保持未修改，不属于本轮授权范围。
