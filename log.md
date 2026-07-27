@@ -1938,3 +1938,12 @@
 - 同步清理 14 篇 `wiki/*.md` 中指向 14 篇删除候选的 34 行物理引用；其中审计报告的 32 是“页面—候选”唯一组合数，额外两行来自同一 WP 在 frontmatter、案例表和原始资料中的重复落点。移除空案例表、将受影响页面的 `updated` 统一改为 `2026-07-27`，历史 `log.md` 路径仍作为维护记录保留。
 - `index.md` live raw 统计同步更新：`_unclassified` 6、AI/ML 31、Blockchain 21、Cloud/Infra 6、Crypto 208、Forensics 61、Hardware/Embedded 8、Malware 16、Mobile 6、OSINT 18、Pentest 15、Pwn 184、Reverse 206、Stego 50、Web 205，raw 总数由 1421 降至 1041。
 - 结构与链接验收通过：全库 1183 篇 active Markdown 中解析出 4133 条本地链接和 572 条图片引用，断链为 0；137 个 raw 资源目录均有同 basename Markdown 且无空目录，138 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 101、technique 24、tooling 13。0xGame / MoeCTF 保留清单与当前 166 篇逐路径一致，三段结构完整；11 个既存历史零引用资源文件保持未修改，不属于本轮授权范围。
+
+## 2026-07-27 — D3CTF2024 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中的 22 篇 D3CTF2024 单题 WP 归档至 `raw/<direction>/`；文件名统一为 `D3CTF2024-<challenge>-wp.md`，只使用英文字母、数字与必要连字符，Markdown 一级标题继续保留 `Baldur's Gate 3 Complete Spell List`、`O!!!SPF!!!!!! Enhanced`、`strange_image_plus+`、`Sym_signin`、`modern_legacy` 与 `write_flag_where` 等题目原始特殊字符。
+- 按决定性主障碍归档为 Crypto 8 篇、Pentest 1 篇、Pwn 5 篇、Reverse 4 篇、Web 4 篇。OSPF 路由注入到容器横向访问的多阶段网络攻击链归 Pentest；浏览器或服务端应用逻辑主导的四题归 Web；VM/程序行为还原与低层利用原语分别归 Reverse 和 Pwn。
+- 将 3 个必要视觉资源目录及 4 张图片一并归档；资源目录统一重命名为与 Markdown 相同的 basename，图片继续使用 `scratch-off-qr.png`、`mix-vm-state-layout.png`、`pie-address-leak.png` 与 `vm-instruction-overwrite-rce.png` 等语义化名称，4 条 Markdown 图片引用已逐条更新。
+- 目标端预验收通过后，将源 `wp` 下 22 篇 Markdown 与 3 个资源目录移入 Windows 回收站；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/D3CTF2024-wp-before-archive-20260727-113036.zip`，包含 26 个文件，SHA-256 为 `dde53a65e1df6cd48495e845051916d5a1c4ffd22ada8ade3037af83089a0592`。
+- `index.md` live raw 统计同步更新：Crypto 由 208 增至 216、Pentest 由 15 增至 16、Pwn 由 184 增至 189、Reverse 由 206 增至 210、Web 由 205 增至 209，raw 总数由 1041 增至 1063；本轮未新增或修改 `wiki/*.md`。
+- 校验结果：22 篇 D3CTF2024 WP 的三段结构、代码围栏、UTF-8、结尾换行和目标命名均无异常；3 个资源目录均有同 basename Markdown，4 条图片引用全部可解析且图片 SHA-256 与源文件一致。全库 1205 篇 active Markdown 中解析出 4137 条本地链接和 576 条图片引用，断链为 0；140 个 raw 资源目录均有同 basename Markdown 且无空目录，138 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 101、technique 24、tooling 13。
