@@ -6,7 +6,7 @@ raw:
   - ../raw/crypto/hash-protocol-and-oracle-attacks.md
   - ../raw/crypto/ACTF2026-ohmycaptcha-wp.md
   - ../raw/crypto/RCTF2025-suanhash-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Hash, Protocol and Oracle Attacks
@@ -35,7 +35,7 @@ updated: 2026-07-06
 
 | 信号 | 先确认 | 下一跳 |
 |---|---|---|
-| MD5/SHA1 length extension、secret-prefix MAC | 服务端是否用 `hash(secret || msg)`，是否可控追加数据和原始长度 | 本页 raw；工具入口见 [crypto-tooling.md](crypto-tooling.md) |
+| MD5/SHA1 length extension、secret-prefix MAC | 服务端是否用 `hash(secret \|\| msg)`，是否可控追加数据和原始长度 | 本页 raw；工具入口见 [crypto-tooling.md](crypto-tooling.md) |
 | CRC/线性 MAC/XOR aggregate/hash basis | tag 是否可写成 GF(2) 线性关系或可组合状态 | [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md)、[number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | Compression oracle / CRIME-style | secret 与可控前缀同包压缩，响应长度稳定可测 | 本页 raw |
 | Padding/CBC/UTF-8/JSON parse oracle | 错误文本、状态码、时间或业务状态能区分候选 | [block-mode-misuse-family.md](block-mode-misuse-family.md) |
@@ -51,12 +51,25 @@ updated: 2026-07-06
 | [ACTF2026-ohmycaptcha-wp](../raw/crypto/ACTF2026-ohmycaptcha-wp.md) | CAPTCHA 只是构造表达式的前置约束；核心 oracle 是“表达式输出被 `e=5` RSA 加密”，可组合小明文、Coppersmith 和 Franklin-Reiter。 |
 | [RCTF2025-suanhash-wp](../raw/crypto/RCTF2025-suanhash-wp.md) | Sponge-like digest 暴露 rate/capacity 差分；两条相邻消息恢复内部差分后，下一块用互补差分直接碰撞。 |
 | [D3CTF2025-d3fnv-wp](../raw/crypto/D3CTF2025-d3fnv-wp.md) | FNV 哈希可视为未知 key 上的小系数多项式求值，先用格恢复 key 幂向量信息。 |
+| [0xGame2023-week3-Overflow-wp](../raw/crypto/0xGame2023-week3-Overflow-wp.md) | 本题不是整数类型溢出，而是指数在群阶模数下的等价类绕过。凡是先把消息映射成整数、再直接放进代数运算的签名实现，都不能只对原始字符串做黑名单；应先使用抗碰撞哈希把消息映射到规定域，并严格按成熟签名标准实现和验证协议。 |
+| [MoeCTF2023-broken-hash-wp](../raw/crypto/MoeCTF2023-broken-hash-wp.md) | 自定义散列不仅要检查单轮扩散，还要检查压缩函数对输入置换是否存在不变量。本题的关键不是寻找数值碰撞，而是利用四元组的二面体对称性构造结构碰撞；递归树中只修改叶子内部顺序，则碰撞会自然传递到根节点。 |
+| [SekaiCTF2026-iihash-wp](../raw/crypto/SekaiCTF2026-iihash-wp.md) | 本题的关键不是暴力搜索 128 位摘要，而是利用非密码学哈希为速度设计的可逆、线性和低扩散结构。遇到带 seed 的高速哈希时，应先分清短输入与长输入分支，再检查 secret 派生、累加器更新和 avalanche 中哪些步骤可逆或能通过差分消去。 |
+| [UMDCTF2018-cert-builder-wp](../raw/crypto/UMDCTF2018-cert-builder-wp.md) | 证书文本转储并不保存所有 ASN.1 编码细节，但签名本身提供了强校验条件。重建时应把“字符串标签、RDN 分组、算法参数”等不确定项限制为小范围枚举，再用原签名验证精确的 `TBSCertificate`，不要仅以 OpenSSL 能否解析作为成功标准。 |
+| [UMDCTF2022-blockchain-1-hashcash-wp](../raw/crypto/UMDCTF2022-blockchain-1-hashcash-wp.md) | 分类应以决定性机制为准，而不是题名。Hashcash 是比特币工作量证明的历史先驱，但本题没有区块链语义。实现时还要区分“前导零位”和“前导零十六进制字符”：题目要求 20 位，对应恰好 5 个十六进制零，平均需要约 $2^{20}$ 次尝试。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| `Hash(secret \|\| msg)`、裸字段拼接或验证视图不一致 | [hash-mac-construction-and-length-extension.md](hash-mac-construction-and-length-extension.md) |
+| 错误类型、长度、比较或 timing 能反复查询 | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
+| CRC、线性 checksum、有限域或多项式关系决定恢复 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
 
 ## 合并与拆分结论
 
 - 保留为 family：raw 横跨 hash、MAC、block mode、协议和 oracle，统一价值是判断“可观测差异如何转成隐藏状态”。
 - 不与 block-mode family 合并：block-mode 页关注字段和模式误用；本页关注 oracle、hash/MAC 状态和协议反馈。
-- 不拆 length-extension / compression / CRC 小页：当前多为短案例速查，后续有多篇 WP 支撑时再拆具体 technique。
+- 已把 MAC 构造、通用自适应 oracle 和线性/多项式恢复接到具体 technique；低频 compression 变体继续留作本页分流。
 
 ## 常见误判
 

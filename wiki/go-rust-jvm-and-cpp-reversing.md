@@ -8,7 +8,7 @@ raw:
   - ../raw/reverse/HGAME2026-pvz-wp.md
   - ../raw/reverse/ACTF2026-calc-my-point-wp.md
   - ../raw/reverse/D3CTF2022-d3thon-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Go, Rust, JVM and C++ Reversing
@@ -41,6 +41,14 @@ updated: 2026-07-06
 | C++ vtable/RTTI/template/STL | 类型恢复、虚调用、对象布局和真实业务函数边界 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
 | D/Haskell/Swift/Kotlin Native | 语言特定符号、运行时库和中间表示是否比普通伪代码更有信息量 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
 | Cython/Nuitka/Python native extension | Python 调用边界和 native 校验函数 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Go/Rust/JVM/.NET metadata、类型和字节码比裸汇编更可靠 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md) |
+| 比较 API/指令可直接观察目标与输入差异 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
+| 嵌入 Python/PYD 承载真实校验逻辑 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md) |
 
 ## 合并与拆分结论
 
@@ -75,6 +83,12 @@ updated: 2026-07-06
 | [ACTF2026-flagchecker-wp](../raw/reverse/ACTF2026-flagchecker-wp.md) | LoongArch64 Go 静态程序破坏符号恢复，通过反射派生真实方法名；再把 shellcode SM4 层和 8 段 Feistel 环分开求逆。 |
 | [0xGame2022-week2-re2-wp](../raw/reverse/0xGame2022-week2-re2-wp.md) | Go `math/big` 调用链是 RSA 校验；重点是提取 `n/c/e` 并注意 `SetString` 的 base 参数，密文是八进制。 |
 | [LilacCTF2026-c-plus-plus-plus-plus-wp](../raw/reverse/LilacCTF2026-c-plus-plus-plus-plus-wp.md) | C# Native AOT 中 `XEngine` 是 Twofish-like 16 轮 Feistel；先按 RS/MDS、40 个 round key 和 whitening 恢复固定 key/IV。 |
+| [0xGame2024-week4-JustSoSo-wp](../raw/reverse/0xGame2024-week4-JustSoSo-wp.md) | Android 逆向遇到 `native` 方法时，需要沿 `System.loadLibrary` 找到各 ABI 下的 `.so`，按 JNI 导出名定位实现，再把 native 结果带回 Java 数据流。本题最容易写错的是 S 盒初值：源码使用 `256-i`，首项 256 会一直以整数参与置换，只有生成密钥流字节时才截断，不能擅自改成标准 RC4 的 `0..255` 或 `255..0`。 |
+| [RCTF2025-fakevdi-wp](../raw/reverse/RCTF2025-fakevdi-wp.md) | 本题的四个环节缺一不可：C# 反混淆找隐藏配置与本地端口、Rust 逆向恢复 AES 登录分支、协议分析得到会话 RC4、按服务端路径重建字节级一致的 BMP。最容易误判的是把缺图当作附件损坏，或只凭视觉制作近似图片；客户端使用整张 BMP 的 MD5 作为下一层 RC4 密钥，所以文件编码、像素布局和元数据同样属于校验输入。 |
+| [UMDCTF2019-gosh-wp](../raw/reverse/UMDCTF2019-gosh-wp.md) | Go 二进制即便 strip，`.gopclntab` 仍是恢复函数边界和名称的重要线索。自定义哈希不一定单向：若只由可逆的奇数乘法、取反和 xor-shift 组成，就能在固定宽度整数环上逐步逆转。求出候选后还应重新执行正向函数和原程序双重验证。 |
+| [UMDCTF2022-go-away-wp](../raw/reverse/UMDCTF2022-go-away-wp.md) | 跨架构和加密代码不一定是决定性障碍。对 Go、Rust 等包含丰富构建元数据的二进制，第一轮应先做 `file`、`strings` 和路径检索。发现多个候选 flag 时，不能看到 `UMDCTF{...}` 就停止；应结合执行路径、官方答案和产物来源判断哪些是诱饵，哪些是构建时意外泄露。 |
+| [WMCTF2023-gohunt-wp](../raw/reverse/WMCTF2023-gohunt-wp.md) | 从二维码密文出发，结合符号信息逆向自定义 base58、异构变换和 xxtea 加密链；tinygo 程序保留符号但字符串全被编码时，应先从特征字符串和外部载体入手，定位编码函数再向上回溯调用链。 |
+| [WMCTF2024-rustdroid-wp](../raw/reverse/WMCTF2024-rustdroid-wp.md) | 先 RC4 反推中间密文，再爆破单字节变换比直接逆旋转更简单；长度 43 表明正文部分正好 36 字节：`len("WMCTF{}")=7`。 |
 
 ## 原始资料
 

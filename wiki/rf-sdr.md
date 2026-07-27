@@ -4,7 +4,7 @@ tags: [hardware-embedded, forensics, technique, rf, sdr, iq, qam, fsk, signal]
 skills: [ctf-hardware-embedded, ctf-forensics]
 raw:
   - ../raw/hardware-embedded/rf-sdr.md
-updated: 2026-06-18
+updated: 2026-07-27
 ---
 
 # RF / SDR / IQ Signal Processing
@@ -58,6 +58,14 @@ updated: 2026-06-18
 - [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
 - [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md)
 - [forensics-tooling.md](forensics-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [UMDCTF2020-carrier-crisis-wp](../raw/hardware-embedded/UMDCTF2020-carrier-crisis-wp.md) | 无线题中的高射频提示不代表必须拥有真实射频前端。只要附件是离线 IQ 或浮点采样，就应优先还原 GNU Radio 信号链；本题的关键是用完全相同的离散本振撤销逐样本乘法，而不是直接把浮点值强制解释为字符。 |
 
 ## 原始资料
 

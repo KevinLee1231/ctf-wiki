@@ -9,7 +9,7 @@ raw:
   - ../raw/pwn/ACTF2026-amcu-wp.md
   - ../raw/reverse/LilacCTF2026-justrom-wp.md
   - ../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Hardware ISA, Bootloader and KVM
@@ -64,6 +64,19 @@ updated: 2026-07-06
 | [D3CTF2019-easy-dongle-wp](../raw/reverse/D3CTF2019-easy-dongle-wp.md) | ELF 加密狗和 STM32 固件经 UART 协议协作，先还原固件加载地址、串口封包和 DES 参数。 |
 | [D3CTF2019-simd-wp](../raw/reverse/D3CTF2019-simd-wp.md) | AVX2 SIMD 并行 SM4 校验，先理解 gather/shuffle 后的数据布局再按真实排列解密。 |
 | [D3CTF2022-d3arm-wp](../raw/reverse/D3CTF2022-d3arm-wp.md) | ARM 架构/指令语义是主障碍，先确认加载基址、调用约定和平台特有指令。 |
+| [UMDCTF2017-verilog-2-wp](../raw/hardware-embedded/UMDCTF2017-verilog-2-wp.md) | 硬件描述语言中的寄存器切片经常被用来隐藏常量。处理此类题目时要保留位宽、切片位置和非阻塞赋值的周期边界；得到 `n`、`d` 后，剩余部分就是普通 RSA 私钥运算。本题的模块名叫 `encrypt`，但真正泄露的是解密所需的私钥指数。 |
+| [ACTF2025-deeptx-wp](../raw/reverse/ACTF2025-deeptx-wp.md) | 这道题应按数据流逆序拆解，而不是逐条翻译整份 PTX。Layer3 的关键是识别 8 位旋转、模 $256$ 逆元、矩阵逆和 `uint32_t` 溢出；Layer2 是双轴置换；Layer1 是非完全可逆的图像复原问题，应采用正则化反卷积。CUDA 逆向中，`blockIdx`、`threadIdx`、同步点和常量内存访问共同决定算法边界，先恢复高层索引式再写逆程序，错误率最低。 |
+| [ACTF2025-ezFPGA-wp](../raw/reverse/ACTF2025-ezFPGA-wp.md) | 解题顺序是“VCD 定周期采样—RC4 密钥流相减—模 $256$ 矩阵求逆—利用已知前缀滚动逆卷积”。VCD 的事件压缩和 8 位硬件类型的自然截断是两个最容易忽略的点。分析 HDL 时，应先把连续赋值和状态机整理成数学变换，再明确每一步所在的数值域；这样无需搭建真实 FPGA 环境，也能完整复现算法。 |
+| [UMDCTF2025-top-ten-craziest-x86-instructions-wp](../raw/reverse/UMDCTF2025-top-ten-craziest-x86-instructions-wp.md) | 冷门指令应按语义选数学模型：无进位乘法转 GF(2) 多项式分解，浮点向量操作按单精度舍入列方程，乘积和与 SAD 交给 SMT，最小值指令用于过滤候选；建模前还要确认 lane、宽度、立即数和符号语义。 |
+| [WMCTF2022-archgame-wp](../raw/reverse/WMCTF2022-archgame-wp.md) | 把多架构 Unicorn 执行链转化为图搜索问题，节点是 `chall*.bin` 和架构模式，边是每个关卡可能返回的常量；附件同时出现大量小二进制和一个主调度程序，且运行流程会按返回值选择下一文件时，应先恢复调度逻辑、解密 key 更新方式和目标终止条件。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| ISA/bootloader/UEFI/MCU/KVM guest 需恢复装载与执行 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
+| UART/I2C/SPI/CAN/逻辑波形需定时和帧解码 | [bus-logic-and-serial-frame-decoding.md](bus-logic-and-serial-frame-decoding.md) |
+| RF/IQ 调制与频谱信号是决定性障碍 | [rf-sdr.md](rf-sdr.md) |
 
 ## 合并与拆分结论
 

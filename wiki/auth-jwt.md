@@ -4,7 +4,7 @@ tags: [web, family, auth, jwt, jwe, token]
 skills: [ctf-web]
 raw:
   - ../raw/web/auth-jwt.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # JWT and JWE Token Attacks
@@ -43,11 +43,19 @@ updated: 2026-06-12
 | 签名 cookie 长度/CRC | token 不是 JWT 但结构可控、MAC 弱或字段可交换 | 转 [block-mode-misuse-family.md](block-mode-misuse-family.md) 或 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
 | JSON duplicate key / parser 差异 | 验签和业务读取不同字段 | 转 [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| `alg/kid/jku/x5u/jwk` 影响算法、密钥类型或 key source | [auth-token-key-and-lookup-confusion.md](auth-token-key-and-lookup-confusion.md) |
+| Cookie/header/session/代理与业务层读取不同身份状态 | [session-and-access-control-state-confusion.md](session-and-access-control-state-confusion.md) |
+| JSON 重复键或验签视图与业务解析视图不一致 | [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：JWT/JWE 的攻击点分散在算法、key lookup、远程 key、claim 和解析差异，适合作为 token 二级路由。
 - 不合并进 `auth-bypass-cookies-and-hidden-routes.md`：认证入口页只决定是否进入 token 路线。
-- 不拆 `jwt-alg-confusion.md` 等小页：当前 raw 还不足以支撑多个独立 technique 页。
+- 算法/key lookup 混淆、session 状态差异和 JSON 验签视图差异已有独立 technique；本页保留 JWT/JWE 变体分流。
 
 ## 常见误判
 
@@ -71,6 +79,10 @@ updated: 2026-06-12
 |---|---|
 | [ACTF2026-aaa26-wp](../raw/web/ACTF2026-aaa26-wp.md) | Mongo `$regex` 盲注恢复 reviewer invite code，vm2 里用 Buffer slab 泄露 JWT secret，伪造 admin 后上传伪 PDF/SVG 让 ImageMagick `text:/flag` 渲染。 |
 | [D3CTF2025-d3invitation-wp](../raw/cloud-infra/D3CTF2025-d3invitation-wp.md) | MinIO STS session token 是 JWT，object_name 可注入 policy 影响对象访问权限。 |
+| [0xGame2022-week4-profile-wp](../raw/web/0xGame2022-week4-profile-wp.md) | 漏洞本质是认证状态与业务对象生命周期脱节：JWT 在用户删除后仍然有效，而查询不存在的用户又返回了一个缺少权限字段的空对象，最终形成 fail-open。审计类似逻辑时，应同时检查 token 撤销、对象不存在时的返回值，以及权限字段缺失时是否默认拒绝。 |
+| [0xGame2025-week3-长夜月-wp](../raw/web/0xGame2025-week3-长夜月-wp.md) | 本题把未验签 JWT 与原型链污染串联起来。前者说明“能解码”不等于“已认证”，安全鉴权必须调用 `jwt.verify()` 并限制算法；后者说明递归合并不可信 JSON 时，应拒绝 `__proto__`、`prototype`、`constructor` 等特殊键。这里被污染的是共享的 `CONFIG` 原型对象，而不是全局 `Object.prototype`，准确追踪对象的原型关系才能看清 flag 条件为何成立。 |
+| [ACTF2023-easylatex-wp](../raw/web/ACTF2023-easylatex-wp.md) | 本题串联了身份、浏览器和服务端请求三个信任边界。JWT 验证必须固定允许的算法，并禁止把非对称公钥当作 HMAC 密钥；允许用户控制资源根目录时，CSP 中的可信 CDN 也会变成脚本托管点；服务端请求更不应根据身份字段选择绝对 URL，也不能无条件转发浏览器 Cookie。HttpOnly 只阻止 JavaScript 直接读取 Cookie，无法阻止应用自己的接口把 Cookie 复制到攻击者可控请求中。 |
+| [D3CTF2024-Doctor-wp](../raw/web/D3CTF2024-Doctor-wp.md) | 可用链路是“伪 WebSocket 头绕过 JWT→无效 `source_id` 留下零值结构→`DataBase` 污染完整 DSN→`allowAllFiles=true`→Rogue MySQL 的 LOCAL INFILE 文件读取”。最隐蔽的环节不是单次拼接，而是同一字符串先经过 `FormatDSN`、再经过按最后一个 `/` 切分的 `ParseDSN`，两段看似合理的逻辑组合出了参数注入。 |
 
 ## 原始资料
 

@@ -4,7 +4,7 @@ tags: [hardware-embedded, stego, forensics, hid, audio, video, physical-signal, 
 skills: [ctf-hardware-embedded, ctf-stego, ctf-forensics]
 raw:
   - ../raw/forensics/keyboard-mouse-audio-and-physical-puzzles.md
-updated: 2026-06-18
+updated: 2026-07-27
 ---
 
 # Keyboard, Mouse, Audio and Physical Puzzles
@@ -45,6 +45,14 @@ updated: 2026-06-18
 | 3D printer video | 跟踪喷头/床位置，过滤挤出动作，把轨迹投影成文字。 |
 | LED/Morse/按键时序 | 用 on/off 持续时间聚类成点、划、分隔。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| HID/键盘/鼠标/Bluetooth report 需事件和轨迹重建 | [peripheral-event-and-coordinate-reconstruction.md](peripheral-event-and-coordinate-reconstruction.md) |
+| 音调、DTMF/Morse/SSTV/频率序列承载符号 | [audio-spectrum-and-symbol-decoding.md](audio-spectrum-and-symbol-decoding.md) |
+| 视频/图像帧差、像素通道或运动轨迹隐藏信息 | [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md) |
+
 ## 常见陷阱
 
 - 只看文件 metadata，忽略真正信息在时间序列中。
@@ -60,6 +68,14 @@ updated: 2026-06-18
 - [3d-printing.md](3d-printing.md)
 - [rf-sdr.md](rf-sdr.md)
 - [video-document-and-media-stego.md](video-document-and-media-stego.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [UMDCTF2021-hidden-card-wp](../raw/stego/UMDCTF2021-hidden-card-wp.md) | 图像隐写载体没有明显异常时，应根据题名、附件来源和像素统计考虑具体工具/算法。BattleSteg 的像素遍历策略与通用 LSB 不同，算法不匹配时即使位平面里确有数据也无法正确重组。保留原 PNG，避免重新编码破坏最低位。 |
 
 ## 原始资料
 

@@ -6,7 +6,7 @@ raw:
   - ../raw/web/node-and-prototype.md
   - ../raw/web/ACTF2026-agent-wp.md
   - ../raw/ai-ml/VNCTF2026-huntingagent-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Node.js Prototype Pollution and VM Escape
@@ -44,6 +44,14 @@ updated: 2026-07-06
 | Workflow/custom node/runner 插件 | runner 是否携带内部 token、localhost API、GraphQL/MCP hint 或 artifact 权限 | 转 [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 | 污染后需 SSRF/内部 require | 目标会从污染字段加载 URL、路径或模块 | 转 [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| SSRF/制品内容推进到 Node `require`/加载执行 | [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md) |
+| JSON duplicate key 导致验签视图与业务视图不同 | [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md) |
+| workflow/runner 参数可控并推进到内部 API | [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：原型污染、gadget 和 VM escape 共用 Node 对象模型，但落点不同，需要二级 pivot。
@@ -61,6 +69,8 @@ updated: 2026-07-06
 | [D3CTF2023-d3node-wp](../raw/web/D3CTF2023-d3node-wp.md) | Node/Mongo NoSQL 注入、URL-like 任意读和 npm prepack 脚本串成 RCE。 |
 | [D3CTF2023-egg4shell-wp](../raw/web/D3CTF2023-egg4shell-wp.md) | Egg.js SSRF 到 cluster 通信后触发 watcher 原型污染和 Mongo Code 反序列化竞态。 |
 | [HGAME2026-vidarshop-wp](../raw/web/HGAME2026-vidarshop-wp.md) | JWT 头是干扰项，真实身份由可预测 uid 决定；拿到管理员语义后用 `__proto__`/constructor 污染余额状态。 |
+| [0xGame2023-week2-ez-sandbox-wp](../raw/web/0xGame2023-week2-ez-sandbox-wp.md) | 原型污染不只存在于显式 `__proto__`，递归合并还必须防御 `constructor.prototype`，并使用自有属性检查及无原型字典。Node.js 的 `vm` 不是面向不可信代码的安全隔离边界；黑名单也无法覆盖 JavaScript 的动态属性访问。应使用独立低权限进程或容器，并限制文件、网络和系统调用能力。 |
+| [D3CTF2024-Stack-Overflow-wp](../raw/web/D3CTF2024-Stack-Overflow-wp.md) | 预期链是“28 项写入覆盖 20 项缓冲区→改写输出指令泄露 VM 基址→按 `base + 42` 覆盖读指令→恶意 `toString` 经 Function 构造器逃逸”。需要把运行时 VM 地址与原生 PIE 概念区分，并在同一实例上完成两阶段利用。 |
 
 ## 常见误判
 

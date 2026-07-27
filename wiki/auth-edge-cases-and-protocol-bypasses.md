@@ -4,7 +4,7 @@ tags: [web, family, auth, srp, dh, unicode, nosql, aql, hash-collision]
 skills: [ctf-web]
 raw:
   - ../raw/web/auth-edge-cases-and-protocol-bypasses.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Auth Edge Cases and Protocol Bypasses
@@ -52,6 +52,14 @@ updated: 2026-07-06
 - SRP/DH 只看密码强度，忽略公钥合法性校验。
 - NoSQL payload 只复制 SQLi 思路，没有按目标查询语言语法构造。
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| token header/算法/key source 影响验证路径 | [auth-token-key-and-lookup-confusion.md](auth-token-key-and-lookup-confusion.md) |
+| Cookie/header/session/代理与业务层身份状态不一致 | [session-and-access-control-state-confusion.md](session-and-access-control-state-confusion.md) |
+| 重复字段、编码和规范化顺序改变请求视图 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) |
+
 ## 合并与拆分结论
 
 本页应标为 family。Hash bucket、Unicode normalization、SRP/DH 参数校验和 AQL/NoSQL 提权的输入形态、最小证据和利用路线都不同；共同价值是“普通认证绕过不成立时，下一步检查哪类身份边界”。如果后续某个分支积累到 3 篇以上直接 raw，再拆成独立 technique。
@@ -77,6 +85,11 @@ updated: 2026-07-06
 | [RCTF2025-photographer-wp](../raw/web/RCTF2025-photographer-wp.md) | SQLite `SELECT *` join 中同名 `type` 字段覆盖用户权限字段，上传图片 MIME type 可写成 `-1` 绕过管理员判断。 |
 | [SUCTF2026-jdbc-masterWP](../raw/web/SUCTF2026-jdbc-masterWP.md) | Unicode 长 `ſ` 绕过 `/suctf` 路径过滤后，可控 JDBC driver/URL 走 Kingbase `ConfigurePath` 与 Spring XML beans 无外连加载。 |
 | [VNCTF2026-web-pentest-wp](../raw/web/VNCTF2026-web-pentest-wp.md) | 前端混合加密登录把 SM4 `key/iv` 经 SM2 封装给服务端；若封装值可固定复用，只需重算业务密文和 MD5 签名即可爆破。 |
+| [ACTF2022-safer-telegram-bot-1-wp](../raw/web/ACTF2022-safer-telegram-bot-1-wp.md) | 本题是短时状态泄露与错误授权设计的组合：随机 UID 本身并不弱，但它被嵌进用户可读、可重放的按钮数据中；服务端随后又把这段数据当作身份凭据。400 ms 的窗口只是自动化门槛，不是密码学保护。 |
+| [ACTF2022-safer-telegram-bot-2-wp](../raw/web/ACTF2022-safer-telegram-bot-2-wp.md) | 本题首先利用了身份语义混淆：`777000` 既被业务逻辑当作可信 root，又会在 2022 年的特定频道/讨论组消息路径中代表 Telegram 系统转发。仅检查 `from.id === 777000` 无法区分“真正的系统账户私聊”与“频道消息的兼容表示”。这类依赖第三方平台特殊 ID 的授权规则本身就不稳健。 |
+| [MoeCTF2023-signin-wp](../raw/web/MoeCTF2023-signin-wp.md) | 漏洞由三层语义错位叠加而成：异或哈希在相同输入时归零，Python 的跨类型比较能区分 `"0"` 与 `0`，而 f-string 又会把二者规范化为同一字节串。遇到动态修改函数对象的混淆代码时，应先还原其副作用，再分析后续调用的真实语义。 |
+| [UMDCTF2024-umdproxy-wp](../raw/web/UMDCTF2024-umdproxy-wp.md) | 0-RTT 允许客户端在完整握手结束前发送应用数据，但这些数据天然可能被重放，不能直接承载非幂等的加余额操作。题目通过恶意代理先诱导一次失败以建立可恢复会话，再复制第二次连接的 early data，使带秘密授权的请求在无需解密的情况下执行多次。服务端应拒绝在 0-RTT 中处理余额、支付或状态变更请求，并启用可靠的 anti-replay 机制。 |
+| [UMDCTF2026-umdmarket-wp](../raw/web/UMDCTF2026-umdmarket-wp.md) | 签名只能证明字段由服务端生成，不能证明这些字段在业务语义上彼此一致。重传逻辑把“旧价格”和“当前序列号”重新签成一个合法但不应存在的组合，破坏了报价的新鲜度绑定。正确修复是保留原始序列号，或在重传时返回当前价格，不能只重新计算 HMAC。 |
 
 ## 原始资料
 

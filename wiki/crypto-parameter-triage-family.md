@@ -2,7 +2,7 @@
 type: family
 tags: [crypto, family, triage]
 skills: [ctf-crypto]
-updated: 2026-07-18
+updated: 2026-07-27
 ---
 
 # Crypto Parameter and Oracle Triage
@@ -127,6 +127,15 @@ updated: 2026-07-18
 | [D3CTF2025-d3fnv-wp](../raw/crypto/D3CTF2025-d3fnv-wp.md) | FNV 哈希可视为未知 key 上的小系数多项式求值，先用格恢复 key 幂向量信息。 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
 | [D3CTF2025-d3guess-wp](../raw/crypto/D3CTF2025-d3guess-wp.md) | 带噪声猜数反馈要用概率二分收集输出，再恢复 MT19937 状态预测后续随机数。 | [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
 | [D3CTF2025-d3sys-p2-2-0-wp](../raw/crypto/D3CTF2025-d3sys-p2-2-0-wp.md) | RSA/CRT 因子有已知线性近似且修正项很小，优先建 partial factoring 小根模型。 | [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md) |
+| [ACTF2022-cryptonote-wp](../raw/crypto/ACTF2022-cryptonote-wp.md) | 本题把三个看似独立的密码学问题串在同一条利用链上：SM2 摘要实现漏掉公钥，使签名可以恢复 Bob 公钥；配对友好曲线破坏了 OTRS 在范围证明中的签名者匿名性，使 Carol 公钥的每一位泄露；交易验证又未检查密钥镜像所属子群，使同一输出能够用 $I$ 与 $I+T$ 花费两次。 | 本页对应路线 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| RSA 小指数、共模、广播或相关消息关系 | [rsa-low-exponent-and-related-message-attacks.md](rsa-low-exponent-and-related-message-attacks.md) |
+| 有界未知、partial key/nonce 或小根关系需要格 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
+| nonce 重用、点验证或小子群缺陷泄露标量 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
 
 ## 常见陷阱
 
@@ -136,6 +145,10 @@ updated: 2026-07-18
 
 ## 关联技巧
 
+- [ordered-matrix-product-trace-peeling.md](ordered-matrix-product-trace-peeling.md)
+- [overcomplete-matrix-linear-relation-recovery.md](overcomplete-matrix-linear-relation-recovery.md)
+- [reduced-round-spn-integral-attacks.md](reduced-round-spn-integral-attacks.md)
+- [symmetric-cipher-differential-fault-analysis.md](symmetric-cipher-differential-fault-analysis.md)
 - [block-mode-misuse-family.md](block-mode-misuse-family.md)
 - [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)
 - [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)

@@ -5,7 +5,7 @@ skills: [ctf-web]
 raw:
   - ../raw/web/parser-wrapper-and-legacy-ssrf-tricks.md
   - ../raw/web/WMCTF2025-pdf2text-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Parser, Wrapper and Legacy SSRF Tricks
@@ -52,6 +52,15 @@ updated: 2026-07-06
 | [D3CTF2025-tidy-quic-wp](../raw/web/D3CTF2025-tidy-quic-wp.md) | HTTP/3/QUIC ContentLength 与实际 body 不一致叠加脏缓冲池，先复现请求体污染绕 WAF。 |
 | [HGAME2026-文文新闻-wp](../raw/web/HGAME2026-文文新闻-wp.md) | Vite 任意文件读取先拿路径和后端源码，再利用代理不清理 TE、后端只信 Content-Length 的 CL/TE 差异做请求走私。 |
 | [VNCTF2026-markdown2world-wp](../raw/web/VNCTF2026-markdown2world-wp.md) | Pandoc 转 docx 时会读取 Markdown 图片目标并嵌入 `word/media/`；构造本地资源引用后解压 docx 取回文件内容。 |
+| [WMCTF2023-ez-java-again-wp](../raw/web/WMCTF2023-ez-java-again-wp.md) | `file://` 本地文件读取配合双重 URL 编码绕过敏感路径过滤；Java 服务把用户输入当 URL 打开，且过滤逻辑只看明文或单次解码结果时，应测试 `file:///`、`jar:`、fragment 和多轮编码。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| URL parser、wrapper、DNS 或请求客户端对终点理解不同 | [url-parser-wrapper-and-ssrf-filter-differential.md](url-parser-wrapper-and-ssrf-filter-differential.md) |
+| XML/SVG/SOAP 等解析链在第二阶段加载外部实体/资源 | [xxe-and-structured-parser-boundary-exploitation.md](xxe-and-structured-parser-boundary-exploitation.md) |
+| 一份请求在校验、签名、缓存和业务层具有不同字段视图 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) |
 
 ## 合并与拆分结论
 

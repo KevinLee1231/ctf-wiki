@@ -5,7 +5,7 @@ skills: [ctf-stego, ctf-forensics]
 raw:
   - ../raw/stego/pdf-png-gif-and-text-stego.md
   - ../raw/forensics/HGAME2026-redacted-wp.md
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # PDF, PNG, GIF and Text Stego
@@ -47,6 +47,21 @@ updated: 2026-07-11
 |---|---|
 | [HGAME2026-redacted-wp](../raw/forensics/HGAME2026-redacted-wp.md) | PDF 脱敏题先区分视觉遮挡、文本对象残留、ToUnicode/CMap 字体反复制和增量保存历史版本；不要只跑 `strings` 或截图 OCR。 |
 | [D3CTF2023-d3gif-wp](../raw/stego/D3CTF2023-d3gif-wp.md) | GIF/PNG/QR 媒体层叠，先拆帧和图像通道，再恢复二维码或文本 artifact。 |
+| [0xGame2023-week1-重生之我在教学楼打-CS-wp](../raw/stego/0xGame2023-week1-重生之我在教学楼打-CS-wp.md) | 遇到陌生附件应先通过扩展名、文件头和题目语境识别载体，再选择原生程序打开。三维场景隐写的重点是系统搜索出生点、边界、物体底部和不可见面，并通过改变视角、亮度与对比度提高可读性。 |
+| [UMDCTF2021-magic-wp](../raw/stego/UMDCTF2021-magic-wp.md) | 自立体图依靠空间视差，而不是最低位或元数据。先检查纹理是否具有稳定横向周期，再用差分/平移叠加寻找深度图。保留原始分辨率非常重要，缩放和重采样会破坏周期并降低隐藏轮廓的可见性。 |
+| [UMDCTF2022-rsi-1-wp](../raw/stego/UMDCTF2022-rsi-1-wp.md) | 专有容器题应先按格式边界提取目标字段，不能对整个文件盲目解压。OSR 字符串使用 ULEB128 变长长度，若误当成单字节，后续偏移会在较长字段上失效。本题的 replay data 不含正常的逗号分隔帧，反而是一串空字节和明文，这也是它被人为用作隐藏载体的证据。 |
+| [UMDCTF2022-rsi-2-wp](../raw/stego/UMDCTF2022-rsi-2-wp.md) | 与 RSI 1 相比，本题不能把解压结果直接当作文本，而要解释回放帧语义。绘图时应过滤哨兵、按键释放帧并在笔画间断线，否则跨字符连线会降低可读性。坐标系方向也是关键：若不反转 $y$ 轴，文字会垂直镜像。 |
+| [UMDCTF2023-march-of-the-eight-wp](../raw/stego/UMDCTF2023-march-of-the-eight-wp.md) | 用文本提示确定“重音选择 → F 大调级数 → 三位八进制 ASCII”的完整视觉隐写通道；乐谱中大量刻意添加的重音符号、调性提示和异常大小写文字同时出现时，应把音乐理论元素视为数据选择与编码规则。 |
+| [UMDCTF2026-closing-bell-wp](../raw/stego/UMDCTF2026-closing-bell-wp.md) | 本题分为三层：用校准字节拟合多 venue 仿射信道、穷举 24 位流密码种子恢复 ELF、再逆向 ELF 内可逆的 book 状态更新。每层都有独立校验：多字段评分、ELF 魔数与 checksum、目标哈希。由于最主要的工作是从伪装成行情的隐蔽通道重组载荷，最终归入 Stego；ELF 逆向是后续阶段。利用分层校验逐步收紧，比直接在 16 MB 文本中搜索可打印字符串可靠得多。 |
+| [WMCTF2024-steg-allinone-wp](../raw/stego/WMCTF2024-steg-allinone-wp.md) | 第一层给参数，第二层给第三层参数，必须按顺序解；额外 IDAT 块不是普通图片显示信息，而是第三层所需原始蓝色通道。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| PDF/Office revision、未渲染对象或历史版本保留内容 | [structured-document-history-and-hidden-object-recovery.md](structured-document-history-and-hidden-object-recovery.md) |
+| PNG/GIF/图像通道、bitplane 或帧差隐藏数据 | [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md) |
+| 文档/图片容器边界、尾随数据或内嵌对象决定提取 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
 
 ## 合并与拆分结论
 

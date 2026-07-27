@@ -4,7 +4,7 @@ tags: [reverse, family, font, shader, legacy-format, side-channel]
 skills: [ctf-reverse, ctf-hardware-embedded, ctf-stego]
 raw:
   - ../raw/reverse/font-shader-firmware-and-legacy-patterns.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Font, Shader, Firmware and Legacy Patterns
@@ -38,11 +38,19 @@ updated: 2026-07-06
 | MBR/16-bit/legacy executable/ESP32/Xtensa | 架构、加载基址、固件符号表和执行环境是否先于算法 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
 | fork/pipe/dead branch/time lock/batch crackme | 是否可通过 patch、faketime、pattern extraction 或自动化批处理降维 | [anti-analysis.md](anti-analysis.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| glyph/shader/bitmap/legacy renderer 生成隐藏文字或图形 | [renderer-glyph-shader-and-legacy-format-reconstruction.md](renderer-glyph-shader-and-legacy-format-reconstruction.md) |
+| 低频 ISA、boot/UEFI/MCU 固件需装载与模拟 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
+| 数据位于游戏资源、scene 或客户端状态 | [game-asset-and-scene-state-extraction.md](game-asset-and-scene-state-extraction.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：raw 覆盖的格式和副作用差异很大，但共同价值是提示“别把它当普通二进制读”。
 - 不合并进跨方向总入口：本页仍有大量 Reverse 执行模型和工具链判断；总入口只负责首轮分流。
-- 暂不拆字体/shader/BPF 子页：当前案例数量不足以支撑独立 technique，先通过分流表链接到更具体页面。
+- 字体/shader/legacy renderer、低频 ISA/固件模拟和游戏资源提取已有独立 technique；BPF 等低频变体继续由本页转向 kernel/reverse 路线。
 
 ## 常见误判
 
@@ -65,6 +73,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [D3CTF2019-c-c-wp](../raw/reverse/D3CTF2019-c-c-wp.md) | 私用区字符依赖动态加载字体，先脱壳跟进字体 hook 并 dump 解密后的字体资源。 |
+| [UMDCTF2023-machokes-flex-wp](../raw/reverse/UMDCTF2023-machokes-flex-wp.md) | 追踪 FreeType glyph 到 OpenGL texture ID 的分配顺序，把硬编码纹理 ID 数组还原成 ASCII；3D 程序中除了主模型还存在文字 shader、glyph atlas 和一组离屏顶点时，flag 可能被渲染在相机视锥之外。 |
 
 ## 原始资料
 

@@ -9,7 +9,7 @@ raw:
   - ../raw/reverse/HGAME2026-noncesense-wp.md
   - ../raw/reverse/D3CTF2025-d3kernel-wp.md
   - ../raw/reverse/D3CTF2022-d3w0w-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Mobile, Firmware, Kernel and Game RE
@@ -45,6 +45,14 @@ updated: 2026-07-06
 | Unreal/Unity/Lua 游戏引擎 | 资源、脚本、反射元数据、存档和 native 插件谁控制真实校验 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 | CAN/UDS/车载协议 | 帧 ID、DLC、seed-key、routine control 和 replay 边界 | [signals-and-hardware.md](signals-and-hardware.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| WebView/URL Scheme/native bridge 暴露移动平台边界 | [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md) |
+| debuggable/run-as/backup 允许读取 Android 私有数据 | [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md) |
+| 游戏资源、scene、save 或客户端状态承载目标 | [game-asset-and-scene-state-extraction.md](game-asset-and-scene-state-extraction.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：这些 raw 分支共同问题是运行环境和载体格式，而不是某个单点恢复技巧。
@@ -75,6 +83,8 @@ updated: 2026-07-06
 - [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
 - [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
 - [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)
+- [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md)
+- [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md)
 - [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)
 - [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
 - [signals-and-hardware.md](signals-and-hardware.md)

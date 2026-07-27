@@ -7,7 +7,7 @@ raw:
   - ../raw/stego/SUCTF2026-Artifact_OnlineWP.md
   - ../raw/web/ACTF2026-master-of-album-wp.md
   - ../raw/pentest/VNCTF2026-minecraft-wp.md
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # Game State, WebSocket and WASM
@@ -59,12 +59,22 @@ updated: 2026-07-11
 | [NCTF2026-鸡爪流高手-wp](../raw/reverse/NCTF2026-鸡爪流高手-wp.md) | 游戏协议和 ELO 结算是主线；低分保护检查更新前状态，结算写入无符号分数字段导致下溢登榜。 |
 | [NCTF2026-pay-for-2048-wp](../raw/reverse/NCTF2026-pay-for-2048-wp.md) | Electron `app.asar` 中 JS bridge 调 WASM license 校验；先直接用 Node 调应用服务，再补 WASM digest/key 派生。 |
 | [SUCTF2026-sqliWP](../raw/web/SUCTF2026-sqliWP.md) | `/api/query` 注入前必须复现 Go WASM 前端签名和浏览器指纹字段；签名过后用 PostgreSQL 字符串拼接构造布尔盲注。 |
+| [UMDCTF2026-rainbet-wp](../raw/reverse/UMDCTF2026-rainbet-wp.md) | 题目把随机逻辑放进 WASM 只能增加阅读成本，并没有隐藏客户端可获得的确定性输入。完整复刻置换、字节序和取样顺序后，`session_id + streak` 足以预测每局。协议层还需同步维护规范视图并逐动作重签 HMAC，否则即使游戏预测正确也会被拒绝。 |
+| [ACTF2023-ctfer-simulator-wp](../raw/web/ACTF2023-ctfer-simulator-wp.md) | 题目的随机数校验本身有效，但服务端把不可信的客户端事件轨迹当成了可信状态迁移。分析这类游戏接口时，应分别检查随机性、资源守恒、事件顺序和最终胜利条件；只要其中一层缺失，就可能在保持随机序列完全合法的同时伪造整个游戏过程。本题还包含典型的 JavaScript 隐式类型转换错误，使资格校验实际上失效。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 自定义 VM/WASM linear memory 与 host bridge 承载校验 | [custom-vm-and-wasm-state-lifting.md](custom-vm-and-wasm-state-lifting.md) |
+| 资源包、scene、save 或客户端/服务端状态含目标 | [game-asset-and-scene-state-extraction.md](game-asset-and-scene-state-extraction.md) |
+| 图像/视频帧、场景输出或时间差隐藏信息 | [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md) |
 
 ## 合并与拆分结论
 
 - 保留为 family：raw 横跨 WebSocket、session、WASM、游戏资源和解释器，首轮 pivot 比单点 payload 更重要。
 - 不合并进 `vm-z3-sandbox-and-game-basics.md`：总页只决定是否进入规则系统，本页负责游戏/客户端状态内部路线。
-- 暂不拆 WASM、WebSocket 或游戏 session 小页：当前 raw 多为短案例，拆分后会形成弱入口。
+- WASM/自定义 VM、游戏资源/场景状态和媒体帧隐藏已形成三个 technique；WebSocket/session 继续作为状态传输变体留在本页。
 
 ## 常见误判
 

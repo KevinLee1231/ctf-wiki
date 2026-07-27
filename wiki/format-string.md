@@ -4,7 +4,7 @@ tags: [pwn, technique, format-string, leak, arbitrary-write]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/format-string.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Format String Exploitation
@@ -73,6 +73,12 @@ updated: 2026-06-12
 | [D3CTF2019-unprintablev-wp](../raw/pwn/D3CTF2019-unprintablev-wp.md) | stdout 被关闭的格式化字符串题，先恢复输出或改 FILE 描述符再 leak/ORW。 |
 | [LilacCTF2026-chuantongxiangyan-wp](../raw/pwn/LilacCTF2026-chuantongxiangyan-wp.md) | 格式化字符串可控，先定义泄露、写入粒度和目标地址，再选择 GOT/返回地址/短写链。 |
 | [NCTF2026-checkin-wp](../raw/pwn/NCTF2026-checkin-wp.md) | `read` 后直接 `printf(buf)` 再 `_exit`，核心是格式串泄露/短写，利用 `_exit` GOT 或栈低字节把控制流循环起来。 |
+| [0xGame2023-week4-结束了-wp](../raw/pwn/0xGame2023-week4-结束了-wp.md) | 该题把多个受限原语串成完整利用链：16 字节格式化字符串同时泄露三项随机化信息；0x50 字节栈溢出只能控制一个返回地址，于是通过伪造 `rbp` 重入 `read`；第二次读入再用双 `leave; ret` 迁移到 `.bss`，最终构造 ORW 绕过 seccomp。源码注释中的 `-fno-stack-protector -no-pie` 与实际编译命令、附件保护不一致，应以实际 ELF 为准。 |
+| [0xGame2024-week3-ez-orw-wp](../raw/pwn/0xGame2024-week3-ez-orw-wp.md) | 非栈输入并不会消除格式化字符串漏洞；只要调用 `printf` 时栈上存在可利用的指针链，仍可通过位置参数和 `%hn` 建立任意半字写。本题还要求把 PIE 泄露、固定映射、`mprotect` 包装函数和 seccomp 允许的 ORW 系统调用串成完整控制流。 |
+| [0xGame2025-week4-Hourais-Last-Game-wp](../raw/pwn/0xGame2025-week4-Hourais-Last-Game-wp.md) | 本题把信息泄露、格式化字符串任意写和业务校验绕过串成一条链。PIE 泄露解决地址随机化，`%n` 系列写入则定点修改 GOT；相比把某个函数末字节爆破成 `system`，直接劫持两个校验依赖函数更稳定。复现时最容易出错的是格式化字符串参数偏移和累计输出字节数，必须在与远端一致的非调试环境中校准。 |
+| [MoeCTF2024-One-Chance-wp](../raw/pwn/MoeCTF2024-One-Chance-wp.md) | 本题难点不是 `%n` 的基本用法，而是格式串参数何时被解析。只有一次调用时，可以先用顺序参数完成指针重定向，再让后出现的位置参数取到修改后的目标；最终用 `%hhn` 只写一字节，避免破坏 PIE 地址的正确高位。 |
+| [MoeCTF2025-pyjail-6-wp](../raw/pwn/MoeCTF2025-pyjail-6-wp.md) | 借助 `str.format` 的字段属性遍历制造异常，再从 `AttributeError.obj` 取回 `object.__getattribute__`；沙箱禁止点号但保留格式化字符串、异常对象和模式匹配时，应检查这些解释器内部机制是否能代替显式属性访问。 |
+| [UMDCTF2021-jump-is-found-wp](../raw/pwn/UMDCTF2021-jump-is-found-wp.md) | 这题把堆溢出和格式化字符串串成同一利用链。堆溢出负责控制格式字符串，`%p` 负责泄漏，`%hn` 负责绕过 NUL 和大数打印限制。分段写必须同时处理参数偏移、累计字符数回绕和写入顺序。 |
 
 ## 原始资料
 

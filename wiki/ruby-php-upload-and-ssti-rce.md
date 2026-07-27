@@ -4,7 +4,7 @@ tags: [web, family, rce, upload, ssti, code-injection]
 skills: [ctf-web]
 raw:
   - ../raw/web/ruby-php-upload-and-ssti-rce.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Ruby, PHP, Upload and SSTI RCE
@@ -43,11 +43,19 @@ updated: 2026-07-06
 | `open()`、shell 拼接、tar/wget/date 等命令包装 | 空格、引号、换行、brace expansion、文件名参数是否能改变命令语义 | [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md) |
 | API filter/query 参数能改变字段或查询结构 | 是数据库/ORM 注入、mass assignment，还是业务级权限绕过 | [auth-edge-cases-and-protocol-bypasses.md](auth-edge-cases-and-protocol-bypasses.md)、[sqli-filter-and-oracle-family.md](sqli-filter-and-oracle-family.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 模板、语言表达式、shell 或命令包装器发生二次解释 | [server-side-expression-and-command-context-escape.md](server-side-expression-and-command-context-escape.md) |
+| 上传检查器与存储/解析/执行端对文件类型理解不同 | [upload-polyglot-and-content-type-confusion.md](upload-polyglot-and-content-type-confusion.md) |
+| 序列化对象进入 magic method、回调或依赖 gadget | [deserialization-gadget-and-object-graph-execution.md](deserialization-gadget-and-object-graph-execution.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：这些案例共享“输入进入可执行解释层”的判断，但具体语言和触发面差异很大，不适合伪装成一个 technique。
 - 不与上传/路径 family 合并：上传链的关键常常是文件落点和解析规则；本页只在上传最终形成执行时承接。
-- 不拆出每种语言小页：当前 raw 多数是短案例速查，单独拆页会形成低信息密度页面；有多篇 WP 支撑时再拆具体 technique。
+- 不按语言机械拆页；改按二次解释、上传解析差异和反序列化对象图三个执行边界连接具体 technique。
 
 ## 失败后转向
 

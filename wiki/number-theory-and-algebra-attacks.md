@@ -6,7 +6,7 @@ raw:
   - ../raw/crypto/number-theory-and-algebra-attacks.md
   - ../raw/crypto/WMCTF2025-lemonpepper-wp.md
   - ../raw/crypto/0xGame2020-week1-Fibonacci-wp.md
-updated: 2026-07-18
+updated: 2026-07-27
 ---
 
 # Number Theory and Algebra Attacks
@@ -60,10 +60,27 @@ updated: 2026-07-18
 | [RCTF2025-f-l-and-ag-plusplus-wp](../raw/crypto/RCTF2025-f-l-and-ag-plusplus-wp.md) | 高次数拼接关系需要快速 resultant、CRT basis 和 Lagrange interpolation；恢复比例后再 rational reconstruction 拼回 flag。 |
 | [RCTF2025-suanp01y-wp](../raw/crypto/RCTF2025-suanp01y-wp.md) | 稀疏多项式满足 `hint = h1 * h0^{-1}` 于 `GF(2)[X]/(X^r-1)`；做 rational reconstruction 恢复分母，再枚举循环位移解 AES-CTR。 |
 | [LilacCTF2026-lambda-m-wp](../raw/reverse/LilacCTF2026-lambda-m-wp.md) | Lambda calculus/Scott encoding 只是表达层，真实语义是 GF(2^8) 有理函数插值；把 40 个点转成齐次线性方程组。 |
+| [0xGame2025-week4-Quaternion-wp](../raw/crypto/0xGame2025-week4-Quaternion-wp.md) | 遇到非交换代数中的幂运算时，可以先寻找忠实矩阵表示，把指数问题转为矩阵幂；但在真正求离散对数前，还应检查特征多项式和参数退化。本题的识别信号是纯虚部范数为 0，使 $q=a+v$ 中的 $v$ 满足 $v^2=0$。此时幂运算只保留常数项和一次项，消息指数可以由任一非零虚部分量直接恢复。 |
+| [ACTF2025-easy-log-wp](../raw/crypto/ACTF2025-easy-log-wp.md) | 把自定义二元运算识别为 $2\times2$ 矩阵乘法，再在可控阶的子群中求离散对数；运算式对两个点的坐标均为双线性形式，且出现 $y^2-xy-x^2$ 或相邻 Fibonacci 数，应检查矩阵表示、范数和 Pisano 周期。 |
+| [ACTF2025-OhMyTetration-wp](../raw/crypto/ACTF2025-OhMyTetration-wp.md) | 把不同高度的模幂塔当作欧拉函数链上的剩余类 oracle，从链尾的小模数开始逐级提升；程序显式递归计算 $\varphi(P)$、允许选择幂塔高度，并把秘密放在最内层指数时，应检查每个高度实际泄露的是秘密模哪个链元素。 |
+| [MoeCTF2021-马锤壳s-wp](../raw/crypto/MoeCTF2021-马锤壳s-wp.md) | 利用奇数在模 $2^n$ 环中可逆，逐元素撤销矩阵的仿射掩码，再求矩阵左解；看到 $AK+B\bmod 2^n$ 时，先检查 $\gcd(A,2^n)$；$A$ 为奇数即可直接求逆。 |
+| [MoeCTF2024-baby-equation-wp](../raw/crypto/MoeCTF2024-baby-equation-wp.md) | 这题先用代数恒等式把双变量方程降为因子分配问题，再利用 flag 格式筛选正确拆分。原稿展示的因子列表与实际 $k$ 不一致，循环也漏用了因子；这里已按源码重新分解，并验证因子乘积恰为 $2\sqrt{k}$。 |
+| [SekaiCTF2026-oneline6ryp7o-wp](../raw/crypto/SekaiCTF2026-oneline6ryp7o-wp.md) | 固定字母表且字符值相邻时，大整数同余常可线性化为比特选择问题。本题还利用了 $2^{67}-1$ 的循环移位性质：字节权重的指数可模 67 化简，而 8 在模 67 下可逆，因此 67 个字符正好对应 67 个独立比特，比枚举 $2^{67}$ 个字符串有效得多。 |
+| [UMDCTF2023-bulbeuler-wp](../raw/crypto/UMDCTF2023-bulbeuler-wp.md) | 把两个有限域幂相乘，利用指数和在群阶 $p-1$ 上归零来识别编码位；按位输出成对的 $g^x,g^y$，且某一分支令两个指数之和等于 $p-1$，通常意味着可以通过乘积或逆元关系直接判别。 |
+| [WMCTF2024-connection-wp](../raw/crypto/WMCTF2024-connection-wp.md) | 题目核心是 XOR 的线性/同态关系，而不是暴力枚举 padding；映射 $0\to1,1\to-1$ 后，随机 shuffle 的计数差异会转成矩阵核问题。 |
+| [WMCTF2024-rsa-wp](../raw/crypto/WMCTF2024-rsa-wp.md) | 题目不是普通 RSA，而是四元数矩阵幂；关键是把矩阵还原成四元数虚部，利用 $b_n=bX,c_n=cX,d_n=dX$ 的共同因子关系。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 小根、部分位或 HNP 型有界泄露 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
+| 有限域、商环、模根、插值或多项式消元决定恢复 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
+| 签名 nonce、点验证或小子群缺陷泄露标量 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
 
 ## 合并与拆分结论
 
-本页应保留为 family。DLP、Coppersmith、p-adic、GF(2) 和特殊群的首轮判断不同；但都属于“先识别代数对象，再选攻击模型”的二级路由。当前不拆小页，等某一路线积累更多 WP 后再独立成 technique。
+本页应保留为 family。DLP、Coppersmith、p-adic、GF(2) 和特殊群的首轮判断不同；但都属于“先识别代数对象，再选攻击模型”的二级路由。格小根、代数多项式恢复和签名/子群缺陷已有独立 technique，本页只保留它们与长尾代数路线之间的 pivot。
 
 ## 常见陷阱
 

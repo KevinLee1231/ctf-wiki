@@ -5,7 +5,7 @@ skills: [ctf-web]
 raw:
   - ../raw/web/xss-dom-and-browser-tricks.md
   - ../raw/web/RCTF2025-514-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # XSS, DOM and Browser Tricks
@@ -53,6 +53,19 @@ updated: 2026-07-06
 | [RCTF2025-author-plus-wp](../raw/web/RCTF2025-author-plus-wp.md) | author meta 属性注入过滤了常规空白但漏 `%0b/%0c`，用 CSP meta 压制防护脚本，并借 popover `onbeforetoggle` 在 bot 点击时触发外带。 |
 | [RCTF2025-author-wp](../raw/web/RCTF2025-author-wp.md) | 用户名进入 `<meta name=author>` 属性，可注入 CSP 限制 `xss-shield.js`，再在文章正文用 `img onerror` 外带 cookie。 |
 | [SUCTF2026-Note_revWP](../raw/web/SUCTF2026-Note_revWP.md) | `search.php?q=` 进入内联 JS 字符串且可用 `</script>` 闭合；让 bot 访问内网同源搜索页后 fetch 管理员 notes 并外带。 |
+| [0xGame2024-week3-paste-bin-wp](../raw/web/0xGame2024-week3-paste-bin-wp.md) | 本题的 CSP 并非完全失效，而是信任边界设置错误：允许加载“任何人都能向其发布内容”的公共包 CDN，等价于把脚本执行权交给所有 npm 发布者。修复时既要对 Paste 内容做 HTML 清洗或文本化输出，也要移除过宽的脚本源，并通过 nonce 或固定哈希精确授权本站所需脚本。 |
+| [ACTF2022-poorui-wp](../raw/web/ACTF2022-poorui-wp.md) | 双向索引缺少对象一致性校验时，关闭连接只能删除仍指向自身的映射；服务端也不能把客户端声明的用户名直接当作授权身份，或允许任意 Origin 建立认证 WebSocket。旧版 Lodash 深合并、原型继承权限判断、React 任意属性展开和管理员 bot 串联后可完成身份接管。 |
+| [SekaiCTF2026-filtered-reality-wp](../raw/web/SekaiCTF2026-filtered-reality-wp.md) | 链条是 screen-id spoof → SXG fallback → DOM clobber/CSP nonce leak → PHP POP → `php://filter` RCE → secret-prefix hash length extension。每一步只产出下一步所需能力，必须区分“可让 bot 访问”“已获得 XSS”“Web RCE”和“可跨 UID 读取”。 |
+| [UMDCTF2026-open-insight-wp](../raw/web/UMDCTF2026-open-insight-wp.md) | 基于 `typeof` 的黑名单无法安全包装 DOM，`document.all` 的历史兼容特性正好绕过判断。更根本的问题是公式通过 `new Function` 在页面主 Realm 中执行。安全设计应使用无 DOM 权限的隔离执行环境和白名单表达式语法，而不是代理少数全局对象。 |
+| [WMCTF2024-spectre-wp](../raw/web/WMCTF2024-spectre-wp.md) | XSS 根因：模板 `#if` 分支内二次渲染，用户内容可拿到 nonce；泄密目标：developer 才能加载的 `share-view.dev.js` 内含 `token_key`。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| admin bot/受害者浏览器持有敏感状态，需要 DOM gadget 或导航外带 | [browser-gadget-and-admin-bot-exfiltration.md](browser-gadget-and-admin-bot-exfiltration.md) |
+| CSP 阻止直接脚本，但缓存、资源或窗口状态可泄露 | [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md) |
+| sanitizer、模板和浏览器最终 DOM 对输入视图不同 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) |
 
 ## 合并与拆分结论
 

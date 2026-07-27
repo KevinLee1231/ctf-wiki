@@ -46,6 +46,14 @@ updated: 2026-07-27
 | custom recurrence stream | 递推不是标准 LFSR/RC4，但输出仍逐字节 XOR。 | 先化为线性/低维状态；不能线性化再转约束求解。 |
 | PCAP/DNS 泄露 key | hostname、协议字段或流量重组暴露 key/stream 片段。 | 先转 [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) 补齐会话和方向。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| LFSR/RC4/多次一密暴露已知明文或复用 keystream | [stream-cipher-keystream-reuse-and-state-recovery.md](stream-cipher-keystream-reuse-and-state-recovery.md) |
+| 状态生成器本质是 MT/LCG/线性递推 | [linear-prng-state-and-seed-recovery.md](linear-prng-state-and-seed-recovery.md) |
+| 输出还经过码表、bit packing 或多层表示变换 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
+
 ## 常见陷阱
 
 - 没有对齐 known plaintext，导致 keystream bit 全部错位。
@@ -75,6 +83,10 @@ updated: 2026-07-27
 | [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | SIGSEGV/SIGTRAP/SIGFPE handler 改 RC4 状态，`TracerPid` 混入 key；先 patch 反调试或复现 handler 后断 `memcmp`。 |
 | [LilacCTF2026-kilogram-wp](../raw/reverse/LilacCTF2026-kilogram-wp.md) | VMP 外壳只是前置障碍；输出文件保存 salt、被口令 key 保护的本地 key 和 RC4-like flag 密文。 |
 | [SUCTF2026-flumelWP](../raw/reverse/SUCTF2026-flumelWP.md) | Flutter/Dart 输入先经 `Rc4Warp`，再由新版 `libjunk.so` 验证 Hermes bundle 并派生 AES-CBC key/IV；旧 placeholder 会误导。 |
+| [0xGame2025-week2-RC4-wp](../raw/crypto/0xGame2025-week2-RC4-wp.md) | 利用流密码密钥流复用，通过已知明密文恢复 keystream；相同 RC4 key 从初始状态加密不同消息，其中至少一条明文已知且长度足够。 |
+| [D3CTF2024-strange-image-plus-wp](../raw/crypto/D3CTF2024-strange-image-plus-wp.md) | 主动选择 LFSR taps 和分组大小，使同一密钥流在一个 CBC 分组内部重复，再利用黑白像素的低熵逐块恢复明文；可控 IV、可控分组大小、可控 LFSR 参数，以及“图像只有两种像素值”的组合会把密码分析降为很小的枚举问题。 |
+| [MoeCTF2022-LittLe-FSR-wp](../raw/crypto/MoeCTF2022-LittLe-FSR-wp.md) | 遇到已知连续输出的 LFSR，应先把异或视为 $GF(2)$ 上的加法，通过线性方程恢复反馈向量，再用额外输出验证窗口方向。恢复反馈多项式并不等于能恢复完整初始状态：还要检查状态转移是否可逆。本题最小抽头为 8，使最初 8 位对后续输出不可观测；这部分只能依靠题目明确给出的格式约束补全。 |
+| [MoeCTF2023-xorrrrrrrrr-wp](../raw/crypto/MoeCTF2023-xorrrrrrrrr-wp.md) | 同一明文与多个相关密钥流重复异或时，已知前缀既能泄露密钥流片段，也能帮助判断不同密钥流之间的相对位移。找到相差一字节的两个文章窗口后，相同文章字节会在异或中抵消，整个 flag 就能从一个已知首字节递推恢复。 |
 
 ## 原始资料
 

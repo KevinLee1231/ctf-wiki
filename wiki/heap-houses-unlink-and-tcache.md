@@ -6,7 +6,7 @@ raw:
   - ../raw/pwn/heap-houses-unlink-and-tcache.md
   - ../raw/pwn/WMCTF2025-palusimulator-wp.md
   - ../raw/pwn/D3CTF2019-new-heap-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Heap Houses, Unlink and Tcache
@@ -51,10 +51,25 @@ updated: 2026-07-06
 | [NCTF2026-ezheap-wp](../raw/pwn/NCTF2026-ezheap-wp.md) | 常规 IO 触发面被拿掉后仍可 largebin attack 改 `mp_.tcache_bins`，再用 tcache poisoning 做 AAR/AAW。 |
 | [Spirit2026-5-large-wp](../raw/pwn/Spirit2026-5-large-wp.md) | glibc 2.39 只给 largebin 尺寸堆块，UAF 泄露后用 largebin attack 改 `g_f`，绕过 SHSTK/IBT/GOT 路线。 |
 | [SUCTF2026-minivfsWP](../raw/pwn/SUCTF2026-minivfsWP.md) | VFS 风格接口背后是 glibc 2.41 largebin/off-by-null/overlap 堆利用，先稳定 libc/heap leak 和 chunk 布局。 |
+| [D3CTF2024-PwnShell-wp](../raw/pwn/D3CTF2024-PwnShell-wp.md) | 本题利用链由三个独立环节组成：off-by-null 改写相邻堆块元数据、伪造空闲链表指针取得任意地址写、通过 `/proc/self/maps` 消除 ASLR 影响。最后选择覆盖 `efree@GOT`，是因为扩展会在删除对象时把可控内容指针直接传给 `efree`，函数参数天然满足命令执行入口的调用约定。 |
+| [UMDCTF2022-the-show-must-go-on-wp](../raw/pwn/UMDCTF2022-the-show-must-go-on-wp.md) | 题名虽然提示 tcache，但这里无需伪造链表指针。关键是让新申请精确复用已释放的 `0x90` chunk，再利用越界写覆盖物理相邻对象。分析这类题时，应分别计算“请求大小到 chunk 大小的归一化”和“目标字段相对当前用户区的总距离”，不能只看源码中的数组长度。 |
+| [UMDCTF2024-worm-eat-worm-wp](../raw/pwn/UMDCTF2024-worm-eat-worm-wp.md) | 本题的关键是 C++ 所有权错误，而不是 vector 越界：自赋值把已释放指针保留在对象中，`Get` 泄露 tcache 链，`Rename` 写入伪造链头。Full RELRO 只保护主程序并不代表所有已加载共享库都没有可写 GOT；这里选择 libstdc++ 的 `free@GOT - 0x10`，还能让被劫持的 `free` 同时拿到可直接执行的 `/bin/sh` 参数。 |
+| [UMDCTF2025-one-write-wp](../raw/pwn/UMDCTF2025-one-write-wp.md) | 固定悬空指针可随分配阶段覆盖不同 allocator 元数据：unsorted bin 泄漏 libc、safe-linked tcache 泄漏 heap、poison 到 `__libc_argv` 泄漏 stack 和 PIE，最后借 smallbin tcache stashing 写回全局指针。 |
+| [UMDCTF2026-velvet-table-wp](../raw/pwn/UMDCTF2026-velvet-table-wp.md) | 这道题把关键条件都写进了源码：tcache 满后残留的悬空指针、可逆掩码、栈地址派生的 marker、栈上伪 smallbin 块以及带标签的函数指针。正确分析顺序是先恢复索引和掩码，再建立 UAF 泄露/写原语，最后按实际 glibc 版本完成 smallbin 到栈的重叠；仅覆盖函数指针而不同时更新标签不会成功。 |
+| [WMCTF2023-blindless-wp](../raw/pwn/WMCTF2023-blindless-wp.md) | 利用 `house of blindless` 改写动态链接器结构，把退出路径转成 `system("/bin/sh")`；Pwn 题只给有限写 primitive，且目标是动态链接 ELF 时，应检查 `.dynamic`、`link_map`、`DT_FINI`、`DT_FINI_ARRAY` 等退出时会被访问的结构。 |
+| [WMCTF2023-roguegate-wp](../raw/pwn/WMCTF2023-roguegate-wp.md) | Windows NT 堆溢出构造 `unlink`，再配合迷宫奖励写入和 `__crt_lowio_handle_data.osfile` 绕过 `0x1a` 输入限制，最终建立任意读写。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| chunk header、unlink、unsorted/largebin 链表可被破坏 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
+| UAF/double free/tcache freelist 可转任意分配 | [uaf-object-reuse-and-tcache-poisoning.md](uaf-object-reuse-and-tcache-poisoning.md) |
+| FILE/exit/TLS 清理结构是最终触发目标 | [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md) |
 
 ## 合并与拆分结论
 
-本页应为 family。它与 [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md) 分工：本页偏 metadata/bin/house 路线，后者偏 UAF/对象生命周期和 tcache primitive 的形成。当前不拆 House 系列小页，因为 raw 仍以速查集合为主。
+本页应为 family。它与 [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md) 分工：本页偏 metadata/bin/house 路线，后者偏 UAF/对象生命周期和 tcache primitive 的形成。metadata/bin、UAF/tcache 和 FILE/exit 落点已拆为三个 technique；具体 House 名称继续作为版本相关变体保留在本页。
 
 ## 常见陷阱
 

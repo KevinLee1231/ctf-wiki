@@ -4,7 +4,7 @@ tags: [web, family, sqli, upload, deserialization, command-injection, rce-chain]
 skills: [ctf-web]
 raw:
   - ../raw/web/sqli-upload-deser-and-command-rce.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # SQLi, Upload, Deserialization and Command RCE
@@ -41,12 +41,20 @@ updated: 2026-07-06
 | 自定义 serializer、长度截断、整数溢出 | 解析器读取字段顺序是否可被长度/类型混淆改写 | [json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md)、[auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md) |
 | 业务竞态或 TOCTOU | 状态检查和状态使用是否跨请求、跨锁或跨队列 | [race-condition-and-concurrency-exploits.md](race-condition-and-concurrency-exploits.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| SQL 注入只暴露过滤后布尔/timing/error oracle | [sqli-filter-and-response-oracle-extraction.md](sqli-filter-and-response-oracle-extraction.md) |
+| 上传校验和后续解析/执行对文件类型理解不同 | [upload-polyglot-and-content-type-confusion.md](upload-polyglot-and-content-type-confusion.md) |
+| 反序列化对象图可到达文件、模板或命令 sink | [deserialization-gadget-and-object-graph-execution.md](deserialization-gadget-and-object-graph-execution.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：它的价值是把多个入口统一映射到“升级为文件读、secret、WebShell、反序列化或命令执行”的链路选择。
 - 不合并进 SQLi family：SQLi 只是其中一个入口；本页关注 SQLi 之后的横向升级。
 - 不合并进上传 family：本页还覆盖命令包装器、serializer 和反序列化链。
-- 当前不拆成独立 technique：大多数分支已有更具体页面承接，raw 主要作为短案例集合和链路速查。
+- SQL oracle、上传解析差异和反序列化对象图已有具体 technique；本页只保留多原语链的先后关系和 pivot。
 
 ## 常见误判
 

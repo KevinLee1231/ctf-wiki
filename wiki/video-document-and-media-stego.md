@@ -5,7 +5,7 @@ skills: [ctf-stego, ctf-forensics, ctf-reverse]
 raw:
   - ../raw/stego/video-document-and-media-stego.md
   - ../raw/reverse/WMCTF2025-videoplayer-wp.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Video, Document and Media Stego
@@ -47,6 +47,20 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md) | `.mp0` 文件由播放器使用机器信息 MD5 解密；在解密函数返回的 `std::vector` 中用头尾指针算大小并 dump，得到真实 mp4 后从视频末尾读 flag。 |
+| [MoeCTF2024-我的图层在你之上-wp](../raw/stego/MoeCTF2024-我的图层在你之上-wp.md) | PDF 隐写不能只看渲染结果。应同时检查文件尾、对象流、注释与图层结构；矢量 PDF 导入编辑器后出现多个独立对象，就是继续拆层的强信号。图层合成时还要区分普通透明度叠加与逐像素 Add，本题需要后者才能还原密码图案。 |
+| [UMDCTF2018-shrek-this-out-wp](../raw/stego/UMDCTF2018-shrek-this-out-wp.md) | 视频二维码题要同时保证帧完整、顺序正确和分层解码正确。先用首帧元数据核对帧数，再逐帧 Base64 解码、拼接压缩数据、解压并检查最终文件元数据，可以让每一层都有明确的结构校验。 |
+| [UMDCTF2023-straight-outta-the-scif-wp](../raw/stego/UMDCTF2023-straight-outta-the-scif-wp.md) | 高分辨率保留并解析 PDF 每页的黄色打印机追踪点，再把序列号字段按两组三位十进制 ASCII 重组；打印/扫描语境下，整页规律重复的微小黄点应优先联想到 Machine Identification Code，而不是普通水印或 LSB。 |
+| [UMDCTF2024-i-love-shapes-and-colors-wp](../raw/stego/UMDCTF2024-i-love-shapes-and-colors-wp.md) | 识别特定软件生成的视频数据载体，使用同一工具和已知口令逆向恢复文件；题面同时出现 AES-256、几何形状视频、已知密码和专用工具链接时，重点是格式解码而非密码破解。 |
+| [WMCTF2022-nano-tv-wp](../raw/stego/WMCTF2022-nano-tv-wp.md) | 本题核心是利用 tar PaxHeader 中的高精度创建时间恢复视频帧顺序。单帧雪花图像信息量不足，按文件名播放也读不到内容，只有按真实创建时间排序后生成动图才能看到漂移文字；识别信号是附件为 tar 包、文件名顺序混乱、题面反复暗示电视雪花和“等等”、每张 PNG 看似随机但尺寸一致。 |
+| [WMCTF2023-ez-v1deo-wp](../raw/stego/WMCTF2023-ez-v1deo-wp.md) | 逐帧提取视频像素 LSB 并重建可视化视频；题目给出视频且画面无明显异常时，应检查各通道最低位、帧间差分和 alpha/颜色通道。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 视频帧差、颜色通道、时间采样或轨迹隐藏数据 | [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md) |
+| 文档 revision、隐藏对象或编辑历史保留内容 | [structured-document-history-and-hidden-object-recovery.md](structured-document-history-and-hidden-object-recovery.md) |
+| 媒体/文档容器存在尾随、伪装或内嵌载荷 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
 
 ## 合并与拆分结论
 

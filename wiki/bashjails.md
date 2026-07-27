@@ -4,7 +4,7 @@ tags: [pwn, pentest, family, bash, jail, restricted-shell, shell-escape]
 skills: [ctf-pwn, ctf-pentest]
 raw:
   - ../raw/pwn/bashjails.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Bash Jails & Restricted Shells
@@ -40,6 +40,14 @@ updated: 2026-06-12
 | 只能 echo/printf 分层构造 payload | 先生成中间脚本或 octal 字节串，再逐层解锁更多字符 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md) |
 | 已拿到低权限 shell | 继续枚举进程、端口、计划任务、SUID、sudo、服务配置和内部 flag 服务 | [linux-privesc.md](linux-privesc.md), [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md) |
 | 其实是 Python、Lua、Ruby 或 C jail | 不在 shell 语法里硬凑，转对应语言或运行时页面 | [pyjails.md](pyjails.md), [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md) |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Bash/rbash expansion、内建与输出通道绕过字符串过滤 | [restricted-shell-feature-and-output-channel-escape.md](restricted-shell-feature-and-output-channel-escape.md) |
+| 外层解释器/对象图或继承 capability 比 shell 语法更关键 | [restricted-runtime-object-graph-and-capability-recovery.md](restricted-runtime-object-graph-and-capability-recovery.md) |
+| 包装脚本存在隐藏 debug/backdoor/环境条件 | [source-audit-hidden-backdoor-and-debug-mode-discovery.md](source-audit-hidden-backdoor-and-debug-mode-discovery.md) |
 
 ## 合并与拆分结论
 

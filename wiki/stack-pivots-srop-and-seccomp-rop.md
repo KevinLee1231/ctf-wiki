@@ -4,7 +4,7 @@ tags: [pwn, family, rop, srop, stack-pivot, seccomp]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/stack-pivots-srop-and-seccomp-rop.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Stack Pivots, SROP and Seccomp ROP
@@ -41,6 +41,14 @@ updated: 2026-06-12
 | 可泄露 libc 函数但 gadget 不稳定 | 先从泄露范围内扫描 syscall、one_gadget 或可拼接序列 | [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md) |
 | gadget 或立即数受素数、字符集、唯一字节等约束 | 先把约束建模，再决定分解常量、分阶段写入或切换 shellcode 模型 | [pwn-tooling.md](pwn-tooling.md), [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 栈迁移、SROP 或 constrained ROP 是主要落地方式 | [stack-control-flow-and-constrained-rop.md](stack-control-flow-and-constrained-rop.md) |
+| 动态链接器/符号解析用于补齐缺失调用目标 | [dynamic-linker-and-symbol-resolution-exploitation.md](dynamic-linker-and-symbol-resolution-exploitation.md) |
+| seccomp 后的 fd、cwd 和继承通道决定最终读取 | [sandbox-capability-and-inherited-channel-bypasses.md](sandbox-capability-and-inherited-channel-bypasses.md) |
+
 ## 合并与拆分结论
 
 本页保留为 family。SROP、栈迁移、RETF、vDSO、ret2dlresolve 和 `.fini_array` hijack 都有独立技术细节，但在健康检查层面，它们常被同一批 raw 混在“受限控制流如何落地”问题下。将其改成 family 可以减少误导：具体执行骨架落到相邻 technique，首轮 pivot 留在这里。
@@ -61,6 +69,16 @@ updated: 2026-06-12
 - [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
 - [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md)
 - [pwn-tooling.md](pwn-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [0xGame2023-week3-没了溢出-你能秒我-wp](../raw/pwn/0xGame2023-week3-没了溢出-你能秒我-wp.md) | 本题展示了 off-by-null 对保存帧指针的利用：即使返回地址没有被直接覆盖，两级函数栈帧也能把被污染的 `rbp` 转成栈迁移原语。关键验收点是输入必须正好读满、清零后的地址确实落入可控区，以及 ret sled 最终能命中 ROP 链。 |
+| [UMDCTF2024-the-spice-wp](../raw/pwn/UMDCTF2024-the-spice-wp.md) | 本题的两个信息泄露分别解决 ASLR 下的栈地址和 Canary，任意长度 `fgets` 则提供控制流覆盖。没有常规 `pop rax` 时，可利用按值传递大型结构体的栈参数布局，让 `spice_amount` 把栈上的 `0x0f` 返回到 RAX，再衔接现成 `syscall` 完成 SROP。 |
+| [WMCTF2020-base64-wp](../raw/pwn/WMCTF2020-base64-wp.md) | Web 任意读拿扩展文件，Go PHP 扩展异常路径触发栈溢出，覆盖 slice 的 `array/len/cap` 实现任意读，泄漏 `.so`/libc/栈后 ROP 或 stack pivot。 |
 
 ## 原始资料
 

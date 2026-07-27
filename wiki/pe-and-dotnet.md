@@ -4,7 +4,7 @@ tags: [malware, family, pe, dotnet, config, shellcode]
 skills: [ctf-malware, ctf-reverse, ctf-forensics]
 raw:
   - ../raw/malware/pe-and-dotnet.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # PE, .NET, and Binary Malware Analysis
@@ -38,6 +38,14 @@ updated: 2026-06-12
 | memory forensics | 进程 dump、injected region、config in memory | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
 | YARA/IOC | 匹配规则是否解释真实行为 | 输出规则时保留字段来源 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| PE/.NET resource、overlay、config 或内嵌模块需要提取 | [pe-dotnet-config-and-resource-extraction.md](pe-dotnet-config-and-resource-extraction.md) |
+| 主程序仅负责解密/映射第二阶段 | [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md) |
+| 恶意 C2 配置、session key 和自定义协议是最终目标 | [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：PE/.NET 恶意样本通常是拆层、配置、C2、shellcode和内存证据组合。
@@ -58,6 +66,14 @@ updated: 2026-06-12
 - [scripts-and-obfuscation.md](scripts-and-obfuscation.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
 - [malware-tooling.md](malware-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [0xGame2024-week4-Crazy-Thursday-v-me-50-btc-wp](../raw/malware/0xGame2024-week4-Crazy-Thursday-v-me-50-btc-wp.md) | 完整链路为 `PPTM 宏 → PyInstaller/Python 勒索逻辑 → RSA 解封装 3DES 密钥 → 解密 WAV → DeepSound → SNOW`。外部下载地址只是历史 IOC，应去活化记录；真正决定复现的是宏触发条件、勒索程序的密钥封装格式、完整 RSA 参数、恢复出的 3DES 密钥和两层隐写密码。 |
 
 ## 原始资料
 

@@ -1947,3 +1947,24 @@
 - 目标端预验收通过后，将源 `wp` 下 22 篇 Markdown 与 3 个资源目录移入 Windows 回收站；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/D3CTF2024-wp-before-archive-20260727-113036.zip`，包含 26 个文件，SHA-256 为 `dde53a65e1df6cd48495e845051916d5a1c4ffd22ada8ade3037af83089a0592`。
 - `index.md` live raw 统计同步更新：Crypto 由 208 增至 216、Pentest 由 15 增至 16、Pwn 由 184 增至 189、Reverse 由 206 增至 210、Web 由 205 增至 209，raw 总数由 1041 增至 1063；本轮未新增或修改 `wiki/*.md`。
 - 校验结果：22 篇 D3CTF2024 WP 的三段结构、代码围栏、UTF-8、结尾换行和目标命名均无异常；3 个资源目录均有同 basename Markdown，4 条图片引用全部可解析且图片 SHA-256 与源文件一致。全库 1205 篇 active Markdown 中解析出 4137 条本地链接和 576 条图片引用，断链为 0；140 个 raw 资源目录均有同 basename Markdown 且无空目录，138 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 101、technique 24、tooling 13。
+
+## 2026-07-27 — 新增 Raw 全量摄入与单入链语义复核
+
+- 以仓库当前文件为事实源，并以最近一次完整导航检查提交 `9355db8` 仅作为新增路径边界：当前 1063 篇 raw 中有 702 篇路径在该基线后出现，其中 129 篇已被现有 wiki 引用，573 篇尚无 wiki 证据入口。本轮逐篇读取新增 WP 的“方法总结”，没有按比赛名、文件名或全文中偶然出现的工具词机械分类，也没有改写任何 `raw/` 正文。
+- 新建 16 篇具有独立首轮证据、解法骨架和失败 pivot 的 technique：AI/ML 的约束感知对抗优化、梯度泄漏输入恢复；Blockchain 的 delegatecall 存储布局破坏、跨链消息字段绑定；Cloud/Infra 的身份 token 到控制面 pivot；Web 的请求视图与规范化差异；Crypto 的有序矩阵迹剥离、过完备矩阵关系恢复、低轮 SPN 积分攻击、对称密码故障差分；Pwn 的沙箱能力/继承通道绕过、协议长度/状态解析破坏；Mobile 的 WebView/URL Scheme/native bridge、debuggable/run-as；Forensics 的结构化文档历史与隐藏对象恢复；Pentest 的动态路由劫持与透明回送。
+- 其余 530 篇不另造页面，而是按决定性主障碍写入 97 篇现有 family/technique 的案例索引。路由只抽取可复用识别信号，不搬运单题流程；对多原语边界显式纠偏，例如 NTRU 不因出现 RSA/CRT 字样误入 RSA、Vyper 锁槽错误不误入 delegatecall、Web 中的 Git/地理/游戏状态证据进入真正承载该模式的跨方向节点。
+- 完成首轮单入链语义复核：在后续补建 technique 前，1063 篇 raw 已全部有 wiki 入口，按“不同 wiki 页面”计有 678 篇单入链、385 篇多入链；678 篇单入链逐篇重算建议落点，实际页面与决定性主障碍不一致数为 0。单入链保留是因为这些 WP 只直接支撑一个模式，不为增加计数强行复制到 family 和 technique。
+- `index.md` 先新增本轮摄入产生的 16 个 technique 入口；随后审计历史 family 的落点完整性，又新增 AI/ML 5 篇、Crypto 13 篇和跨 Crypto/Forensics 2 篇 technique。AI/ML 将黑盒反馈、后门/投毒、prompt/tool、token/输出约束和 LLM 输出派生秘密分开；Crypto 将 RSA、Hash/MAC、PRNG、格小根、代数、流密码、签名/子群、编码、秘密共享和同态 oracle 落到独立恢复骨架。wiki 当前总量为 174，页面类型为 family 101、technique 60、tooling 13。
+- 为 2 篇 AI/ML family 和 15 篇 Crypto/跨域 family 增加“首轮证据 -> 具体 technique”下一跳表，修正此前“案例不足、暂不拆页”的历史判断；这些 family 均直接连接至少 3 个语义相关 technique，不靠跨方向关联页凑数。
+- Web 批次新增 11 篇 technique，按认证状态、JWT key lookup、SQL oracle、服务端二次解释、LFI wrapper、反序列化对象图、URL/SSRF parser 差异、上传 polyglot、XXE 解析边界、浏览器/admin bot 外带和 N-day 适配拆分；12 篇相关 family 已各自连接至少 3 个具体落点，不按语言名或“最终都能 RCE”合并。
+- Pwn/Pentest 批次新增 13 篇 technique，覆盖栈控制流、整数/长度、动态链接器、heap metadata、UAF/tcache、FILE/exit、内核对象竞态、受限运行时对象图、运行时保护、受限 shell、源码隐藏入口、本机配置提权和 JIT OOB；19 篇相关 family 已补齐基于 primitive 的下一跳。wiki 当前总量为 198，页面类型为 family 101、technique 84、tooling 13。
+- Reverse/Malware 与 Forensics/Stego/Hardware/OSINT 批次新增 25 篇 technique：运行时镜像、anti-debug、trace 快照、managed bytecode、VM/WASM lifting、游戏资源、脚本/PE 配置、ISA/固件模拟、renderer、约束求解，以及文件系统、归档、协议流、Windows 证据、媒体通道、音频、外设、内存/容器、RAID、总线和公开来源关联。36 篇剩余 family 均增加基于证据形态的下一跳。
+- family 角色全量复核不再用“任意关联图的传递可达”冒充具体落点：当前 101 篇 family 每页都直接连接至少 3 篇语义相关 technique，缺口数为 0；family 仍保留共同信号、变体判断和失败 pivot，具体执行骨架下沉到 technique。wiki 当前总量为 223，页面类型为 family 101、technique 109、tooling 13。
+- 进一步只统计“路由/分流/判断/下一跳”章节中的 technique 边，发现 13 篇既有 family 的具体技巧只出现在普通关联区；已为认证边界、分组模式、跨域取证、Crypto/Pwn/Reverse 首轮、模型恢复、Mobile、OOB/JIT、VM、Blockchain、Node 与 Pentest 补上显式下一跳。严格口径下 family 路由章节少于 3 个 technique 的页面也降为 0。
+- family 角色审计前备份为 `backups/pre-family-role-audit-20260727-224402.zip`，大小 697827 字节，SHA-256 为 `a2d5c0df16385f7ab1f882758645dd3ebcecdc79c007dd769f00a9620d64a6d8`。
+- 本轮最终同步仓库外 14 个专项 skill：`ctf-ai-ml`、`ctf-blockchain`、`ctf-cloud-infra`、`ctf-crypto`、`ctf-web`、`ctf-pwn`、`ctf-mobile`、`ctf-forensics`、`ctf-reverse`、`ctf-stego`、`ctf-osint`、`ctf-malware`、`ctf-pentest`、`ctf-hardware-embedded`。只增加会影响首轮证据判断的高频 wiki 直链；没有复制 technique 正文，也没有改变工具路径或方向边界。
+- 修改前备份为 `backups/pre-wiki-full-ingest-20260727-221458.zip`，包含原 `wiki/`、`index.md`、`log.md`、`AGENTS.md` 与 `CLAUDE.md`，大小 552780 字节，SHA-256 为 `dd3955699fe33c0624dc9dd356f416d652163b42194e5b7193093bd75d5f00b2`。
+- 按用户要求清理 `backups/`：精确删除 21 个旧 ZIP，仅保留 `pre-family-role-audit-20260727-224402.zip`、`pre-wiki-full-ingest-20260727-221458.zip` 与 `pre-UMDCTF2017-raw-archive-20260725-074013.zip`；三份保留项均为可逐条读取的 ZIP，没有展开备份目录。
+- 顺带修复 `forensics-tooling.md`、`hash-protocol-and-oracle-attacks.md`、`malware-tooling.md` 与 `oracles-recurrences-captcha-polyglots.md` 中 4 处既有 Markdown 表格未转义竖线，避免表格列被错误拆分；没有借机改写其技巧结论。
+- 对本轮新增的 530 条 raw 案例路由逐条检查句尾与分号拼接，并回读相应 raw 的“方法总结”修复 32 条定长截断、半句或硬换行误拼摘要；最终不完整句尾、尾随省略号和异常分号均为 0，没有用自动补句替代原始证据。
+- 校验结果：全库 1290 篇 active Markdown 中解析 5526 条本地链接，断链为 0；1063 篇 raw 全部有 wiki 入口，最终为 607 篇单入链、456 篇多入链，140 个同 basename 资源目录均通过共置检查。223 篇 wiki 全部由 `index.md` 覆盖，页面类型为 family 101、technique 109、tooling 13；严格按路由章节统计，少于 3 个 technique 下一跳的 family 为 0。85 篇新增 technique 均具备标准技巧章节、raw 支撑和非 index 相邻入链；408 个表格、3791 行表格数据、3 份备份 ZIP 与仓库外 14 个 skill 中的 146 条 wiki 直链均通过检查。`raw/` 的 Git 状态为空，本轮没有改写证据层正文。

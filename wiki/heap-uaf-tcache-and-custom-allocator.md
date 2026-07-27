@@ -8,7 +8,7 @@ raw:
   - ../raw/pwn/D3CTF2019-basic-basic-parser-wp.md
   - ../raw/pwn/D3CTF2019-new-heap-wp.md
   - ../raw/pwn/D3CTF2021-deterministic-heap-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Heap UAF, Tcache and Custom Allocators
@@ -63,6 +63,19 @@ updated: 2026-07-06
 | [VNCTF2026-ezphp-wp](../raw/pwn/VNCTF2026-ezphp-wp.md) | PHP 扩展 off-by-one 扩大 `vh_edit` 范围后覆盖 `comment` 指针字段；用 `/proc/self/maps` 泄露基址并把 `efree@GOT` 改成 `system`。 |
 | [VNCTF2026-real-world-wp](../raw/pwn/VNCTF2026-real-world-wp.md) | 原样 Rsync 3.3.0 服务，先用 CVE-2024-12085 未初始化数据泄漏定位地址，再用 CVE-2024-12084 checksum 堆溢出转任意写。 |
 | [VNCTF2026-recode-wp](../raw/pwn/VNCTF2026-recode-wp.md) | Protocol Buffers 对象 UAF 进入 tcache poisoning、任意读写和栈 ROP，先确认对象生命周期和 libc/heap leak。 |
+| [SekaiCTF2026-3in1-wp](../raw/pwn/SekaiCTF2026-3in1-wp.md) | “3in1”不是三个互不相关的漏洞，而是一条权限逐层扩大的链。分析时必须区分漏洞所在组件与漏洞产生的权限结果：第一段是 LibJS UAF；第二段是 QEMU CPU 模拟错误，却用于提升客体权限；第三段才是 QEMU 设备模型的宿主堆越界与逃逸。 |
+| [UMDCTF2019-blue-star-accounting-wp](../raw/pwn/UMDCTF2019-blue-star-accounting-wp.md) | 本题的决定性原语是悬空指针与同尺寸堆块复用。分析菜单题时，要把每个操作对应的分配、释放和全局指针状态画清楚，再依据 allocator size class 设计覆盖长度。成功到达读取 flag 的分支已能验证利用，但不能替代缺失的服务端秘密。 |
+| [UMDCTF2026-bookmaker-wp](../raw/pwn/UMDCTF2026-bookmaker-wp.md) | 跨语言绑定中的所有权错误是本题核心。JavaScript 的 `ArrayBuffer` 生命周期没有与原生 `free` 同步，使一个普通视图变成稳定的 UAF 读写入口。选择与目标结构完全相同的 `0x30` 尺寸可以提高重占确定性，随后按结构偏移先泄露、再改写函数指针。 |
+| [WMCTF2020-roshambo-wp](../raw/pwn/WMCTF2020-roshambo-wp.md) | 先还原带 `[RPC]` 头、命令号、长度和 SHA-256 校验的自定义协议，再用 host/client 两端控制阻塞 IO 与共享指针竞态。堆链从 double free、chunk 重叠和 libc 泄漏推进到 `__free_hook`，最后借 `setcontext` 布置 open/read/puts。 |
+| [WMCTF2024-magicpp-wp](../raw/pwn/WMCTF2024-magicpp-wp.md) | 漏洞点：扩容造成旧指针悬挂，随后写旧指针形成 UAF；leak 点：`load_file('/proc/self/maps')` 可泄露 heap/libc。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 悬空引用、double free 或同尺寸复用控制对象/freelist | [uaf-object-reuse-and-tcache-poisoning.md](uaf-object-reuse-and-tcache-poisoning.md) |
+| allocator metadata/bin list 破坏形成重叠或受控写 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
+| 最终落点是 FILE、wide-data、exit 或 TLS handler | [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md) |
 
 ## 合并与拆分结论
 

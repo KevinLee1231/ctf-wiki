@@ -15,7 +15,7 @@ raw:
   - ../raw/crypto/HGAME2026-flux-wp.md
   - ../raw/pwn/NCTF2026-ezprotocol-wp.md
   - ../raw/crypto/SUCTF2026-MirrorBus9WP.md
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # Oracles, Recurrences, CAPTCHA and Polyglots
@@ -51,7 +51,7 @@ updated: 2026-07-11
 | CAPTCHA/font | 字体是否动态、图片是否可由 DOM/Canvas 获取 | [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md) |
 | modular CAPTCHA / expression oracle | CAPTCHA 是否可转 CRT/LLL 约束，表达式输出是否形成 crypto oracle | 先构造最短表达式，再转 crypto family |
 | esolang/polyglot | 每层输出是否可作为下一层输入，主要障碍是表示层还是解释器行为 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 或 [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
-| hash length extension | MAC 形态是否为 `hash(secret || msg)` | 转 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
+| hash length extension | MAC 形态是否为 `hash(secret \|\| msg)` | 转 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
 
 ## 来自 WP 的案例索引
 
@@ -62,6 +62,16 @@ updated: 2026-07-11
 | [NCTF2026-ezprotocol-wp](../raw/pwn/NCTF2026-ezprotocol-wp.md) | 自定义协议的状态机比加密更关键：恢复 XOR payload 和 checksum 后，利用同连接认证状态拼接多 packet。 |
 | [SUCTF2026-MirrorBus9WP](../raw/crypto/SUCTF2026-MirrorBus9WP.md) | 半双工协议可在 reset 态采样仿射映射；先解出能触发 CHAL 的 MIX 点，再利用固定 CHAL 对 16-bit `PROVE` checksum 分批穷举。 |
 | [LilacCTF2026-nestdlp-wp](../raw/crypto/LilacCTF2026-nestdlp-wp.md) | 二元多项式商环 DLP 可转成乘法矩阵行列式上的 p-adic DLP；恢复指数后还要用 padding 汉明重量约束解明文。 |
+| [UMDCTF2020-second-wp](../raw/_unclassified/UMDCTF2020-second-wp.md) | 逐字符比较必须使用恒定时间实现，否则即使结果消息完全相同，耗时也会暴露正确前缀。攻击时最重要的是复用同一会话，并用重复测量或中位数抵抗网络噪声。 |
+| [WMCTF2022-nanodiamond-rev-wp](../raw/crypto/WMCTF2022-nanodiamond-rev-wp.md) | 本题核心是一个带最多 2 次谎言的交互式布尔查询纠错问题。服务端 `eval` 表达式白名单虽然限制了语法，但仍允许构造单点查询和成对一致性校验；识别信号是固定 6 个布尔变量、13 次回答、最多 2 次谎言、连续 50 轮且每轮独立。查询数量明显多于 6，说明题目希望利用冗余校验而不是暴力猜。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 比较、timeout、错误或成功位需抽象成稳定查询谓词 | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
+| 递推、状态机或验证器可精确建成位向量/符号约束 | [constraint-solver-and-symbolic-state-recovery.md](constraint-solver-and-symbolic-state-recovery.md) |
+| CAPTCHA/QR/网格的结构和纠错约束决定重组 | [qr-and-structured-symbol-reassembly.md](qr-and-structured-symbol-reassembly.md) |
 
 ## 合并与拆分结论
 

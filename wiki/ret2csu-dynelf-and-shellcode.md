@@ -41,6 +41,14 @@ updated: 2026-07-27
 | shellcode 空间小但寄存器已预设 | 只补缺失参数或第一阶段 read/mprotect，再加载完整 shellcode | [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md) |
 | shell 出来但命令被 read 吃掉或无回显 | 先处理交互时序、PTY、延迟和 fd，再考虑 ORW 替代 | [pwn-tooling.md](pwn-tooling.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| ret2csu/短 gadget 组合受限寄存器调用与栈控制 | [stack-control-flow-and-constrained-rop.md](stack-control-flow-and-constrained-rop.md) |
+| DynELF/ret2dlresolve 从内存或 resolver 恢复目标符号 | [dynamic-linker-and-symbol-resolution-exploitation.md](dynamic-linker-and-symbol-resolution-exploitation.md) |
+| 格式化字符串先提供泄露或任意写 | [format-string.md](format-string.md) |
+
 ## 合并与拆分结论
 
 本页应为 family。ret2csu、DynELF、badchar ROP、shellcode stager 和 syscall ROP 是不同技术，但它们都发生在“控制流已经可用，如何落地最终能力”的阶段。保留为 family 比拆成短页更利于 exploit 链路阅读。
@@ -61,6 +69,19 @@ updated: 2026-07-27
 - [overflow-basics.md](overflow-basics.md)
 - [windows-arm-and-cross-platform-exploits.md](windows-arm-and-cross-platform-exploits.md)
 - [pwn-tooling.md](pwn-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [0xGame2022-week1-winmts-dream-wp](../raw/pwn/0xGame2022-week1-winmts-dream-wp.md) | 核心方法：用满足字符白名单的短 `read` shellcode 作为第一阶段，再覆盖读入完整 `execve` shellcode，实现分阶段执行；识别特征：固定 RWX 映射、执行用户输入、首阶段长度很短且逐字节白名单校验，但后续 `read` 的数据不再检查。 |
+| [0xGame2023-week3-shellcode-but-without-syscall-wp](../raw/pwn/0xGame2023-week3-shellcode-but-without-syscall-wp.md) | 利用链由两个原语组成：任意 8 字节写负责把退出回调指向受控区域，运行时自修改负责绕过静态字节过滤并得到第二次 `read`。针对机器码的黑名单只能检查提交时的字节，无法阻止代码在可写可执行内存中自行构造被禁指令。 |
+| [0xGame2025-week2-任意代码执行-wp](../raw/pwn/0xGame2025-week2-任意代码执行-wp.md) | 本题是两阶段 shellcode：先利用早期零字节绕过 `strlen`，再借助入口残留寄存器在 10 字节内构造第二次 `read`，最后用 NOP 滑道解决自覆盖后的续执行位置。原题解中的“10 比特”应为“10 字节”，而 `push 0`、入口寄存器和 `bss+10` 的控制流都是不可省略的关键机制。 |
+| [ACTF2023-blind-wp](../raw/pwn/ACTF2023-blind-wp.md) | 本题在无附件场景下通过交互差异恢复了程序的关键栈布局。利用链可以概括为：无边界全局光标造成越界写，改写相邻 `ptr` 后将固定 8 字节输出升级为任意读，再以同一编辑原语完成任意写，最后用 DynELF 解析 `system` 并覆盖返回地址。 |
+| [UMDCTF2020-coal-miner-wp](../raw/pwn/UMDCTF2020-coal-miner-wp.md) | 本题的重点是把堆溢出、GOT 改写、libc 泄露和 ret2libc 串成完整链条。启用 canary 并不意味着无法利用：若攻击者能改写 `__stack_chk_fail` 的解析目标，保护机制本身也可能成为可控的跳板。 |
+| [UMDCTF2023-pokemon-game-wp](../raw/pwn/UMDCTF2023-pokemon-game-wp.md) | 第一阶段用一字节越界把能力字段改为 `0x07`，同时获得 RWX 权限和必定捕捉能力；第二阶段把随机出现的对象 ID 当作受限字节生成器，逐字节编码 shellcode。 |
 
 ## 原始资料
 

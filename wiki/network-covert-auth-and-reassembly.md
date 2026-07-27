@@ -5,7 +5,7 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/network-covert-auth-and-reassembly.md
   - ../raw/forensics/WMCTF2025-voice-hacker-wp.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Network Covert Channels, Auth and Reassembly
@@ -46,6 +46,14 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-voice-hacker-wp](../raw/forensics/WMCTF2025-voice-hacker-wp.md) | PCAP 中一批 UDP 包可按 RTP 解码导出目标音频；后续不是解协议 flag，而是把音频样本用于绕过 `/api/authenticate` 的 wav 特征相似度。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| TCP/HTTP/WebSocket/DNS 分段需按会话和序号重组 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
+| DNS label/TTL/zone/rebinding 是隐蔽信道或解析关键 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| 响应差异/timing 先要建成可重复 oracle | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
 
 ## 合并与拆分结论
 

@@ -4,7 +4,7 @@ tags: [reverse, family, signal-handler, trace, packed, dump]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/signal-trace-and-packed-anti-analysis.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Signal, Trace and Packed Anti-Analysis
@@ -40,6 +40,14 @@ updated: 2026-06-12
 | parent-patched child | 父进程写入子进程或 memfd 后再执行 | dump 子进程修改后镜像 |
 | ConfuserEx dynamic module | .NET 模块在 constructor 或 runtime 动态解密 | constructor 断点 dump module |
 | packed anti-analysis | 壳和检测交织，trace 指向 fake path | 先转 [anti-analysis.md](anti-analysis.md) 清环境 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 信号/父子进程/packed module 的事件序列需 trace/dump 对齐 | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+| debugger/信号/timing/self-check 检测改变控制流 | [anti-debug-self-check-and-environment-bypass.md](anti-debug-self-check-and-environment-bypass.md) |
+| 比较/校验 API 是最短明文恢复锚点 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
 
 ## 合并与拆分结论
 

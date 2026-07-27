@@ -5,7 +5,7 @@ skills: [ctf-stego, ctf-forensics]
 raw:
   - ../raw/stego/audio-frequency-and-archive-stego.md
   - ../raw/forensics/WMCTF2025-voice-hacker-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Audio, Frequency and Archive Stego
@@ -48,12 +48,26 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [WMCTF2025-voice-hacker-wp](../raw/forensics/WMCTF2025-voice-hacker-wp.md) | 从 RTP 导出的参考音频可以用 TTS/语音克隆生成口令音频，但真正验收条件是后端比较的 wav 长度、振幅、采样数和相似度阈值。 |
+| [UMDCTF2017-synesthesia-2-wp](../raw/stego/UMDCTF2017-synesthesia-2-wp.md) | 高位宽 PCM 的不同字节可以承载彼此独立的信号。正常播放器按完整 32 bit little-endian 整数解释样本，最低字节中的小信号会被高位声音掩盖；把该字节单独提升为音频后，隐藏频谱才会显现。二维码谱线还需要按其几何方向做有限形态学修复。 |
+| [UMDCTF2019-secretsounds-wp](../raw/stego/UMDCTF2019-secretsounds-wp.md) | 8 位 PCM 的符号位翻转可以让任意字节流听起来像音频数据，同时用固定异或恢复。分析时应读取容器声明的数据偏移，并检查简单变换后的 magic。恢复出的可执行文件也不必直接运行；若尾部是已知归档格式，静态列目录和解包更安全。 |
+| [UMDCTF2021-coldplays-flags-wp](../raw/stego/UMDCTF2021-coldplays-flags-wp.md) | 音频在本题同时充当宿主文件和语义线索。`binwalk` 负责发现追加 ZIP，时间戳则要求回到歌曲内容取词。外部歌曲信息不是解题的唯一载体：关键时间点、拼接规则和最终口令均已在这里展开，按照原音频即可独立复现。 |
+| [WMCTF2022-hilbert-wave-wp](../raw/stego/WMCTF2022-hilbert-wave-wp.md) | 本题核心是识别“一维音频数据其实是二维图像数据”，再根据题名使用 Hilbert 曲线逆映射恢复空间顺序。$49152=128\times128\times3$、三声道、采样值不超过 255 是判断 RGB 图片的关键证据。 |
+| [WMCTF2022-spider-man-wp](../raw/stego/WMCTF2022-spider-man-wp.md) | 本题核心是不要停在游戏内可见 flag。触碰模型后的音效尾部出现杂音，结合开发者工具中 `hit-crystal` 资源，说明真正数据藏在音频文件里；识别信号是：VR 场景中的物理 flag 过于直接、触发音效尾部异常、资源名和交互事件能对应到 `hit-crystal`、文件扩展名与实际内容不一致。 |
+| [WMCTF2023-money-left-me-broken-wp](../raw/stego/WMCTF2023-money-left-me-broken-wp.md) | 先用 Arnold 逆变换恢复视频，再用原始音频作差提取 DCT watermark；视频画面呈周期性扭曲、题名或画面提示原始素材来源、音频存在噪声时，应考虑“视频置乱 + 音频水印”双层隐写。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 固定频率、DTMF/Morse/SSTV/FSK 或声道差异编码符号 | [audio-spectrum-and-symbol-decoding.md](audio-spectrum-and-symbol-decoding.md) |
+| 信息位于声道/bitplane/时间帧差等媒体通道 | [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md) |
+| 音频尾部/容器内嵌归档，或归档结构/加密需恢复 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
 
 ## 合并与拆分结论
 
 - 保留为 family：audio raw 横跨频域、双音、SSTV、LSB、元数据、语音特征和 archive。
 - 不合并进 `signals-and-hardware.md`：本页从已成音频文件和频域证据出发，硬件页从采样/总线/物理层出发。
-- 暂不拆 DTMF/SSTV/LSB 小页：当前页面作为音频二级分流更有查询价值。
+- DTMF/SSTV/频率符号已归入统一的音频解码 technique，媒体通道与归档恢复分别转到相邻 technique；本页继续承担三类证据的二级分流。
 
 ## 常见误判
 

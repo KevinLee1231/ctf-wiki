@@ -5,7 +5,7 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/kernel-uaf-race-and-slab-techniques.md
   - ../raw/pwn/WMCTF2025-wm-easynetlink-wp.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Kernel UAF, Race and SLAB Techniques
@@ -51,6 +51,16 @@ updated: 2026-06-12
 | [D3CTF2023-d3kcache-wp](../raw/pwn/D3CTF2023-d3kcache-wp.md) | 页级 UAF、buddy/slab/pipe_buffer 复用是主线，先把 page 到 pipe 的重分配稳定化。 |
 | [D3CTF2025-d3kheap2-wp](../raw/pwn/D3CTF2025-d3kheap2-wp.md) | 新版内核堆题继续围绕 UAF/page/slab 复用，先确认对象释放窗口和可控映射。 |
 | [D3CTF2025-d3kshrm-d3kshrm-revenge-wp](../raw/pwn/D3CTF2025-d3kshrm-d3kshrm-revenge-wp.md) | 共享内存 mmap fault 下标越界可映射相邻 struct page，先稳定伪造页表和内核任意映射。 |
+| [SekaiCTF2026-MTE-wp](../raw/pwn/SekaiCTF2026-MTE-wp.md) | 本题必须把“认证门槛”和“内存破坏根因”分开：QARMA3 PAC oracle、MTE LFSR 与 Binder FD 传递用于取得 race 接口的使用资格；真正的内核漏洞是驱动释放对象后仍通过全局指针读取并写入。硬件内存安全机制不会自动修复对象生命周期错误。 |
+| [UMDCTF2024-ornithopter-wp](../raw/pwn/UMDCTF2024-ornithopter-wp.md) | 本题首先提供的是 `.bss` 后方的步进式任意读写，而不是现成的栈溢出。关键是利用 `brk` 随机间隙有上界，通过堆喷和标记扫描建立 `.bss` 到堆的坐标系；随后才有条件读取 bin 元数据、篡改 tcache、借 `__libc_argv` 泄露栈地址并完成栈劫持。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| UAF、引用计数、RCU 或 TOCTOU 需要扩大竞态窗口 | [kernel-object-lifetime-and-race-window.md](kernel-object-lifetime-and-race-window.md) |
+| 用户态并发/状态竞争本身构成可重复 oracle 或原语 | [race-condition-and-concurrency-exploits.md](race-condition-and-concurrency-exploits.md) |
+| KASLR/KPTI/SMEP/SMAP 与调试环境是落地障碍 | [kaslr-kpti-smep-and-kernel-debugging.md](kaslr-kpti-smep-and-kernel-debugging.md) |
 
 ## 合并与拆分结论
 

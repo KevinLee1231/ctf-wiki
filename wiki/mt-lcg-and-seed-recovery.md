@@ -5,7 +5,7 @@ skills: [ctf-crypto, ctf-web]
 raw:
   - ../raw/crypto/mt-lcg-and-seed-recovery.md
   - ../raw/web/WMCTF2025-guess-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # MT, LCG and Seed Recovery
@@ -50,11 +50,19 @@ updated: 2026-07-06
 | chaotic / middle-square / flag-derived RNG | seed 空间小、状态退化或由 flag 字节确定。 | 先找不变量和退化周期，再 bounded brute force 或 hill climbing。 |
 | PRNG 喂给 DSA/ECDSA nonce | 签名随机数由弱 PRNG 产生。 | 先恢复 k 或 k 的约束，再转 [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| MT/LCG/运行时随机输出足以恢复状态、参数或时间 seed | [linear-prng-state-and-seed-recovery.md](linear-prng-state-and-seed-recovery.md) |
+| 截断状态、部分输出或小误差需要格/SMT 恢复 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
+| PRNG 输出被直接当作 XOR/stream keystream 跨消息复用 | [stream-cipher-keystream-reuse-and-state-recovery.md](stream-cipher-keystream-reuse-and-state-recovery.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：MT19937、C `rand()`、LCG、V8 `Math.random()`、时间种子和 weak nonce 的实现不同，但首轮都要判断输出是否足够直接恢复 seed/state。
 - 不与 [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md) 合并：本页处理“可直接或近直接状态恢复”的路线，后者处理 partial output、timing、SMT、格式串写状态等需要外部约束补齐的路线。
-- 不拆成 MT/LCG/V8 小页：当前 raw 更适合作为 PRNG 二级分流；若某一类积累多个独立 raw，再拆具体 technique。
+- MT/LCG/运行时 seed 的共同状态恢复骨架已拆为 technique；本页保留生成器识别、截断输出和跨域用途的分流。
 
 ## 常见陷阱
 
@@ -88,6 +96,16 @@ updated: 2026-07-06
 | [VNCTF2026-hd-is-what-wp](../raw/crypto/VNCTF2026-hd-is-what-wp.md) | SIDH/SIKE 公钥向量先被公开 seed 的 LCG 矩阵线性混淆；恢复标准公钥后再用 Castryck-Decru attack 求共享 j。 |
 | [VNCTF2026-numberguesser-wp](../raw/crypto/VNCTF2026-numberguesser-wp.md) | 只有 10 次 hint 查询，但 Python `random.seed(os.urandom(8))` 可逆；选相隔 227 的输出 untemper/twist 反推 64-bit seed。 |
 | [VNCTF2026-schnorr-wp](../raw/crypto/VNCTF2026-schnorr-wp.md) | Schnorr 服务固定 seed 导致首轮承诺 `B` 跨连接重复；对同一 `B` 给两个 challenge，用 special soundness 相减提 witness。 |
+| [0xGame2020-week4-ElGamal-wp](../raw/crypto/0xGame2020-week4-ElGamal-wp.md) | 漏洞来自明文直接落在“二次剩余/非剩余”两个可公开判定的集合中。先用欧拉判别准则确定实际公钥 $y$ 的勒让德符号，再决定只看 $c_1$，还是联合 $c_0,c_1$ 消去随机数奇偶性。分析必须以实际参数为准，不能照搬源码中未生效的公钥修改逻辑。 |
+| [0xGame2021-week3-Predict-1-wp](../raw/crypto/0xGame2021-week3-Predict-1-wp.md) | 未知模数 LCG 可通过连续差分构造恒为 $p$ 倍数的行列式关系，再对多个关系求 `gcd`。恢复参数后必须用全部已知状态验证递推式，避免把带额外因子的 `gcd` 误当作模数。 |
+| [0xGame2025-week2-Ez-LCG-wp](../raw/crypto/0xGame2025-week2-Ez-LCG-wp.md) | 用可控 seed 把外层 RNG 限制在短环，再枚举少量 LCG 参数并逆推状态；用户可控 seed、只排除固定点、参数由随机次数迭代产生但状态空间存在短周期。 |
+| [0xGame2025-week4-MT19937-wp](../raw/crypto/0xGame2025-week4-MT19937-wp.md) | 当 MT19937 只泄露零散或截断位时，应先判断总泄露位数是否达到 19968，并利用生成、旋转、temper 与位截取在 $\mathbb{F}_2$ 上的线性性质建立方程。本题还要区分标准 MT19937 初始化与 CPython `random.Random(seed)` 的 `init_by_array()` 路径；恢复内部状态只是第一步，逆初始化得到原 seed 才能通过最终检查。 |
+| [ACTF2023-claw-crane-wp](../raw/crypto/ACTF2023-claw-crane-wp.md) | 用连分数在 $p,q<2^{64}$ 下逼近 $c/2^{128}$，再通过人为加入高位项制造长零区，并筛选实际零位比例；随机过程若使用 `hash(state + controllable)` 且状态按已知输出线性更新，应立即检查能否让下一轮哈希输入保持不变。 |
+| [ACTF2023-mt-speed-run-wp](../raw/crypto/ACTF2023-mt-speed-run-wp.md) | 把 MT19937 的状态更新与 temper 符号化为 $\mathrm{GF}(2)$ 线性映射，用大量 1 位截断输出恢复 19968 位状态；线性 PRNG 即使只泄露少量输出位，只要样本足够多且变换参数已知，仍可能形成满秩方程组。 |
+| [MoeCTF2024-ezLCG-wp](../raw/crypto/MoeCTF2024-ezLCG-wp.md) | 本题的决定性缺陷不是 LCG 参数本身可见，而是 DSA 临时随机数之间存在可消元的线性关系。先用签名方程把每个 $k_i$ 表成私钥 $d$ 的一次式，再通过相邻差分消去 LCG 的 $a,b$，即可把私钥恢复转化为有限域低次方程求根。实现时还应遍历并验证全部候选根，避免把求根结果的排列顺序误当成密码学依据。 |
+| [SekaiCTF2026-orbital-strike-wp](../raw/crypto/SekaiCTF2026-orbital-strike-wp.md) | 嵌套 LCG 仍保留低秩线性递推。差分和滑动窗口先把未知初值转成核关系，结果式恢复内层模数与乘数，二阶差分消元再暴露外层模数。模元素的整数提升存在符号歧义，恢复参数后必须重放两层递推并验证 AES padding，不能只凭“解出可打印文本”接受候选。 |
+| [UMDCTF2018-bitcon-wp](../raw/crypto/UMDCTF2018-bitcon-wp.md) | 公开区块哈希可以作为可复现的随机信标，却不能直接作为钱包私钥等秘密材料的熵源。遇到“使用公开数据生成密钥”的题目，应先定位种子来源和时间范围，再复现完整的密钥、公钥派生过程，而不是攻击椭圆曲线本身。 |
+| [UMDCTF2024-possible-futures-wp](../raw/crypto/UMDCTF2024-possible-futures-wp.md) | 利用公开生成器中的固定 PRNG 种子重演随机树和 flag 放置决策，只解压命中的一条路径；附件规模极大但同时给出生成脚本、固定 `random.seed()` 和确定性编号时，应优先模拟生成过程，而不是机械遍历所有归档。 |
 
 ## 原始资料
 

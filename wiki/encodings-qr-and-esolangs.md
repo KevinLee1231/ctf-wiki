@@ -52,11 +52,25 @@ updated: 2026-07-27
 | [D3CTF2021-shellgen2-wp](../raw/web/D3CTF2021-shellgen2-wp.md) | 无字母数字 PHP 生成器本质是受限字符表达式构造，先建字符索引表和递增优化。 |
 | [Xp0intCTF2017-MaybeNotStandrad-wp](../raw/reverse/Xp0intCTF2017-MaybeNotStandrad-wp.md) | 输入 45 字节、输出 60 字符且有 64 字符表，是标准 Base64 结构加非标准字母表；先还原表再解码。 |
 | [NCTF2026-vm-encryptor-wp](../raw/reverse/NCTF2026-vm-encryptor-wp.md) | 先写自定义 VM disassembler 理清 opcode；真实算法是循环位移/XOR 后进魔改 Base64，再整体 XOR。 |
+| [0xGame2020-week1-lowerBase64-wp](../raw/crypto/0xGame2020-week1-lowerBase64-wp.md) | 按 Base64 四字符分组枚举丢失的大小写位，再用已知明文字符集剪枝；字符串完全小写但形态像 Base64，且直接解码得到乱码或不符合 flag 格式。 |
+| [0xGame2025-week2-这个b64不太对啊-wp](../raw/crypto/0xGame2025-week2-这个b64不太对啊-wp.md) | 利用 Base64 第四索引只依赖第三明文字节低 6 位的性质构造映射 oracle；编码位拆分保持标准 Base64，只随机置换输出字符表，且允许选择明文查询。 |
+| [D3CTF2024-Baldurs-Gate-3-Complete-Spell-List-wp](../raw/crypto/D3CTF2024-Baldurs-Gate-3-Complete-Spell-List-wp.md) | 本题的关键是从标题和数据形态构造码表。九个法术等级在统一减一后自然覆盖 $0$ 至 $8$，而三个九进制位的范围为 $0$ 至 $728$，足以编码 ASCII。先用开头几组验证出 `http`，再批量解码全部数据，可以避免在错误编码方向上继续尝试。 |
+| [MoeCTF2024-拼图糕手-revenge-wp](../raw/crypto/MoeCTF2024-拼图糕手-revenge-wp.md) | 这题最容易错在变换顺序。数字没有在原位置编码，而是集中追加后再随整串反转；解密数字链时也必须从已知末位向前递推。二维码只负责承载密文，自定义编码才是决定最终 flag 的步骤。 |
+| [UMDCTF2020-halls-harmony-wp](../raw/crypto/UMDCTF2020-halls-harmony-wp.md) | 音频在本题中只是七进制数字的物理载体。先按固定符号时长恢复离散音高，再按三位一组解释为七进制，比直接尝试语音识别或把频率当 ASCII 更符合生成机制。 |
+| [UMDCTF2021-whose-base-is-it-anyway-wp](../raw/crypto/UMDCTF2021-whose-base-is-it-anyway-wp.md) | “Base-N”不一定是标准库里的 Base16、Base32 或 Base64。本题的 `n` 表示每个输出符号承载的位数，核心是位流重组。逆向自定义编码时应先记录切片宽度、位序、字符表和尾部剩余位的处理，再严格反转层次顺序。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Base/hex/URL/ROT/字符集或自定义码表形成可逆链 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
+| QR/条码/网格符号被分片、旋转、反色或多层叠加 | [qr-and-structured-symbol-reassembly.md](qr-and-structured-symbol-reassembly.md) |
+| 扩展名、magic、容器边界或内嵌载荷不一致 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
 
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖通用编码、二维码、esolang、Unicode、浮点/数字列等多条路线，第一步判断不同，不能作为单一 technique。
-- 暂不拆 Base/QR/esolang 小页：这些内容当前多为速查和短案例，直接拆会增加查询成本；后续若某类积累多篇 WP 再拆具体 technique。
+- 已把可逆编码链、QR 结构重组和文件载荷识别拆为 technique；esolang 仍按解释器行为转 reverse family。
 - 不并入 [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)：后者更偏异常文件/格式清洗，本页负责轻量可逆编码和文本/QR/esolang 首轮判断。
 
 ## 常见陷阱

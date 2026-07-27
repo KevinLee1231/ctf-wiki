@@ -8,7 +8,7 @@ raw:
   - ../raw/ai-ml/RCTF2025-the-alchemists-cage-wp.md
   - ../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md
   - ../raw/ai-ml/VNCTF2026-huntingagent-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # LLM Attacks
@@ -43,6 +43,14 @@ updated: 2026-07-06
 | LLM 输出作为 key/seed/password | 模型、prompt、temperature 和输出格式是否已知，输出分布是否集中 | 批量采样候选输出，派生 key 后用密文/校验 oracle 碰撞验证 |
 | agent 附件链 | 附件是否能从“分析”推进到执行 | 转 [scripts-and-obfuscation.md](scripts-and-obfuscation.md) 或 malware |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 不可信 prompt、网页、邮件或附件能改变 tool call | [prompt-injection-and-tool-call-hijacking.md](prompt-injection-and-tool-call-hijacking.md) |
+| Unicode、token 分片、编码或输出后处理产生表示差异 | [token-smuggling-and-output-constraint-bypass.md](token-smuggling-and-output-constraint-bypass.md) |
+| 模型输出被直接派生为 key、seed、password 或 token | [llm-output-derived-secret-recovery.md](llm-output-derived-secret-recovery.md) |
+
 ## 来自 WP 的案例索引
 
 | Raw WP | 可复用联系 |
@@ -51,12 +59,14 @@ updated: 2026-07-06
 | [SUCTF2026-easyLLMWP](../raw/ai-ml/SUCTF2026-easyLLMWP.md) | 服务端公开 `key = SHA256(LLM_output)[:16]`、模型、prompt 和 temperature；低温输出空间集中时，把 LLM 当弱 key generator，批量采样候选输出后用 AES-CBC 密文和 padding/明文格式 oracle 碰撞。 |
 | [VNCTF2026-huntingagent-wp](../raw/ai-ml/VNCTF2026-huntingagent-wp.md) | Multi-Agent 审计平台要同时看 Supervisor 截断审查、Coordinator ReAct 调度和 Skill 触发概率；prompt leak 与工具执行可各拿一段 secret。 |
 | [WMCTF2025-shopping-company-phishing-email-wp](../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md) | 客服 AI 会分析附件时，prompt injection 可以把“解压并检查 zip”推进到工具执行 ELF；判断重点是工具链而不是聊天输出本身。 |
+| [ACTF2023-slm-wp](../raw/ai-ml/ACTF2023-slm-wp.md) | 本题的决定性问题不是传统意义上的“让模型说出秘密”，而是应用把模型生成的文本直接送入 Python 执行器。审计 LLM 应用时，应沿数据流检查模型输出最终进入了普通文本、结构化解析器，还是 `exec`、`eval`、解释器或系统命令等执行边界。 |
+| [WMCTF2024-give-your-shell-wp](../raw/ai-ml/WMCTF2024-give-your-shell-wp.md) | 第一层：prompt 中直接泄露 flag；第二层：工具函数黑名单过窄，`os.popen` 是真实命令执行点。 |
 
 ## 合并与拆分结论
 
 - 保留为 family：LLM 攻击覆盖 prompt、上下文、工具和附件链，多数题需要先判断边界。
 - 不合并进 adversarial ML：LLM 攻击不依赖梯度/扰动范数，验证方式不同。
-- 暂不拆 prompt injection/tool-use 小页：当前 raw 更需要保持链路关系。
+- prompt/tool、token/输出约束和输出派生秘密已拆为三个 technique；本页只保留三者之间的首轮边界。
 
 ## 常见误判
 

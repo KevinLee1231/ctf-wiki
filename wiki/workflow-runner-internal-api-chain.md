@@ -4,7 +4,7 @@ tags: [web, pentest, workflow, runner, internal-api, graphql, mcp, build, token,
 skills: [ctf-web, ctf-cloud-infra, ctf-pentest]
 raw:
   - ../raw/web/Spirit2026-5-flowforge-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Workflow Runner Internal API Chain
@@ -64,6 +64,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [HGAME2026-my-little-assistant-wp](../raw/web/HGAME2026-my-little-assistant-wp.md) | MCP 工具只暴露 `py_request`，但 Playwright 禁用 Web 安全后外部页面可请求 localhost MCP JSON-RPC 调用 `py_eval`。 |
+| [ACTF2023-hooks-wp](../raw/cloud-infra/ACTF2023-hooks-wp.md) | 本题的核心不是单独的 SSRF 或单独的 Jenkins CVE，而是多个看似有限的能力跨越信任边界后形成完整攻击链：共享的 SCM 出口 IP 绕过网关白名单，302 把不可用的 POST 变成可用的 GET，Flask 的 `redirect_url` 把外部请求转入 Docker 内网，Stapler 动态路由与沙箱外 Groovy 校验最终提供命令执行。 |
 
 ## 原始资料
 

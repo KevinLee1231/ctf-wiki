@@ -6,7 +6,7 @@ raw:
   - ../raw/pwn/oob-jit-parser-primitives.md
   - ../raw/pwn/D3CTF2019-basic-basic-parser-wp.md
   - ../raw/pwn/D3CTF2021-easy-chrome-full-chain-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # OOB / JIT / Parser 原语技巧族
@@ -50,6 +50,14 @@ updated: 2026-07-06
 | seccomp/sandbox | syscall 被过滤，能读写内存但不能直接 execve | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md) | 转 open/read/write、ORW、SROP、ret2dlresolve 或文件描述符继承。 |
 | kernel/user boundary | ioctl、copy_from_user、slab、race | [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md) | 若目标是理解状态机而非提权，先 pivot 到 reverse 页面。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| JIT 类型反馈/边界优化产生 OOB、addrof/fakeobj | [jit-oob-and-runtime-object-corruption.md](jit-oob-and-runtime-object-corruption.md) |
+| 协议长度/状态/parser 消费量失配产生破坏 | [protocol-length-state-parser-corruption.md](protocol-length-state-parser-corruption.md) |
+| 整数、浮点、指针和原始字节解释差异形成 primitive | [data-interpretation-memory-primitives.md](data-interpretation-memory-primitives.md) |
+
 ## 常见陷阱
 
 - 只追 crash，不量化 primitive；没有 primitive 表就很难稳定迁移到远程。
@@ -69,6 +77,15 @@ updated: 2026-07-06
 | [LilacCTF2026-na1vm-wp](../raw/pwn/LilacCTF2026-na1vm-wp.md) | 自定义 VM 任务队列 OOB 覆盖 `head/tail/size` 后控制寄存器和栈基址；任意写还要恢复 glibc `__exit_funcs` pointer mangling key。 |
 | [RCTF2025-no-check-wasm-wp](../raw/pwn/RCTF2025-no-check-wasm-wp.md) | V8/WASM 类型校验缺陷允许 `externref` 与 `i64` 互转，先构造 `addrOf/fakeObj`，再泄露栈和 RWX 页写 shellcode。 |
 | [SUCTF2026-BoxWP](../raw/pwn/SUCTF2026-BoxWP.md) | J2V8 内嵌 V8 9.3.345.11，先排除 Java 沙箱逃逸，再用 CVE-2021-38003 `JSON.stringify` hole 做 OOB/addrof/RWX wasm。 |
+| [0xGame2025-week2-VM-wp](../raw/pwn/0xGame2025-week2-VM-wp.md) | 本题的利用原语不是泛泛的“VM 可以改 GOT”，而是负 `sp` 造成的定向越界：先用 19 次 `pop` 读出 `puts@GOT` 的低 32 位，在 VM 内构造 `puts-system` 的偏移，再用半宽写回把 GOT 改成 `system`。复现时应从 ELF 和 libc 计算 `stack[-18]` 与 `0x300e0`，避免把原题脚本中的常量误当成普适值。 |
+| [UMDCTF2025-literally-1984-wp](../raw/pwn/UMDCTF2025-literally-1984-wp.md) | 链条是“错误常量折叠 → 优化版本专属 OOB → 扩大数组长度 → 伪造 ArrayBuffer backing store → 任意读写 → 劫持 Wasm 跳转表”。应分别验证解释器、基线编译器和优化编译器对值域的认识，并锁定目标 V8 提交与构建参数。 |
+| [WMCTF2022-broobwser-wp](../raw/pwn/WMCTF2022-broobwser-wp.md) | 利用 LibJS 对象布局破坏，把 `ArrayBuffer` / `DataView` 的元数据改成可控指针，从而获得任意地址读写，再泄露 libc 并布置 ROP；题目给的是单独 JS 解释器、固定 commit 和补丁，而远端只执行脚本文件时，应优先做引擎对象模型和堆布局分析，不要把服务端包装层当主要攻击面。 |
+| [WMCTF2022-ctf-team-simulator-wp](../raw/pwn/WMCTF2022-ctf-team-simulator-wp.md) | 把二进制当作一门小 DSL 解释器来逆向，先恢复 token 与语法，再找特权命令的语义约束；服务端收集一整段脚本后再交给本地程序执行，且二进制中出现大量 flex/yacc 风格 token 时，应优先分析语法动作和命令状态机。 |
+| [WMCTF2023-corejs-wp](../raw/pwn/WMCTF2023-corejs-wp.md) | 利用 DFG JIT 未正确 clobberize 的副作用制造 `ArrayWithDouble` 与 `ArrayWithContiguous` 类型混淆；JSC 补丁涉及 `ValueAdd`、DFG、`clobberize`、`jsCast` 或 structure id 检查时，应重点寻找 JIT 假设与运行时对象类型不一致的路径。 |
+| [WMCTF2023-jit-wp](../raw/pwn/WMCTF2023-jit-wp.md) | 利用 JIT 校验与实际内存访问语义不一致造成的越界读写；题目让用户提交字节码/JIT 程序，并声称做了内存边界检查时，应对比“校验器接受的访问”和“运行时真正生成的访问”。 |
+| [WMCTF2024-babysigin-wp](../raw/pwn/WMCTF2024-babysigin-wp.md) | 题目重点不是传统内存破坏，而是满足 LLVM pass 的静态模式匹配；四层调用链、`0x7890`、`0x6666`、全局 `0x8888` 是关键约束。 |
+| [WMCTF2024-blindvm-wp](../raw/pwn/WMCTF2024-blindvm-wp.md) | 本题保留为空白型 raw WP，原因是官方文档和源码仓库均缺少细节；没有把其他 VM 题的机制硬套到本题，避免归档后产生错误知识。 |
+| [WMCTF2024-evm-wp](../raw/pwn/WMCTF2024-evm-wp.md) | 漏洞本质：虚拟地址隔离和物理内存访问路径混用；利用目标：普通进程通过 store 修改特权进程代码页。 |
 
 
 ## 关联技巧

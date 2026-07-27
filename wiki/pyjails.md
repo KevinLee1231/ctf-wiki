@@ -5,7 +5,7 @@ skills: [ctf-pwn, ctf-web, ctf-reverse]
 raw:
   - ../raw/pwn/pyjails.md
   - ../raw/web/WMCTF2025-guess-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Python Jails
@@ -51,6 +51,19 @@ updated: 2026-07-06
 | [LilacCTF2026-checkin-wp](../raw/web/LilacCTF2026-checkin-wp.md) | Python eval jail 经过 IDNA/正则过滤后仍保留 `vars()`、`dir()` 和可变 `LockedList`；原地 pop/append 修改状态。 | 跨页补入 |
 | [VNCTF2026-i-really-really-really-and-revenge-wp](../raw/web/VNCTF2026-i-really-really-really-and-revenge-wp.md) | Pyjail 封数字、字符串和 builtins 后，仍可用布尔造数、类元信息造字符串、`object.__subclasses__()` 找全局模块，并用异常外带。 | 跨页补入 |
 | [VNCTF2026-i-really-really-really-ultimate-wp](../raw/web/VNCTF2026-i-really-really-really-ultimate-wp.md) | Unicode 绕过被补后，生成器 `gi_frame.f_back` 仍能回溯栈帧恢复 `builtins`，再拼 `/flag` 并用断言报错泄露。 | 跨页补入 |
+| [MoeCTF2025-pyjail-5-wp](../raw/pwn/MoeCTF2025-pyjail-5-wp.md) | 利用 Python `match` 类模式的运行时属性提取绕过只检查 `ast.Attribute` 的过滤器；沙箱允许 `match/case` 和类模式，却仅禁止点号节点时，应检查 `MatchClass.kwd_attrs` 是否形成等价属性访问。 | 本页对应路线 |
+| [UMDCTF2025-evaldle-wp](../raw/pwn/UMDCTF2025-evaldle-wp.md) | 共享命名空间让攻击者把复杂表达式拆成多轮短赋值，而成功/异常的二值差异可组成比较预言机；长度限制不能替代语法白名单或进程隔离。 | 本页对应路线 |
+| [UMDCTF2026-exponential-wp](../raw/pwn/UMDCTF2026-exponential-wp.md) | 频率检查只约束第一阶段文本，却允许访问已有 Python 对象并修改其类方法。利用比较运算隐式调用 `__eq__`，可以先取得二阶段输入，再交给 `exec`。构造时应先固定最短有效语义，再把频数补到二次幂，而不是反过来从频率表猜代码。 | 本页对应路线 |
+| [WMCTF2020-python-is-fun-wp](../raw/pwn/WMCTF2020-python-is-fun-wp.md) | 源码层受限时可转向 bytecode：用 `LOAD_BUILD_CLASS` 取得内建函数对象，借 `FORMAT_VALUE`、布尔比较和 `__doc__` 拼出属性名，再经 `getattr` 进入 Python 对象链，最终抵达 `builtins.__import__`。 | 本页对应路线 |
+| [UMDCTF2022-simple-calculator-wp](../raw/web/UMDCTF2022-simple-calculator-wp.md) | 字符串黑名单无法给 `eval` 建立安全边界；即使返回值被限制为整数，比较、长度和算术仍能形成一位信息的侧信道。审计此类“受限计算器”时，应分别检查可访问的作用域、允许的表达式语法和输出类型转换，不能只寻找命令执行。 | 本页对应路线 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Python 对象图、subclasses 或函数 globals 可恢复 builtins | [restricted-runtime-object-graph-and-capability-recovery.md](restricted-runtime-object-graph-and-capability-recovery.md) |
+| 现有 fd/cwd/fifo/环境 capability 可越过字符或 API 限制 | [sandbox-capability-and-inherited-channel-bypasses.md](sandbox-capability-and-inherited-channel-bypasses.md) |
+| 禁用字符需通过编码、码表、切片或表示层生成 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
 
 ## 合并与拆分结论
 

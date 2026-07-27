@@ -6,7 +6,7 @@ raw:
   - ../raw/forensics/pcap-protocol-credential-recovery.md
   - ../raw/forensics/SUCTF2026-LightNovelWP.md
   - ../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # PCAP 协议、凭据与文件恢复技巧族
@@ -60,6 +60,20 @@ updated: 2026-07-06
 | [VNCTF2026-ez-iot-wp](../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md) | ESP-NOW 捕获不能直接把整帧当密文；先定位 vendor frame 和应用层 magic，再按 `seq`、`total`、IV、AES-CBC 密文切块重组 PNG。 |
 | [D3CTF2021-easy-quantum-wp](../raw/crypto/D3CTF2021-easy-quantum-wp.md) | PCAP 中传输 pickle/numpy 量子态和测量基，先按流量结构恢复 BB84 密钥再异或密文。 |
 | [D3CTF2021-robust-wp](../raw/forensics/D3CTF2021-robust-wp.md) | HTTP/3/QUIC 流量和媒体信号混合，先重组网络层数据，再转频谱或 payload 提取。 |
+| [0xGame2023-week2-notverybadusb-wp](../raw/forensics/0xGame2023-week2-notverybadusb-wp.md) | USB 键盘取证要先锁定设备和端点，再核对报告长度、修饰键、按键码与释放帧。后续载荷应静态分析并对 URL 失活处理，不在宿主机直接执行；哈希必须针对脚本实际下载的文件，而不是 PowerShell 文本或 PCAP 附件。 |
+| [0xGame2025-week4-Big-and-beautiful-wp](../raw/forensics/0xGame2025-week4-Big-and-beautiful-wp.md) | 本题的重点不是某一个工具，而是把不同证据源串成完整攻击时间线：SAM 与 SYSTEM 恢复最初受害主机的本地凭据；站点目录和 Web 日志确认 Craft CMS RCE 及木马落地命令；MySQL 表空间保留攻击者修改的密码；VeraCrypt 容器给出重要文件和喷洒字典；最后由 SMB、NTLMSSP 和 DNS 流量确认域账户、成功密码、域名与域控主机名。 |
+| [MoeCTF2023-magnet-network-wp](../raw/forensics/MoeCTF2023-magnet-network-wp.md) | Torrent 的 `pieces` 是对整个文件流按固定长度切块后的 SHA-1 串，不是“一文件一哈希”。本题利用 pad 文件把五个 4 字节片段恰好补成完整 piece，再把最后一个片段单独留在尾部。解题关键是同时理解 bencode、文件拼接顺序、piece 边界和最终按文件名重排的区别。 |
+| [WMCTF2022-1-5-wp](../raw/forensics/WMCTF2022-1-5-wp.md) | 本题核心是“流量里有密文，内存里有解密材料”。TCP/WebSocket 部分要从内存中恢复 `eval.js`，得到“随机补齐、异或 15、25 进制字符串、换表 base64”的加密流程；QUIC/HTTP3 部分要从内存中恢复 TLS 1.3 key log，再交给 Wireshark 解密。 |
+| [WMCTF2023-ghost-wp](../raw/forensics/WMCTF2023-ghost-wp.md) | 修复损坏 SYSTEM hive，提取 bootKey 和 NTDS 哈希，生成 keytab 解密 SMB/Kerberos 流量；PCAP 同时包含 `SYSTEM`、`NTDS`、加密 SMB 流量和压缩包时，应考虑域凭据恢复与流量解密，而不是只做文件 carving。 |
+| [WMCTF2023-oversharing-wp](../raw/forensics/WMCTF2023-oversharing-wp.md) | 从 SMB 流量中导出 LSASS minidump，并用 `pypykatz lsa minidump` 提取凭据；PCAP 中出现大量 SMB 文件传输、可导出 `.DMP` 或 `lsass` 相关对象时，应优先尝试 Windows 凭据解析。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 会话分段、重传、chunk/framing 后恢复对象或凭据 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
+| DNS 记录、label/tunnel 或解析时序承载数据 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| 恶意 C2 协议、会话 key 和配置恢复是主障碍 | [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md) |
 
 ## 常见陷阱
 

@@ -4,7 +4,7 @@ tags: [crypto, family, classical, xor, substitution]
 skills: [ctf-crypto, ctf-stego]
 raw:
   - ../raw/crypto/classical-xor-and-substitution-ciphers.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Classical XOR and Substitution Ciphers
@@ -40,6 +40,14 @@ updated: 2026-07-06
 | book/lorenz/长文本替换 | 外部文本、同步轮、crib 和统计模型 | [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md) |
 | 图片 Caesar、semaphore、视觉编码 | 可视排列、坐标/条带偏移、手势表或图像通道 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)、[cross-category-triage-family.md](cross-category-triage-family.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 多份密文复用 XOR/流密码 keystream，或有已知明文锚点 | [stream-cipher-keystream-reuse-and-state-recovery.md](stream-cipher-keystream-reuse-and-state-recovery.md) |
+| Base/ROT/字符集/自定义码表和位序构成可逆表示链 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
+| Lorenz 或 book cipher 的轮结构、轮位或文本索引决定解法 | [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：它负责轻量 Crypto 与视觉/空间表示边界之间的分流，避免把所有 XOR/替换短案例散成低密度 technique。
@@ -61,6 +69,15 @@ updated: 2026-07-06
 - [rc4-lfsr-and-keystream-reuse.md](rc4-lfsr-and-keystream-reuse.md)
 - [lorenz-and-book-cipher-attacks.md](lorenz-and-book-cipher-attacks.md)
 - [cross-category-triage-family.md](cross-category-triage-family.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [MoeCTF2021-ex-viginere-wp](../raw/crypto/MoeCTF2021-ex-viginere-wp.md) | 把两个互素周期的仿射密钥合并为长度 77 的单表列，使用重合指数定周期、频率评分恢复每列参数；加密同时出现周期乘法和周期加法时，真实统计周期通常是两个长度的最小公倍数，而不是任一单独长度。 |
+| [WMCTF2024-turing-wp](../raw/crypto/WMCTF2024-turing-wp.md) | 长 crib 使 Bombe 剪枝非常有效；对角线板的作用是把插线板对称关系纳入传播，快速排除错误 key。 |
 
 ## 原始资料
 

@@ -4,7 +4,7 @@ tags: [cross-category, family, interactive, container, jail, solver, oracle]
 skills: [ctf-solve-challenge, ctf-pwn, ctf-pentest, ctf-cloud-infra, ctf-reverse]
 raw:
   - ../raw/pwn/interactive-containers-jails-and-solvers.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Interactive Containers, Jails and Solvers
@@ -42,6 +42,14 @@ updated: 2026-06-12
 | Nonogram、15-puzzle、100 prisoners、Levenshtein oracle | 先建规则模型和验证器，再生成最短 solver | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
 | 像素边缘重组、二维码输出、碎片拼接 | 先恢复几何/网格证据，再转图像或二维码页面 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 受限运行时仍可沿对象图恢复宿主 capability | [restricted-runtime-object-graph-and-capability-recovery.md](restricted-runtime-object-graph-and-capability-recovery.md) |
+| shell expansion、工具副作用或输出通道可绕过命令代理 | [restricted-shell-feature-and-output-channel-escape.md](restricted-shell-feature-and-output-channel-escape.md) |
+| JIT/解释器对象布局错误提供 OOB 与任意读写 | [jit-oob-and-runtime-object-corruption.md](jit-oob-and-runtime-object-corruption.md) |
+
 ## 合并与拆分结论
 
 本页应保留为 family。它与 [pyjails.md](pyjails.md) 和 [bashjails.md](bashjails.md) 不重复：后两者处理具体语言/ shell 逃逸，本页处理交互环境、容器边界和规则系统的首轮分流。也不并入 [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)，因为容器与交互 oracle 的证据形态不同。
@@ -70,6 +78,9 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [ACTF2026-farthest2026-wp](../raw/pwn/ACTF2026-farthest2026-wp.md) | DOS/dosemu2/COMCOM64 sidecar 形成容器边界逃逸，先确认虚拟化边界、helper 加载和 host 侧执行点。 |
+| [0xGame2023-week4-魔方大师-wp](../raw/_unclassified/0xGame2023-week4-魔方大师-wp.md) | 本题的难点不在手工魔方公式，而在表示转换和限时自动化：先从 ANSI 颜色恢复 54 个面片，再把服务端展开图重排为 URFDLB，最后把 Kociemba 记号翻译成服务端动作字符。将解析、求解和协议交互拆开校验，可以避免面序或逆时针符号错误导致整轮失败。 |
+| [SekaiCTF2026-bejeweled-wp](../raw/_unclassified/SekaiCTF2026-bejeweled-wp.md) | 终端游戏自动化的首要问题是正确恢复屏幕状态。直接按换行读取会被 ANSI 光标控制破坏；应维护虚拟终端缓冲区，在稳定的语义棋盘上搜索，并把动画、网络延迟和服务端节流纳入状态机。结果提取也不能假设胜利与失败共用布局，应在所有帧中持续搜索 flag。该题的决定性工作是实时游戏求解与终端自动化，不稳定映射到 14 个安全方向，因此保留在 `_unclassified`。 |
+| [SekaiCTF2026-skyblock-wp](../raw/_unclassified/SekaiCTF2026-skyblock-wp.md) | 这是一条两级跨模块套利链：先利用鱼竿的 100/750000 价差取得启动资金，再利用 `Speedster Boots` 的低成本合成配方和 $1.5\times10^{12}$ 做市参考价越过最终门槛。分析此类经济题时，应把 NPC 买卖价、合成成本、做市参考价、动态系数、市场反馈权重和税率放在同一张表中，并检查是否存在从低价来源走到高价收购端的闭环。 |
 
 ## 原始资料
 

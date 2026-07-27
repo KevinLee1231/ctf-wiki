@@ -43,6 +43,14 @@ updated: 2026-07-27
 | 堆题 | UAF/double free/tcache poisoning，先确认 glibc 版本。 |
 | 保护驱动路线 | RELRO、PIE、Canary、NX、seccomp 决定目标选择。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| saved PC/frame 可控，后续受栈空间、gadget 和保护限制 | [stack-control-flow-and-constrained-rop.md](stack-control-flow-and-constrained-rop.md) |
+| chunk/bin/UAF/tcache 等 allocator primitive 主导路线 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
+| kernel 对象生命周期、race 和 slab 复用主导路线 | [kernel-object-lifetime-and-race-window.md](kernel-object-lifetime-and-race-window.md) |
+
 ## 常见陷阱
 
 - 不看 checksec 就开始写 ROP。
@@ -52,6 +60,8 @@ updated: 2026-07-27
 
 ## 关联技巧
 
+- [sandbox-capability-and-inherited-channel-bypasses.md](sandbox-capability-and-inherited-channel-bypasses.md)
+- [protocol-length-state-parser-corruption.md](protocol-length-state-parser-corruption.md)
 - [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
 - [cross-primitive-escape-and-hybrid-exploit-map.md](cross-primitive-escape-and-hybrid-exploit-map.md)
 - [data-interpretation-memory-primitives.md](data-interpretation-memory-primitives.md)
@@ -149,6 +159,16 @@ updated: 2026-07-27
 | [D3CTF2025-d3cgi-wp](../raw/pwn/D3CTF2025-d3cgi-wp.md) | FastCGI 1-day 内存破坏依赖 record 长度和堆布局稳定性，先复现补丁差异和二进制请求。 | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) |
 | [D3CTF2025-d3kheap2-wp](../raw/pwn/D3CTF2025-d3kheap2-wp.md) | 新版内核堆题继续围绕 UAF/page/slab 复用，先确认对象释放窗口和可控映射。 | [kernel-uaf-race-and-slab-techniques.md](kernel-uaf-race-and-slab-techniques.md) |
 | [D3CTF2025-d3kshrm-d3kshrm-revenge-wp](../raw/pwn/D3CTF2025-d3kshrm-d3kshrm-revenge-wp.md) | 共享内存 mmap fault 下标越界可映射相邻 struct page，先稳定伪造页表和内核任意映射。 | [kernel-uaf-race-and-slab-techniques.md](kernel-uaf-race-and-slab-techniques.md) |
+| [0xGame2024-week1-Find-me-wp](../raw/pwn/0xGame2024-week1-Find-me-wp.md) | 预测 `srand(time(0))` 生成的随机数，并利用顺序分配的文件描述符定位 flag；秒级时间种子、未关闭的连续 `open()`、可控 fd 的 `read`/`write` 原语。 | 本页对应路线 |
+| [MoeCTF2024-Pwn-it-off-wp](../raw/pwn/MoeCTF2024-Pwn-it-off-wp.md) | 未初始化栈变量可能继承前一个函数留下的数据，而相同大小、相近调用顺序的栈帧尤其容易复用。二进制输入中的 NUL 字节既能提前终止 `strcmp`，又允许 NUL 后的数据继续留在栈中，为下一阶段检查服务。 | 本页对应路线 |
+| [MoeCTF2025-easylibc-wp](../raw/pwn/MoeCTF2025-easylibc-wp.md) | 利用 lazy binding 让同一 GOT 表项先泄露 PIE、解析后再泄露 libc；程序在第一次目标函数调用前后重复打印 GOT 内容，且值从 PLT 区间变为 libc 区间时，应想到延迟绑定状态变化。 | 本页对应路线 |
+| [UMDCTF2023-you-want-me-to-run-what-wp](../raw/pwn/UMDCTF2023-you-want-me-to-run-what-wp.md) | 核心技巧是区分“UTF-8 校验看到的字符序列”和“CPU 看到的机器码字节”；让首条指令立即 `ret`，可以避开后续随机字符被执行的问题。 | 本页对应路线 |
+| [UMDCTF2024-ready-aim-fire-wp](../raw/pwn/UMDCTF2024-ready-aim-fire-wp.md) | 本题利用了“事后边界检查”与 C++ 异常展开的组合。44 字节偏移负责伪造 `fire_weapon` 栈帧，题目泄露负责恢复 `main` 的 RBP，而 landing pad 地址让展开器把异常交给本不在调用链上的 `direct_hit`。分析这类题时要同时查看普通反汇编、`.eh_frame` 和 LSDA 语义，不能把所有覆盖返回地址的题都套成 ret2win。 | 本页对应路线 |
+| [UMDCTF2025-finished-wp](../raw/pwn/UMDCTF2025-finished-wp.md) | 全局缓冲区溢出可攻击 C++ 异常控制流元数据而不触碰返回地址或 GOT；看到 `__cxa_throw`、`_Unwind_*` 和相邻 libgcc 全局对象时，应同时审计 `.eh_frame`、CIE/FDE、personality routine 与 `registered_frames`。 | 本页对应路线 |
+| [UMDCTF2025-off-by-one-error-wp](../raw/pwn/UMDCTF2025-off-by-one-error-wp.md) | NaN 可让错误比较器失去有效顺序，从而保留任意大的桶下标；审计浮点排序与分桶时，应覆盖 NaN、无穷、相等值、最大端点和浮点到整数转换，避免把表面 off-by-one 低估为单元素越界。 | 本页对应路线 |
+| [UMDCTF2025-prison-realm-wp](../raw/pwn/UMDCTF2025-prison-realm-wp.md) | 本题是一条无泄漏的 GOT 相对改写链。ASLR 隐藏了 libc 基址，但已解析 GOT 项本身；已经包含正确高位；攻击者只需给低位增加已知的函数内偏移和 one-gadget 差值。 | 本页对应路线 |
+| [UMDCTF2026-vkexchange-wp](../raw/pwn/UMDCTF2026-vkexchange-wp.md) | Vulkan 描述符索引错误最终仍是内存破坏，只是内存布局由驱动实现决定。题目固定 Mesa 版本，才使 descriptor 大小、set header 和分配顺序可预测。利用不需要读出 GPU 地址：只需把目标输出描述符重定向到可审计的账户缓冲，就能把 shader 变成逐字拷贝 oracle。 | 本页对应路线 |
+| [WMCTF2020-babymac-wp](../raw/pwn/WMCTF2020-babymac-wp.md) | macOS 堆题的整体思路和 Linux 菜单堆题相似，但符号、库偏移和可用执行方式要按目标环境处理。本题的可复用点是先把堆溢出转成 note 表劫持，再用“伪条目指向 GOT”完成泄露和写 GOT；由于 flag 只能通过 `/readflag` 获取，最终选择 `free("/readflag") -> system("/readflag")`，而不是常见的一键 shell。 | 本页对应路线 |
 
 ## 原始资料
 - [pwn-first-pass-red-flags-and-protections.md](../raw/pwn/pwn-first-pass-red-flags-and-protections.md)

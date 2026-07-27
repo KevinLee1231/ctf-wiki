@@ -6,7 +6,7 @@ raw:
   - ../raw/forensics/linux-git-browser-and-container-forensics.md
   - ../raw/forensics/WMCTF2025-githacker-wp.md
   - ../raw/pentest/ACTF2026-ezssh-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Linux, Git, Browser and Container Forensics
@@ -49,6 +49,16 @@ updated: 2026-07-06
 |---|---|---|
 | [WMCTF2025-githacker-wp](../raw/forensics/WMCTF2025-githacker-wp.md) | `git log` 被回滚隐藏时，`git reflog` 可恢复关键提交、密码文件和被删除容器；后续还可能需要按文件格式继续恢复。 | Git reflog + dangling object + 后续文件识别 |
 | [ACTF2026-ezssh-wp](../raw/pentest/ACTF2026-ezssh-wp.md) | SSH 横向链中 `.bash_history`、`authorized_keys`、Debian 弱 key、Git dangling commit 和 systemd backup unit 各提供一段凭据或配置。 | SSH/Git/backup artifact 串联 |
+| [WMCTF2024-metasecret-wp](../raw/forensics/WMCTF2024-metasecret-wp.md) | 第一段：Firefox IndexedDB -> Snappy/StructuredClone -> MetaMask vault -> hashcat -> 助记词；第二段：Web3MQ Snap nonce 公式 -> `sha3_224` 字典爆破 -> Web3MQ 密码。 | 本页对应路线 |
+| [UMDCTF2020-sign-stealing-software-2-wp](../raw/web/UMDCTF2020-sign-stealing-software-2-wp.md) | 声明过滤变量不等于实施过滤。任意文件读取后的下一步应从系统账户、应用配置和版本控制元数据建立路径；Git 的 HEAD、引用和日志可以泄露已经从工作树删除的信息。 | 本页对应路线 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| inode/journal/Git object/删除路径仍可恢复历史文件 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
+| 浏览器进程、profile、container layer 或 whiteout 保留证据 | [memory-process-and-container-layer-recovery.md](memory-process-and-container-layer-recovery.md) |
+| profile/database/container 中存在内嵌对象或伪装格式 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
 
 ## 合并与拆分结论
 

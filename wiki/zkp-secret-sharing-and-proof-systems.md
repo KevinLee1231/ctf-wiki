@@ -4,7 +4,7 @@ tags: [crypto, family, zkp, secret-sharing, garbled-circuit, pairing, proof-syst
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/zkp-secret-sharing-and-proof-systems.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # ZKP, Secret Sharing and Proof Systems
@@ -40,6 +40,14 @@ updated: 2026-06-12
 | MAYO/FROST/阈值签名结构错误 | 先确认 nonce、commitment、share 或矩阵结构是否复用/可扰动 | [lattice-and-lwe.md](lattice-and-lwe.md), [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md) |
 | crypto-protected endpoint 竞争 | 先固定并发窗口和签名修改方式，再转 Web/Pwn race | [race-condition-and-concurrency-exploits.md](race-condition-and-concurrency-exploits.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 签名/证明 transcript 的 nonce、challenge 或子群绑定失败 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
+| `(x,y)` 份额、阈值、Vandermonde 或多项式承诺可恢复秘密 | [secret-sharing-and-polynomial-interpolation.md](secret-sharing-and-polynomial-interpolation.md) |
+| 证明关系需在有限域/多项式环中插值、消元或求根 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
+
 ## 合并与拆分结论
 
 本页应保留为 family。ZKP、garbled circuit、Shamir、KZG 和阈值签名的攻击模型不同，但都属于“验证关系或共享关系缺约束”的二级路由。当前 raw 还不足以拆成多个稳定 technique。
@@ -61,6 +69,14 @@ updated: 2026-06-12
 - [ecc-dlp-and-signature-attacks.md](ecc-dlp-and-signature-attacks.md)
 - [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)
 - [crypto-tooling.md](crypto-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [UMDCTF2025-bron-coin-wp](../raw/crypto/UMDCTF2025-bron-coin-wp.md) | 利用 Groth16 电路中未布尔化的 Merkle 方向变量，把分支选择变成域上的线性插值，伪造成员证明；电路用普通域变量表达布尔选择，却没有 `is_boolean` 或 $d(d-1)=0$ 约束。 |
 
 ## 原始资料
 

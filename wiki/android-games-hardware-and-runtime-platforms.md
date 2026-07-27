@@ -6,7 +6,7 @@ raw:
   - ../raw/reverse/android-games-hardware-and-runtime-platforms.md
   - ../raw/reverse/WMCTF2025-appfriend-wp.md
   - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Android, Games, Hardware and Runtime Platforms
@@ -41,6 +41,14 @@ updated: 2026-07-06
 | Electron/Tauri/Node 桌面应用 | `asar`、JS bundle、native binary、npm package runtime introspection 的边界 | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)、[node-and-prototype.md](node-and-prototype.md) |
 | Verilog/硬件状态机、SGX enclave、AS/400 SAVF、Glulx | 是否先需要恢复平台格式、状态机或执行模型，再谈 flag 算法 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)、[font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 游戏资源、scene、save 或客户端/服务端状态含目标 | [game-asset-and-scene-state-extraction.md](game-asset-and-scene-state-extraction.md) |
+| WebView/URL Scheme/native bridge 是移动平台攻击面 | [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md) |
+| debuggable/run-as/backup 暴露 Android 私有数据 | [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：raw 中平台跨度大，共同价值是先判断“平台/运行时边界”，不是单一算法技巧。
@@ -62,6 +70,8 @@ updated: 2026-07-06
 - [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
 - [anti-analysis.md](anti-analysis.md)
 - [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)
+- [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md)
+- [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md)
 
 ## 来自 WP 的案例索引
 
@@ -85,6 +95,16 @@ updated: 2026-07-06
 | [SUCTF2026-flumelWP](../raw/reverse/SUCTF2026-flumelWP.md) | Flutter/Dart 输入先经 `Rc4Warp`，再由新版 `libjunk.so` 验证 Hermes bundle 并派生 AES-CBC key/IV；旧 placeholder 会误导。 |
 | [SUCTF2026-MvsicPlayerWP](../raw/reverse/SUCTF2026-MvsicPlayerWP.md) | Electron 音乐播放器先解析 `.su_mv` payload，再由 native `.node` 对 WAV 分支执行 VM bytecode 加密；目标是恢复原 WAV MD5。 |
 | [VNCTF2026-login-wp](../raw/reverse/VNCTF2026-login-wp.md) | APK Java 层只组包，native so 完成魔改 AES、HTTP header 签名和 Frida/IDA 环境检测；可结合流量复算。 |
+| [MoeCTF2024-SecretModule-wp](../raw/mobile/MoeCTF2024-SecretModule-wp.md) | 这题的有效分析顺序是先识别 Magisk 模块入口，再解开 Shell 包装，最后把物理按键交互抽象成二元枚举。`getevent -lc 1` 每次只读取一个输入事件；七次选择空间极小，MD5 在这里仅是验证函数，并不需要进行通用哈希破解。 |
+| [UMDCTF2020-droided-chungus-wp](../raw/mobile/UMDCTF2020-droided-chungus-wp.md) | 本题按现存仓库只能走服务端源码复原路线，不能假装完成了已经缺失的 APK 迷宫逆向。服务协议的关键是准确复刻带 32 位溢出的移位异或和打乱过程，再按服务端保存的方向序列推进，最后解 Base85。 |
+| [UMDCTF2023-pokeball-escape-wp](../raw/mobile/UMDCTF2023-pokeball-escape-wp.md) | 同时跟踪 Android 系统属性检查、JNI 方法和资源解密逻辑；仅关闭应用并不等于题目要求的 escape；动态路线：Hook `systemInfo()` 或修补分支，让应用相信设备厂商是 `Devon Corporation`。 |
+| [0xGame2023-week3-虚构核心-wp](../raw/reverse/0xGame2023-week3-虚构核心-wp.md) | 该题的关键是沿动态加载链找到真正的校验代码：外层 APK 只负责用固定密钥循环异或解密 DEX，内层 `FlagChecker` 才包含 flag 结构和 MD5 条件。四位十六进制字符串的搜索空间很小，直接本地穷举既可复现，也避免依赖外部反查结果。 |
+| [ACTF2023-native-app-wp](../raw/reverse/ACTF2023-native-app-wp.md) | 本题的逆向难点有两层：先从 Flutter AOT 而不是 DEX 中恢复 Dart 业务逻辑，再正确理解多个 UI 回调之间的状态依赖。算法本身是标准 RC4，加密前多了一次逐字节异或 `0xff`，利用 RC4 对称性即可直接反解。 |
+| [SekaiCTF2026-ufo-wp](../raw/reverse/SekaiCTF2026-ufo-wp.md) | 这是一道 APK 状态逆向与 QR 重建题，决定性障碍不是 Android 权限或付费逻辑，因此归入 Reverse 比仓库原先的 Misc 更准确。面对名称混淆，应优先追踪仍可读的偏好键、方法签名和状态数据流；识别出 $21\times21$ 网格后，也不能因为缺少三个定位框就否定 QR，而应按版本补齐功能模块，再由格式信息或枚举确定纠错等级与 mask。 |
+| [UMDCTF2023-jnidorino-wp](../raw/reverse/UMDCTF2023-jnidorino-wp.md) | 将托管层 native 声明、实际调用和 ELF 导出符号视为三个集合，优先做集合差分；大量同构、随机命名的 JNI 包装通常是噪声；题目若提示“漏掉一个函数”，应先比较数量与名称，而不是逐函数逆向。 |
+| [UMDCTF2023-playtime-wp](../raw/reverse/UMDCTF2023-playtime-wp.md) | 从地图头指针表和异常地图常量定位隐藏内容，而不是盲目通关整部游戏；“地图存在但没有 warp”是典型不可达资源信号，可通过调试器改地图 ID 或补丁已有入口访问。 |
+| [WMCTF2023-ezandroid-wp](../raw/reverse/WMCTF2023-ezandroid-wp.md) | 对 goron 控制流平坦化和字符串加密的 Android native 库，先 hook `RegisterNatives` 定位 JNI 函数，再绕过 Frida 检测并动态抓 RC4/AES 的输入输出。 |
+| [WMCTF2024-re1-wp](../raw/reverse/WMCTF2024-re1-wp.md) | 识别点：导出表函数和实际 JNI 注册函数不一致；分析方式：从 `JNI_OnLoad/RegisterNatives` 反查真实 native 方法。 |
 
 ## 原始资料
 

@@ -6,7 +6,7 @@ raw:
   - ../raw/crypto/homomorphic-and-exotic-algebra.md
   - ../raw/crypto/SUCTF2026-RestaurantWP.md
   - ../raw/crypto/VNCTF2026-ezov-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Homomorphic and Exotic Algebra
@@ -43,6 +43,14 @@ updated: 2026-07-06
 | Hamming code、交织、差分隐私噪声 | 先恢复编码/采样模型，再通过重复查询、纠错或噪声抵消恢复明文 | [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md) |
 | BB84/QKD、双方协议交互可控 | 先建攻击者控制的消息流和基选择，再比较校验阶段能否通过 | [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 密文群运算可构造明文变换并触发业务反馈 | [homomorphic-ciphertext-malleability-oracles.md](homomorphic-ciphertext-malleability-oracles.md) |
+| 群/环运算最终化为多项式、模根或插值问题 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
+| 反馈只给比较、成功位或 timing，需要先建立谓词 | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
+
 ## 合并与拆分结论
 
 本页应保留为 family。它承接的是低频 crypto 结构的首轮识别，而不是具体算法步骤。当前 raw 多为短案例，拆分成 Paillier、ElGamal、Braid、FPE、BB84 等小页会形成孤立节点。
@@ -57,6 +65,10 @@ updated: 2026-07-06
 | [D3CTF2021-alice-want-flag-wp](../raw/crypto/D3CTF2021-alice-want-flag-wp.md) | ElGamal 乘法同态和长度 oracle 可逐位泄露密码，再结合短 key meet-in-the-middle。 |
 | [LilacCTF2026-bootstrapping-wp](../raw/crypto/LilacCTF2026-bootstrapping-wp.md) | 同态、配对或特殊代数结构暴露运算关系，先确认可组合操作和明文空间。 |
 | [RCTF2025-repairing-wp](../raw/crypto/RCTF2025-repairing-wp.md) | Pairing/ElGamal 风格密文可重随机化：同时改 `C1,C2,C3` 保持 shared key 不变，服务端未去重时可解出原 flag key。 |
+| [0xGame2024-week2-Elgamal-wp](../raw/crypto/0xGame2024-week2-Elgamal-wp.md) | 漏洞来自验签输入域不完整：$r$ 既作为指数又作为模 $q$ 的底数，却没有被限制在标准区间。通过同时满足模 $q-1$ 和模 $q$ 的两个同余条件，可以把已有签名线性缩放到新消息；修复时至少要检查 $0<r<q$、$0<s<q-1$。 |
+| [ACTF2025-tinyCKKS-wp](../raw/crypto/ACTF2025-tinyCKKS-wp.md) | 从 CKKS 近似解密值乘回缩放因子，恢复含噪声的精确环元素，进而解线性方程得到秘密；再用多轮误差恢复 MT19937 状态；服务返回高精度近似明文、误差远小于缩放因子，并重复使用可预测 PRNG 生成小误差时，应检查是否能恢复 $pt+e$ 和 PRNG 输出。 |
+| [UMDCTF2023-noisy-bits-wp](../raw/crypto/UMDCTF2023-noisy-bits-wp.md) | 识别 Golay $(23,12,7)$ 纠错码，利用其三位纠错能力恢复每个被扰动的码字；12 位输入、23 位输出、固定多项式和每块至多三位噪声是非常强的编码参数特征。 |
+| [WMCTF2022-homo-wp](../raw/crypto/WMCTF2022-homo-wp.md) | 本题核心是把简化同态加密还原成 AGCD 问题。公钥不是随机大数，而是一组共享隐藏因子 $q$ 的近似倍数；只要用格规约恢复 $q$，每个密文位都能通过 $(c\bmod q)\bmod 2$ 解出。 |
 
 ## 常见陷阱
 

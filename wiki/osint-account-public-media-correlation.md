@@ -8,7 +8,7 @@ raw:
   - ../raw/osint/RCTF2025-speak-softly-love-wp.md
   - ../raw/osint/RCTF2025-wanna-feel-love-wp.md
   - ../raw/osint/SUCTF2026-SigninWP.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # OSINT Account and Public Media Correlation
@@ -50,6 +50,14 @@ updated: 2026-07-06
 | Archive / mirror / gopher | 页面失效时优先保存 archive、Ghostarchive、gopher 或站点镜像，再继续串联。 |
 | 媒体隐写混合 | 如果图片/音频/视频同时出现异常 artifact，先分离“公开来源证据”和“文件内容恢复”两条线。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| username/avatar/post/game profile 需跨平台建立身份链 | [cross-platform-account-and-public-media-correlation.md](cross-platform-account-and-public-media-correlation.md) |
+| DNS/WHOIS/CT/Archive/repo/document metadata 提供 pivot | [public-record-dns-whois-and-archive-pivoting.md](public-record-dns-whois-and-archive-pivoting.md) |
+| 图片/视频/坐标/地标与账号媒体需联合定位 | [visual-geolocation-and-media-metadata-correlation.md](visual-geolocation-and-media-metadata-correlation.md) |
+
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖社交账号、游戏平台、公开媒体、GitHub/博客、archive、Unicode 隐写和平台 API，重点是身份节点之间的 pivot。
@@ -79,6 +87,13 @@ updated: 2026-07-06
 | [RCTF2025-speak-softly-love-wp](../raw/osint/RCTF2025-speak-softly-love-wp.md) | 音乐视频、个人主页、音频文件、SVN 和 gopher 页面串联时，先保存每个公开 URL 和时间线。 |
 | [RCTF2025-wanna-feel-love-wp](../raw/osint/RCTF2025-wanna-feel-love-wp.md) | 多阶段 OSINT 可同时包含隐写、媒体元数据、购买记录和墓碑信息，避免只按音频题处理。 |
 | [SUCTF2026-SigninWP](../raw/osint/SUCTF2026-SigninWP.md) | 签到题给公开团队页面时，应先检查 CTFtime/主页等公开资料里的 flag-like 字符串。 |
+| [0xGame2025-week3-我是NaeS姐姐的舔狗-wp](../raw/osint/0xGame2025-week3-我是NaeS姐姐的舔狗-wp.md) | 本题考查跨平台身份关联与证据闭环。有效线索不是孤立的：博客的居住地与站台照片共同确认车站；Grav 重置提示中的 QQ 邮箱连接到 QQ 动态；昵称和生日把 QQ 转发视频中的评论者关联到 B 站账号；登机牌则优先依赖 PDF417 的结构化数据，而不是只凭模糊的时刻猜航班。 |
+| [ACTF2025-master-of-movie-wp](../raw/osint/ACTF2025-master-of-movie-wp.md) | 电影截图 OSINT 的核心是选择高区分度线索。人物脸部和普通场景适合反向图片搜索；反向搜索失败时，应转向画面中的稀有文本，并从“语言—场景类型—专名—角色或剧情”逐层验证。Hard_2 依靠韩文展签恢复学校名，Hard_0 则利用成绩榜上的罕见姓氏组合命中角色表。外部工具只负责生成候选，最终结论仍需由截图细节和权威作品信息共同支撑。 |
+| [MoeCTF2024-时光穿梭机-wp](../raw/osint/MoeCTF2024-时光穿梭机-wp.md) | 历史 OSINT 的常见难点是名称漂移：同一人名可能出现旧式罗马化、现代拼音和中文名。应先用日期、报刊名、版面标题等稳定字段锁定史料，再做人物名映射；得到墓址后才进入地图核验。正文保留了史料标题与日期，因此即使原检索页面以后失效，仍能理解该链接提供的关键证据。 |
+| [UMDCTF2022-ketchup-wp](../raw/osint/UMDCTF2022-ketchup-wp.md) | 人脸 OSINT 与普通相似图片搜索解决的问题不同。第一阶段用人脸特征跨图片找到同一人物，第二阶段用来源更明确的照片匹配包含姓名的网页。遇到搜索结果只显示缩略图时，页面源代码和网络请求常能恢复原图 URL；但最终结论仍应由出现姓名的独立页面交叉确认，而不是只凭相似度排名。 |
+| [UMDCTF2023-tcc-2-wp](../raw/osint/UMDCTF2023-tcc-2-wp.md) | 把站点枚举、公开简历、赛事记录和社交平台消息组合成多源验证；站点地图、异常命名的 XML、公开文档和响应头都可能是题目刻意留下的导航或反馈机制。 |
+| [UMDCTF2026-hades-group-wp](../raw/osint/UMDCTF2026-hades-group-wp.md) | 这道题的重点是从匿名频道内容寻找可归属的外部对象，而不是对所有群成员做无差别查询。贴纸包名连接到创建者身份，用户名历史、两套泄漏库和缓存资料用于交叉验证，区域文档库再把号码转换为实名，最终才查询记录号。题目明确限定所有身份均为虚构种子，实际 OSINT 中也应遵守授权范围并避免查询真实个人。 |
+| [WMCTF2023-find-me-wp](../raw/osint/WMCTF2023-find-me-wp.md) | 把 OSINT 线索链和流量加密还原结合起来，利用密码复用解锁博客文章，再恢复通信加密；题面给出用户名和社交平台时，应检查同名 GitHub、博客、头像来源、自动化脚本和复用凭据。 |
 
 ## 原始资料
 

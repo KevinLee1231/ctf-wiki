@@ -4,7 +4,7 @@ tags: [web, family, url-parser, ssrf, polyglot, crlf]
 skills: [ctf-web]
 raw:
   - ../raw/web/polyglot-url-tricks-and-ssrf-leaks.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Polyglot, URL Tricks and SSRF Leaks
@@ -42,11 +42,19 @@ updated: 2026-06-12
 | XSLT `math:random()` seed | 解析器内部随机数可预测 | 转 [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md) |
 | DNS rebinding | host 校验和实际访问之间存在再次解析 | 转 [dns.md](dns.md) 补 TTL/解析证据 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| scheme/authority/IP/重定向在校验层与连接层解释不同 | [url-parser-wrapper-and-ssrf-filter-differential.md](url-parser-wrapper-and-ssrf-filter-differential.md) |
+| 上传内容同时满足检查器和危险解析器 | [upload-polyglot-and-content-type-confusion.md](upload-polyglot-and-content-type-confusion.md) |
+| 多组件对编码、路径或重复字段形成请求视图差异 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：raw 覆盖 URL、协议、polyglot 文件和 SSRF 泄露，单一 technique 命名无法准确覆盖。
 - 不合并进 `parser-wrapper-and-legacy-ssrf-tricks.md`：该页负责所有二段解析器，本页负责 payload 自身的多解释和 URL/SSRF 专项绕过。
-- 不拆成 `gopher-ssrf.md`、`url-parser-bypass.md` 等小页：当前 raw 更适合保留为紧凑路由表。
+- URL/parser/SSRF 差异和上传 polyglot 已拆成 technique；gopher 等具体 scheme 继续作为协议变体留在本页。
 
 ## 常见误判
 

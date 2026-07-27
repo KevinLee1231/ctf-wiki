@@ -4,7 +4,7 @@
 
 - Knowledge base path: `D:/文档/markdown文件/ctf-wiki`
 - Structure: flat graph
-- Updated: 2026-07-24
+- Updated: 2026-07-27
 
 ## 查询顺序
 
@@ -177,51 +177,154 @@
 
 ### AI / ML
 
+- [black-box-query-feedback-evasion.md](wiki/black-box-query-feedback-evasion.md)
+- [constraint-aware-adversarial-optimization-and-validation.md](wiki/constraint-aware-adversarial-optimization-and-validation.md)
+- [gradient-leakage-input-reconstruction.md](wiki/gradient-leakage-input-reconstruction.md)
 - [linear-model-input-lattice-recovery.md](wiki/linear-model-input-lattice-recovery.md)
 - [linear-model-parameter-recovery.md](wiki/linear-model-parameter-recovery.md)
+- [llm-output-derived-secret-recovery.md](wiki/llm-output-derived-secret-recovery.md)
+- [model-backdoor-trigger-and-poisoning-analysis.md](wiki/model-backdoor-trigger-and-poisoning-analysis.md)
+- [prompt-injection-and-tool-call-hijacking.md](wiki/prompt-injection-and-tool-call-hijacking.md)
+- [token-smuggling-and-output-constraint-bypass.md](wiki/token-smuggling-and-output-constraint-bypass.md)
 - [transformer-logit-inversion.md](wiki/transformer-logit-inversion.md)
 
 ### Crypto / Blockchain
 
+- [adaptive-oracle-response-modeling.md](wiki/adaptive-oracle-response-modeling.md)
+- [algebraic-polynomial-and-modular-root-reconstruction.md](wiki/algebraic-polynomial-and-modular-root-reconstruction.md)
+- [bridge-message-field-binding.md](wiki/bridge-message-field-binding.md)
+- [delegatecall-storage-layout-corruption.md](wiki/delegatecall-storage-layout-corruption.md)
+- [hash-mac-construction-and-length-extension.md](wiki/hash-mac-construction-and-length-extension.md)
+- [homomorphic-ciphertext-malleability-oracles.md](wiki/homomorphic-ciphertext-malleability-oracles.md)
+- [lattice-small-root-and-partial-leakage.md](wiki/lattice-small-root-and-partial-leakage.md)
+- [layered-encoding-and-symbol-mapping-recovery.md](wiki/layered-encoding-and-symbol-mapping-recovery.md)
+- [linear-prng-state-and-seed-recovery.md](wiki/linear-prng-state-and-seed-recovery.md)
 - [lorenz-and-book-cipher-attacks.md](wiki/lorenz-and-book-cipher-attacks.md)
+- [ordered-matrix-product-trace-peeling.md](wiki/ordered-matrix-product-trace-peeling.md)
+- [overcomplete-matrix-linear-relation-recovery.md](wiki/overcomplete-matrix-linear-relation-recovery.md)
+- [reduced-round-spn-integral-attacks.md](wiki/reduced-round-spn-integral-attacks.md)
+- [rsa-factor-relation-and-partial-key-recovery.md](wiki/rsa-factor-relation-and-partial-key-recovery.md)
+- [rsa-low-exponent-and-related-message-attacks.md](wiki/rsa-low-exponent-and-related-message-attacks.md)
+- [rsa-padding-and-interval-oracle-attacks.md](wiki/rsa-padding-and-interval-oracle-attacks.md)
+- [secret-sharing-and-polynomial-interpolation.md](wiki/secret-sharing-and-polynomial-interpolation.md)
+- [signature-nonce-and-subgroup-failures.md](wiki/signature-nonce-and-subgroup-failures.md)
+- [stream-cipher-keystream-reuse-and-state-recovery.md](wiki/stream-cipher-keystream-reuse-and-state-recovery.md)
+- [symmetric-cipher-differential-fault-analysis.md](wiki/symmetric-cipher-differential-fault-analysis.md)
 
 ### Web
 
 - [artifact-trust-ssrf-to-node-require-rce.md](wiki/artifact-trust-ssrf-to-node-require-rce.md)
+- [auth-token-key-and-lookup-confusion.md](wiki/auth-token-key-and-lookup-confusion.md)
+- [browser-gadget-and-admin-bot-exfiltration.md](wiki/browser-gadget-and-admin-bot-exfiltration.md)
 - [csp-xsleak-and-browser-exfiltration.md](wiki/csp-xsleak-and-browser-exfiltration.md)
+- [deserialization-gadget-and-object-graph-execution.md](wiki/deserialization-gadget-and-object-graph-execution.md)
 - [json-duplicate-key-hmac-parser-differential.md](wiki/json-duplicate-key-hmac-parser-differential.md)
+- [lfi-wrapper-and-session-file-inclusion.md](wiki/lfi-wrapper-and-session-file-inclusion.md)
 - [path-confusion-to-signed-internal-request-chain.md](wiki/path-confusion-to-signed-internal-request-chain.md)
 - [protocol-relay-and-internal-service-injection.md](wiki/protocol-relay-and-internal-service-injection.md)
+- [request-view-normalization-differentials.md](wiki/request-view-normalization-differentials.md)
+- [server-side-expression-and-command-context-escape.md](wiki/server-side-expression-and-command-context-escape.md)
+- [session-and-access-control-state-confusion.md](wiki/session-and-access-control-state-confusion.md)
+- [sqli-filter-and-response-oracle-extraction.md](wiki/sqli-filter-and-response-oracle-extraction.md)
+- [upload-polyglot-and-content-type-confusion.md](wiki/upload-polyglot-and-content-type-confusion.md)
+- [url-parser-wrapper-and-ssrf-filter-differential.md](wiki/url-parser-wrapper-and-ssrf-filter-differential.md)
+- [version-fingerprinting-and-nday-poc-adaptation.md](wiki/version-fingerprinting-and-nday-poc-adaptation.md)
 - [workflow-runner-internal-api-chain.md](wiki/workflow-runner-internal-api-chain.md)
+- [xxe-and-structured-parser-boundary-exploitation.md](wiki/xxe-and-structured-parser-boundary-exploitation.md)
+
+### Cloud / Infra
+
+- [cloud-identity-token-to-control-plane-pivot.md](wiki/cloud-identity-token-to-control-plane-pivot.md)
 
 ### Cross-Direction
 
 - [bgp-rpki-route-hijack.md](wiki/bgp-rpki-route-hijack.md)
+- [dynamic-routing-hijack-transparent-relay.md](wiki/dynamic-routing-hijack-transparent-relay.md)
 - [race-condition-and-concurrency-exploits.md](wiki/race-condition-and-concurrency-exploits.md)
 
 ### Pwn
 
 - [data-interpretation-memory-primitives.md](wiki/data-interpretation-memory-primitives.md)
+- [dynamic-linker-and-symbol-resolution-exploitation.md](wiki/dynamic-linker-and-symbol-resolution-exploitation.md)
+- [file-structure-and-exit-handler-control-flow.md](wiki/file-structure-and-exit-handler-control-flow.md)
 - [format-string.md](wiki/format-string.md)
+- [heap-metadata-and-bin-list-corruption.md](wiki/heap-metadata-and-bin-list-corruption.md)
+- [integer-length-and-index-confusion-exploitation.md](wiki/integer-length-and-index-confusion-exploitation.md)
+- [jit-oob-and-runtime-object-corruption.md](wiki/jit-oob-and-runtime-object-corruption.md)
 - [kaslr-kpti-smep-and-kernel-debugging.md](wiki/kaslr-kpti-smep-and-kernel-debugging.md)
+- [kernel-object-lifetime-and-race-window.md](wiki/kernel-object-lifetime-and-race-window.md)
+- [protocol-length-state-parser-corruption.md](wiki/protocol-length-state-parser-corruption.md)
+- [restricted-runtime-object-graph-and-capability-recovery.md](wiki/restricted-runtime-object-graph-and-capability-recovery.md)
+- [sandbox-capability-and-inherited-channel-bypasses.md](wiki/sandbox-capability-and-inherited-channel-bypasses.md)
+- [stack-control-flow-and-constrained-rop.md](wiki/stack-control-flow-and-constrained-rop.md)
+- [uaf-object-reuse-and-tcache-poisoning.md](wiki/uaf-object-reuse-and-tcache-poisoning.md)
+
+### Pentest
+
+- [local-privesc-misconfiguration-and-credential-pivot.md](wiki/local-privesc-misconfiguration-and-credential-pivot.md)
+- [restricted-shell-feature-and-output-channel-escape.md](wiki/restricted-shell-feature-and-output-channel-escape.md)
+- [source-audit-hidden-backdoor-and-debug-mode-discovery.md](wiki/source-audit-hidden-backdoor-and-debug-mode-discovery.md)
+
+### Cross-Platform Exploitation
+
+- [runtime-mitigation-pointer-mangling-and-shadow-stack-bypass.md](wiki/runtime-mitigation-pointer-mangling-and-shadow-stack-bypass.md)
 
 ### Reverse
 
+- [anti-debug-self-check-and-environment-bypass.md](wiki/anti-debug-self-check-and-environment-bypass.md)
 - [compare-breakpoint-plaintext-recovery.md](wiki/compare-breakpoint-plaintext-recovery.md)
+- [constraint-solver-and-symbolic-state-recovery.md](wiki/constraint-solver-and-symbolic-state-recovery.md)
+- [custom-vm-and-wasm-state-lifting.md](wiki/custom-vm-and-wasm-state-lifting.md)
 - [embedded-python-pyd-custom-aes.md](wiki/embedded-python-pyd-custom-aes.md)
+- [game-asset-and-scene-state-extraction.md](wiki/game-asset-and-scene-state-extraction.md)
+- [managed-runtime-metadata-and-bytecode-recovery.md](wiki/managed-runtime-metadata-and-bytecode-recovery.md)
+- [renderer-glyph-shader-and-legacy-format-reconstruction.md](wiki/renderer-glyph-shader-and-legacy-format-reconstruction.md)
+- [staged-loader-and-runtime-image-recovery.md](wiki/staged-loader-and-runtime-image-recovery.md)
+- [trace-hook-and-state-snapshot-reconstruction.md](wiki/trace-hook-and-state-snapshot-reconstruction.md)
+- [unknown-isa-bootloader-and-firmware-emulation.md](wiki/unknown-isa-bootloader-and-firmware-emulation.md)
 - [vmp-client-server-smc-rc4-recovery.md](wiki/vmp-client-server-smc-rc4-recovery.md)
 - [windows-kernel-ioctl-hidden-feedback-maze.md](wiki/windows-kernel-ioctl-hidden-feedback-maze.md)
 
 ### Forensics
 
 - [3d-printing.md](wiki/3d-printing.md)
+- [archive-repair-and-known-plaintext-recovery.md](wiki/archive-repair-and-known-plaintext-recovery.md)
 - [blockchain-and-transaction-forensics.md](wiki/blockchain-and-transaction-forensics.md)
+- [file-format-and-embedded-payload-identification.md](wiki/file-format-and-embedded-payload-identification.md)
+- [filesystem-metadata-and-deleted-artifact-recovery.md](wiki/filesystem-metadata-and-deleted-artifact-recovery.md)
+- [memory-process-and-container-layer-recovery.md](wiki/memory-process-and-container-layer-recovery.md)
+- [protocol-stream-reassembly-and-credential-extraction.md](wiki/protocol-stream-reassembly-and-credential-extraction.md)
+- [qr-and-structured-symbol-reassembly.md](wiki/qr-and-structured-symbol-reassembly.md)
+- [raid-vm-disk-and-fragmented-volume-reconstruction.md](wiki/raid-vm-disk-and-fragmented-volume-reconstruction.md)
 - [rf-sdr.md](wiki/rf-sdr.md)
+- [structured-document-history-and-hidden-object-recovery.md](wiki/structured-document-history-and-hidden-object-recovery.md)
+- [windows-registry-event-and-credential-correlation.md](wiki/windows-registry-event-and-credential-correlation.md)
+
+### Stego / Signals
+
+- [audio-spectrum-and-symbol-decoding.md](wiki/audio-spectrum-and-symbol-decoding.md)
+- [bus-logic-and-serial-frame-decoding.md](wiki/bus-logic-and-serial-frame-decoding.md)
+- [media-channel-bitplane-and-frame-difference-extraction.md](wiki/media-channel-bitplane-and-frame-difference-extraction.md)
+- [peripheral-event-and-coordinate-reconstruction.md](wiki/peripheral-event-and-coordinate-reconstruction.md)
+
+### OSINT
+
+- [cross-platform-account-and-public-media-correlation.md](wiki/cross-platform-account-and-public-media-correlation.md)
+- [dns-zone-transfer-tunnel-and-resolution-analysis.md](wiki/dns-zone-transfer-tunnel-and-resolution-analysis.md)
+- [public-record-dns-whois-and-archive-pivoting.md](wiki/public-record-dns-whois-and-archive-pivoting.md)
+- [visual-geolocation-and-media-metadata-correlation.md](wiki/visual-geolocation-and-media-metadata-correlation.md)
+
+### Mobile
+
+- [android-debuggable-run-as-private-data.md](wiki/android-debuggable-run-as-private-data.md)
+- [mobile-webview-url-scheme-native-bridge.md](wiki/mobile-webview-url-scheme-native-bridge.md)
 
 ### Malware
 
 - [malware-c2-session-key-and-protocol-recovery.md](wiki/malware-c2-session-key-and-protocol-recovery.md)
+- [pe-dotnet-config-and-resource-extraction.md](wiki/pe-dotnet-config-and-resource-extraction.md)
 - [powershell-staged-payload-and-clipboard-phishing.md](wiki/powershell-staged-payload-and-clipboard-phishing.md)
+- [script-deobfuscation-and-staged-payload-recovery.md](wiki/script-deobfuscation-and-staged-payload-recovery.md)
 
 ## Raw 资料统计
 

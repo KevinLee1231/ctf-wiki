@@ -58,6 +58,14 @@ updated: 2026-07-27
 - 附件像图片/字体/固件/资源包：先做格式和资源层 triage，避免过早套普通 ELF/PE 工作流。
 - 逆向后出现 DSA/ECC/RC4/LFSR/代数关系：转 crypto 页面，把 reverse 只当实现恢复层。
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| loader/packer 运行时映射第二阶段，需要 dump 与修复 | [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md) |
+| Python/JVM/.NET/Go/Rust metadata/bytecode 可恢复语义 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md) |
+| 静态控制流失真，API/比较/阶段边界适合 trace/hook | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+
 ## 常见误判
 
 - 看到复杂伪代码就先完整重写算法，忽略最终比较点、明文 buffer、trace 或资源 dump 这些更短路径。
@@ -170,6 +178,25 @@ updated: 2026-07-27
 | [D3CTF2025-d3piano-wp](../raw/reverse/D3CTF2025-d3piano-wp.md) | Android 钢琴 app 的 native hook 链和 Salsa20/LZW 音符序列，先识别 Frida/gumpp 篡改点。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 | [D3CTF2025-d3rpg-revenge-wp](../raw/reverse/D3CTF2025-d3rpg-revenge-wp.md) | RPG Maker/RGSS 资源包魔改和 Ruby 脚本明文内存，先脱壳或搜索脚本恢复校验。 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 | [D3CTF2025-locked-door-wp](../raw/reverse/D3CTF2025-locked-door-wp.md) | VMP 壳和反调试后还有 RSA 签名门，先脱壳定位 OEP，再替换公钥或重签 key。 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
+| [0xGame2020-week3-tls-rc4-wp](../raw/reverse/0xGame2020-week3-tls-rc4-wp.md) | TLS callback 是 PE 正常执行链的一部分，逆向时应在入口点之外检查 TLS Directory。算法识别也不能只凭“结构像 RC4”就替换成库函数；本题保留 KSA 末尾 `j` 的细节会改变整条密钥流，必须逐条复现实际状态更新。 | 本页对应路线 |
+| [0xGame2024-week3-Tea-wp](../raw/reverse/0xGame2024-week3-Tea-wp.md) | TEA 的识别特征包括两个 32 位半块、四字密钥、32 轮 Feistel 式更新和黄金分割常量。还原时不能只套标准算法，还要复现题目额外的数据布局：整段逆序、小端 `uint32_t` 解释，以及相隔 32 字节的两个有效块。 | 本页对应路线 |
+| [0xGame2024-week3-The-Matrix-wp](../raw/reverse/0xGame2024-week3-The-Matrix-wp.md) | 矩阵逆向题通常有两层工作：先从指针访问和内存对齐恢复数据结构，再把程序循环翻译成线性代数。这里除了求 $K^{-1}B$，还必须处理密钥实际顺序以及 9 字节窗口每次只前进 6 字节的重叠关系；使用精确有理数运算可避免“浮点后手工四舍五入”带来的不确定性。 | 本页对应路线 |
+| [0xGame2025-week2-Shuffle-Shuffle-wp](../raw/reverse/0xGame2025-week2-Shuffle-Shuffle-wp.md) | 固定随机洗牌本质上只是一个固定置换。若随机数运行库已知，可以重放 Fisher–Yates；若跨平台 `rand()` 不一致，则用等长、字符互异的 chosen plaintext 直接标记每个位置。本题必须保留 44 字节密文、探针输入和探针输出，三者足以在没有原程序和外部网站的情况下复现 flag。 | 本页对应路线 |
+| [0xGame2025-week4-蔷薇地狱-wp](../raw/reverse/0xGame2025-week4-蔷薇地狱-wp.md) | 本题把文件加密器逆向、流量取证和弱 RSA 串在一起。看到随机生成的 key/IV、`send` 外传和 PCAP 中的长十进制整数，应沿数据流确认“字节序 → 大整数 → 模幂 → 十进制编码”的完整序列，而不是直接把抓包内容当作对称密钥。还要以实际 API 参数为准判断对称模式：存在 IV 并不必然代表 CBC，本题明确设置的是 AES-256-ECB，IV 只是被多余地保留在协议和命令行接口中。 | 本页对应路线 |
+| [MoeCTF2021-ez-algorithm-revenge-wp](../raw/reverse/MoeCTF2021-ez-algorithm-revenge-wp.md) | 这题把逆向得到的数据生成逻辑与经典数塔动态规划组合在了一起。除了写出状态转移和回溯，最重要的检查点是伪随机数实现：固定种子只能保证同一种 `rand()` 实现内的序列可复现，不能跨运行库直接等价。遇到类似题目，应同时记录种子、调用顺序、取模方式和实际运行时。 | 本页对应路线 |
+| [MoeCTF2024-moedaily-wp](../raw/reverse/MoeCTF2024-moedaily-wp.md) | 分析表格型逆向题不能只看最终比较常量，应沿跨工作表引用还原数据流。这里 `BITAND(..., 0xffffffff)` 明确了 32 位截断，列间引用揭示每次 16 轮的分段，而第二组公式以上一组输出为输入，证明 TEA 被完整执行了两遍。 | 本页对应路线 |
+| [SekaiCTF2026-minions-in-16k-wp](../raw/reverse/SekaiCTF2026-minions-in-16k-wp.md) | 本题的交付不是固定 flag，而是可持续参赛的协议实现和战斗 bot。连上服务器只完成了一半：评分是零和 Elo，净负收益 bot 持续运行会主动掉分，达到高水位后停机也是合理策略。应先在离线模式验证协议和控制逻辑，再以本题独立 Elo/净胜率监控线上效果。由于主要障碍是从客户端恢复网络布局、定点数与输入语义，本篇从 `_unclassified` 调整到 `reverse`。 | 本页对应路线 |
+| [UMDCTF2017-break-the-chain-wp](../raw/reverse/UMDCTF2017-break-the-chain-wp.md) | 链式校验仍然可以逐步求解，只要状态依赖是单向的。与其一次性暴力搜索 $95^{46}$ 个字符串，不如把“前一字符”作为已知状态，每轮只枚举 95 个可打印字符，并同时用两条位运算约束剪枝。 | 本页对应路线 |
+| [UMDCTF2017-hash-me-not-wp](../raw/reverse/UMDCTF2017-hash-me-not-wp.md) | 哈希或校验和“不可逆”不等于无法恢复：若每次只处理一个字符，输入空间只有 95 个候选，预计算反查表就足够。判断攻击成本时必须看分块方式和输入熵，而不能只看函数名称。 | 本页对应路线 |
+| [UMDCTF2018-lorem-mipsum-wp](../raw/reverse/UMDCTF2018-lorem-mipsum-wp.md) | 逆向密码工件时应把每个变换独立实现，并分别验证中间结果。源码与附件发生冲突时，可打印明文只是线索，官方摘要才是强校验；本题也说明不能因为函数出现在控制流中，就未经验证地宣称公开密文一定经历了该函数。 | 本页对应路线 |
+| [UMDCTF2019-armageddon-wp](../raw/reverse/UMDCTF2019-armageddon-wp.md) | 这题的难点是大量分散的关系约束，而不是某个单独的复杂算法。把每个校验函数独立执行，可以避免整程序路径爆炸；再将成功路径上与输入有关的约束合并，求解会稳定得多。符号执行结果仍应通过长度、固定格式和官方摘要交叉验证。 | 本页对应路线 |
+| [UMDCTF2019-easycrypt-wp](../raw/reverse/UMDCTF2019-easycrypt-wp.md) | “使用随机数”不等于不可逆：种子若完全由公开的文件长度决定，排列就可以确定性重放。面对自定义加密，应把流程拆成字节代换和位置置换两层，分别证明可逆，再按加密的逆序恢复。输出文件的 magic、可视内容和官方摘要构成三重校验。 | 本页对应路线 |
+| [UMDCTF2019-simplecheck-wp](../raw/reverse/UMDCTF2019-simplecheck-wp.md) | 大量成对合法性检查常可抽象为图问题。本题把 key 转化为固定大小的 clique，升序搜索既去除了排列重复，也便于用剩余候选数剪枝。对于已能在原二进制上验证、但缺少服务端秘密的数据，应清楚区分“利用链已完成”和“历史 flag 不可恢复”。 | 本页对应路线 |
+| [UMDCTF2021-what-is-memory-wp](../raw/reverse/UMDCTF2021-what-is-memory-wp.md) | 遇到“近似标准算法”时不能强行套标准解码器。先定位实现与标准的差异，再把差异建模成有限搜索。本题每轮只丢失一个 Base64 字符，候选数可通过字符集、长度和最终格式迅速收敛；系统 API 检查与编码算法无关。 | 本页对应路线 |
+| [UMDCTF2021-willow-wp](../raw/reverse/UMDCTF2021-willow-wp.md) | 自定义树替换的重点不是给节点强行命名成 S 盒，而是忠实还原每一位决定的分支和叶值。映射非双射时，逆运算天然产生候选集合；链式异或提供逐位置约束，flag 格式负责最后消歧，不能随意选第一个逆像。 | 本页对应路线 |
+| [UMDCTF2023-cleffas-surprise-wp](../raw/reverse/UMDCTF2023-cleffas-surprise-wp.md) | 识别“复制到可执行页再间接调用”的 shellcode 装载器，并直接跟踪 shellcode 的内存副作用；AArch64 的 `movk` 适合分段构造立即数；连续的移位值 $0,16,32,48$ 往往代表拼接字符串或常量。 | 本页对应路线 |
+| [UMDCTF2023-lets-catch-up-wp](../raw/reverse/UMDCTF2023-lets-catch-up-wp.md) | 用 AES 固定 T-table 常量识别被改名、混淆的第三方实现，再与上游库做结构对照；前端传入的可见密钥是障眼法；真正决定结果的是密钥扩展后被覆盖的 `Ke`。 | 本页对应路线 |
+| [WMCTF2022-seeee-wp](../raw/reverse/WMCTF2022-seeee-wp.md) | 先恢复字符置换表，再利用 ChaCha20 流密码“加密即解密”的性质反推第二段输入；程序要求 IV 和 ciphertext 两个参数，内部出现固定映射表和一段字节流常量时，应检查是否是置换层叠流密码层。 | 本页对应路线 |
 
 ## 原始资料
 - [reverse-first-pass-workflow-and-debugging.md](../raw/reverse/reverse-first-pass-workflow-and-debugging.md)

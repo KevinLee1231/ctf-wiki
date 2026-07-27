@@ -4,7 +4,7 @@ tags: [web, family, triage]
 skills: [ctf-web]
 raw:
   - ../raw/web/web-first-pass-triage-and-chain-patterns.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # First-Pass Triage and Chain Patterns
@@ -40,6 +40,7 @@ updated: 2026-07-06
 |---|---|---|
 | 登录态、cookie、session、hidden route、IDOR、代理 ACL | [auth-bypass-cookies-and-hidden-routes.md](auth-bypass-cookies-and-hidden-routes.md) | 服务端到底以哪个身份字段、路由视图或信任边界授权。 |
 | JWT、HMAC、重复 JSON key、签名字段和 parser 差异 | [auth-jwt.md](auth-jwt.md)、[json-duplicate-key-hmac-parser-differential.md](json-duplicate-key-hmac-parser-differential.md) | 签名层和业务层看到的对象是否一致。 |
+| 重复 header/query/cookie、路径规范化、协议降级或请求边界差异 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) | 安全检查层和最终消费层是否读取同一请求表示。 |
 | SQLi、NoSQL、过滤绕过、盲注、二阶触发 | [sqli-filter-and-oracle-family.md](sqli-filter-and-oracle-family.md) | 回显、错误、时间、长度和持久化触发点。 |
 | PHP/LFI/SSTI/SSRF/XXE/type juggling | [php-lfi-ssti-ssrf-and-type-juggling.md](php-lfi-ssti-ssrf-and-type-juggling.md) | 服务端解释层差异是否通向读文件、内部访问、认证绕过或 RCE。 |
 | 路径穿越、上传、ZIP/软链接、渲染器、RSC、内部协议 | [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md) | 可控资源定位是否交给文件系统、网络客户端、解包器或内部服务。 |
@@ -166,6 +167,14 @@ updated: 2026-07-06
 | [D3CTF2025-d3model-wp](../raw/web/D3CTF2025-d3model-wp.md) | Keras .keras 模型 load_model 反序列化 CVE，先控制 config.json 的类/函数解析路径。 | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md)、[php-java-python-deserialization.md](php-java-python-deserialization.md) |
 | [D3CTF2025-tidy-quic-wp](../raw/web/D3CTF2025-tidy-quic-wp.md) | HTTP/3/QUIC ContentLength 与实际 body 不一致叠加脏缓冲池，先复现请求体污染绕 WAF。 | [parser-wrapper-and-legacy-ssrf-tricks.md](parser-wrapper-and-legacy-ssrf-tricks.md) |
 | [RCTF2025-signin-wp](../raw/web/RCTF2025-signin-wp.md) | 前端源码把完成度作为 `score` 参数提交，先读业务逻辑并直接验证阈值触发条件。 | 跨页补入 |
+| [0xGame2023-week4-spring-wp](../raw/web/0xGame2023-week4-spring-wp.md) | Actuator 的配置脱敏只保护 `/env` 的展示结果，并不会擦除 JVM 中的原始对象；一旦 `/actuator/heapdump` 未受保护，密码、令牌和连接信息仍可能从堆中恢复。本题的完整链路是识别 Actuator、确认管理端点暴露、下载堆转储，再按 Spring 配置源对象定位 `app.password`。 | 本页对应路线 |
+| [0xGame2024-week2-hello-shell-wp](../raw/web/0xGame2024-week2-hello-shell-wp.md) | 本题的利用链是“无回显命令执行 → `${IFS}` 绕过空格 → SUID `wc` 特权读文件 → 重定向到 Web 目录”。无需依赖反弹 shell 或临时外带平台，稳定机制和完整请求都可以在本地复现。 | 本页对应路线 |
+| [0xGame2024-week4-basic-flask-wp](../raw/web/0xGame2024-week4-basic-flask-wp.md) | 递归 `getattr`/`setattr` 合并可沿 `__class__ → __init__ → __globals__` 污染 Flask `app._static_folder`，再复用静态路由读 `/flag`。这是 Python 对象/类属性污染，不应与 JavaScript 原型链污染混称。 | 本页对应路线 |
+| [0xGame2025-week1-Lemon-RevEnge-wp](../raw/web/0xGame2025-week1-Lemon-RevEnge-wp.md) | 利用递归属性合并造成 Python 类污染，再篡改 Jinja 路径校验依赖的全局常量；不受限的 JSON-to-object merge、可达 `__init__.__globals__`，以及用户路径直接进入模板加载器。 | 本页对应路线 |
+| [SekaiCTF2026-pwnable-document-fabricator-wp](../raw/web/SekaiCTF2026-pwnable-document-fabricator-wp.md) | 本题的公开入口、数据流和题面定位均是 Web，放在 Web 类合理；真正缺失的决定性原语则位于原生文档转换组件。对未公开且零解的 0day，准确的 WP 应明确区分“源码可证攻击面”“利用必须具备的能力”和“尚无证据的具体漏洞”，尤其不能把仓库中可见的最终 flag 误写成通过某个杜撰 PoC 得到的结果。 | 本页对应路线 |
+| [UMDCTF2019-java-web-execution-service-wp](../raw/web/UMDCTF2019-java-web-execution-service-wp.md) | 这是典型的算法复杂度拒绝服务被转化为条件触发。构造时要同时满足“参数名互异”“哈希值相同”和“总查询长度小于 200000”。判断 Java HashMap 是否会退化必须以题目实际打包的实现为准，不能套用当前 JDK 的树化行为。 | 本页对应路线 |
+| [UMDCTF2022-chungusbot-v2-wp](../raw/web/UMDCTF2022-chungusbot-v2-wp.md) | 源码优先级高于第三方复盘。本题常见误解是把时间窗口说成“分钟”或图片创建时间，但 `ctx.created_at` 和字符串切分明确表明它检查消息秒数。图像比较也不是感知哈希，而是二值化后的逐位置相等率；理解分母、阈值和大面积黑色背景后，就能用很少的编辑达到条件。 | 本页对应路线 |
+| [WMCTF2020-nobody-knows-bao-ta-better-than-me-wp](../raw/web/WMCTF2020-nobody-knows-bao-ta-better-than-me-wp.md) | 官方材料未公开，不能确认；只能确认题目方向与宝塔面板相关 0day 有关，缺少可复现漏洞链。 | 本页对应路线 |
 
 ## 原始资料
 - [web-first-pass-triage-and-chain-patterns.md](../raw/web/web-first-pass-triage-and-chain-patterns.md)

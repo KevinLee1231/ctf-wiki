@@ -4,7 +4,7 @@ tags: [forensics, family, usb, hid, bluetooth, peripheral]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/peripheral-capture.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Peripheral Capture Analysis
@@ -37,6 +37,14 @@ updated: 2026-06-12
 | Arrow key navigation | 方向键序列和起点/地图 | 先恢复输入序列；若需要重放地图或画图，转 [keyboard-mouse-audio-and-physical-puzzles.md](keyboard-mouse-audio-and-physical-puzzles.md) |
 | Bluetooth RFCOMM | L2CAP/RFCOMM 重组和 payload 方向 | 提取串口文本或文件 |
 | GBA/USB framebuffer | interrupt payload 是否为像素/瓦片数据 | 按尺寸和色深重组图像 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| USB HID/鼠标/键盘/Bluetooth report 需状态与坐标重建 | [peripheral-event-and-coordinate-reconstruction.md](peripheral-event-and-coordinate-reconstruction.md) |
+| 外设数据被分段/封装在协议流中，需先会话重组 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
+| 音调、LED/Morse 或频率序列承载符号 | [audio-spectrum-and-symbol-decoding.md](audio-spectrum-and-symbol-decoding.md) |
 
 ## 合并与拆分结论
 

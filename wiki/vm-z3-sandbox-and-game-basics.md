@@ -6,7 +6,7 @@ raw:
   - ../raw/pwn/vm-z3-sandbox-and-game-basics.md
   - ../raw/pwn/WMCTF2025-wm-eat-some-qanux-wp.md
   - ../raw/pwn/D3CTF2019-babyrop-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # VM, Z3, Sandbox and Game Basics
@@ -55,6 +55,14 @@ updated: 2026-07-06
 | [SUCTF2026-easygalWP](../raw/reverse/SUCTF2026-easygalWP.md) | Unity/IL2CPP 资源中反序列化 Story 节点；恢复 choice 的 weight/value/marker 后建模为带路径恢复的背包 DP。 | 跨页补入 |
 | [SUCTF2026-WestWP](../raw/reverse/SUCTF2026-WestWP.md) | 81 轮 permutation + dispatch table 更新共享状态；逆三个 rotate/add/xor helper 后，用 Unicorn 推进状态并约束求输入。 | 跨页补入 |
 | [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 | 跨页补入 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 验证器/状态机可建成 BitVec、数组和路径约束 | [constraint-solver-and-symbolic-state-recovery.md](constraint-solver-and-symbolic-state-recovery.md) |
+| 自定义 VM/WASM 需恢复 opcode、状态布局和控制流 | [custom-vm-and-wasm-state-lifting.md](custom-vm-and-wasm-state-lifting.md) |
+| JIT/解释器对象布局缺陷形成 OOB 与任意读写 | [jit-oob-and-runtime-object-corruption.md](jit-oob-and-runtime-object-corruption.md) |
 
 ## 合并与拆分结论
 

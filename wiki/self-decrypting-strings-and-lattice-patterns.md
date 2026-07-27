@@ -46,6 +46,14 @@ updated: 2026-07-27
 | 发现 AES/SM4/ChaCha/XXTEA 常量但流程异常 | 先恢复真实轮函数、轮数、S-box、移位方向和加解密同构性 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md), [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) |
 | ROP 链或控制流本身被当作校验 | 先 trace gadget 序列和寄存器状态，再反向组装可计算模型 | [anti-analysis.md](anti-analysis.md), [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 字符串/状态只在运行时解密并短暂存在 | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+| 解密后仍是 Base/字符集/码表/位序表示链 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
+| 比较点可直接截获候选或目标明文 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
+
 ## 合并与拆分结论
 
 本页应保留为 family。自解密、字符串恢复、格约束、GF 线性恢复和魔改 cipher 的第一步证据不同，不能合并成单一 technique；但它们都服务于“把隐藏校验恢复成可复算模型”，作为 Reverse 首轮后的二级入口有价值。
@@ -66,6 +74,9 @@ updated: 2026-07-27
 | [D3CTF2021-ancient-wp](../raw/reverse/D3CTF2021-ancient-wp.md) | 算术编码和编译期字符串保护组合，先 dump 固定分布表和目标编码再反解输入。 |
 | [D3CTF2021-white-give-wp](../raw/reverse/D3CTF2021-white-give-wp.md) | LLVM pass 全局变量 AES、常数拆分和 MBA 表达式替换，先 dump 明文常量再还原校验流。 |
 | [LilacCTF2026-nineapple-wp](../raw/reverse/LilacCTF2026-nineapple-wp.md) | iOS Swift 九宫格手势锁给出 `weight/target_all/map_list`；无需操作 UI，按加权和反查每个字符路径。 |
+| [0xGame2025-week4-云消雾散-wp](../raw/reverse/0xGame2025-week4-云消雾散-wp.md) | 看到 RC4 风格的 S 盒更新时，不能默认算法一定会生成密钥流并执行异或；本题真正的数据操作是分组内的位置交换。逆置换必须从末状态倒序撤销，并严格复现循环边界。处理图片时也应以程序的真实文件读写为准：本题固定保留 1078 字节、仅处理 822528 字节，余下 72 字节不变，这些边界条件缺一不可。 |
+| [MoeCTF2024-sm4-wp](../raw/reverse/MoeCTF2024-sm4-wp.md) | 标准密码算法题也要检查调用点的内存语义。源码中声明的 key 不一定是运行时 key，数组相邻关系也必须以目标二进制为准；这里一个 NUL off-by-one 改变了 SM4 密钥首字节，解释了使用表面密钥始终解不出的现象。 |
+| [MoeCTF2024-XTEA-wp](../raw/reverse/MoeCTF2024-XTEA-wp.md) | 识别 XTEA 后仍要还原调用层的数据流。重叠分组会让第二次加密依赖第一次的中间密文，逆向顺序必须与加密调用顺序相反；若直接把 12 字节拆成两个普通独立块，永远无法得到正确 key。 |
 
 ## 常见陷阱
 

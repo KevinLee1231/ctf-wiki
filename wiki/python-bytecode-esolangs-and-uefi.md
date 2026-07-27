@@ -37,11 +37,19 @@ updated: 2026-07-27
 | HarmonyOS HAP/ABC、UEFI、DOS stub | 先恢复格式、工具链、入口点和调用约定，再进入算法恢复 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
 | Unity IL2CPP、游戏字节码、非原生脚本 | 先确认 metadata、managed/native 边界和资源脚本关系 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| pyc/marshal/JVM/.NET 等 metadata/bytecode 可直接恢复语义 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md) |
+| UEFI/boot/固件或低频 ISA 需装载与模拟 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
+| Python 解释器加载 PYD/扩展模块执行自定义校验 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：这些 raw 分支的共同障碍是“先恢复执行格式/字节码语义”，不是某个具体算法。
 - 不合并进 VM family：VM family 判断自定义 VM/混淆，本页承接 Python/esolang/UEFI/HarmonyOS 等已有格式或小众解释器。
-- 暂不拆 Python 字节码 technique：已有 raw/WP 覆盖 `.pyc`、Cython、Pyarmor、Nuitka 等不同入口，先用 family 分流更稳。
+- Python/managed bytecode 已由 metadata technique 承接，UEFI/固件由模拟 technique 承接；Cython、Pyarmor、Nuitka 仍按 loader/packer 变体在本页分流。
 
 ## 常见误判
 
@@ -66,6 +74,10 @@ updated: 2026-07-27
 | [D3CTF2023-d3recover-wp](../raw/reverse/D3CTF2023-d3recover-wp.md) | Cython/Python 扩展可用带符号版本 BinDiff 迁移语义，先恢复 Pyx API 调用和约束。 |
 | [LilacCTF2026-ezpython-wp](../raw/reverse/LilacCTF2026-ezpython-wp.md) | PyInstaller runtime hook 把自定义 `a85decode/b64decode` 写入 `builtins`，并动态改 `MX.__code__` 后才是 XXTEA 真实轮函数。 |
 | [LilacCTF2026-lambda-m-wp](../raw/reverse/LilacCTF2026-lambda-m-wp.md) | Lambda calculus/Scott encoding 只是表达层，真实语义是 GF(2^8) 有理函数插值；把 40 个点转成齐次线性方程组。 |
+| [0xGame2022-week4-听首音乐-wp](../raw/reverse/0xGame2022-week4-听首音乐-wp.md) | MIDI 不仅能保存可听见的旋律，也能作为编程语言的语法载体。识别 Velato 后，关键步骤是按音程语义编译或解释音符；程序输出的大整数则应优先尝试按大端整数直接转换为字节，因为 flag 的 ASCII 编码本身就可以视为一个长整数。 |
+| [MoeCTF2024-Cython-Strike-Bomb-Defusion-wp](../raw/reverse/MoeCTF2024-Cython-Strike-Bomb-Defusion-wp.md) | 从损坏源码恢复逻辑时，不要让语言模型替你“修正”看似奇怪的表达式。`input ^ mask == 114` 在 Python 中会按 `(input ^ mask) == 114` 解释，而 C 中恰好相反；本题密码正是利用这项优先级差异得到的。 |
+| [UMDCTF2023-welcome-to-python-wp](../raw/reverse/UMDCTF2023-welcome-to-python-wp.md) | 先识别并拆出 PyInstaller 内嵌归档，再对真正的 Python 校验器做代数逆运算；`c_float` 到 `c_uint32` 是位级重解释，不是普通类型转换。 |
+| [WMCTF2023-rightback-wp](../raw/reverse/WMCTF2023-rightback-wp.md) | 移除 pyc 花指令时同步修复 code object 长度和行号映射，再还原后续 RC5 解密；pyc 反编译失败但字节码中出现大量规律 `JUMP_FORWARD + 垃圾字节` 时，应先做字节码层去花，而不是只依赖反编译器。 |
 
 ## 原始资料
 

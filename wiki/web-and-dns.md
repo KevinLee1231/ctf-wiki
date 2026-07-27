@@ -4,7 +4,7 @@ tags: [osint, family, public-web, dns, archive, public-index]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/web-and-dns.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Web and DNS OSINT
@@ -40,6 +40,14 @@ updated: 2026-07-06
 | `.DS_Store`、公开目录、静态文件泄露 | 先确认是否公开索引证据；若需要下载/恢复对象，转文件取证。 | [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
 | Telegram/Tor/FEC/平台公开 API | 先确认平台数据是否公开、稳定和可复查，再把结果并入身份链。 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| DNS/WHOIS/CT/archive/repo/document metadata 扩展公开证据 | [public-record-dns-whois-and-archive-pivoting.md](public-record-dns-whois-and-archive-pivoting.md) |
+| zone transfer、记录、TTL/rebinding 或 DNS tunnel 决定路线 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| 账号、公开媒体和跨平台标识用于确认实体归属 | [cross-platform-account-and-public-media-correlation.md](cross-platform-account-and-public-media-correlation.md) |
+
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖搜索、DNS、历史快照、WHOIS、Shodan、GitHub、Telegram、Tor、公开目录和服务指纹，核心价值是公开来源二级分流。
@@ -63,6 +71,14 @@ updated: 2026-07-06
 - [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
 - [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)
 - [osint-tooling.md](osint-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [UMDCTF2018-threat-memetelligence-wp](../raw/osint/UMDCTF2018-threat-memetelligence-wp.md) | 威胁情报题应形成可复核的证据链：初始域名 $\rightarrow$ 样本报告 $\rightarrow$ 文件哈希与网络行为 $\rightarrow$ flag。只写“在某网站搜到”无法解释关联依据，也会让 WP 完全依赖外部页面继续存在。 |
 
 ## 原始资料
 

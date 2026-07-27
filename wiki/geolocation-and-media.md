@@ -5,7 +5,7 @@ skills: [ctf-osint]
 raw:
   - ../raw/osint/geolocation-and-media.md
   - ../raw/osint/LilacCTF2026-sky-is-ours-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Geolocation and Media Analysis
@@ -40,6 +40,14 @@ updated: 2026-07-06
 | 地点推导出 key/字符 | 先确认地点，再把地标、音乐、键号、邮编或坐标映射为编码输入。 | [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
 | 发布账号/视频描述更关键 | 保留媒体来源页面和账号链，转账号相关性页面继续。 | [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 路牌、地标、道路、坐标、时间或视频帧用于定位 | [visual-geolocation-and-media-metadata-correlation.md](visual-geolocation-and-media-metadata-correlation.md) |
+| 域名、WHOIS、CT、archive 和公开文档扩展基础设施证据 | [public-record-dns-whois-and-archive-pivoting.md](public-record-dns-whois-and-archive-pivoting.md) |
+| 账号、公开媒体和跨平台标识用于验证实体 | [cross-platform-account-and-public-media-correlation.md](cross-platform-account-and-public-media-correlation.md) |
+
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖图像反搜、地理坐标、街景、路牌/建筑、IP、产品识别、历史媒体和编码 key，路线分叉明显。
@@ -68,6 +76,9 @@ updated: 2026-07-06
 | Raw WP | 复用信号 | 下一跳 |
 |---|---|---|
 | [LilacCTF2026-sky-is-ours-wp](../raw/osint/LilacCTF2026-sky-is-ours-wp.md) | 机翼涂装、桥梁/海岸轮廓和题面日期共同收敛航班；先用地点、航空公司和日期三类证据交叉验证。 | [osint-tooling.md](osint-tooling.md) |
+| [UMDCTF2021-justin-2-wp](../raw/osint/UMDCTF2021-justin-2-wp.md) | 地理定位应从高置信度的行政线索逐步缩小：车牌地区码确定区域，独特建筑确定街区，最后用道路几何和视角确定街名。仅凭西里尔文字不能区分城市，单独依赖模糊建筑轮廓也容易命中相似地点。 | 本页对应路线 |
+| [UMDCTF2023-gone-missing-3-wp](../raw/osint/UMDCTF2023-gone-missing-3-wp.md) | 先用地区特有的基础设施缩小国家或地区，再用可读地名和空间几何完成精确定位；黑黄条纹电线杆与中文只能给出候选区域，真正用于落点的是罗盘方向、道路弯折和电力线布局。 | 本页对应路线 |
+| [UMDCTF2023-notsogeo-wp](../raw/web/UMDCTF2023-notsogeo-wp.md) | panorama ID 不是普通的无意义前端标识，它能映射到街景元数据和拍摄坐标；地图、瓦片和媒体类应用应检查静态 JSON、网络参数及客户端状态，敏感元数据不能仅靠界面隐藏。 | 本页对应路线 |
 
 ## 原始资料
 

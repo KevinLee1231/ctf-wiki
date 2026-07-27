@@ -5,7 +5,7 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/windows-registry-logs-and-credentials.md
   - ../raw/forensics/SUCTF2026-forensicsWP.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Windows Registry, Logs and Credentials
@@ -41,6 +41,14 @@ updated: 2026-07-06
 | Windows 内存 dump | 先用 Volatility 做 `pslist/psxview/cmdline/clipboard/hashdump/netscan`，再按进程或 hive 深挖。 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) |
 | WMI persistence 或 wmiexec 痕迹 | 检查 WMI repository、USN 中 `__<timestamp>.<random>` 输出文件、WMIPRVSE Prefetch 和 Defender 记录。 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Registry/EVTX/DPAPI/浏览器凭据需按 SID 与时间关联 | [windows-registry-event-and-credential-correlation.md](windows-registry-event-and-credential-correlation.md) |
+| MFT/USN/journal/删除块提供文件与时间线证据 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
+| 进程/VAD/minidump/VM snapshot 保留运行时 secret | [memory-process-and-container-layer-recovery.md](memory-process-and-container-layer-recovery.md) |
+
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 同时覆盖日志、注册表、SAM、NTFS、浏览器、Defender、WMI、内存凭据和反取证，核心价值是证据源分流。
@@ -71,6 +79,9 @@ updated: 2026-07-06
 |---|---|
 | [SUCTF2026-forensicsWP](../raw/forensics/SUCTF2026-forensicsWP.md) | AD1 Windows 系统盘综合题，证据横跨关机事件、Notepad TabState 删除内容、应用缓存、聊天数据库和 Ollama 日志；适合先按 artifact 类型拆证据，再统一时间线和答案拼接规则。 |
 | [D3CTF2019-find-me-wp](../raw/forensics/D3CTF2019-find-me-wp.md) | Chrome Login Data 和 lsass.dmp 组合，先修复嵌入 ZIP 再提取 DPAPI master key 解密浏览器凭据。 |
+| [0xGame2025-week3-Bitlocker安全吗-wp](../raw/forensics/0xGame2025-week3-Bitlocker安全吗-wp.md) | 本题的核心证据链是“已解锁系统的内存镜像 → FVEK → BitLocker 磁盘镜像 → NTFS 文件”。BitLocker 对静态磁盘的加密仍然可靠，但只要系统正在使用该卷，解密所需密钥就必须存在于内存；及时采集内存便可能绕过对口令的正面攻击。 |
+| [0xGame2025-week4-NTFS很ez啦-wp](../raw/forensics/0xGame2025-week4-NTFS很ez啦-wp.md) | 这道题利用了“当前文件系统状态”和“历史事务状态”的差异：随机 `.dat` 名称只是现状，真正的信息仍保留在 `$LogFile` 的重命名记录里。解题时应先确定正确的分区偏移，再解析 `$LogFile`，按 LSN 保持事件顺序，并区分 `RENAME_OLD_NAME` 与 `RENAME_NEW_NAME`。恢复出的长十进制文件名不是普通编号，而是大端字节串的整数表示；按最短长度转回字节并顺序拼接即可得到 flag。 |
+| [UMDCTF2018-eternally-crying-wp](../raw/forensics/UMDCTF2018-eternally-crying-wp.md) | EVTX 题的重点不是对所有字段做盲目字符串搜索，而是先用事件 ID、进程路径和连续记录号缩小时间线，再寻找攻击者如何把字符编码到字段中。开发代码用于确认行为模型，最终字符顺序仍应以日志记录顺序为准。 |
 
 ## 原始资料
 

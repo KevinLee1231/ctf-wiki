@@ -7,7 +7,7 @@ raw:
   - ../raw/web/WMCTF2025-pdf2text-wp.md
   - ../raw/web/D3CTF2019-ezupload-wp.md
   - ../raw/web/D3CTF2025-d3model-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # PHP, Java and Python Deserialization
@@ -64,6 +64,24 @@ updated: 2026-07-06
 | [RCTF2025-rootkb-dash-wp](../raw/web/RCTF2025-rootkb-dash-wp.md) | 工具沙箱可连默认口令 Redis，Celery token key 使用 pickle 且类加载限制不足，写恶意 pickle 等管理员会话触发。 |
 | [VNCTF2026-black-coffee-wp](../raw/web/VNCTF2026-black-coffee-wp.md) | Java 原生反序列化 gadget 链，先确认编码层、触发类、TemplatesImpl/POJONode 等可用 gadget。 |
 | [VNCTF2026-more-black-coffee-wp](../raw/web/VNCTF2026-more-black-coffee-wp.md) | Java 反序列化继续加载内存马，先确认 FilterShell 注入点、触发链和容器运行时边界。 |
+| [0xGame2022-week4-Ez-girlfriend-wp](../raw/web/0xGame2022-week4-Ez-girlfriend-wp.md) | 这条链不依赖第三方 gadget 库：应用自身提供命令执行 sink，JDK 的嵌套 `HashMap` 负责在反序列化期间触发 `equals()`。分析此类题时，应先确认入口是否无类型限制地反序列化，再搜索可控字段进入的 `equals()`、`hashCode()`、`compareTo()` 等隐式方法，最后利用集合重建过程把危险方法串起来。 |
+| [0xGame2023-week2-ez-unserialize-wp](../raw/web/0xGame2023-week2-ez-unserialize-wp.md) | 分析 PHP 反序列化应从魔术方法入口反向寻找危险调用，并逐步确认对象类型、属性值和触发时序。`__wakeup()` 的赋值不一定能消除恶意状态，因为序列化格式能够保存引用关系；根本修复是停止反序列化不可信数据，或使用纯数据格式并进行严格模式校验。 |
+| [0xGame2025-week3-文件查询器蓝-wp](../raw/web/0xGame2025-week3-文件查询器蓝-wp.md) | 本题的主线是“文件上传 + Phar 元数据反序列化 + 析构函数动态调用”。后缀白名单不能识别文件真实类型，明文关键字检查又能被整体压缩绕过；查询接口则提供了触发 `phar://` 的文件系统函数。审计类似题目时，应同时关注 PHP 版本、所有文件操作函数、可控对象属性以及析构等魔术方法，不能只把注意力放在上传后缀上。 |
+| [ACTF2023-craftcms-wp](../raw/web/ACTF2023-craftcms-wp.md) | 鉴权发生在危险配置之后：未授权 `conditions/render` 先经 `Craft::configure()` 写入 `as ...`，由 Yii 构造 `Imagick` 并解析 `/tmp` 中的 MSL，再向 `cpresources` 写 WebShell。HTTP 最终报错不能否定构造函数副作用已经发生。 |
+| [D3CTF2024-Moonbox-wp](../raw/web/D3CTF2024-Moonbox-wp.md) | Moonbox 的主链路是“replay 接口接收 Hessian→伪造 HashMap 内部结构→UIDefaults 取值→SwingLazyValue 调用 JNDI→LDAP 返回 Jackson 引用”。对象图的价值在于把危险调用延迟到目标反序列化时，API 层还要满足签名头和 Base64 传输格式。 |
+| [MoeCTF2025-23-幻境迷心-皇陨星沉-大结局-wp](../raw/web/MoeCTF2025-23-幻境迷心-皇陨星沉-大结局-wp.md) | 链路是 `readObject()` → `HashMap` 重建 → `Dog.hashCode()` → 反射序列 → `Runtime.exec()`。强制类型转换晚于反序列化回调；构造 payload 时还要避免 `hashCode`、`equals` 或 `compareTo` 在本地序列化阶段提前触发。 |
+| [RCTF2025-hyperfun-wp](../raw/web/RCTF2025-hyperfun-wp.md) | 公开密钥伪造密文、弱口令管理员会话、默认参数差异触发 PHP 反序列化，再借 Guzzle gadget 写文件并利用 Hyperf 代理类懒加载执行。Swoole/Hyperf 多 worker 环境中，必须区分文件已落盘与类是否会重新加载。 |
+| [WMCTF2020-webweb-wp](../raw/web/WMCTF2020-webweb-wp.md) | 按目标类的属性可见性和构造关系伪造对象图，把事件回调和 mapper 方法映射串成命令执行；PHP 反序列化题中若出现 `events`、`disconnect`、`insert`、`props`、`IteratorAggregate` 等回调/映射结构，应检查是否能把业务方法名转成内置危险函数。 |
+| [WMCTF2023-traveler-wp](../raw/web/WMCTF2023-traveler-wp.md) | Nacos Hessian 反序列化投递内存马，借助内网代理继续攻击 Spring Boot 服务，再用 BCEL 字节码绕过 WAF 执行命令；Nacos `2.2.2`、JRaft `WriteRequest`、Hessian2 反序列化、内网 Spring Boot 与 WAF 同时出现时，应考虑“先控入口服务，再横向打内网服务”的链路。 |
+| [WMCTF2024-ezql-wp](../raw/web/WMCTF2024-ezql-wp.md) | 识别点：QLExpress 执行用户表达式、依赖中存在 ActiveMQ/Shiro/commons-collections；核心绕过：安全方法白名单限制的是直接危险调用，但属性访问仍能触发 JavaBean getter/setter。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 语言序列化数据触发 magic method、回调或依赖 gadget | [deserialization-gadget-and-object-graph-execution.md](deserialization-gadget-and-object-graph-execution.md) |
+| 最终 sink 是模板、语言 eval 或命令上下文 | [server-side-expression-and-command-context-escape.md](server-side-expression-and-command-context-escape.md) |
+| 对象/制品可控并推进到 Node `require` 或内部加载器 | [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md) |
 
 ## 合并与拆分结论
 

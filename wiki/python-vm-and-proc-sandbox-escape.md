@@ -4,7 +4,7 @@ tags: [pwn, family, sandbox, vm, proc, emulator]
 skills: [ctf-pwn, ctf-reverse]
 raw:
   - ../raw/pwn/python-vm-and-proc-sandbox-escape.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Python, VM and /proc Sandbox Escape
@@ -42,6 +42,14 @@ updated: 2026-06-12
 | syscall blacklist | 是否可用 `sysenter`、vDSO、uncommon syscall 或内部 helper | [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md) |
 | restricted shell / Busybox | 命令、重定向、通配符、环境变量和 applet 是否可用 | [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 对象图、globals、模块缓存或宿主回调可恢复能力 | [restricted-runtime-object-graph-and-capability-recovery.md](restricted-runtime-object-graph-and-capability-recovery.md) |
+| `/proc`、fd、fifo、cwd 或继承句柄绕过表面隔离 | [sandbox-capability-and-inherited-channel-bypasses.md](sandbox-capability-and-inherited-channel-bypasses.md) |
+| 外层是 shell/命令代理，扩展和输出通道决定逃逸 | [restricted-shell-feature-and-output-channel-escape.md](restricted-shell-feature-and-output-channel-escape.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：raw 覆盖 Python、VM、FUSE/CUSE、`/proc`、fifo、emulator 和 shell trick，靠单一 technique 无法概括。
@@ -61,9 +69,19 @@ updated: 2026-06-12
 - [vm-z3-sandbox-and-game-basics.md](vm-z3-sandbox-and-game-basics.md)
 - [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md)
 - [seccomp-ret2dlresolve-and-runtime-primitives.md](seccomp-ret2dlresolve-and-runtime-primitives.md)
+- [sandbox-capability-and-inherited-channel-bypasses.md](sandbox-capability-and-inherited-channel-bypasses.md)
 - [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md)
 - [source-backdoors-and-restricted-shell-tricks.md](source-backdoors-and-restricted-shell-tricks.md)
 - [pwn-tooling.md](pwn-tooling.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [UMDCTF2023-bbfmspmss-wp](../raw/pwn/UMDCTF2023-bbfmspmss-wp.md) | 核心漏洞不是 Rust 内存安全缺陷，而是未约束绝对路径导致 `/proc/self/mem` 被当作普通箱子文件打开；`/proc/self/mem` 的读写结果还可充当无回显地址探针，逐级缩小 PIE 基址范围。 |
+| [WMCTF2024-yourwa-wp](../raw/web/WMCTF2024-yourwa-wp.md) | 源码关键点：`fs.openSync` 保留已删除文件的 fd，flag 仍可经 `/proc/<pid>/fd` 读取；沙箱绕过：Deno 禁止普通文件读，但静态 import 的错误信息可作为文件内容侧信道。 |
 
 ## 原始资料
 

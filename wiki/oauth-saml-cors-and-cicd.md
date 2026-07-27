@@ -4,7 +4,7 @@ tags: [web, family, oauth, oidc, saml, cors, cicd]
 skills: [ctf-web, ctf-cloud-infra]
 raw:
   - ../raw/web/oauth-saml-cors-and-cicd.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # OAuth, SAML, CORS and CI/CD
@@ -43,6 +43,7 @@ updated: 2026-06-12
 | Git 历史或 CI 变量泄露 | token 是否仍有效、权限范围和环境隔离是否足够 | [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
 | TeamCity/Guacamole/IdP API | 凭据能否从管理 API 扩展到连接参数或 RCE | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) |
 | 登录页投毒 | 管理员是否会访问被修改页面，凭据是否回传 | [xss-dom-and-browser-tricks.md](xss-dom-and-browser-tricks.md) 或 [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) |
+| Firebase/Kubernetes/service-account token | token 的主体、audience、RBAC 与可达资源图 | [cloud-identity-token-to-control-plane-pivot.md](cloud-identity-token-to-control-plane-pivot.md) |
 
 ## 合并与拆分结论
 
@@ -64,6 +65,7 @@ updated: 2026-06-12
 - [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md)
 - [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md)
 - [csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md)
+- [cloud-identity-token-to-control-plane-pivot.md](cloud-identity-token-to-control-plane-pivot.md)
 - [web-tooling.md](web-tooling.md)
 
 ## 来自 WP 的案例索引
@@ -71,6 +73,8 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [RCTF2025-auth-wp](../raw/web/RCTF2025-auth-wp.md) | Node IdP 中 `parseInt(false)` 与 MySQL `TINYINT` 存储语义不一致可注册 admin，再利用 SP XML Signature Wrapping 让业务读取未签名 Assertion。 |
+| [SekaiCTF2026-EnD-wp](../raw/web/SekaiCTF2026-EnD-wp.md) | 本题串联了三个不同信任边界：代理的响应定界错误把攻击者代码送入管理员 origin，同源权限泄露内部 API 配置，媒体 Range 与 Service Worker 又把不可读的跨源响应压缩成一位前缀 oracle。这里并非传统“缓存命中”攻击，关键是保存并移用 opaque `Response` 后产生的成功/失败差异。CSP、私网过滤和 CORS 各自只覆盖一层，不能替代端到端的消息边界与浏览器行为审计。 |
+| [UMDCTF2021-iot-project-wp](../raw/web/UMDCTF2021-iot-project-wp.md) | 从当前版本删除秘密并不能清除 Git 历史。审计公开仓库时要检查补丁、已删除文件、重命名和旧 API 行为。本题必须把“历史泄漏的密钥”与“仍可调用的旧 webhook”结合，单看最新版无法完成利用。 |
 
 ## 原始资料
 

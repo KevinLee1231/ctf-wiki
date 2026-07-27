@@ -4,7 +4,7 @@ tags: [pwn, family, heap, fsop, file-structure, glibc]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-fsop-file-structure-attacks.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Heap FSOP and FILE Structure Attacks
@@ -39,6 +39,14 @@ updated: 2026-06-12
 | refcount wrap | 单字节计数溢出导致对象提前释放 | 先稳定生命周期，再进入 heap UAF |
 | stdout 被关闭/不可打印 | 是否能改 fileno 或重新打开输出通道 | 关联 [format-string.md](format-string.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| FILE/wide-data/exit/TLS 结构提供泄露或控制流 | [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md) |
+| chunk/bin metadata 先提供可写目标或地址泄露 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
+| 格式化字符串可先覆盖 FILE 指针/字段或获取地址 | [format-string.md](format-string.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：FILE 结构既可做 leak，也可做输入劫持、vtable 劫持和 ORW 辅助，首轮需要按字段和 glibc 版本分流。
@@ -69,6 +77,9 @@ updated: 2026-06-12
 | [HGAME2026-diary-keeper-wp](../raw/pwn/HGAME2026-diary-keeper-wp.md) | glibc 2.35 off-by-null 伪造合并并泄露 libc/heap，后续不是普通 UAF，而是 `_IO_list_all` + house of obstack。 |
 | [RCTF2025-mstr-wp](../raw/pwn/RCTF2025-mstr-wp.md) | 运行时字符串对象重叠形成越界读写并最终打 FSOP，先确认对象布局、libc 和 FILE 结构目标。 |
 | [RCTF2025-rd-wp](../raw/pwn/RCTF2025-rd-wp.md) | 未初始化 task 指针可踩 stdout，先泄露 heap/libc，再构造 fake stdout / fake FILE 控制执行流。 |
+| [0xGame2023-week3-shellcode-but-FOP-wp](../raw/pwn/0xGame2023-week3-shellcode-but-FOP-wp.md) | 本题需要同时解决随机入口、禁用 execve、随机文件名和关闭 stdout 四个约束。第一阶段利用调用前寄存器状态做二次读取，第二阶段通过目录枚举定位文件，再使用 ORW 读取；这比假设文件名固定或直接套 `shellcraft.sh()` 更符合实际沙箱边界。 |
+| [ACTF2023-qemu-playground-2-wp](../raw/pwn/ACTF2023-qemu-playground-2-wp.md) | 本题的利用链为：逆向第一阶段口令、通过认证开放 `ptr`、利用 MMIO 末端 4 字节越界改写指针低位、通过 PIO 得到同一 4 GiB 窗口内的读写、沿真实对象指针泄露 libc，最后用宽字符 FSOP 栈迁移到 Host ROP。 |
+| [UMDCTF2025-aura-wp](../raw/pwn/UMDCTF2025-aura-wp.md) | 先破坏仍会被使用的 `FILE` 对象，再借 `fread` 完成受控写入。审计时应检查 `FILE *` 是否被误交给 `read`、`memcpy` 等裸内存接口，以及后续标准 I/O 能否把伪造的缓冲区边界、fd 和状态位转化为任意读写。 |
 
 ## 原始资料
 

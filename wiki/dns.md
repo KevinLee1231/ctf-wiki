@@ -4,7 +4,7 @@ tags: [cross-category, family, dns, rebinding, tunneling, enumeration]
 skills: [ctf-web, ctf-forensics, ctf-osint, ctf-pentest, ctf-malware]
 raw:
   - ../raw/pentest/dns.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # DNS Exploitation Techniques
@@ -43,6 +43,14 @@ updated: 2026-06-12
 | SPF/TXT 链 | `include:`、`redirect=`、TXT 拼接暴露 flag | 递归展开并处理字符串拼接 |
 | TCP Fast Open / SYN payload | 题目本质是网络协议边界，不是 DNS | 转网络/forensics 或 pwn primitive 判断 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| AXFR/记录/TTL/rebinding/tunnel 本身决定证据路径 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| DNS/WHOIS/CT/Archive 用于公开资产和历史 pivot | [public-record-dns-whois-and-archive-pivoting.md](public-record-dns-whois-and-archive-pivoting.md) |
+| PCAP 中 DNS label/会话需要排序、去 framing 和重组 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：DNS 题经常在 Web、Forensics、OSINT、Pentest 与 Malware 之间切换，本页提供协议层 pivot。
@@ -70,6 +78,7 @@ updated: 2026-06-12
 | Raw WP | 可复用联系 |
 |---|---|
 | [D3CTF2022-ohhhh-spf-wp](../raw/pentest/D3CTF2022-ohhhh-spf-wp.md) | SPF/DNS 记录是主线，先查询 TXT/SPF 解析链并确认域名授权语义。 |
+| [UMDCTF2026-insider-info-wp](../raw/web/UMDCTF2026-insider-info-wp.md) | 限制的是隧道往返次数，不是 DNS question 数量。DNS 头部的 `QDCOUNT` 允许在同一报文中批量查询，先一次性恢复域名素材，再用第二次请求命中完整域名即可。该题的决定性机制是应用层 DNS 报文结构，因此归入 Web/应用协议方向。 |
 
 ## 原始资料
 

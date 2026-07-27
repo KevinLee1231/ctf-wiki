@@ -63,6 +63,14 @@ updated: 2026-07-27
 - 在 VM 题里只看 handler 代码，不记录 VM state、opcode 和 operand 的对应关系。
 - 忽略假 flag、诱饵字符串和反调试环境差异。
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 壳/loader 运行时映射解密第二阶段，需 dump 修复 | [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md) |
+| anti-debug/self-check/环境检测阻断真实解包路径 | [anti-debug-self-check-and-environment-bypass.md](anti-debug-self-check-and-environment-bypass.md) |
+| 动态解密、API 和阶段状态适合 hook/trace/snapshot | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+
 ## 合并与拆分结论
 
 该页不再作为 technique 使用。壳、商业虚拟化、控制流混淆、动态解密、patch 和 trace 自动化的共同点是“先找到真实逻辑边界”，但后续路线依赖保护类型分叉。具体单点模式应落到 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)、[vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) 或工具页；本页只保留分流和降维判断。
@@ -86,6 +94,14 @@ updated: 2026-07-27
 | [D3CTF2025-locked-door-wp](../raw/reverse/D3CTF2025-locked-door-wp.md) | VMP 壳和反调试后还有 RSA 签名门，先脱壳定位 OEP，再替换公钥或重签 key。 |
 | [LilacCTF2026-kilogram-wp](../raw/reverse/LilacCTF2026-kilogram-wp.md) | VMP 外壳只是前置障碍；输出文件保存 salt、被口令 key 保护的本地 key 和 RC4-like flag 密文。 |
 | [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 |
+| [0xGame2025-week2-TELF-wp](../raw/reverse/0xGame2025-week2-TELF-wp.md) | 本题有两层：先修复 `0xEC` 处的 UPX 魔改标识，再恢复 Linux glibc 随机序列和 TEA。`X1c! → UPX!`、种子 `1010000`、四个密钥、56 字节密文、32 轮和小端分组都是复现所需的关键事实。动态调试并非唯一方案，只要在正确运行库中生成密钥，便可离线完成解密。 |
+| [ACTF2022-dropper-wp](../raw/reverse/ACTF2022-dropper-wp.md) | 本题的关键不是某一个复杂算法，而是连续识别三层障碍：UPX 只隐藏外层入口；资源异或与动态 API 解析隐藏内层 PE；除零异常和虚函数表跳转再隐藏真正的校验函数。沿数据流逐层剥离后，最终验证只是可直接重放的大整数四则运算、低位优先的 base-128 拆分和 Base64 解码。 |
+| [ACTF2023-obfuse-wp](../raw/reverse/ACTF2023-obfuse-wp.md) | 本题不是“看到 OLLVM 就跑某个脚本”，而是分层恢复语义：运行后提取全局明文，模拟间接控制流并重建 CFG，再从 `EvalCommand` 进入真实校验。三段数据分别用小空间哈希爆破、定制密码算法逆运算和固定 PRNG 的树路径枚举解决。 |
+| [MoeCTF2024-SMCProMax-wp](../raw/reverse/MoeCTF2024-SMCProMax-wp.md) | SMC 题要区分“磁盘中的加密代码”“运行时解密后的校验逻辑”和“进入校验前被修改的输入”三层状态。Z3 只解决最后校验函数的逆像，若忽略前置字符变换，模型给出的字符串仍不是实际应提交的 flag。 |
+| [UMDCTF2017-oldschool-wp](../raw/reverse/UMDCTF2017-oldschool-wp.md) | 这题的关键是逐层识别封装，而不是把解包后的 PE 当成最终程序：UPX、Bat To Exe 资源保护、RC4、BriefLZ 和批处理位重排各负责一层。每层都应检查头部、长度或已知格式，再进入下一层；最终 access key 来自可逆位排列，不需要暴力枚举 $16^{10}$。 |
+| [WMCTF2020-easy-re-wp](../raw/reverse/WMCTF2020-easy-re-wp.md) | 识别 Perl 打包 EXE 的初始化流程，通过 `FindResourceA` / `LoadResource` / `LockResource` 和文件尾 magic 定位 BFS 资源，按文件表结构批量还原内部文件。 |
+| [WMCTF2023-ios-wp](../raw/reverse/WMCTF2023-ios-wp.md) | 在越狱设备上结合 Frida hook 和 IDA 静态分析，定位 UI 校验函数并还原 RC4 类算法；iOS 题出现越狱检测、按钮校验、加密字符串和 OLLVM 混淆时，应先绕过环境检测，再 hook 弹窗/校验入口定位真实函数。 |
+| [WMCTF2023-mollvme-wp](../raw/reverse/WMCTF2023-mollvme-wp.md) | 把 Move 字节码题转化为约束求解问题，先反汇编，再消除死代码或实现轻量符号执行；输入固定长度、字节码中存在大量恒真/恒假分支和不可达路径时，应优先清理路径，而不是逐条手算所有分支。 |
 
 ## 原始资料
 

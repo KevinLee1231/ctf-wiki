@@ -4,7 +4,7 @@ tags: [crypto, family, ecc, dlp, signature, nonce]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/ecc-dlp-and-signature-attacks.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # ECC DLP and Signature Attacks
@@ -46,11 +46,19 @@ updated: 2026-07-06
 | hash-collision generated k | nonce 派生依赖 MD5/SHA 碰撞或弱 hash。 | 先转 [hash-protocol-and-oracle-attacks.md](hash-protocol-and-oracle-attacks.md) 固定碰撞关系，再回签名方程。 |
 | shared prime / modulus factor | 多个曲线或签名参数共享素因子。 | GCD 先做参数恢复，再进入 DLP/签名路线。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| nonce 复用/偏置/部分泄露，或未验证点进入秘密标量乘 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
+| 部分 nonce/HNP 泄露需要格恢复 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
+| 曲线/群关系最终化为有限域、多项式或模根问题 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：曲线参数体检、DLP、invalid/singular/anomalous curve、small subgroup 和签名 nonce 恢复的第一步判断不同，但都围绕曲线群或签名方程的结构缺陷。
 - 不并入 [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)：ECC/签名题需要先处理点合法性、群阶、cofactor、签名格式和 nonce 方程，和一般数论代数页的入口证据不同。
-- 不拆成 DLP、invalid curve、signature nonce 三个 technique：当前页面承担 Crypto triage 的二级分流；具体 HNP/格、PRNG nonce 或 hash collision 会继续转到相邻页面。
+- 签名 nonce/小子群缺陷和格型部分泄露已落到具体 technique；本页继续承担曲线识别、DLP 算法选择与点验证之间的二级分流。
 
 ## 常见陷阱
 
@@ -82,6 +90,12 @@ updated: 2026-07-06
 | [VNCTF2026-hd-is-what-wp](../raw/crypto/VNCTF2026-hd-is-what-wp.md) | SIDH/SIKE 公钥向量先被公开 seed 的 LCG 矩阵线性混淆；恢复标准公钥后再用 Castryck-Decru attack 求共享 j。 |
 | [VNCTF2026-schnorr-wp](../raw/crypto/VNCTF2026-schnorr-wp.md) | Schnorr 服务固定 seed 导致首轮承诺 `B` 跨连接重复；对同一 `B` 给两个 challenge，用 special soundness 相减提 witness。 |
 | [D3CTF2019-keygenme-wp](../raw/reverse/D3CTF2019-keygenme-wp.md) | Keygen 逻辑落到签名/曲线数学关系，先把校验式转成可求解的 DSA/ECDSA 约束。 |
+| [0xGame2023-week3-ECC-wp](../raw/crypto/0xGame2023-week3-ECC-wp.md) | 本题由“曲线离散对数”和“不规范明文编码”两部分组成。Sage 只用于合法曲线点之间的 $K=kG$；对不在曲线上的 `C1`，必须复用题目实际使用的坐标运算，不能强行调用 `E.point(C1)`。审计自制 ECC 时还应重点检查私钥位数、随机数位数以及明文到曲线的编码方式。 |
+| [0xGame2025-week3-映雪-wp](../raw/crypto/0xGame2025-week3-映雪-wp.md) | 同一短 Weierstrass 曲线上的两个点可以通过方程相减消去常数项，并恢复一次项系数；当曲线系数本身就是 $n$ 的素因子时，恢复系数等价于分解复合模数。 |
+| [D3CTF2024-S0DH-wp](../raw/crypto/D3CTF2024-S0DH-wp.md) | 把 $2^{38}$-同源路径分成两段，以中间曲线的 $j$-不变量做 meet-in-the-middle，复杂度降到约 $2^{20}$ 级别；SIDH 风格参数中某一侧同源次数明显偏小，并公开起点、终点曲线时，应检查能否从两端枚举到同一同构类。 |
+| [UMDCTF2026-nuclear-codes-wp](../raw/crypto/UMDCTF2026-nuclear-codes-wp.md) | 宏混淆掩盖的是一个有理数三次方程。识别并清除分母后，椭圆曲线上的群结构提供了系统寻找有理点的方法；再把有理坐标缩放为互素整数即可满足输入约束。分类时应按这一决定性数学障碍归入密码/数论方向，而不是仅因原仓库目录名而归入逆向。 |
+| [WMCTF2022-ecc-wp](../raw/crypto/WMCTF2022-ecc-wp.md) | 本题核心是用椭圆曲线点关系构造 RSA 因子泄露。$G$ 和 $3G$ 给得很反常，说明要从 $2G+G=3G$ 和曲线方程里恢复模 $p$ 的关系；识别信号是：RSA 模数 $n$、密文 $c$、指数 $e$ 与椭圆曲线点坐标同时出现；曲线参数缺失；flag bits 被拆成三段，代码中最终把 $a$、$b$、RSA 解密结果拼接。 |
+| [WMCTF2022-intercept-wp](../raw/crypto/WMCTF2022-intercept-wp.md) | 本题核心是 IBE 主密钥恢复。注册接口泄露多个用户的 $d,h_1,h_2$ 后，可以构造不同用户对之间的 $a_{k_1},a_{k_2}$，利用比值恒等关系得到隐藏阶 $zq$ 的倍数；对多组结果取 GCD 后恢复 $zq$。 |
 
 ## 原始资料
 

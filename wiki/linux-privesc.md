@@ -4,7 +4,7 @@ tags: [pentest, family, linux, privesc, service-abuse]
 skills: [ctf-pentest]
 raw:
   - ../raw/pentest/linux-privesc.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Linux Privilege Escalation and Service Exploitation
@@ -54,6 +54,14 @@ updated: 2026-06-12
 | 备份/NFS/Unix socket | 先把不可达资源转成可访问端口或本地挂载，再判断是凭据、文件读还是执行能力。 |
 | 常规本机提权 | SUID、capabilities、Docker、ACL、cron、PATH、可写服务脚本仍需手工确认，自动化枚举只是候选生成器。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| sudo/SUID/capability/service/cron 或凭据配置形成提权边 | [local-privesc-misconfiguration-and-credential-pivot.md](local-privesc-misconfiguration-and-credential-pivot.md) |
+| 受限 shell 的扩展、工具和输出通道阻碍后续枚举 | [restricted-shell-feature-and-output-channel-escape.md](restricted-shell-feature-and-output-channel-escape.md) |
+| 源码、部署脚本或历史配置暴露隐藏高权限入口 | [source-audit-hidden-backdoor-and-debug-mode-discovery.md](source-audit-hidden-backdoor-and-debug-mode-discovery.md) |
+
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖 sudo 参数注入、服务配置、数据库 RCE、备份凭据、NFS/SSH socket、代理 pivot、CVE 和 TOCTOU，首轮判断不同，不应伪装成单一 technique。
@@ -75,6 +83,16 @@ updated: 2026-06-12
 - [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md)
 - [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md)
 - [race-condition-and-concurrency-exploits.md](race-condition-and-concurrency-exploits.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [0xGame2025-week3-base64Decoder-wp](../raw/pentest/0xGame2025-week3-base64Decoder-wp.md) | 本题是一条“解析差异 → shell 注入 → SUID 提权”的完整主机利用链。第一层问题是校验器与执行器不一致：Python 只认可了安全的第一段，Linux 工具却解释了更多数据。第二层问题是把解码结果经命令替换送入 `sh`，使分号获得命令分隔语义。获得低权限命令执行后，再由错误配置的 SUID `dd` 跨越文件权限边界。 |
+| [0xGame2025-week4-ezHack-wp](../raw/pentest/0xGame2025-week4-ezHack-wp.md) | 本题是一条完整的“高权限定时任务 + 用户可写目录 + 通配符参数注入”提权链。文件名本身不执行命令；真正的问题是 shell 把恶意文件名展开成了 `rsync` 的命令行参数，而远程同步语法又让 `-e` 指定的程序获得了执行机会。最后通过 SUID Bash 保留 `root` 的有效 UID，读取 flag。 |
+| [ACTF2025-hard-guess-wp](../raw/pentest/ACTF2025-hard-guess-wp.md) | 本题前半段考查从公开信息构造定向口令，而不是盲目扩大爆破范围；后半段考查 SUID 程序调用 shell 时的环境变量边界。仅清理 `LD_PRELOAD` 等动态链接器变量并不足以保证安全：只要高权限程序继续调用解释器，`BASH_ENV`、解释器启动文件和参数解析都可能形成命令执行入口。修复时应避免在 SUID 程序中调用 `system()`，改用固定路径和固定参数的 `execve()`，并为子进程构造最小环境。 |
 
 ## 原始资料
 

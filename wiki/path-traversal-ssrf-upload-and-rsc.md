@@ -7,7 +7,7 @@ raw:
   - ../raw/web/WMCTF2025-pdf2text-wp.md
   - ../raw/web/WMCTF2025-rustdesk-change-client-backend-wp.md
   - ../raw/web/D3CTF2019-ezupload-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Path Traversal, SSRF, Upload and RSC
@@ -86,6 +86,13 @@ updated: 2026-07-06
 | [RCTF2025-514s-heart-wp](../raw/web/RCTF2025-514s-heart-wp.md) | Koishi 插件静态路由目录穿越先读配置拿后台密码，再用配置 `${{ ... }}` 表达式执行命令。 |
 | [SUCTF2026-wmsWP](../raw/web/SUCTF2026-wmsWP.md) | JEECG `/rest/*` 白名单放行且 Spring `params` 可由 POST body 命中后台方法；模板 ZIP 解压目录穿越写 JSP。 |
 | [VNCTF2026-markdown2world-wp](../raw/web/VNCTF2026-markdown2world-wp.md) | Pandoc 转 docx 时会读取 Markdown 图片目标并嵌入 `word/media/`；构造本地资源引用后解压 docx 取回文件内容。 |
+| [0xGame2023-week2-ez-upload-wp](../raw/web/0xGame2023-week2-ez-upload-wp.md) | 二次渲染能清除普通尾部附加代码，但不能弥补“客户端可控 MIME + 原样保留可执行扩展名 + 上传目录可由 Web 访问”的组合缺陷。应由服务端识别真实格式、生成固定安全扩展名、把上传目录置于脚本执行范围之外，并使用随机对象名与独立静态文件域。 |
+| [0xGame2023-week3-web-snapshot-wp](../raw/web/0xGame2023-week3-web-snapshot-wp.md) | 本题的核心链条是“仅检查初始协议的 SSRF → HTTP 302 协议跳转 → Gopher 注入 Redis RESP → Redis 主从复制写模块 → 模块命令执行”。修复时应同时限制初始 URL 与每次重定向的协议和目标地址，禁止访问内网网段，并为 Redis 启用认证、最小权限和危险命令限制；只修入口正则不能阻止重定向绕过。 |
+| [ACTF2022-bet2loss-wp](../raw/web/ACTF2022-bet2loss-wp.md) | 利用下载接口缺少语义校验，读取 keystore 与密码后接管合约 owner 权限；链上关键操作由 Web 后端代签，而后端同时提供日志或文件下载接口时，应检查密钥材料是否与用户可控文件名共用目录。 |
+| [WMCTF2020-gogogo-wp](../raw/web/WMCTF2020-gogogo-wp.md) | MySQL collation 隐式转换制造账号混淆，配合未使用事务导致的部分写入；Go HTTP CRLF 注入把插件上传请求打到内部接口并覆盖 `.so`；注册处出现数据库唯一键报错但业务未回滚、用户名可用全角/相似字符、后端暴露 Go plugin 读文件/发 HTTP 能力时，应联想到编码表比较和 SSRF/CRLF 到内部上传链。 |
+| [WMCTF2020-make-php-great-again-wp](../raw/web/WMCTF2020-make-php-great-again-wp.md) | 通过软链接/`/proc/self/root` 多层路径绕过 `require_once` 的 once 去重，再配合 `php://filter` 读取 PHP 源码或 flag 文件。 |
+| [WMCTF2022-subconverter-wp](../raw/web/WMCTF2022-subconverter-wp.md) | 在前端代理严格限制参数的情况下，寻找后端旧版路由里仍会把 `url` 当作本地文件读取的接口，先泄露 token，再使用 QuickJS 脚本执行链写出 flag；Web 题给出双容器、前端代理参数白名单、后端开源服务固定 commit 和周期性 token 时，应把版本源码、代理过滤和配置文件权限放在一起看。 |
+| [WMCTF2024-jvm-go-wp](../raw/web/WMCTF2024-jvm-go-wp.md) | 漏洞点：`filepath.Join` 后没有做路径归一化和根目录约束；利用点：路径穿越读取 `/proc/self/fd/<n>`，绕过直接读取 flag 时的限制。 |
 
 ## 原始资料
 

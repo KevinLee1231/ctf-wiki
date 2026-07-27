@@ -4,7 +4,7 @@ tags: [pwn, pentest, web, family, source-backdoor, restricted-shell, bash, rvim,
 skills: [ctf-pwn, ctf-pentest, ctf-web]
 raw:
   - ../raw/pwn/source-backdoors-and-restricted-shell-tricks.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Source Backdoors and Restricted Shell Tricks
@@ -50,6 +50,14 @@ updated: 2026-07-06
 - 在受限 shell 中硬拼黑名单绕过，而不是找允许工具的副作用。
 - 不保存最小命令，导致 writeup 只剩“交互里试出来”。
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| shell expansion、内建、环境或输出副作用可恢复命令能力 | [restricted-shell-feature-and-output-channel-escape.md](restricted-shell-feature-and-output-channel-escape.md) |
+| 源码/配置/历史存在隐藏路由、debug 条件或后门分支 | [source-audit-hidden-backdoor-and-debug-mode-discovery.md](source-audit-hidden-backdoor-and-debug-mode-discovery.md) |
+| 低权限落点可沿 sudo/SUID/service/凭据配置提权 | [local-privesc-misconfiguration-and-credential-pivot.md](local-privesc-misconfiguration-and-credential-pivot.md) |
+
 ## 合并与拆分结论
 
 该页不作为单一 technique 使用。它保留为 Pwn/Pentest/Web 之间的跨方向 family，因为源码后门、HISTFILE/`bash -v`、rvim 插件逃逸和受限 shell 工具副作用的第一步证据不同，但都属于“显式漏洞利用前先确认隐藏功能或允许工具副作用”的分流入口。若后续某一类 raw 增多，应拆出更具体 technique；现阶段由本页连接 [bashjails.md](bashjails.md)、[interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)、[pyjails.md](pyjails.md) 和 [scripts-and-obfuscation.md](scripts-and-obfuscation.md) 更合适。
@@ -68,6 +76,7 @@ updated: 2026-07-06
 | Raw WP | 可复用联系 |
 |---|---|
 | [RCTF2025-rootkb-wp](../raw/web/RCTF2025-rootkb-wp.md) | 工具沙箱目录可写且运行时固定 `LD_PRELOAD=sandbox.so`，覆盖共享库后靠 constructor 把 flag 移到 Web 静态目录。 |
+| [MoeCTF2024-哦不-我的nginx-wp](../raw/pwn/MoeCTF2024-哦不-我的nginx-wp.md) | 题目的核心不是 nginx 配置，而是从“仅存活一个 Bash 进程”的环境逐级自举：先用纯内建能力传入无动态依赖的 BusyBox，再用 BusyBox 恢复文件传输和权限工具，最后补齐成对的 libc 与动态加载器。传二进制时先转 `\xNN` 是为了绕过 Bash 变量不能保存 NUL 字节的限制。 |
 
 ## 原始资料
 

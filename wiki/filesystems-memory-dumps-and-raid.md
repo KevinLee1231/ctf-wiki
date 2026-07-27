@@ -4,7 +4,7 @@ tags: [forensics, family, filesystem, memory-dump, raid, partition]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/filesystems-memory-dumps-and-raid.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Filesystems, Memory Dumps and RAID
@@ -39,6 +39,14 @@ updated: 2026-06-12
 | RAID5/XOR、缺盘恢复 | 先确定成员顺序、chunk size、parity 方向，再重建文件系统 | [forensics-tooling.md](forensics-tooling.md) |
 | TrueCrypt/VeraCrypt 高熵卷或 keyfile | 先确认卷大小、卷头状态和上下文线索，再尝试密码/keyfile/隐藏卷；若进入卷内文件恢复，转归档/文件系统页 | [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md), [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md) |
 | SQLite/Kyoto Cabinet/BSON/diff history | 先解析记录结构和顺序，再重建历史内容 | [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md) |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 文件系统 metadata 与删除记录决定恢复 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
+| 进程/VAD/minidump/container layer 保留运行时证据 | [memory-process-and-container-layer-recovery.md](memory-process-and-container-layer-recovery.md) |
+| RAID、VMDK sparse、分卷或碎片卷需重建 | [raid-vm-disk-and-fragmented-volume-reconstruction.md](raid-vm-disk-and-fragmented-volume-reconstruction.md) |
 
 ## 合并与拆分结论
 

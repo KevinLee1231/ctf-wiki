@@ -4,7 +4,7 @@ tags: [crypto, family, prng, z3, lcg, timing, constraint-solving]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/prng-z3-lcg-and-timing-attacks.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # PRNG Z3, LCG and Timing Attacks
@@ -48,11 +48,19 @@ PRNG 证据已经明确，但直接状态恢复不够：输出被截断、打乱
 | 格式串影响 seed/状态 | Pwn primitive 可改写全局随机状态、赌注或时间偏移。 | 先用 [format-string.md](format-string.md) 获得写原语，再回到 PRNG 预测。 |
 | NTP/UUID/time poisoning | 网络时间或 UUID 结构泄露随机状态。 | 先确认流量和时间源，再转 [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) 补证据。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 递推、运行时 PRNG 或时间 seed 可恢复完整状态 | [linear-prng-state-and-seed-recovery.md](linear-prng-state-and-seed-recovery.md) |
+| 截断输出/有界误差适合小根、HNP 或格约束 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
+| 比较、timeout 或 timing 先要量化成可重复谓词 | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：partial output、Z3 solve-time oracle、LCG modulo、LFSR parity、格式串改状态和时间/UUID poisoning 的共同点是 PRNG 证据需要外部约束补齐。
 - 不并入 [mt-lcg-and-seed-recovery.md](mt-lcg-and-seed-recovery.md)：直接状态恢复和“约束补状态”的首轮问题不同；本页的关键是先把反馈写成状态变量上的约束。
-- 不拆成 Z3、timing、LCG 小页：目前这些模式经常作为同一条链的不同补证方式出现，保留在 family 中更利于 pivot。
+- PRNG 状态、格型部分泄露和自适应 oracle 已由独立 technique 承接；本页保留三者在同一题链中互相补证时的 pivot。
 
 ## 常见陷阱
 

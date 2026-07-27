@@ -39,6 +39,14 @@ updated: 2026-07-27
 | Discord/API 枚举 | token/频道/消息分页和 rate limit | [web-and-dns.md](web-and-dns.md) 或 OSINT |
 | cipher identification | 明密文长度、字符集、重复模式和文件头 | [classical-xor-and-substitution-ciphers.md](classical-xor-and-substitution-ciphers.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 扩展名、magic、容器边界或内嵌载荷不一致 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
+| 归档 header/目录/压缩流损坏或 ZipCrypto 已知明文 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| 内容是 Base/hex/URL/字符集/码表等可逆表示链 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：它是 Forensics、Crypto、OSINT 与其它专项的轻量入口，提供首轮分流价值。

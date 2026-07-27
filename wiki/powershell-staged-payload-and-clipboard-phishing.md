@@ -4,7 +4,7 @@ tags: [malware, reverse, powershell, mshta, staged-payload, phishing, obfuscatio
 skills: [ctf-malware, ctf-reverse]
 raw:
   - ../raw/reverse/Spirit2026-5-im-a-human-wp.md
-updated: 2026-05-21
+updated: 2026-07-27
 ---
 
 # PowerShell Staged Payload and Clipboard Phishing
@@ -54,6 +54,14 @@ updated: 2026-05-21
 - [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md)
 - [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [0xGame2024-week2-呜呜呜我再也不敢乱点了-wp](../raw/malware/0xGame2024-week2-呜呜呜我再也不敢乱点了-wp.md) | 本题的完整链路是“TLS key log 解密 → HTTP 对象恢复 → ZIP 文件名异常检查 → BAT 调用链定位 → PowerShell Base64 静态解码 → 提取 C2 IP”。分析可疑脚本时，应先去除注释和噪声，追踪实际被调用的文件与解码函数；对已经出现 `Invoke-Expression`、网络连接等危险行为的代码，只做离线解码，不要在宿主机上直接运行。 |
 
 ## 原始资料
 

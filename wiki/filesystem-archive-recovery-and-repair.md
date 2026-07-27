@@ -6,7 +6,7 @@ raw:
   - ../raw/forensics/disk-recovery.md
   - ../raw/forensics/WMCTF2025-githacker-wp.md
   - ../raw/crypto/SUCTF2026-chaosWP.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Filesystem and Archive Recovery Repair
@@ -51,6 +51,14 @@ updated: 2026-07-06
 | VeraCrypt 卷头恢复 | 改挂载密码通常只重包卷头密钥材料，不重加密数据区；两个容器共享 master key 时可用旧卷头恢复旧密码访问。 |
 | 结构化数据库恢复 | SQLite serial type、page header、WAL/journal 和字段类型可直接影响可见内容。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| inode/MFT/journal/unallocated metadata 可恢复删除文件 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
+| central directory/流边界/CRC/ZipCrypto 需要修复 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| RAID/VMDK/分卷/损坏 partition 需先重建底层映射 | [raid-vm-disk-and-fragmented-volume-reconstruction.md](raid-vm-disk-and-fragmented-volume-reconstruction.md) |
+
 ## 常见陷阱
 
 - 在损坏归档上直接爆破密码，忽略 header/CRC/目录项本身已经坏了。
@@ -72,6 +80,11 @@ updated: 2026-07-06
 |---|---|
 | [WMCTF2025-githacker-wp](../raw/forensics/WMCTF2025-githacker-wp.md) | `.png`/`.jpg` 高熵且大小规整时不要按图片隐写死磕；如果是 VeraCrypt 容器，改密码后的容器可通过同源旧容器卷头恢复旧密码访问。 |
 | [SUCTF2026-chaosWP](../raw/crypto/SUCTF2026-chaosWP.md) | ZipCrypto 已知明文不只用常见 magic；AVIF/ISOBMFF 头部字段也能提供稳定明文窗口。 |
+| [0xGame2024-week1-加密的压缩包-wp](../raw/forensics/0xGame2024-week1-加密的压缩包-wp.md) | 这是 ZIP 元数据伪装，而不是密码爆破。检查此类异常 ZIP 时，应同时核对本地文件头和中央目录中的通用位标志、压缩大小以及文件尾注释；恢复正确的 `0x0009` 后，现成解压工具即可按 ZipCrypto 正常处理数据。 |
+| [MoeCTF2021-easyforensics-wp](../raw/forensics/MoeCTF2021-easyforensics-wp.md) | 这题包含两层证据恢复：先在 E01 文件系统镜像中恢复已删除对象，再逆转脚本对文件内容的编码和分块。重组此类数据时，目录名既是载荷也是顺序信息，必须显式按编号排序并检查连续性。用文件头和容器内部结构共同确认文件类型，也比仅凭扩展名改名更可靠。 |
+| [UMDCTF2022-kernel-infernal-1-wp](../raw/forensics/UMDCTF2022-kernel-infernal-1-wp.md) | Linux kdump 题首先要保证 `vmlinux` 与转储内核版本严格匹配，否则结构体偏移和符号解析都会失真。定位路径类问题时，调用栈只负责找出相关任务；还要结合 PID 查询该任务的工作目录、根目录和已打开文件，才能把崩溃行为落到具体文件系统位置。 |
+| [UMDCTF2023-detective-pikachu-1-wp](../raw/forensics/UMDCTF2023-detective-pikachu-1-wp.md) | 沿“加密 ZIP → JPEG/WAV Steghide → XOR 提示 → 图鉴词表 → 迭代 BLAKE2b 口令”的证据链逐层恢复；多种看似正常的媒体和档案同时出现时，应记录每层输入、输出、口令来源和哈希变换，避免把载荷层级混在一起。 |
+| [WMCTF2020-xman-happy-birthday-wp](../raw/forensics/WMCTF2020-xman-happy-birthday-wp.md) | 看到文件名、扩展名或 magic number 明显倒写时，先检查是否为全文件字节倒序。ZIP 题尤其可以用 `50 4B` 作为识别信号：如果在文件尾看到 `4B 50`，就应尝试 reverse 文件内容，再按正常压缩包处理。 |
 
 ## 原始资料
 

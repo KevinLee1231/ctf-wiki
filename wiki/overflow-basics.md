@@ -48,6 +48,20 @@ updated: 2026-07-27
 |---|---|
 | [D3CTF2023-d3op-wp](../raw/pwn/D3CTF2023-d3op-wp.md) | ubus RPC 的 base64 服务输出长度计算和索引检查不一致，最终是协议入口触发的 AArch64 栈溢出；先量化溢出长度和保护，再转跨平台 ROP。 |
 | [HGAME2026-adrift-wp](../raw/pwn/HGAME2026-adrift-wp.md) | 整数边界绕过转正逻辑并影响 canary/栈执行，先验证偏移、泄露和 shellcode 条件。 |
+| [ACTF2023-easyvirtio-wp](../raw/pwn/ACTF2023-easyvirtio-wp.md) | 本题的关键是区分三层事实：CVE-2023-3180 提供 `src_len != dst_len` 的堆越界写；第一个赛题补丁把错误路径变成从 `dst` 开始、长度为 `src_len` 的越界读；第二个赛题补丁在对象尾部加入可泄露、可覆盖、会被间接调用的 `g_free` 指针。 |
+| [D3CTF2024-D3BabyEscape-wp](../raw/pwn/D3CTF2024-D3BabyEscape-wp.md) | 利用链是“MMIO 可控基址导致越界读→函数指针泄露 libc→PMIO 状态机解锁越界写→局部覆盖函数指针→参数类型混淆触发 `system`”。题目之所以只需覆盖低 4 字节，是因为源函数和目标函数位于同一个 libc 映射；如果目标跨映射或 ASLR 使高位不同，就必须寻找完整 8 字节写。 |
+| [MoeCTF2024-luosh-wp](../raw/pwn/MoeCTF2024-luosh-wp.md) | 复杂菜单程序应按“解析—存储—执行”分层审计。本题的决定性组合是：错误输出泄漏地址，解析阶段获得受限任意写，执行阶段再借 `.bss` 索引越界跨过写目标限制。看到自制文件系统或 inode 不代表必须打堆，先追踪对象实际存储位置和函数指针消费者更有效。 |
+| [MoeCTF2025-call-it-wp](../raw/pwn/MoeCTF2025-call-it-wp.md) | 利用“循环下标递增、有效计数不递增”的状态不同步造成 OOB 写，再把相邻内存布置成间接调用表；数组索引和循环终止条件使用不同变量，且错误分支只更新其中一个时，应检查无效输入能否推进索引。 |
+| [UMDCTF2024-the-voice-wp](../raw/pwn/UMDCTF2024-the-voice-wp.md) | 本题展示了 Canary 的一个反常规绕过：不泄露随机 Canary，而是同时改写“栈上的副本”和 TLS 中的原值。空字节让 `atoi` 只解析前缀，却不会截断 `gets` 的后续溢出；TLS 越界下标 15 则把固定值写到 `fs:0x28`。两部分缺一不可。 |
+| [WMCTF2020-mengyedekending-wp](../raw/pwn/WMCTF2020-mengyedekending-wp.md) | C# pwn 题需要先判断可控数据最终落在原生栈、托管对象还是运行时封装的缓冲区中。本题可复用的思路是把栈溢出转成“下标变量污染”，再利用程序自身的数组/索引写逻辑修改关键标志位；连续 `\r` 带来的无限溢出提高了容错率，但宽字节输入会改变 payload 的实际内存布局，调试时必须按最终字节序列验证。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| saved RIP/frame 可控但栈空间、gadget 或保护受限 | [stack-control-flow-and-constrained-rop.md](stack-control-flow-and-constrained-rop.md) |
+| signedness、位宽、长度计算或索引检查与访问不一致 | [integer-length-and-index-confusion-exploitation.md](integer-length-and-index-confusion-exploitation.md) |
+| 原始字节/整数/浮点/指针解释差异直接形成内存 primitive | [data-interpretation-memory-primitives.md](data-interpretation-memory-primitives.md) |
 
 ## 合并与拆分结论
 

@@ -4,7 +4,7 @@ tags: [forensics, file-triage, artifact, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/file-signatures-and-flag-artifact-hunting.md
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # File Signatures and Flag Artifact Hunting
@@ -45,6 +45,14 @@ updated: 2026-07-11
 | Trailing data | JPEG/PDF/ZIP 后附额外字节，需按 EOF marker 切出。 |
 | Common encoding | base64/hex/ROT18 常是最终或倒数第二层。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 扩展名/magic/容器边界与内嵌对象不一致 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
+| 损坏/加密归档需 header、CRC 或已知明文恢复 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| 文件系统 metadata/journal/unallocated block 保留删除对象 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
+
 ## 常见陷阱
 
 - 只运行 `strings | grep flag`，没有看 metadata、尾部和嵌套文件。
@@ -61,6 +69,14 @@ updated: 2026-07-11
 - [blockchain-and-transaction-forensics.md](blockchain-and-transaction-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [UMDCTF2017-macho-man-wp](../raw/forensics/UMDCTF2017-macho-man-wp.md) | 文件头损坏题应先观察残留主体，而不是盲目套用 magic。`LC_SEGMENT_64` 与 `__PAGEZERO` 明确给出了格式、端序和架构；其余头部字段则可由 load command 数量及总长度交叉验证。最终摘要必须针对“补头后的完整文件”计算，不能只哈希新增头或原始残片。 |
 
 ## 原始资料
 

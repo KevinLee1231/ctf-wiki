@@ -2,7 +2,7 @@
 type: tooling
 tags: [forensics, tooling, tools, environment]
 skills: [ctf-forensics, ctf-stego, ctf-hardware-embedded]
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # Forensics Tooling
@@ -149,7 +149,7 @@ updated: 2026-07-11
 
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
-| strings | /usr/bin/strings | 提取可打印字符串 | `strings file | grep -i flag` |
+| strings | /usr/bin/strings | 提取可打印字符串 | `strings file \| grep -i flag` |
 | file | /usr/bin/file | 识别文件真实类型 | `file unknown.bin` |
 | git | /usr/bin/git | 版本控制/仓库取证 | `git log --all` |
 | apktool | /usr/bin/apktool | APK 反编译 | `apktool d app.apk` |

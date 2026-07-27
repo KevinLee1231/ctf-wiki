@@ -6,7 +6,7 @@ raw:
   - ../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md
   - ../raw/crypto/D3CTF2022-d3share-wp.md
   - ../raw/crypto/VNCTF2026-mymnemonic-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Exotic Secret Sharing, Rabin and Polynomials
@@ -58,6 +58,14 @@ updated: 2026-07-06
 | Rabin polynomial primes | `c = m^2 mod n` 且 p/q 由多项式或可恢复参数生成。 | 先恢复/分解 p、q，再 CRT 组合四根并用格式筛选。 |
 | Vandermonde recovery | 多个点值和次数界足以恢复多项式系数。 | 按域/模数建立线性系统，解系数后 forward check。 |
 | LCG period detection | 输出足够长且可观察重复周期，但缺少传统 `a,c,m` 参数。 | 先找 period_start/period，再预测后续输出；若要恢复参数再转 PRNG family。 |
+
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Shamir/Asmuth-Bloom/Vandermonde/CRT 份额达到恢复条件 | [secret-sharing-and-polynomial-interpolation.md](secret-sharing-and-polynomial-interpolation.md) |
+| Rabin、多项式商环或模平方根产生候选根 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
+| 结构化模数、partial key 或因子间关系可直接约束 `p,q` | [rsa-factor-relation-and-partial-key-recovery.md](rsa-factor-relation-and-partial-key-recovery.md) |
 
 ## 合并与拆分结论
 

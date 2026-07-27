@@ -2,7 +2,7 @@
 type: family
 tags: [cross-category, family, triage]
 skills: [ctf-solve-challenge]
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # Cross-Category Triage
@@ -134,6 +134,7 @@ updated: 2026-07-11
 | [D3CTF2025-d3image-wp](../raw/ai-ml/D3CTF2025-d3image-wp.md) | 图像块变换和隐写编码可逆，先抽出块顺序/颜色关系再写正反向恢复脚本。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md) |
 | [D3CTF2025-d3rpg-signin-wp](../raw/stego/D3CTF2025-d3rpg-signin-wp.md) | RPG 地图、标牌、隐藏路径和摩斯地板构成视觉/空间隐写主线，先固定地图状态再提取场景线索。 | [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)、[game-state-websocket-and-wasm.md](game-state-websocket-and-wasm.md) |
 | [D3CTF2025-d3rpki-wp](../raw/pentest/D3CTF2025-d3rpki-wp.md) | RPKI/BGP 只校验 origin 时可伪造 peer 或宣告更具体路由，先确认 AS、CIDR 和 filter。 | [bgp-rpki-route-hijack.md](bgp-rpki-route-hijack.md) |
+| [SekaiCTF2026-67-hunt-wp](../raw/_unclassified/SekaiCTF2026-67-hunt-wp.md) | 六道题都必须提交规范化正确答案才能解锁奖励；奖励内容本身又通过七连块形状给出 `JIGSAW` 元提示。最终下划线是拼图中的真实字符，不能在转写时当作空格丢失。决定性工作是逻辑谜题与空间拼合，不依赖某个安全漏洞，因此按正式分类约束保留在 `_unclassified`，而不是因赛事标签新建 `game` 目录。 | 本页对应路线 |
 
 ## 常见陷阱
 

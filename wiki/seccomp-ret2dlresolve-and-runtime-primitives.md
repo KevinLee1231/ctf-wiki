@@ -4,7 +4,7 @@ tags: [pwn, family, seccomp, ret2dlresolve, syscall, runtime]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/seccomp-ret2dlresolve-and-runtime-primitives.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Seccomp, ret2dlresolve and Runtime Primitives
@@ -40,11 +40,19 @@ updated: 2026-06-12
 | shellcode 可执行但编码/重定位受限 | 构造无 relocation、call/pop 定位、短 stage 或输入变换可逆的 shellcode。 | [windows-arm-and-cross-platform-exploits.md](windows-arm-and-cross-platform-exploits.md) |
 | 运行时/JIT/解释器提供 syscall stub | 先验证 stub 可达和寄存器残留，再把 read 返回值、rdx/r10 等副作用纳入 ROP。 | [interpreter-jit-canary-and-integer-exploits.md](interpreter-jit-canary-and-integer-exploits.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| seccomp/短输入下需栈迁移、ORW 或受限 ROP | [stack-control-flow-and-constrained-rop.md](stack-control-flow-and-constrained-rop.md) |
+| 无 libc 基址或未导入目标符号，需 resolver/DynELF | [dynamic-linker-and-symbol-resolution-exploitation.md](dynamic-linker-and-symbol-resolution-exploitation.md) |
+| 执行边界仍暴露 fd、cwd、fifo 或可组合 capability | [sandbox-capability-and-inherited-channel-bypasses.md](sandbox-capability-and-inherited-channel-bypasses.md) |
+
 ## 合并与拆分结论
 
 - 保留为 `family`：raw 覆盖 seccomp、openat2、参数过滤、ret2dlresolve、GOT/`.fini_array`、runtime syscall stub 和短案例运行时 primitive。
 - 不并入 [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)：本页选择“最终能力路线”，stack 页组织“如何把执行流和寄存器摆到位”。
-- 不拆 ret2dlresolve 独立页：当前已有 [ret2csu-dynelf-and-shellcode.md](ret2csu-dynelf-and-shellcode.md) 承担动态解析与加载器相关技术细节，本页保留为路由入口。
+- 动态链接器与符号解析已拆为具体 technique；本页保留 seccomp、ORW、运行时 syscall 与 resolver 之间的路线选择。
 
 ## 常见陷阱
 
@@ -73,6 +81,9 @@ updated: 2026-06-12
 | [RCTF2025-only-wp](../raw/pwn/RCTF2025-only-wp.md) | 浮点/机器码输入进入 syscall stub，先确认可执行内存、read primitive 和二阶段 shellcode。 |
 | [SUCTF2026-evbufferWP](../raw/pwn/SUCTF2026-evbufferWP.md) | TCP/UDP `inet_pton` 后全局溢出伪造 libevent `bufferevent/evbuffer` callback，seccomp 下栈迁移到 ORW。 |
 | [VNCTF2026-vm-syscall-wp](../raw/pwn/VNCTF2026-vm-syscall-wp.md) | VM `case4` 把 4 个寄存器映射到 syscall，但执行前清零 `r8/r9/r10`；绕过常规 `mmap`，用 `shmget/shmat` 放 `/bin/sh` 后 `execve`。 |
+| [0xGame2020-week4-TLS-struct-and-Thread-easy-pthread-wp](../raw/pwn/0xGame2020-week4-TLS-struct-and-Thread-easy-pthread-wp.md) | 本题的利用链是“有符号负数绕过检查 → 无符号截断形成超长读取 → 同时清零栈与 TLS 中的 Canary → ret2csu 完成 ORW”。关键不只是覆盖栈 Canary，而是让校验两侧保持一致；同时应逐条阅读 seccomp 规则，确认它只封锁 `execve`，而不是笼统地把程序视为无法执行任何系统调用。 |
+| [0xGame2023-week4-爱你在心口难开-wp](../raw/pwn/0xGame2023-week4-爱你在心口难开-wp.md) | 没有 `write` 并不等于完全没有输出通道。该题先利用调用点遗留的 `rdx=RWX 基址` 在 16 字节内完成二次读入，再用 seccomp 的“允许时持续运行、禁止时立即杀死”制造可观测的连接状态差异。对每个字符做二分只需约 $\lceil\log_2 95\rceil=7$ 次连接，显著少于逐值枚举。 |
+| [ACTF2025-only-read-wp](../raw/pwn/ACTF2025-only-read-wp.md) | `GOT[read]` 已提供已知 libc 符号的运行时地址；伪造 `link_map` 后可用 one-gadget 与 `read` 的偏移差把它修正为目标地址。复现时必须对齐 PLT0 栈协议、`Elf64_Rela` 索引、`l_info` 动态项和目标 glibc 版本。 |
 
 ## 原始资料
 

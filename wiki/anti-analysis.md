@@ -46,6 +46,14 @@ updated: 2026-07-27
 | junk bytes、overlap、opaque predicate、CFF、MBA | 先修反汇编边界和控制流，再把表达式化简成可执行校验模型 | [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md), [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md) |
 | VMP/壳/多层保护混合 | 不追完整保护实现，优先找稳定 dump、OEP、导入修复和真实逻辑入口 | [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| debugger/VM/timing/异常或自校验改变真实路径 | [anti-debug-self-check-and-environment-bypass.md](anti-debug-self-check-and-environment-bypass.md) |
+| 关键状态只在运行时短暂出现，需要 hook/trace/dump | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+| 比较/校验点可直接观察中间明文或候选差异 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
+
 ## 合并与拆分结论
 
 本页应保留为 family。`ptrace`、PEB、TLS callback、Frida 检测、anti-VM、anti-DBI 和反反汇编的具体绕过方式不同，但首轮判断都围绕“如何恢复可信分析环境”。拆成大量小 technique 会导致入口碎片化；合并进 Reverse 首轮页又会让总入口过长。
@@ -65,6 +73,15 @@ updated: 2026-07-27
 | [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | SIGSEGV/SIGTRAP/SIGFPE handler 改 RC4 状态，`TracerPid` 混入 key；先 patch 反调试或复现 handler 后断 `memcmp`。 |
 | [VNCTF2026-delicious-obf-ez-maze-wp](../raw/reverse/VNCTF2026-delicious-obf-ez-maze-wp.md) | `delicious obf` 是 `call $5; push; ret` 控制流混淆、SMC 和反调试；`ez_maze` 是魔改 UPX/MFC 迷宫，脱壳后复刻固定种子 DFS 并 BFS。 |
 | [VNCTF2026-login-wp](../raw/reverse/VNCTF2026-login-wp.md) | APK Java 层只组包，native so 完成魔改 AES、HTTP header 签名和 Frida/IDA 环境检测；可结合流量复算。 |
+| [0xGame2024-week4-Tea2-0-wp](../raw/reverse/0xGame2024-week4-Tea2-0-wp.md) | 本题的关键机制是 TLS 回调早于 `main` 执行。分析带 TLS Directory 的 PE 时，静态全局变量不一定就是主逻辑实际使用的值，应在入口点处动态复核并检查所有写交叉引用。还原时必须同时保持 TEA/XTEA 的轮数、运算顺序、32 位溢出和小端序，否则即使算法名称判断正确也无法得到明文。 |
+| [0xGame2025-week4-花鸟风月-wp](../raw/reverse/0xGame2025-week4-花鸟风月-wp.md) | 本题的主线是先修控制流，再逆两层数据变换。遇到同一目标的互补条件跳转、跳入指令中间、`call $+5` 后接 `retn`，应优先怀疑花指令，而不是继续依赖错误伪代码。修复外层反汇编后，还要用动态输入验证每个变换函数的真实效果：已知输入与输出的逐字节差分可以直接恢复循环 XOR 字节流；识别 Base64 时则不能只看字符表，还要检查四字符输出顺序是否被置换。 |
+| [0xGame2025-week4-夜雀之歌-wp](../raw/reverse/0xGame2025-week4-夜雀之歌-wp.md) | 本题的核心不是手动走迷宫，而是识别反调试对随机种子的影响。遇到“正常运行和调试时数据不同”的程序，应检查 `IsDebuggerPresent`、时间、随机种子及初始化回调，并确保绕过后走的是正常分支，而不是只让程序不退出。对于只显示局部视野的迷宫，直接从全局缓冲区导出完整布局，再用 BFS 求路径；超长地图和路径不必堆进 WP，只需保留数据格式、导出范围、搜索规则和可验证的长度与哈希。 |
+| [D3CTF2024-ezjunk-wp](../raw/reverse/D3CTF2024-ezjunk-wp.md) | 三处垃圾代码的共同点都是破坏线性反汇编：跳入指令中部、修改返回地址以及手工重排栈顶。处理时应以实际控制流和栈变化为准，不要把反汇编器生成的所有边都视为有效；有效校验可分成“CRC 式可逆位移”和“XTEA 变体”两层。密钥、`sum`、`delta` 和额外异或常量都藏在垃圾代码或反调试分支里，不能直接套标准 XTEA。最终求解器使用无符号 32 位类型，让加减法自然按模 $2^{32}$ 回绕，避免有符号溢出引入未定义行为。 |
+| [D3CTF2024-Forest-wp](../raw/reverse/D3CTF2024-Forest-wp.md) | 本题通过 `DEBUGGER_EXCEPTION`、单步异常和特权指令异常把普通分支隐藏进 SEH 状态机。动态单步会反复进入异常处理器，还可能触发“调试异常只能出现一次”的反调试分支；静态解析固定尺寸块更稳定。 |
+| [MoeCTF2022-broken-hash-wp](../raw/reverse/MoeCTF2022-broken-hash-wp.md) | 分析带 TLS 与 SEH 的校验程序时，要区分启动前回调、正常控制流和异常控制流；`IsDebuggerPresent` 可能专门让调试路径避开真实 handler。遇到逐项比较并在首错处退出的验证器，应优先考虑泄露或 patch 当前索引，把布尔校验转成前缀长度 oracle。与此同时，还要检查哈希是否按字符独立计算：若没有位置和上下文依赖，复杂的反调试外壳并不能弥补可直接查表的验证结构。 |
+| [WMCTF2020-easy-apk-wp](../raw/reverse/WMCTF2020-easy-apk-wp.md) | 绕过 Java/Native 双层反调试，恢复 StringFog 混淆字符串，跟踪动态注册 JNI 函数中的 AES 派生 key 和 ZUC 流密码异或；APK 同时检测 debuggable、Magisk、Xposed、Frida、`/proc/self/maps`、`/proc/self/status`，且算法在 `RegisterNatives` 后才出现时，应先处理反调试和动态 JNI 注册。 |
+| [WMCTF2020-welcome-to-ctf-wp](../raw/reverse/WMCTF2020-welcome-to-ctf-wp.md) | 通过 UEF/VEH 恢复被硬件断点改写的真实控制流，提取魔改 Base64 表、MIRACL RSA 参数和方程校验参数，反向构造合法输入；程序在 main 前注册异常处理、设置硬件断点、API 通过 `GetProcAddress(GetModuleHandleW(...), ...)` 动态解析，且调试器会影响最终校验变量时，应先还原异常分发逻辑再看伪代码。 |
+| [WMCTF2024-ez-learn-wp](../raw/reverse/WMCTF2024-ez-learn-wp.md) | 不要直接套标准 SM4，必须还原题目修改过的 XOR 常量；TLS 反调试和花指令是分析障碍，不是最终加密核心。 |
 
 ## 常见陷阱
 

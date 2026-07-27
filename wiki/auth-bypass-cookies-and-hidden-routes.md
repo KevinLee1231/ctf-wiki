@@ -4,7 +4,7 @@ tags: [web, family, auth, session, access-control, hidden-routes]
 skills: [ctf-web]
 raw:
   - ../raw/web/auth-bypass-cookies-and-hidden-routes.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Auth Bypass, Cookies and Hidden Routes
@@ -42,6 +42,14 @@ LLM chatbot jailbreak 只在它直接承担认证或访问控制门禁时保留�
 | OAuth/OIDC/SAML/CORS/CI 信任边界 | 身份提供方、回调地址、Origin、email verification、CI token 和平台权限是否被混用 | [oauth-saml-cors-and-cicd.md](oauth-saml-cors-and-cicd.md) |
 | `server-status`、JA4/JA4H、HTTP fingerprint | 信息泄露或指纹匹配是否能构造被信任客户端 | [web-tooling.md](web-tooling.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| Cookie/header/path/method 在代理与业务层形成不同身份视图 | [session-and-access-control-state-confusion.md](session-and-access-control-state-confusion.md) |
+| token header 控制验证算法、key 类型或 key lookup | [auth-token-key-and-lookup-confusion.md](auth-token-key-and-lookup-confusion.md) |
+| 路径、重复字段或规范化顺序决定 ACL 与后端看到的请求 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) |
+
 ## 合并与拆分结论
 
 - 保留为 family：它连接多个认证 technique，能提供“先看哪一层授权”的 pivot 价值。
@@ -72,6 +80,13 @@ LLM chatbot jailbreak 只在它直接承担认证或访问控制门禁时保留�
 | [D3CTF2023-d3dolphin-wp](../raw/web/D3CTF2023-d3dolphin-wp.md) | remember-me cookie 可伪造管理员登录，后续利用日志包含执行 PHP。 |
 | [SUCTF2026-NoteWP](../raw/web/SUCTF2026-NoteWP.md) | `/bot/` 可请求 `127.0.0.1:80` 并把内部响应 `Set-Cookie` 透传给攻击者，直接泄露 bot/admin 的 PHPSESSID 后读取 notes。 |
 | [SUCTF2026-wmsWP](../raw/web/SUCTF2026-wmsWP.md) | JEECG `/rest/*` 白名单放行且 Spring `params` 可由 POST body 命中后台方法；模板 ZIP 解压目录穿越写 JSP。 |
+| [0xGame2020-week4-broken-motto-wp](../raw/web/0xGame2020-week4-broken-motto-wp.md) | 漏洞根因不是普通的“Session 可控”，而是同一份 Session 数据先由 `php_serialize` 写入、再由 `php` 按竖线分隔格式读取。利用时要同时满足三点：在可控字符串中制造 `\|` 解析边界、注入已有类 `info` 的对象、将 `admin` 构造为严格比较所需的整数 `1`。即使业务代码提前 `die()`，请求结束阶段的析构函数仍会执行。 |
+| [0xGame2023-week3-notebook-wp](../raw/web/0xGame2023-week3-notebook-wp.md) | 本题把弱 session 密钥与 Pickle 反序列化组合成了 RCE。单看客户端 session 或 `pickle.loads()` 都不足以完成利用，关键是先恢复签名能力，再把恶意字节串放进服务端信任的数据结构。修复时应使用足够长且持久化的随机密钥，并彻底避免对客户端可控数据使用 Pickle，改用 JSON 等无代码执行语义的格式。 |
+| [0xGame2023-week4-auth-bypass-wp](../raw/web/0xGame2023-week4-auth-bypass-wp.md) | 完整利用链由三个弱点组成：过滤器依据未经规范化的原始 URI 鉴权、下载功能把可控文件名直接拼接到基准目录、隐藏 Servlet 把参数交给 `Runtime.exec`。先用双斜杠制造过滤与路由分派差异，再读取 `WEB-INF/web.xml` 和目标 `.class`，最后借 SUID `/readflag` 获取受保护文件；每一步都能从仓库中的 WAR、字节码和 Dockerfile 复核。 |
+| [ACTF2025-Upload-wp](../raw/web/ACTF2025-Upload-wp.md) | 利用链是“目录穿越泄露源码与 `SECRET_KEY` → 伪造 Session → 管理员命令注入 → 任意文件读取回显”。修复时必须在 `Path.resolve()` 后验证真实落点，避免把 Session 密钥放在同一读取边界内，并让用户路径彻底退出 `os.system()` 参数。 |
+| [WMCTF2020-simple-auth-wp](../raw/web/WMCTF2020-simple-auth-wp.md) | SSRF/URL fetcher 遇到 Windows 出网环境时，可通过 HTTP NTLM 认证诱导获取 Net-NTLM；降级到 Net-NTLMv1 后再用固定 challenge 彩虹表还原 NTLM Hash。 |
+| [WMCTF2022-nanoscore-wp](../raw/web/WMCTF2022-nanoscore-wp.md) | 本题核心是把 CTF 平台事件当作题目线索：一血提交时间、Hint 和 `/users` 泄露的注册时间共同缩小管理员候选集合，再对可疑主办方 ID 做弱口令验证；识别信号是 `/flag` 明确要求 ADMIN、登录后 `/users` 暴露用户列表和创建时间、题目 Hint 直接指向 First Blood、一血 ID 与主办方身份存在异常关联。 |
+| [WMCTF2023-你的权限放着我来-wp](../raw/web/WMCTF2023-你的权限放着我来-wp.md) | 利用密码重置接口中的 token 绑定缺陷重置管理员账号；页面泄露用户邮箱、重置接口可抓包修改邮箱、token 可为空或不随目标邮箱变化时，应重点检查越权重置。 |
 
 ## 原始资料
 

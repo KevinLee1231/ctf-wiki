@@ -5,7 +5,7 @@ skills: [ctf-malware]
 raw:
   - ../raw/malware/scripts-and-obfuscation.md
   - ../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md
-updated: 2026-06-12
+updated: 2026-07-27
 ---
 
 # Scripts and Obfuscation Analysis
@@ -42,9 +42,17 @@ updated: 2026-06-12
 | 反沙箱、主机名、环境变量、时间延迟 | 先伪造环境或 patch 检测点，避免在错误分支提取配置 | [anti-analysis.md](anti-analysis.md) |
 | 需要输出 IOC、YARA 或行为报告 | 先固定已验证的域名、路径、mutex、key、hash 和协议字段，不把猜测写成 IOC | [malware-tooling.md](malware-tooling.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| PowerShell/JS/VBA/包脚本多层编码、eval 和下载链 | [script-deobfuscation-and-staged-payload-recovery.md](script-deobfuscation-and-staged-payload-recovery.md) |
+| PowerShell 分阶段载荷与剪贴板/钓鱼行为需要复原 | [powershell-staged-payload-and-clipboard-phishing.md](powershell-staged-payload-and-clipboard-phishing.md) |
+| 脚本最终恢复 C2 配置、session key 或恶意协议 | [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md) |
+
 ## 合并与拆分结论
 
-本页应为 family。脚本混淆、PowerShell stage、包投毒、shellcode loader、反沙箱和 IOC 提炼共享“载荷链分阶段还原”的首轮模型，但每个具体技术已由相邻页面承接。当前不删除，是因为 raw 和 WP 同时覆盖了恶意脚本、包载荷和 SVG 邮件附件；当前不拆分，是因为拆分会让短案例失去统一入口。
+本页应为 family。脚本混淆、PowerShell stage、包投毒、shellcode loader、反沙箱和 IOC 提炼共享“载荷链分阶段还原”的首轮模型；通用脚本去混淆、PowerShell 钓鱼链和 C2 协议恢复分别由相邻 technique 承接，低频载体继续保留统一入口。
 
 ## 来自 WP 的案例索引
 
@@ -52,6 +60,13 @@ updated: 2026-06-12
 |---|---|
 | [WMCTF2025-shopping-company-phishing-email-wp](../raw/pentest/WMCTF2025-shopping-company-phishing-email-wp.md) | `.eml` 发票催收附件中的 SVG 同时承载视觉诱饵和 JavaScript；分析时先解 MIME/base64，再还原脚本映射表、XOR/key 和诱饵 flag。 |
 | [D3CTF2021-baby-spear-wp](../raw/reverse/D3CTF2021-baby-spear-wp.md) | 隐藏 VBA 宏释放 PE 并用时间派生 AES key，先恢复 Office 宏流和 staged payload。 |
+| [0xGame2024-week4-Encrypted-file-wp](../raw/malware/0xGame2024-week4-Encrypted-file-wp.md) | 本题的证据链是“上传 WebShell → 从 WebShell 恢复固定通信算法 → 解密命令流 → 找到 OpenSSL 加密命令 → 用同一参数逆向解密附件”。分析冰蝎流量时，不必逐段粘贴超长密文；保留协议解码逻辑、完整攻击命令序列以及最终文件恢复命令，WP 即可独立复现。 |
+| [UMDCTF2018-excellent-security-wp](../raw/malware/UMDCTF2018-excellent-security-wp.md) | 分析脚本恶意代码时要同时记录执行、落地和持久化三条行为链，并依据实际解释器判断转义语义。本题若机械删除所有 `^`，会得到错误 flag；字符是否具有转义作用取决于它出现在哪一层语言和哪种字符串上下文中。 |
+| [UMDCTF2019-oh-squib-wp](../raw/malware/UMDCTF2019-oh-squib-wp.md) | 分析 Office 恶意文档时，应优先离线解包并读取 XML、关系文件和字段代码，避免直接打开并启用内容。视觉隐藏不会从 OOXML 中删除命令。对外链载荷要把关键命令链和解码数据完整归纳进正文；临时 Pastebin 一类地址既非复现所必需，也可能失效或带来执行风险，因此不保留。 |
+| [UMDCTF2025-suspicious-button-wp](../raw/malware/UMDCTF2025-suspicious-button-wp.md) | 静态化简 QML 中的动态属性访问和字符置换，恢复下载命令，再对留存的 Base64/bzip2 第二阶段做离线解码；桌面主题或 plasmoid 引入 `executable` 数据源、点击事件中出现混淆字符串、远程脚本直接管道到 shell。 |
+| [WMCTF2024-party-time-wp](../raw/malware/WMCTF2024-party-time-wp.md) | 宏分析重点：文档属性 `Comments` 中藏 payload，不在宏正文直接给命令；恶意程序关键：私钥也存入注册表，真正需要补的是 OAEP label。 |
+| [0xGame2025-week3-ezVBS-wp](../raw/reverse/0xGame2025-week3-ezVBS-wp.md) | 本题由“算术构造字符 → `Execute` 动态执行 → 可打印字符轮转 → 覆盖自身 → 自定义 Base64”组成。危险点不在最终编码，而在前几层具有真实副作用：若直接执行原脚本，旧层会被覆盖，证据链随之丢失。 |
+| [UMDCTF2017-death-gripes-wp](../raw/reverse/UMDCTF2017-death-gripes-wp.md) | 动态语言混淆经常把简单常量藏进语法噪声。先识别 `.call` 链的稳定状态转移，就能把整个程序简化成一元计数编码。静态计数比直接 `eval` 未知数据区更安全，也更容易说明结果为何成立。 |
 
 ## 常见陷阱
 

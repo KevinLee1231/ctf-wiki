@@ -11,7 +11,7 @@ raw:
   - ../raw/stego/audio-frequency-and-archive-stego.md
   - ../raw/stego/image-bitplane-qr-and-jpeg-stego.md
   - ../raw/pwn/oob-jit-parser-primitives.md
-updated: 2026-07-11
+updated: 2026-07-27
 ---
 
 # Exotic Encodings and File Formats
@@ -51,6 +51,14 @@ updated: 2026-07-11
 | 音符/音程隐蔽承载 nibble | 先提取音符序列，再用 known prefix 校准音阶映射 | [audio-frequency-and-archive-stego.md](audio-frequency-and-archive-stego.md) |
 | Ruby `String#unpack` 或类似解析器越界 | 确认攻击者是否控制格式字符串、运行时是否受影响以及能否形成读取原语 | [oob-jit-parser-primitives-family.md](oob-jit-parser-primitives-family.md) |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| 低频 alphabet、符号映射、bit order 或层序需要恢复 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
+| 条码/QR/网格依赖定位、纠错和结构重组 | [qr-and-structured-symbol-reassembly.md](qr-and-structured-symbol-reassembly.md) |
+| 文件声明与真实字节布局冲突，或容器内存在第二载荷 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
+
 ## 合并与拆分结论
 
 原始混合综述已经按决定性主障碍拆入 Crypto、Stego、Forensics、Reverse 和 Pwn 的现有 raw 资料卷。本页继续保留为 family，不与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) 合并：编码页负责可逆表示本身，本页负责从异常载体或格式信号判断下一方向。这里保留的是跨方向 pivot，而不是物理兜底分类。
@@ -78,6 +86,8 @@ updated: 2026-07-11
 | Raw WP | 可复用联系 |
 |---|---|
 | [NCTF2026-what-a-mess-wp](../raw/stego/NCTF2026-what-a-mess-wp.md) | 本库按 Stego 边界案例归档：Unicode、全角、零宽字符和格式变体用于掩饰记录语义；首轮仍应先做规范化、白名单和校验位统计。 |
+| [UMDCTF2018-proto-tough-wp](../raw/_unclassified/UMDCTF2018-proto-tough-wp.md) | 空 Protobuf 消息仍是合法消息，其编码长度可以为零。面对自定义 TCP 协议时，应把应用层魔数与消息体分别处理，并使用 `.proto` 生成的解析器读取响应，避免把二进制字段标签误当成 flag 的一部分。 |
+| [UMDCTF2025-the-mini-wp](../raw/crypto/UMDCTF2025-the-mini-wp.md) | Across Lite 的“锁定”只是四位密钥驱动的可逆字符置换。分析此类格式时应同时读取状态位和校验字段：前者确认答案经过变换，后者为枚举密钥提供可靠判据。 |
 
 ## 原始资料
 

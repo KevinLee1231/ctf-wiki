@@ -4,7 +4,7 @@ tags: [web, family, sqli, oracle, filter-bypass, blind-sqli, second-order]
 skills: [ctf-web]
 raw:
   - ../raw/web/sqli-filter-and-oracle.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # SQLi 过滤、输入面与 Oracle 技巧族
@@ -48,6 +48,14 @@ updated: 2026-07-06
 | DB 特性替代 | `information_schema` 被禁、processlist、innodb stats | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) | 若库版本有已知洞，验证 CVE/N-day 而不是继续盲猜 payload。 |
 | SQLi to SSTI/RCE | SQL 结果进入模板、文件、session 或任务队列 | [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md) | 若无法 RCE，退回 secret/token/session 读取。 |
 
+## Technique 下一跳
+
+| 首轮判断 | 具体 technique |
+|---|---|
+| SQL 上下文受过滤且只能从布尔/timing/error 恢复数据 | [sqli-filter-and-response-oracle-extraction.md](sqli-filter-and-response-oracle-extraction.md) |
+| 响应噪声、限流或状态变化需要先抽象成稳定谓词 | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
+| 前后组件对重复参数、编码或规范化后的查询值理解不同 | [request-view-normalization-differentials.md](request-view-normalization-differentials.md) |
+
 ## 常见陷阱
 
 - sqlmap 没结果就放弃；CTF 题常把输入面藏在 header、metadata、二阶字段或编码层。
@@ -80,6 +88,10 @@ updated: 2026-07-06
 | [LilacCTF2026-safe-sql-wp](../raw/web/LilacCTF2026-safe-sql-wp.md) | PostgreSQL `E'...'` 只过滤引号时可用反斜杠让 password 逃逸成多语句；再借 BRIN autosummarize CVE 提权到 `COPY FROM PROGRAM`。 |
 | [RCTF2025-photographer-wp](../raw/web/RCTF2025-photographer-wp.md) | SQLite `SELECT *` join 中同名 `type` 字段覆盖用户权限字段，上传图片 MIME type 可写成 `-1` 绕过管理员判断。 |
 | [SUCTF2026-sqliWP](../raw/web/SUCTF2026-sqliWP.md) | `/api/query` 注入前必须复现 Go WASM 前端签名和浏览器指纹字段；签名过后用 PostgreSQL 字符串拼接构造布尔盲注。 |
+| [0xGame2023-week2-ez-sqli-wp](../raw/web/0xGame2023-week2-ez-sqli-wp.md) | 字符串黑名单无法安全约束 SQL 语法，十六进制字符串、注释和服务端预处理都能改变“检查时”与“执行时”的表示。`ORDER BY` 列名不能通过普通值占位符参数化时，应使用固定白名单映射；数据库驱动还应关闭多语句执行，并在生产环境禁用调试错误回显。 |
+| [UMDCTF2018-sql-injection-wp](../raw/web/UMDCTF2018-sql-injection-wp.md) | 删除引号或关键字不是可靠的 SQL 注入防护，因为转义规则、注释和替代运算符仍会改变语句结构。正确修复方式是参数化查询；解题时则应先把过滤后的最终 SQL 完整写出，再根据目标数据库的词法规则构造输入。 |
+| [UMDCTF2026-live-signal-wp](../raw/web/UMDCTF2026-live-signal-wp.md) | 静态类型不能充当运行时输入校验。把客户端对象原样传给 ORM 会把 ORM 的完整查询语法暴露给攻击者；关联存在性过滤又把不可见行变成真假 oracle。应显式构造允许字段的新对象，或在 action 边界使用运行时 schema 严格拒绝额外键和嵌套对象。 |
+| [WMCTF2023-ezblog-wp](../raw/web/WMCTF2023-ezblog-wp.md) | 用 SQL 注入读取 pm2 日志中的 Debugger PIN，再通过调试控制台执行 SQL，最后借助复制链路或日志文件写入模板；Node/pm2 服务开启调试控制台、PIN 打到 stdout、数据库可 `load_file()` 读日志、SQL 执行过滤了 `into/outfile` 但仍允许复制相关语句时，应考虑 rogue master/binlog 绕过。 |
 
 ## 原始资料
 

@@ -4,7 +4,7 @@ tags: [pwn, technique, emulator, float, hash, oob, signedness, primitive]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/emulator-float-and-hash-exploits.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # Data Interpretation Memory Primitives
@@ -58,6 +58,16 @@ updated: 2026-07-06
 - [heap-fsop-file-structure-attacks.md](heap-fsop-file-structure-attacks.md)
 - [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
 - [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md)
+
+## 来自 WP 的案例索引
+
+本节只保留可复用识别信号，不替代原始题解正文。
+
+| Raw WP | 可复用联系 |
+|---|---|
+| [D3CTF2024-D3Note-wp](../raw/pwn/D3CTF2024-D3Note-wp.md) | 这是一道“伪堆题”：表面功能是堆对象管理，真正的利用原语来自数组下标未校验。分析时应先把每个菜单操作还原成“基址 + 下标 × 步长 + 字段偏移”，再判断它能覆盖哪些目标；拿到任意地址读写后，GOT 劫持只是最短利用链之一；返回地址、hook 或其他控制数据也可能成为目标。本题选择 `free@GOT→system`，是因为程序天然提供删除操作和可控的 `/bin/sh` 内容，触发路径最直接。 |
+| [D3CTF2024-write-flag-where-wp](../raw/pwn/D3CTF2024-write-flag-where-wp.md) | 本题的核心不是任意地址写本身，而是如何用未知值写构造读取 oracle。预期解选择 `scanf` 的符号判断，是因为比较立即数恰好为单字节，并且 `%lu%u` 提供了清晰的“退出/继续等待”两种状态。 |
+| [UMDCTF2025-gambling2-wp](../raw/pwn/UMDCTF2025-gambling2-wp.md) | `%f` 对应 `float *`、`%lf` 对应 `double *`；类型宽度错配可形成 4 字节步长、8 字节宽度的重叠写。再按 IEEE-754 位模式反向构造可被 `scanf` 精确解析的十进制浮点数，就能写入固定 ret2win 地址。 |
 
 ## 原始资料
 

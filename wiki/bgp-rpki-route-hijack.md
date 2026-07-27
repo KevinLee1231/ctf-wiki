@@ -4,7 +4,7 @@ tags: [pentest, network, bgp, rpki, technique]
 skills: [ctf-pentest]
 raw:
   - ../raw/pentest/D3CTF2025-d3rpki-wp.md
-updated: 2026-07-06
+updated: 2026-07-27
 ---
 
 # BGP RPKI Route Hijack
@@ -51,6 +51,7 @@ updated: 2026-07-06
 - [web-and-dns.md](web-and-dns.md)
 - [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
 - [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)
+- [dynamic-routing-hijack-transparent-relay.md](dynamic-routing-hijack-transparent-relay.md)
 
 ## 原始资料
 
