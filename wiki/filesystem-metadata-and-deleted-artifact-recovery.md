@@ -5,7 +5,8 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/disk-recovery.md
   - ../raw/forensics/filesystems-memory-dumps-and-raid.md
-updated: 2026-07-27
+  - ../raw/reverse/D3CTF2019-ch1pfs-wp.md
+updated: 2026-07-28
 ---
 
 # Filesystem Metadata and Deleted-Artifact Recovery
@@ -48,10 +49,11 @@ updated: 2026-07-27
 ## 关联技巧
 
 - [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
-- [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)
+- [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
 - [raid-vm-disk-and-fragmented-volume-reconstruction.md](raid-vm-disk-and-fragmented-volume-reconstruction.md)
 
 ## 原始资料
 
 - [disk-recovery.md](../raw/forensics/disk-recovery.md)
 - [filesystems-memory-dumps-and-raid.md](../raw/forensics/filesystems-memory-dumps-and-raid.md)
+- [D3CTF2019-ch1pfs-wp](../raw/reverse/D3CTF2019-ch1pfs-wp.md)

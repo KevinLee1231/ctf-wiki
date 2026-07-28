@@ -5,7 +5,8 @@ skills: [ctf-stego]
 raw:
   - ../raw/stego/image-bitplane-qr-and-jpeg-stego.md
   - ../raw/stego/video-document-and-media-stego.md
-updated: 2026-07-27
+  - ../raw/stego/WMCTF2023-ez-v1deo-wp.md
+updated: 2026-07-28
 ---
 
 # Media-Channel, Bitplane and Frame-Difference Extraction
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [image-bitplane-qr-and-jpeg-stego.md](../raw/stego/image-bitplane-qr-and-jpeg-stego.md)
 - [video-document-and-media-stego.md](../raw/stego/video-document-and-media-stego.md)
+- [WMCTF2023-ez-v1deo-wp](../raw/stego/WMCTF2023-ez-v1deo-wp.md)

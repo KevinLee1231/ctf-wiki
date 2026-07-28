@@ -5,7 +5,8 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/filesystems-memory-dumps-and-raid.md
   - ../raw/forensics/disk-memory-vm-and-container-forensics.md
-updated: 2026-07-27
+  - ../raw/forensics/D3CTF2021-virtual-love-revenge-2-0-wp.md
+updated: 2026-07-28
 ---
 
 # RAID, VM-Disk and Fragmented-Volume Reconstruction
@@ -47,7 +48,7 @@ updated: 2026-07-27
 
 ## 关联技巧
 
-- [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)
+- [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
 - [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md)
 
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [filesystems-memory-dumps-and-raid.md](../raw/forensics/filesystems-memory-dumps-and-raid.md)
 - [disk-memory-vm-and-container-forensics.md](../raw/forensics/disk-memory-vm-and-container-forensics.md)
+- [D3CTF2021-virtual-love-revenge-2-0-wp](../raw/forensics/D3CTF2021-virtual-love-revenge-2-0-wp.md)

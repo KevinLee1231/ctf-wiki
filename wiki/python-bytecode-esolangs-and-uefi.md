@@ -4,7 +4,7 @@ tags: [reverse, family, python-bytecode, esolang, uefi, bytecode]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/python-bytecode-esolangs-and-uefi.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Python Bytecode, Esolangs and UEFI
@@ -31,8 +31,8 @@ updated: 2026-07-27
 
 | 信号 | 先确认 | 下一跳 |
 |---|---|---|
-| `.pyc`、`dis` 输出、magic/version、opcode remap | Python 版本、字节码版本、opcode 表、常量表和控制流是否可还原 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
-| Pyarmor/Nuitka/Cython/嵌入式 Python | 入口是 Python 层、native 扩展、模块 stub 还是运行时 dump | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
+| `.pyc`、`dis` 输出、magic/version、opcode remap | Python 版本、字节码版本、opcode 表、常量表和控制流是否可还原 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md)、[disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
+| Pyarmor/Nuitka/Cython/嵌入式 Python | 入口是 Python 层、native 扩展、模块 stub 还是运行时 dump | [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 | Brainfuck/FRACTRAN/OPAL/函数式语言 | 是否可反向解释、转 C、抽约束或用 coverage/read count oracle | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
 | HarmonyOS HAP/ABC、UEFI、DOS stub | 先恢复格式、工具链、入口点和调用约定，再进入算法恢复 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)、[hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
 | Unity IL2CPP、游戏字节码、非原生脚本 | 先确认 metadata、managed/native 边界和资源脚本关系 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
@@ -42,8 +42,9 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | pyc/marshal/JVM/.NET 等 metadata/bytecode 可直接恢复语义 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md) |
-| UEFI/boot/固件或低频 ISA 需装载与模拟 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
-| Python 解释器加载 PYD/扩展模块执行自定义校验 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md) |
+| UEFI/boot/固件需恢复装载基址和阶段执行 | [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md) |
+| 低频/自定义 ISA 需恢复 opcode 与 MMIO | [custom-isa-and-mmio-emulation.md](custom-isa-and-mmio-emulation.md) |
+| Python 解释器加载 PYD/扩展模块执行自定义校验 | [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md) |
 
 ## 合并与拆分结论
 
@@ -61,7 +62,7 @@ updated: 2026-07-27
 ## 关联页面
 
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 - [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
 - [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
 - [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)

@@ -5,7 +5,7 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/aes-modes-mac-and-oracles.md
   - ../raw/ai-ml/SUCTF2026-easyLLMWP.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # 分组密码模式、MAC 与 Oracle 误用技巧族
@@ -79,7 +79,7 @@ updated: 2026-07-27
 - [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)
 - [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 - [llm-attacks.md](llm-attacks.md)
 - [crypto-tooling.md](crypto-tooling.md)
 

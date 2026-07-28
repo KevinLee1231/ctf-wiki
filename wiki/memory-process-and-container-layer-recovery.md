@@ -5,7 +5,8 @@ skills: [ctf-forensics, ctf-cloud-infra]
 raw:
   - ../raw/forensics/disk-memory-vm-and-container-forensics.md
   - ../raw/forensics/filesystems-memory-dumps-and-raid.md
-updated: 2026-07-27
+  - ../raw/forensics/WMCTF2023-fantastic-terminal-wp.md
+updated: 2026-07-28
 ---
 
 # Memory, Process and Container-Layer Recovery
@@ -48,10 +49,11 @@ updated: 2026-07-27
 ## 关联技巧
 
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
-- [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)
+- [raid-vm-disk-and-fragmented-volume-reconstruction.md](raid-vm-disk-and-fragmented-volume-reconstruction.md)
 - [windows-registry-event-and-credential-correlation.md](windows-registry-event-and-credential-correlation.md)
 
 ## 原始资料
 
 - [disk-memory-vm-and-container-forensics.md](../raw/forensics/disk-memory-vm-and-container-forensics.md)
 - [filesystems-memory-dumps-and-raid.md](../raw/forensics/filesystems-memory-dumps-and-raid.md)
+- [WMCTF2023-fantastic-terminal-wp](../raw/forensics/WMCTF2023-fantastic-terminal-wp.md)

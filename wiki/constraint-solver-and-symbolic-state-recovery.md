@@ -5,7 +5,8 @@ skills: [ctf-reverse, ctf-pwn]
 raw:
   - ../raw/pwn/vm-z3-sandbox-and-game-basics.md
   - ../raw/reverse/vm-obfuscation-transform-patterns.md
-updated: 2026-07-27
+  - ../raw/reverse/MoeCTF2024-特工luo-深入敌营-wp.md
+updated: 2026-07-28
 ---
 
 # Constraint Solver and Symbolic-State Recovery
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [vm-z3-sandbox-and-game-basics.md](../raw/pwn/vm-z3-sandbox-and-game-basics.md)
 - [vm-obfuscation-transform-patterns.md](../raw/reverse/vm-obfuscation-transform-patterns.md)
+- [MoeCTF2024-特工luo-深入敌营-wp](../raw/reverse/MoeCTF2024-特工luo-深入敌营-wp.md)

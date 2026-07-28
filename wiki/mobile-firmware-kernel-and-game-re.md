@@ -9,7 +9,7 @@ raw:
   - ../raw/reverse/HGAME2026-noncesense-wp.md
   - ../raw/reverse/D3CTF2025-d3kernel-wp.md
   - ../raw/reverse/D3CTF2022-d3w0w-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Mobile, Firmware, Kernel and Game RE
@@ -41,7 +41,7 @@ updated: 2026-07-27
 | Mach-O、IPA、Objective-C selector、Swift 符号 | 架构切片、签名/entitlements、selector 字符串、Swift demangle 和 dyld 依赖 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)、[frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) |
 | 固件镜像、SquashFS/JFFS2/UBI/CPIO、DTB、uImage/zImage | 先解包文件系统、确认架构/端序/基址，再定位 init 脚本、Web handler 或协议服务 | [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md) |
 | `.ko`、`.sys`、IOCTL、eBPF、内核模块 | 用户态/内核态边界、handler、map、probe、设备对象和可观测反馈 | [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)、[loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) |
-| WoW64 / Heaven's Gate / 模式切换 | 真实校验是否藏在另一执行模式或另一位宽代码中，dump 后按正确架构解析 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
+| WoW64 / Heaven's Gate / 模式切换 | 真实校验是否藏在另一执行模式或另一位宽代码中，dump 后按正确架构解析 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 | Unreal/Unity/Lua 游戏引擎 | 资源、脚本、反射元数据、存档和 native 插件谁控制真实校验 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
 | CAN/UDS/车载协议 | 帧 ID、DLC、seed-key、routine control 和 replay 边界 | [signals-and-hardware.md](signals-and-hardware.md) |
 
@@ -86,7 +86,7 @@ updated: 2026-07-27
 - [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md)
 - [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md)
 - [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [signals-and-hardware.md](signals-and-hardware.md)
 
 ## 原始资料

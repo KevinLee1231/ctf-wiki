@@ -6,7 +6,7 @@ raw:
   - ../raw/forensics/pcap-protocol-credential-recovery.md
   - ../raw/forensics/SUCTF2026-LightNovelWP.md
   - ../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # PCAP 协议、凭据与文件恢复技巧族
@@ -44,7 +44,7 @@ updated: 2026-07-27
 | 变体 | 优先证据 | 下一跳页面 | 失败后 pivot |
 |---|---|---|---|
 | HTTP 文件/凭据恢复 | `http`, `multipart`, `Set-Cookie`, `Authorization` | [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md) | 如果对象导出失败，改用 TCP stream 和手工 carving。 |
-| TLS 解密 | keylog、master secret、私钥、握手完整 | [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md) | 没有 key 时查内存 dump、浏览器 profile 或凭据泄漏。 |
+| TLS 解密 | keylog、master secret、私钥、握手完整 | [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md) | 没有 key 时查内存 dump、浏览器 profile 或凭据泄漏。 |
 | DNS/ICMP covert channel | 高频子域、长 label、固定长度 payload | [dns.md](dns.md) | 如果编码不明显，按时间间隔、base32/base64/hex 和排序恢复。 |
 | USB HID / 外设事件 | USB interrupt transfer、键盘鼠标 usage ID | [peripheral-capture.md](peripheral-capture.md) | 若轨迹不成字，转坐标可视化或 chord/stenography。 |
 | WiFi/WPA/WEP | 802.11 握手、SSID、EAPOL、弱 WEP | [rf-sdr.md](rf-sdr.md) | 缺握手时查 deauth、PMKID 或是否已有密码线索。 |
@@ -72,7 +72,7 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | 会话分段、重传、chunk/framing 后恢复对象或凭据 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
-| DNS 记录、label/tunnel 或解析时序承载数据 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| DNS label/TXT/CNAME 中存在序号化、编码或双向载荷 | [dns-tunnel-and-label-reassembly.md](dns-tunnel-and-label-reassembly.md) |
 | 恶意 C2 协议、会话 key 和配置恢复是主障碍 | [malware-c2-session-key-and-protocol-recovery.md](malware-c2-session-key-and-protocol-recovery.md) |
 
 ## 常见陷阱

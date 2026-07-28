@@ -5,7 +5,8 @@ skills: [ctf-web, ctf-stego]
 raw:
   - ../raw/web/ruby-php-upload-and-ssti-rce.md
   - ../raw/web/polyglot-url-tricks-and-ssrf-leaks.md
-updated: 2026-07-27
+  - ../raw/web/0xGame2023-week2-ez-upload-wp.md
+updated: 2026-07-28
 ---
 
 # Upload Polyglot and Content-Type Confusion
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [ruby-php-upload-and-ssti-rce.md](../raw/web/ruby-php-upload-and-ssti-rce.md)
 - [polyglot-url-tricks-and-ssrf-leaks.md](../raw/web/polyglot-url-tricks-and-ssrf-leaks.md)
+- [0xGame2023-week2-ez-upload-wp](../raw/web/0xGame2023-week2-ez-upload-wp.md)

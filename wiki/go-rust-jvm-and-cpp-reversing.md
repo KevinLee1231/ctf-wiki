@@ -8,7 +8,7 @@ raw:
   - ../raw/reverse/HGAME2026-pvz-wp.md
   - ../raw/reverse/ACTF2026-calc-my-point-wp.md
   - ../raw/reverse/D3CTF2022-d3thon-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Go, Rust, JVM and C++ Reversing
@@ -40,7 +40,7 @@ updated: 2026-07-27
 | JVM/Kotlin/Spring Boot/JAR/Android server bytecode | class/jar 入口、反编译是否可靠、协程/state machine、动态加载或隐藏 VM | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)、[vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
 | C++ vtable/RTTI/template/STL | 类型恢复、虚调用、对象布局和真实业务函数边界 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md) |
 | D/Haskell/Swift/Kotlin Native | 语言特定符号、运行时库和中间表示是否比普通伪代码更有信息量 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
-| Cython/Nuitka/Python native extension | Python 调用边界和 native 校验函数 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)、[python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
+| Cython/Nuitka/Python native extension | Python 调用边界和 native 校验函数 | [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)、[python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) |
 
 ## Technique 下一跳
 
@@ -48,7 +48,7 @@ updated: 2026-07-27
 |---|---|
 | Go/Rust/JVM/.NET metadata、类型和字节码比裸汇编更可靠 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md) |
 | 比较 API/指令可直接观察目标与输入差异 | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| 嵌入 Python/PYD 承载真实校验逻辑 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md) |
+| 嵌入 Python/PYD 承载真实校验逻辑 | [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md) |
 
 ## 合并与拆分结论
 
@@ -68,7 +68,7 @@ updated: 2026-07-27
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
 - [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 - [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 

@@ -5,7 +5,8 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-uaf-tcache-and-custom-allocator.md
   - ../raw/pwn/heap-houses-unlink-and-tcache.md
-updated: 2026-07-27
+  - ../raw/pwn/D3CTF2021-deterministic-heap-wp.md
+updated: 2026-07-28
 ---
 
 # UAF Object Reuse and Tcache Poisoning
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [heap-uaf-tcache-and-custom-allocator.md](../raw/pwn/heap-uaf-tcache-and-custom-allocator.md)
 - [heap-houses-unlink-and-tcache.md](../raw/pwn/heap-houses-unlink-and-tcache.md)
+- [D3CTF2021-deterministic-heap-wp](../raw/pwn/D3CTF2021-deterministic-heap-wp.md)

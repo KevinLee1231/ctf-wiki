@@ -5,7 +5,8 @@ skills: [ctf-forensics, ctf-stego, ctf-crypto]
 raw:
   - ../raw/crypto/encodings-qr-and-esolangs.md
   - ../raw/forensics/file-triage-archives-and-one-liners.md
-updated: 2026-07-27
+  - ../raw/forensics/UMDCTF2019-matryoshka-wp.md
+updated: 2026-07-28
 ---
 
 # File-Format and Embedded-Payload Identification
@@ -56,3 +57,4 @@ updated: 2026-07-27
 
 - [encodings-qr-and-esolangs.md](../raw/crypto/encodings-qr-and-esolangs.md)
 - [file-triage-archives-and-one-liners.md](../raw/forensics/file-triage-archives-and-one-liners.md)
+- [UMDCTF2019-matryoshka-wp](../raw/forensics/UMDCTF2019-matryoshka-wp.md)

@@ -6,7 +6,7 @@ raw:
   - ../raw/crypto/number-theory-and-algebra-attacks.md
   - ../raw/crypto/WMCTF2025-lemonpepper-wp.md
   - ../raw/crypto/0xGame2020-week1-Fibonacci-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Number Theory and Algebra Attacks
@@ -76,7 +76,8 @@ updated: 2026-07-27
 |---|---|
 | 小根、部分位或 HNP 型有界泄露 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
 | 有限域、商环、模根、插值或多项式消元决定恢复 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
-| 签名 nonce、点验证或小子群缺陷泄露标量 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
+| 签名 nonce 重用/偏置/部分泄露形成模线性关系 | [signature-nonce-reuse-and-partial-leakage.md](signature-nonce-reuse-and-partial-leakage.md) |
+| 未验证点或小子群查询形成 residue 与 CRT | [invalid-curve-and-small-subgroup-attacks.md](invalid-curve-and-small-subgroup-attacks.md) |
 
 ## 合并与拆分结论
 

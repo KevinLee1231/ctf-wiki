@@ -5,7 +5,8 @@ skills: [ctf-web]
 raw:
   - ../raw/web/auth-bypass-cookies-and-hidden-routes.md
   - ../raw/web/auth-jwt.md
-updated: 2026-07-27
+  - ../raw/web/SekaiCTF2026-migurimental-wp.md
+updated: 2026-07-28
 ---
 
 # Session and Access-Control State Confusion
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [auth-bypass-cookies-and-hidden-routes.md](../raw/web/auth-bypass-cookies-and-hidden-routes.md)
 - [auth-jwt.md](../raw/web/auth-jwt.md)
+- [SekaiCTF2026-migurimental-wp](../raw/web/SekaiCTF2026-migurimental-wp.md)

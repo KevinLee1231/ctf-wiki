@@ -6,7 +6,7 @@ raw:
   - ../raw/reverse/loader-vm-image-and-kernel-patterns.md
   - ../raw/reverse/ACTF2026-abyssgate-wp.md
   - ../raw/reverse/西湖论剑2023-Berkeley-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Loader, VM, Image and Kernel Patterns
@@ -45,8 +45,8 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | Loader 解密/映射第二阶段，需在运行时转移前后 dump | [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md) |
-| boot/UEFI/kernel/低频 ISA 需恢复装载地址与模拟环境 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
-| Loader 内嵌 Python/PYD 并由自定义校验器处理输入 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md) |
+| boot/UEFI/kernel 固件需恢复装载地址与阶段环境 | [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md) |
+| Loader 内嵌 Python/PYD 并由扩展模块处理输入 | [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md) |
 
 ## 合并与拆分结论
 

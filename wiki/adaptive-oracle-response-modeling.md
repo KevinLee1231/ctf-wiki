@@ -5,7 +5,9 @@ skills: [ctf-crypto, ctf-web]
 raw:
   - ../raw/crypto/hash-protocol-and-oracle-attacks.md
   - ../raw/crypto/prng-z3-lcg-and-timing-attacks.md
-updated: 2026-07-27
+  - ../raw/web/SUCTF2026-sqliWP.md
+  - ../raw/crypto/UMDCTF2026-no-brainrot-allowed-wp.md
+updated: 2026-07-28
 ---
 
 # Adaptive Oracle Response Modeling
@@ -55,3 +57,5 @@ updated: 2026-07-27
 
 - [hash-protocol-and-oracle-attacks.md](../raw/crypto/hash-protocol-and-oracle-attacks.md)
 - [prng-z3-lcg-and-timing-attacks.md](../raw/crypto/prng-z3-lcg-and-timing-attacks.md)
+- [SUCTF2026-sqliWP](../raw/web/SUCTF2026-sqliWP.md)
+- [UMDCTF2026-no-brainrot-allowed-wp](../raw/crypto/UMDCTF2026-no-brainrot-allowed-wp.md)

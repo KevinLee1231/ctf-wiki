@@ -4,7 +4,7 @@ tags: [ai-ml, family, adversarial-examples, evasion, poisoning, backdoor]
 skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/adversarial-ml.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Adversarial ML
@@ -46,6 +46,7 @@ updated: 2026-07-27
 | 有梯度但量化、随机变换或多约束导致“优化成功、提交失败” | [constraint-aware-adversarial-optimization-and-validation.md](constraint-aware-adversarial-optimization-and-validation.md) |
 | 只有 label、score 或二值反馈，需要在查询预算内搜索 | [black-box-query-feedback-evasion.md](black-box-query-feedback-evasion.md) |
 | clean 输入正常，局部 trigger、污染样本或异常 activation 稳定导向目标类 | [model-backdoor-trigger-and-poisoning-analysis.md](model-backdoor-trigger-and-poisoning-analysis.md) |
+| 攻击者可上传结构合法的 checkpoint/state_dict 并直接控制参数 | [model-artifact-integrity-and-parameter-tampering.md](model-artifact-integrity-and-parameter-tampering.md) |
 
 ## 来自 raw 的模式索引
 

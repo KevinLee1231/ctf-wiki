@@ -5,7 +5,8 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/runtime-protection-and-tls-exploits.md
   - ../raw/pwn/windows-arm-and-cross-platform-exploits.md
-updated: 2026-07-27
+  - ../raw/pwn/HGAME2026-ionostream-wp.md
+updated: 2026-07-28
 ---
 
 # Runtime Mitigation, Pointer Mangling and Shadow-Stack Bypass
@@ -49,9 +50,10 @@ updated: 2026-07-27
 
 - [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)
 - [windows-arm-and-cross-platform-exploits.md](windows-arm-and-cross-platform-exploits.md)
-- [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md)
+- [exit-handler-and-tls-destructor-hijacking.md](exit-handler-and-tls-destructor-hijacking.md)
 
 ## 原始资料
 
 - [runtime-protection-and-tls-exploits.md](../raw/pwn/runtime-protection-and-tls-exploits.md)
 - [windows-arm-and-cross-platform-exploits.md](../raw/pwn/windows-arm-and-cross-platform-exploits.md)
+- [HGAME2026-ionostream-wp](../raw/pwn/HGAME2026-ionostream-wp.md)

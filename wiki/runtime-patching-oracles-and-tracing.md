@@ -4,23 +4,27 @@ tags: [reverse, family, patching, oracle, tracing, hook]
 skills: [ctf-reverse, ctf-mobile]
 raw:
   - ../raw/reverse/runtime-patching-oracles-and-tracing.md
+  - ../raw/reverse/signal-trace-and-packed-anti-analysis.md
   - ../raw/reverse/WMCTF2025-videoplayer-wp.md
   - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
-updated: 2026-07-27
+  - ../raw/reverse/HGAME2026-signal-storm-wp.md
+  - ../raw/reverse/RCTF2025-chaos2-wp.md
+updated: 2026-07-28
 ---
 
 # Runtime Patching, Oracles and Tracing
 
 ## 作用边界
 
-本页是运行时 patch、动态 oracle、trace、hook、coredump 和执行流降维 family。它适用于静态伪代码成本高，但可以通过运行时观察、替换数据、插桩或构造 oracle 直接恢复关键状态的题。
+本页是运行时 patch、动态 oracle、signal/trace、hook、coredump、父子进程 dump 和执行流降维 family。它适用于静态伪代码成本高，但可以通过运行时观察、替换数据、插桩、异常处理器或构造 oracle 直接恢复关键状态的题。
 
-它与 [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) 分工不同：本页偏主动 patch/hook/oracle，后者偏信号处理器、父子进程、packed module dump 和 trace 反演。
+它与 [anti-analysis.md](anti-analysis.md) 的边界是：反分析页先解决环境检测导致的假路径或拒绝运行；本页在程序能进入目标阶段后，选择最短的观测、dump、patch 或 oracle 路线。
 
 ## 识别信号
 
 - 静态分析能定位校验或解密阶段，但完整还原成本高，运行时中间 buffer、key、vector、返回值或比较状态可观察。
 - 程序可被 Frida、smali patch、LD_PRELOAD、INT3、coredump、trace、faketime 或动态符号执行降维。
+- SIGILL/SIGFPE/SIGSEGV handler、父进程写子进程、动态模块或 SMC 使最终执行体只在运行时出现。
 - 只改成功/失败返回值不够，因为后续还复用原始 key、hash、向量或上下文对象。
 - Android/Java/native 混合、libart self-hook、Frida 检测或 unstable hook point 需要改用 smali trace/静态 patch。
 
@@ -30,6 +34,7 @@ updated: 2026-07-27
 - 选择的观察点在数据被使用之前，而不是只在最终返回后。
 - Patch 或 hook 不改变后续必要数据；如果会改变，要同步替换上下文对象。
 - 能用正向 check 验证恢复结果，而不只依赖“程序显示成功”。
+- 对 signal/packed 路线，记录 handler 改写的寄存器/内存和“解密后、执行前”的 dump 时机。
 
 ## 路由表
 
@@ -40,6 +45,9 @@ updated: 2026-07-27
 | INT3/coredump oracle | 崩溃点是否携带候选状态，coredump 是否稳定生成 | 自动化候选输入和 dump 解析 |
 | timing side-channel | 响应时间是否和比较进度/分支相关 | 重复采样、降噪、固定环境 |
 | LD_PRELOAD oracle | 动态链接符号可拦截，目标未静态链接/校验 libc | 劫持函数返回或记录参数 |
+| SIGILL/SIGFPE/SIGSEGV 控制流 | handler 是否改写 PC、flags、key 或状态 | 建 handler-aware trace，不能直接 patch 掉信号 |
+| parent-patched child/memfd | 父进程何时写入子进程或匿名映像 | 在修改后、执行前 dump child memory |
+| packed/dynamic module | constructor 或 runtime 何时完成解密 | 在模块初始化边界 dump 并重建映像 |
 | VM printf/trace 到 Z3 | 输出/trace 可转成约束，而非完整手工反编译 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) |
 | 多线程/反调试干扰 | decoy thread、signal handler、anti-debug 是否影响观察点 | [anti-analysis.md](anti-analysis.md) |
 
@@ -62,6 +70,8 @@ updated: 2026-07-27
 | [ACTF2023-tree-wp](../raw/reverse/ACTF2023-tree-wp.md) | 本题的决定性障碍是恢复 Clang ASTMatcher，而不是普通控制流或字符串校验。分析时应从全局 matcher 构造函数中的节点类型、操作符字符串、绑定 ID 和回调逻辑入手；必要时编写最小 ASTMatcher 参考程序辅助 BinDiff。动态调试则适合直接观察三个全局计数，将复杂 matcher 拆成“循环数量、二元运算计分、类继承结构”三个可独立验证的条件。最终输入只需在 AST 层满足约束，源码本身无需执行。 |
 | [UMDCTF2023-clutter-wp](../raw/reverse/UMDCTF2023-clutter-wp.md) | 理解 VeSP 的加载、加法和内存写入语义，从 verbose 轨迹按执行顺序提取低字节，而不是按随机内存地址排序；程序无输出指令，却频繁把小整数写入一段特定内存范围时，模拟器 trace 往往就是观察通道。 |
 | [UMDCTF2025-ls-wp](../raw/reverse/UMDCTF2025-ls-wp.md) | `ptrace` 在 syscall entry 修改 `orig_rax`，把输入字符变成系统调用号的一次性 XOR 密钥。应结合寄存器参数、返回值用途和后续检查恢复“表面编号 → 目标编号 → 字符”映射，不能只相信源码函数名。 |
+| [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md) | SIGSEGV/SIGTRAP/SIGFPE handler 改 RC4 状态，`TracerPid` 混入 key；先复现 handler 或绕过检测，再在比较点取明文。 |
+| [RCTF2025-chaos2-wp](../raw/reverse/RCTF2025-chaos2-wp.md) | 花指令、反调试和动态 key 修改掩护 RC4 解密；清理 junk 后跟构造函数与运行时密钥更新点。 |
 
 ## Technique 下一跳
 
@@ -75,7 +85,7 @@ updated: 2026-07-27
 
 - 保留为 family：运行时 patch/oracle/trace 是多种手段的路线族，不是单一技术。
 - 不合并进 `anti-analysis.md`：反分析页解决“如何跑起来”，本页解决“跑起来后如何观测和降维”。
-- 不合并进 `signal-trace-and-packed-anti-analysis.md`：信号处理器和 packed dump 的证据形态更具体，仍需独立二级页。
+- 原 `signal-trace-and-packed-anti-analysis.md` 已并入本页：两页最终都路由到 trace/snapshot、反调试绕过和比较点恢复，signal/packed 只需作为更具体的路由行，不值得增加一次中转。
 
 ## 常见误判
 
@@ -87,7 +97,6 @@ updated: 2026-07-27
 ## 关联页面
 
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
 - [anti-analysis.md](anti-analysis.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 - [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
@@ -96,5 +105,8 @@ updated: 2026-07-27
 ## 原始资料
 
 - [runtime-patching-oracles-and-tracing.md](../raw/reverse/runtime-patching-oracles-and-tracing.md)
+- [signal-trace-and-packed-anti-analysis.md](../raw/reverse/signal-trace-and-packed-anti-analysis.md)
 - [WMCTF2025-videoplayer-wp](../raw/reverse/WMCTF2025-videoplayer-wp.md)
 - [WMCTF2025-want2become-magicalgirl-wp](../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md)
+- [HGAME2026-signal-storm-wp](../raw/reverse/HGAME2026-signal-storm-wp.md)
+- [RCTF2025-chaos2-wp](../raw/reverse/RCTF2025-chaos2-wp.md)

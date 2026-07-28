@@ -4,7 +4,7 @@ tags: [forensics, cross-category, family, triage, files, archives, one-liners]
 skills: [ctf-forensics, ctf-solve-challenge]
 raw:
   - ../raw/forensics/file-triage-archives-and-one-liners.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # File Triage, Archives and One-Liners
@@ -44,7 +44,8 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | 扩展名、magic、容器边界或内嵌载荷不一致 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
-| 归档 header/目录/压缩流损坏或 ZipCrypto 已知明文 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| 归档 header/目录/压缩流损坏 | [archive-structure-repair-and-stream-carving.md](archive-structure-repair-and-stream-carving.md) |
+| ZipCrypto 有精确已知明文或匹配压缩流 | [zipcrypto-known-plaintext-recovery.md](zipcrypto-known-plaintext-recovery.md) |
 | 内容是 Base/hex/URL/字符集/码表等可逆表示链 | [layered-encoding-and-symbol-mapping-recovery.md](layered-encoding-and-symbol-mapping-recovery.md) |
 
 ## 合并与拆分结论

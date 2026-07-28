@@ -7,7 +7,7 @@ raw:
   - ../raw/reverse/WMCTF2025-catfriend-wp.md
   - ../raw/reverse/WMCTF2025-videoplayer-wp.md
   - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Anti-Analysis Techniques & Bypasses
@@ -38,7 +38,7 @@ updated: 2026-07-27
 | 证据形态 | 首轮判断 | 下一跳 |
 |---|---|---|
 | Linux `ptrace`、`/proc`、`alarm`、signal、syscall 检测 | 先用 patch/hook/namespace/GDB signal policy 绕过单点，再确认是否还有第二层检测 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
-| `rdtsc`、`clock_gettime`、sleep 或时间阈值 | 先固定时间源或改比较阈值，避免 trace 工具改变行为 | [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md) |
+| `rdtsc`、`clock_gettime`、sleep 或时间阈值 | 先固定时间源或改比较阈值，避免 trace 工具改变行为 | [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) |
 | Windows PEB、NtQuery、TLS callback、heap flag、DR register、INT3 scan | 先选择 x64dbg/ScyllaHide/TitanHide/VEH 或手工 patch，再找 OEP、真实入口和比较点 | [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md), [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md) |
 | Anti-VM、硬件指纹、资源检查、注册表/文件痕迹 | 先判断能否伪造环境；不能稳定伪造时改用静态 patch 或真机/裸机采样 | [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md) |
 | Frida、Pin、DynamoRIO、Java hook 或 libart self-hook 检测 | 先调整注入时机和 hook 点，必要时改 native 检测逻辑，再恢复真实算法 | [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md) |
@@ -96,7 +96,7 @@ updated: 2026-07-27
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 - [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
+- [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md)
 - [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)
 - [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)

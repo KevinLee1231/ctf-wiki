@@ -4,7 +4,8 @@ tags: [crypto, homomorphic, malleability, paillier, elgamal, oracle]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/homomorphic-and-exotic-algebra.md
-updated: 2026-07-27
+  - ../raw/crypto/RCTF2025-repairing-wp.md
+updated: 2026-07-28
 ---
 
 # Homomorphic Ciphertext Malleability Oracles
@@ -53,3 +54,4 @@ Paillier、ElGamal、RSA 或自定义群密码保留可组合代数运算，服�
 ## 原始资料
 
 - [homomorphic-and-exotic-algebra.md](../raw/crypto/homomorphic-and-exotic-algebra.md)
+- [RCTF2025-repairing-wp](../raw/crypto/RCTF2025-repairing-wp.md)

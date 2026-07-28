@@ -4,7 +4,8 @@ tags: [web, pentest, cve, nday, version-fingerprinting]
 skills: [ctf-web, ctf-pentest]
 raw:
   - ../raw/web/known-cves-and-n-day-exploits.md
-updated: 2026-07-27
+  - ../raw/web/D3CTF2022-newest-wordpress-wp.md
+updated: 2026-07-28
 ---
 
 # Version Fingerprinting and N-Day PoC Adaptation
@@ -53,3 +54,4 @@ updated: 2026-07-27
 ## 原始资料
 
 - [known-cves-and-n-day-exploits.md](../raw/web/known-cves-and-n-day-exploits.md)
+- [D3CTF2022-newest-wordpress-wp](../raw/web/D3CTF2022-newest-wordpress-wp.md)

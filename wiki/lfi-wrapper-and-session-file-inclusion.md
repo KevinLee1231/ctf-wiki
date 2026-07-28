@@ -4,7 +4,8 @@ tags: [web, lfi, php-wrapper, session, file-inclusion]
 skills: [ctf-web]
 raw:
   - ../raw/web/php-lfi-ssti-ssrf-and-type-juggling.md
-updated: 2026-07-27
+  - ../raw/web/WMCTF2020-make-php-great-again-wp.md
+updated: 2026-07-28
 ---
 
 # LFI Wrapper and Session-File Inclusion
@@ -53,3 +54,4 @@ updated: 2026-07-27
 ## 原始资料
 
 - [php-lfi-ssti-ssrf-and-type-juggling.md](../raw/web/php-lfi-ssti-ssrf-and-type-juggling.md)
+- [WMCTF2020-make-php-great-again-wp](../raw/web/WMCTF2020-make-php-great-again-wp.md)

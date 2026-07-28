@@ -5,7 +5,7 @@ skills: [ctf-stego, ctf-forensics]
 raw:
   - ../raw/stego/audio-frequency-and-archive-stego.md
   - ../raw/forensics/WMCTF2025-voice-hacker-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Audio, Frequency and Archive Stego
@@ -61,7 +61,7 @@ updated: 2026-07-27
 |---|---|
 | 固定频率、DTMF/Morse/SSTV/FSK 或声道差异编码符号 | [audio-spectrum-and-symbol-decoding.md](audio-spectrum-and-symbol-decoding.md) |
 | 信息位于声道/bitplane/时间帧差等媒体通道 | [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md) |
-| 音频尾部/容器内嵌归档，或归档结构/加密需恢复 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| 音频尾部/容器内嵌归档或结构损坏 | [archive-structure-repair-and-stream-carving.md](archive-structure-repair-and-stream-carving.md) |
 
 ## 合并与拆分结论
 

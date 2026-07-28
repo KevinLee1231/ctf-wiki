@@ -5,7 +5,8 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/vm-obfuscation-transform-patterns.md
   - ../raw/web/game-state-websocket-and-wasm.md
-updated: 2026-07-27
+  - ../raw/reverse/ACTF2026-virtualnpu-wp.md
+updated: 2026-07-28
 ---
 
 # Custom VM and WASM State Lifting
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [vm-obfuscation-transform-patterns.md](../raw/reverse/vm-obfuscation-transform-patterns.md)
 - [game-state-websocket-and-wasm.md](../raw/web/game-state-websocket-and-wasm.md)
+- [ACTF2026-virtualnpu-wp](../raw/reverse/ACTF2026-virtualnpu-wp.md)

@@ -4,7 +4,7 @@ tags: [reverse, crypto, dynamic-debugging, breakpoint, symmetric-checker, xxtea]
 skills: [ctf-reverse, ctf-crypto]
 raw:
   - ../raw/reverse/Spirit2026-5-xxxtea-wp.md
-updated: 2026-07-06
+updated: 2026-07-28
 ---
 
 # Compare Breakpoint Plaintext Recovery
@@ -56,7 +56,7 @@ updated: 2026-07-06
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)
 - [block-mode-misuse-family.md](block-mode-misuse-family.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 
 ## 来自 WP 的案例索引
 

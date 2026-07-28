@@ -5,7 +5,7 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-houses-unlink-and-tcache.md
   - ../raw/pwn/heap-fsop-file-structure-attacks.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Heap Metadata and Bin-List Corruption
@@ -49,7 +49,8 @@ updated: 2026-07-27
 
 - [heap-houses-unlink-and-tcache.md](heap-houses-unlink-and-tcache.md)
 - [heap-uaf-tcache-and-custom-allocator.md](heap-uaf-tcache-and-custom-allocator.md)
-- [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md)
+- [glibc-file-structure-and-fsop.md](glibc-file-structure-and-fsop.md)
+- [exit-handler-and-tls-destructor-hijacking.md](exit-handler-and-tls-destructor-hijacking.md)
 
 ## 原始资料
 

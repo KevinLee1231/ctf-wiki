@@ -8,7 +8,7 @@ raw:
   - ../raw/pwn/D3CTF2019-basic-basic-parser-wp.md
   - ../raw/pwn/D3CTF2019-new-heap-wp.md
   - ../raw/pwn/D3CTF2021-deterministic-heap-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Heap UAF, Tcache and Custom Allocators
@@ -75,7 +75,8 @@ updated: 2026-07-27
 |---|---|
 | 悬空引用、double free 或同尺寸复用控制对象/freelist | [uaf-object-reuse-and-tcache-poisoning.md](uaf-object-reuse-and-tcache-poisoning.md) |
 | allocator metadata/bin list 破坏形成重叠或受控写 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
-| 最终落点是 FILE、wide-data、exit 或 TLS handler | [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md) |
+| 最终落点是 FILE/wide-data | [glibc-file-structure-and-fsop.md](glibc-file-structure-and-fsop.md) |
+| 最终落点是 exit/atexit/TLS destructor | [exit-handler-and-tls-destructor-hijacking.md](exit-handler-and-tls-destructor-hijacking.md) |
 
 ## 合并与拆分结论
 

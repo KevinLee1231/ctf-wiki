@@ -4,7 +4,9 @@ tags: [web, sqli, blind-sqli, filter-bypass, oracle]
 skills: [ctf-web]
 raw:
   - ../raw/web/sqli-filter-and-oracle.md
-updated: 2026-07-27
+  - ../raw/web/SUCTF2026-sqliWP.md
+  - ../raw/web/UMDCTF2018-sql-injection-wp.md
+updated: 2026-07-28
 ---
 
 # SQLi Filter and Response-Oracle Extraction
@@ -53,3 +55,5 @@ updated: 2026-07-27
 ## 原始资料
 
 - [sqli-filter-and-oracle.md](../raw/web/sqli-filter-and-oracle.md)
+- [SUCTF2026-sqliWP](../raw/web/SUCTF2026-sqliWP.md)
+- [UMDCTF2018-sql-injection-wp](../raw/web/UMDCTF2018-sql-injection-wp.md)

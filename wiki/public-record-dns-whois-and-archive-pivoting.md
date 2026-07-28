@@ -5,7 +5,7 @@ skills: [ctf-osint]
 raw:
   - ../raw/osint/web-and-dns.md
   - ../raw/osint/social-media.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Public-Record, DNS/WHOIS and Archive Pivoting
@@ -49,7 +49,7 @@ updated: 2026-07-27
 
 - [web-and-dns.md](web-and-dns.md)
 - [osint-account-public-media-correlation.md](osint-account-public-media-correlation.md)
-- [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md)
+- [dns-record-enumeration-and-zone-transfer.md](dns-record-enumeration-and-zone-transfer.md)
 
 ## 原始资料
 

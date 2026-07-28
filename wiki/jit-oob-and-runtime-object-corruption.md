@@ -5,7 +5,8 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/interpreter-jit-canary-and-integer-exploits.md
   - ../raw/pwn/oob-jit-parser-primitives.md
-updated: 2026-07-27
+  - ../raw/pwn/WMCTF2023-jit-wp.md
+updated: 2026-07-28
 ---
 
 # JIT OOB and Runtime-Object Corruption
@@ -55,3 +56,4 @@ JIT 优化假设、数组边界、类型反馈或解释器对象布局错误产�
 
 - [interpreter-jit-canary-and-integer-exploits.md](../raw/pwn/interpreter-jit-canary-and-integer-exploits.md)
 - [oob-jit-parser-primitives.md](../raw/pwn/oob-jit-parser-primitives.md)
+- [WMCTF2023-jit-wp](../raw/pwn/WMCTF2023-jit-wp.md)

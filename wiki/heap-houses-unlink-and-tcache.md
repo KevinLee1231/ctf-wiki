@@ -6,7 +6,7 @@ raw:
   - ../raw/pwn/heap-houses-unlink-and-tcache.md
   - ../raw/pwn/WMCTF2025-palusimulator-wp.md
   - ../raw/pwn/D3CTF2019-new-heap-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Heap Houses, Unlink and Tcache
@@ -65,7 +65,8 @@ updated: 2026-07-27
 |---|---|
 | chunk header、unlink、unsorted/largebin 链表可被破坏 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
 | UAF/double free/tcache freelist 可转任意分配 | [uaf-object-reuse-and-tcache-poisoning.md](uaf-object-reuse-and-tcache-poisoning.md) |
-| FILE/exit/TLS 清理结构是最终触发目标 | [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md) |
+| FILE/wide-data 是最终 I/O 触发目标 | [glibc-file-structure-and-fsop.md](glibc-file-structure-and-fsop.md) |
+| exit/TLS 清理链是最终终止触发目标 | [exit-handler-and-tls-destructor-hijacking.md](exit-handler-and-tls-destructor-hijacking.md) |
 
 ## 合并与拆分结论
 

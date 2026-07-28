@@ -4,7 +4,9 @@ tags: [forensics, hardware-embedded, usb-hid, mouse, keyboard, bluetooth]
 skills: [ctf-forensics, ctf-hardware-embedded]
 raw:
   - ../raw/forensics/peripheral-capture.md
-updated: 2026-07-27
+  - ../raw/forensics/0xGame2023-week2-notverybadusb-wp.md
+  - ../raw/forensics/WMCTF2023-truncate-wp.md
+updated: 2026-07-28
 ---
 
 # Peripheral Event and Coordinate Reconstruction
@@ -53,3 +55,5 @@ USB HID、鼠标、键盘、Bluetooth RFCOMM、LED 或其它外设 report 记录
 ## 原始资料
 
 - [peripheral-capture.md](../raw/forensics/peripheral-capture.md)
+- [0xGame2023-week2-notverybadusb-wp](../raw/forensics/0xGame2023-week2-notverybadusb-wp.md)
+- [WMCTF2023-truncate-wp](../raw/forensics/WMCTF2023-truncate-wp.md)

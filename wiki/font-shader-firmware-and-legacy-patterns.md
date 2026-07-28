@@ -4,7 +4,7 @@ tags: [reverse, family, font, shader, legacy-format, side-channel]
 skills: [ctf-reverse, ctf-hardware-embedded, ctf-stego]
 raw:
   - ../raw/reverse/font-shader-firmware-and-legacy-patterns.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Font, Shader, Firmware and Legacy Patterns
@@ -42,8 +42,10 @@ updated: 2026-07-27
 
 | 首轮判断 | 具体 technique |
 |---|---|
-| glyph/shader/bitmap/legacy renderer 生成隐藏文字或图形 | [renderer-glyph-shader-and-legacy-format-reconstruction.md](renderer-glyph-shader-and-legacy-format-reconstruction.md) |
-| 低频 ISA、boot/UEFI/MCU 固件需装载与模拟 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
+| 字体、私用区、glyph atlas 或纹理 ID 生成隐藏文字 | [font-glyph-and-text-rendering-reconstruction.md](font-glyph-and-text-rendering-reconstruction.md) |
+| GLSL/SPIR-V 或 GPU pipeline 承载变换/校验 | [shader-vm-and-graphics-pipeline-emulation.md](shader-vm-and-graphics-pipeline-emulation.md) |
+| 低频/自定义 ISA 或 MMIO 需恢复 opcode 与外设语义 | [custom-isa-and-mmio-emulation.md](custom-isa-and-mmio-emulation.md) |
+| boot/UEFI/MCU 固件需确定装载、入口和阶段 | [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md) |
 | 数据位于游戏资源、scene 或客户端状态 | [game-asset-and-scene-state-extraction.md](game-asset-and-scene-state-extraction.md) |
 
 ## 合并与拆分结论

@@ -5,7 +5,8 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/rc4-lfsr-and-keystream-reuse.md
   - ../raw/crypto/classical-xor-and-substitution-ciphers.md
-updated: 2026-07-27
+  - ../raw/reverse/D3CTF2021-zigzag-encryptor-wp.md
+updated: 2026-07-28
 ---
 
 # Stream-Cipher Keystream Reuse and State Recovery
@@ -56,3 +57,4 @@ updated: 2026-07-27
 
 - [rc4-lfsr-and-keystream-reuse.md](../raw/crypto/rc4-lfsr-and-keystream-reuse.md)
 - [classical-xor-and-substitution-ciphers.md](../raw/crypto/classical-xor-and-substitution-ciphers.md)
+- [D3CTF2021-zigzag-encryptor-wp](../raw/reverse/D3CTF2021-zigzag-encryptor-wp.md)

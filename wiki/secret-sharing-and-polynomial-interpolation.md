@@ -5,7 +5,8 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md
   - ../raw/crypto/zkp-secret-sharing-and-proof-systems.md
-updated: 2026-07-27
+  - ../raw/crypto/UMDCTF2023-adi-shamirs-sharing-system-wp.md
+updated: 2026-07-28
 ---
 
 # Secret Sharing and Polynomial Interpolation
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [exotic-secret-sharing-rabin-and-polynomials.md](../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md)
 - [zkp-secret-sharing-and-proof-systems.md](../raw/crypto/zkp-secret-sharing-and-proof-systems.md)
+- [UMDCTF2023-adi-shamirs-sharing-system-wp](../raw/crypto/UMDCTF2023-adi-shamirs-sharing-system-wp.md)

@@ -4,7 +4,9 @@ tags: [crypto, hash, mac, length-extension, construction]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/hash-protocol-and-oracle-attacks.md
-updated: 2026-07-27
+  - ../raw/web/SekaiCTF2026-filtered-reality-wp.md
+  - ../raw/crypto/UMDCTF2023-cbc-mac-2-wp.md
+updated: 2026-07-28
 ---
 
 # Hash/MAC Construction and Length Extension
@@ -53,3 +55,5 @@ updated: 2026-07-27
 ## 原始资料
 
 - [hash-protocol-and-oracle-attacks.md](../raw/crypto/hash-protocol-and-oracle-attacks.md)
+- [SekaiCTF2026-filtered-reality-wp](../raw/web/SekaiCTF2026-filtered-reality-wp.md)
+- [UMDCTF2023-cbc-mac-2-wp](../raw/crypto/UMDCTF2023-cbc-mac-2-wp.md)

@@ -4,7 +4,7 @@ tags: [reverse, family, vm, obfuscation, bytecode, smc, anti-debug, tracing]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/vm-obfuscation-transform-patterns.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # VM、混淆与字节变换技巧族
@@ -71,12 +71,12 @@ updated: 2026-07-27
 - [anti-analysis.md](anti-analysis.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 - [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)
 - [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
 - [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [windows-kernel-ioctl-hidden-feedback-maze.md](windows-kernel-ioctl-hidden-feedback-maze.md)
 
 ## 来自 WP 的案例索引

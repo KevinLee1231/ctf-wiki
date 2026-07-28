@@ -4,7 +4,8 @@ tags: [malware, reverse, pe, dotnet, config, resource]
 skills: [ctf-malware, ctf-reverse]
 raw:
   - ../raw/malware/pe-and-dotnet.md
-updated: 2026-07-27
+  - ../raw/malware/VNCTF2026-vnshell-wp.md
+updated: 2026-07-28
 ---
 
 # PE/.NET Config and Resource Extraction
@@ -53,3 +54,4 @@ PE/.NET 恶意样本的核心目标是恢复嵌入资源、配置、C2、campaig
 ## 原始资料
 
 - [pe-and-dotnet.md](../raw/malware/pe-and-dotnet.md)
+- [VNCTF2026-vnshell-wp](../raw/malware/VNCTF2026-vnshell-wp.md)

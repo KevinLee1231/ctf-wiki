@@ -5,7 +5,8 @@ skills: [ctf-stego, ctf-forensics]
 raw:
   - ../raw/stego/audio-frequency-and-archive-stego.md
   - ../raw/forensics/network-covert-auth-and-reassembly.md
-updated: 2026-07-27
+  - ../raw/stego/ACTF2022-ffsk-wp.md
+updated: 2026-07-28
 ---
 
 # Audio Spectrum and Symbol Decoding
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [audio-frequency-and-archive-stego.md](../raw/stego/audio-frequency-and-archive-stego.md)
 - [network-covert-auth-and-reassembly.md](../raw/forensics/network-covert-auth-and-reassembly.md)
+- [ACTF2022-ffsk-wp](../raw/stego/ACTF2022-ffsk-wp.md)

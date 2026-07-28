@@ -7,7 +7,7 @@ raw:
   - ../raw/reverse/WMCTF2025-appfriend-wp.md
   - ../raw/reverse/WMCTF2025-catfriend-wp.md
   - ../raw/reverse/WMCTF2025-want2become-magicalgirl-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Self-Decrypting, String and Lattice Patterns
@@ -43,7 +43,7 @@ updated: 2026-07-27
 | CVP/LLL、整数范围约束、模线性组合 | 先把校验表达式转成矩阵/格模型，并确认变量范围和模数 | [lattice-and-lwe.md](lattice-and-lwe.md), [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | GF(2^8)、GF(2) 或线性字节方程 | 先确认域乘法、多项式和矩阵方向，再做高斯消元 | [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md) |
 | 决策树函数、海量小函数比较 | 先批量提取常量和路径条件，再生成 forward checker 或 solver | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) |
-| 发现 AES/SM4/ChaCha/XXTEA 常量但流程异常 | 先恢复真实轮函数、轮数、S-box、移位方向和加解密同构性 | [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md), [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) |
+| 发现 AES/SM4/ChaCha/XXTEA 常量但流程异常 | 先恢复真实轮函数、轮数、S-box、移位方向和加解密同构性 | [block-mode-misuse-family.md](block-mode-misuse-family.md), [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) |
 | ROP 链或控制流本身被当作校验 | 先 trace gadget 序列和寄存器状态，再反向组装可计算模型 | [anti-analysis.md](anti-analysis.md), [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md) |
 
 ## Technique 下一跳
@@ -91,7 +91,7 @@ updated: 2026-07-27
 - [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 - [lattice-and-lwe.md](lattice-and-lwe.md)
 - [number-theory-and-algebra-attacks.md](number-theory-and-algebra-attacks.md)
 - [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md)

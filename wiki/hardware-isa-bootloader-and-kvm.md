@@ -9,7 +9,7 @@ raw:
   - ../raw/pwn/ACTF2026-amcu-wp.md
   - ../raw/reverse/LilacCTF2026-justrom-wp.md
   - ../raw/hardware-embedded/VNCTF2026-ez-iot-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Hardware ISA, Bootloader and KVM
@@ -74,7 +74,8 @@ updated: 2026-07-27
 
 | 首轮判断 | 具体 technique |
 |---|---|
-| ISA/bootloader/UEFI/MCU/KVM guest 需恢复装载与执行 | [unknown-isa-bootloader-and-firmware-emulation.md](unknown-isa-bootloader-and-firmware-emulation.md) |
+| 自定义 ISA、KVM guest 或 MMIO 需恢复 opcode/寄存器/外设语义 | [custom-isa-and-mmio-emulation.md](custom-isa-and-mmio-emulation.md) |
+| bootloader/UEFI/MCU 镜像需恢复装载基址与阶段执行 | [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md) |
 | UART/I2C/SPI/CAN/逻辑波形需定时和帧解码 | [bus-logic-and-serial-frame-decoding.md](bus-logic-and-serial-frame-decoding.md) |
 | RF/IQ 调制与频谱信号是决定性障碍 | [rf-sdr.md](rf-sdr.md) |
 

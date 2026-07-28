@@ -5,7 +5,8 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/kernel-uaf-race-and-slab-techniques.md
   - ../raw/pwn/linux-kernel-exploit-basics.md
-updated: 2026-07-27
+  - ../raw/pwn/D3CTF2019-knote-v1-v2-wp.md
+updated: 2026-07-28
 ---
 
 # Kernel Object Lifetime and Race Window
@@ -56,3 +57,4 @@ updated: 2026-07-27
 
 - [kernel-uaf-race-and-slab-techniques.md](../raw/pwn/kernel-uaf-race-and-slab-techniques.md)
 - [linux-kernel-exploit-basics.md](../raw/pwn/linux-kernel-exploit-basics.md)
+- [D3CTF2019-knote-v1-v2-wp](../raw/pwn/D3CTF2019-knote-v1-v2-wp.md)

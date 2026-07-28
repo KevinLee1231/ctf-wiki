@@ -5,7 +5,8 @@ skills: [ctf-pwn, ctf-pentest, ctf-web]
 raw:
   - ../raw/pwn/source-backdoors-and-restricted-shell-tricks.md
   - ../raw/pentest/linux-privesc.md
-updated: 2026-07-27
+  - ../raw/pentest/MoeCTF2023-moeworld-wp.md
+updated: 2026-07-28
 ---
 
 # Source Audit, Hidden Backdoor and Debug-Mode Discovery
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [source-backdoors-and-restricted-shell-tricks.md](../raw/pwn/source-backdoors-and-restricted-shell-tricks.md)
 - [linux-privesc.md](../raw/pentest/linux-privesc.md)
+- [MoeCTF2023-moeworld-wp](../raw/pentest/MoeCTF2023-moeworld-wp.md)

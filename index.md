@@ -4,7 +4,7 @@
 
 - Knowledge base path: `D:/文档/markdown文件/ctf-wiki`
 - Structure: flat graph
-- Updated: 2026-07-27
+- Updated: 2026-07-28
 
 ## 查询顺序
 
@@ -29,7 +29,7 @@
 
 ## 方向入口速查
 
-当题目方向已经初步明确时，优先从下表入口进入对应 family，再按页面内“路由表 / 分流流程 / 关联技巧”跳转；只有工具调用、环境路径或失败状态不清楚时再读 tooling 页。
+当题目方向已经初步明确时，优先从下表的首轮入口进入对应 family，再按页面内“路由表 / 分流流程 / 关联技巧”跳转；若证据已经精确命中特定 technique，可直接进入该页。只有工具调用、环境路径或失败状态不清楚时再读 tooling 页。
 
 | 方向 | 首轮入口 | 工具入口 | 适用边界 |
 |---|---|---|---|
@@ -119,8 +119,7 @@
 | [packers-deobfuscation-and-debug-automation.md](wiki/packers-deobfuscation-and-debug-automation.md) | reverse | 壳、商业虚拟化、动态解密、patch、trace 和降维路线分流。 |
 | [self-decrypting-strings-and-lattice-patterns.md](wiki/self-decrypting-strings-and-lattice-patterns.md) | reverse | 自解密、字符串恢复、格/线性约束和魔改 cipher 恢复分流。 |
 | [hardware-isa-bootloader-and-kvm.md](wiki/hardware-isa-bootloader-and-kvm.md) | hardware-embedded/reverse/pwn | 低频 ISA、固件、bootloader、KVM、MCU、TrustZone 和协处理器分流。 |
-| [runtime-patching-oracles-and-tracing.md](wiki/runtime-patching-oracles-and-tracing.md) | reverse | 运行时 patch、oracle、hook、trace、coredump 和上下文替换分流。 |
-| [signal-trace-and-packed-anti-analysis.md](wiki/signal-trace-and-packed-anti-analysis.md) | reverse | 信号处理器、trace 反演、父子进程 dump 和 packed module 分流。 |
+| [runtime-patching-oracles-and-tracing.md](wiki/runtime-patching-oracles-and-tracing.md) | reverse | 运行时 patch、oracle、signal/hook/trace、父子进程 dump、packed module 和上下文替换分流。 |
 | [scripts-and-obfuscation.md](wiki/scripts-and-obfuscation.md) | malware | JS/PowerShell/SVG/包载荷、脚本混淆和恶意载荷链分流。 |
 | [pe-and-dotnet.md](wiki/pe-and-dotnet.md) | malware | PE/.NET、配置提取、DNS C2、PyInstaller/PyArmor、shellcode 和内存证据分流。 |
 | [cross-domain-forensics-technique-map.md](wiki/cross-domain-forensics-technique-map.md) | forensics | 跨 PCAP/磁盘/内存/媒体/容器取证的下一跳 map。 |
@@ -131,8 +130,7 @@
 | [pdf-png-gif-and-text-stego.md](wiki/pdf-png-gif-and-text-stego.md) | stego | PDF、PNG、GIF、SVG、文本和容器媒体隐写分流。 |
 | [linux-git-browser-and-container-forensics.md](wiki/linux-git-browser-and-container-forensics.md) | forensics | Linux 日志、Git 对象库、浏览器 profile、Docker layer 和凭据恢复分流。 |
 | [image-bitplane-qr-and-jpeg-stego.md](wiki/image-bitplane-qr-and-jpeg-stego.md) | stego | JPEG/PNG/BMP/GIF、bitplane、QR 重组、视觉/空间线索和图像隐写分流。 |
-| [disk-memory-vm-and-container-forensics.md](wiki/disk-memory-vm-and-container-forensics.md) | forensics | 磁盘、内存、VM、容器、Android 和云存储载体分流。 |
-| [filesystems-memory-dumps-and-raid.md](wiki/filesystems-memory-dumps-and-raid.md) | forensics | 分区/文件系统、minidump、VMDK sparse、RAID 和卷恢复分流。 |
+| [disk-memory-vm-and-container-forensics.md](wiki/disk-memory-vm-and-container-forensics.md) | forensics | 磁盘、分区、内存、VM/VMDK、RAID、容器、Android 和云存储载体及底层恢复分流。 |
 | [network-covert-auth-and-reassembly.md](wiki/network-covert-auth-and-reassembly.md) | forensics | 网络 covert channel、凭据恢复、协议重组和 RTP 音频分流。 |
 | [signals-and-hardware.md](wiki/signals-and-hardware.md) | hardware-embedded/forensics | 显示链路、总线、RF、功耗、键盘声学和硬件信号恢复分流。 |
 | [audio-frequency-and-archive-stego.md](wiki/audio-frequency-and-archive-stego.md) | stego | 音频频域、SSTV、DTMF、声道 LSB、DeepSound、语音认证和音频 archive 分流。 |
@@ -180,9 +178,10 @@
 - [black-box-query-feedback-evasion.md](wiki/black-box-query-feedback-evasion.md)
 - [constraint-aware-adversarial-optimization-and-validation.md](wiki/constraint-aware-adversarial-optimization-and-validation.md)
 - [gradient-leakage-input-reconstruction.md](wiki/gradient-leakage-input-reconstruction.md)
-- [linear-model-input-lattice-recovery.md](wiki/linear-model-input-lattice-recovery.md)
+- [linear-model-discrete-input-recovery.md](wiki/linear-model-discrete-input-recovery.md)
 - [linear-model-parameter-recovery.md](wiki/linear-model-parameter-recovery.md)
 - [llm-output-derived-secret-recovery.md](wiki/llm-output-derived-secret-recovery.md)
+- [model-artifact-integrity-and-parameter-tampering.md](wiki/model-artifact-integrity-and-parameter-tampering.md)
 - [model-backdoor-trigger-and-poisoning-analysis.md](wiki/model-backdoor-trigger-and-poisoning-analysis.md)
 - [prompt-injection-and-tool-call-hijacking.md](wiki/prompt-injection-and-tool-call-hijacking.md)
 - [token-smuggling-and-output-constraint-bypass.md](wiki/token-smuggling-and-output-constraint-bypass.md)
@@ -196,6 +195,7 @@
 - [delegatecall-storage-layout-corruption.md](wiki/delegatecall-storage-layout-corruption.md)
 - [hash-mac-construction-and-length-extension.md](wiki/hash-mac-construction-and-length-extension.md)
 - [homomorphic-ciphertext-malleability-oracles.md](wiki/homomorphic-ciphertext-malleability-oracles.md)
+- [invalid-curve-and-small-subgroup-attacks.md](wiki/invalid-curve-and-small-subgroup-attacks.md)
 - [lattice-small-root-and-partial-leakage.md](wiki/lattice-small-root-and-partial-leakage.md)
 - [layered-encoding-and-symbol-mapping-recovery.md](wiki/layered-encoding-and-symbol-mapping-recovery.md)
 - [linear-prng-state-and-seed-recovery.md](wiki/linear-prng-state-and-seed-recovery.md)
@@ -207,7 +207,7 @@
 - [rsa-low-exponent-and-related-message-attacks.md](wiki/rsa-low-exponent-and-related-message-attacks.md)
 - [rsa-padding-and-interval-oracle-attacks.md](wiki/rsa-padding-and-interval-oracle-attacks.md)
 - [secret-sharing-and-polynomial-interpolation.md](wiki/secret-sharing-and-polynomial-interpolation.md)
-- [signature-nonce-and-subgroup-failures.md](wiki/signature-nonce-and-subgroup-failures.md)
+- [signature-nonce-reuse-and-partial-leakage.md](wiki/signature-nonce-reuse-and-partial-leakage.md)
 - [stream-cipher-keystream-reuse-and-state-recovery.md](wiki/stream-cipher-keystream-reuse-and-state-recovery.md)
 - [symmetric-cipher-differential-fault-analysis.md](wiki/symmetric-cipher-differential-fault-analysis.md)
 
@@ -218,6 +218,7 @@
 - [browser-gadget-and-admin-bot-exfiltration.md](wiki/browser-gadget-and-admin-bot-exfiltration.md)
 - [csp-xsleak-and-browser-exfiltration.md](wiki/csp-xsleak-and-browser-exfiltration.md)
 - [deserialization-gadget-and-object-graph-execution.md](wiki/deserialization-gadget-and-object-graph-execution.md)
+- [dns-resolution-rebinding-and-cache-differentials.md](wiki/dns-resolution-rebinding-and-cache-differentials.md)
 - [json-duplicate-key-hmac-parser-differential.md](wiki/json-duplicate-key-hmac-parser-differential.md)
 - [lfi-wrapper-and-session-file-inclusion.md](wiki/lfi-wrapper-and-session-file-inclusion.md)
 - [path-confusion-to-signed-internal-request-chain.md](wiki/path-confusion-to-signed-internal-request-chain.md)
@@ -236,18 +237,13 @@
 
 - [cloud-identity-token-to-control-plane-pivot.md](wiki/cloud-identity-token-to-control-plane-pivot.md)
 
-### Cross-Direction
-
-- [bgp-rpki-route-hijack.md](wiki/bgp-rpki-route-hijack.md)
-- [dynamic-routing-hijack-transparent-relay.md](wiki/dynamic-routing-hijack-transparent-relay.md)
-- [race-condition-and-concurrency-exploits.md](wiki/race-condition-and-concurrency-exploits.md)
-
 ### Pwn
 
 - [data-interpretation-memory-primitives.md](wiki/data-interpretation-memory-primitives.md)
 - [dynamic-linker-and-symbol-resolution-exploitation.md](wiki/dynamic-linker-and-symbol-resolution-exploitation.md)
-- [file-structure-and-exit-handler-control-flow.md](wiki/file-structure-and-exit-handler-control-flow.md)
+- [exit-handler-and-tls-destructor-hijacking.md](wiki/exit-handler-and-tls-destructor-hijacking.md)
 - [format-string.md](wiki/format-string.md)
+- [glibc-file-structure-and-fsop.md](wiki/glibc-file-structure-and-fsop.md)
 - [heap-metadata-and-bin-list-corruption.md](wiki/heap-metadata-and-bin-list-corruption.md)
 - [integer-length-and-index-confusion-exploitation.md](wiki/integer-length-and-index-confusion-exploitation.md)
 - [jit-oob-and-runtime-object-corruption.md](wiki/jit-oob-and-runtime-object-corruption.md)
@@ -255,41 +251,46 @@
 - [kernel-object-lifetime-and-race-window.md](wiki/kernel-object-lifetime-and-race-window.md)
 - [protocol-length-state-parser-corruption.md](wiki/protocol-length-state-parser-corruption.md)
 - [restricted-runtime-object-graph-and-capability-recovery.md](wiki/restricted-runtime-object-graph-and-capability-recovery.md)
+- [runtime-mitigation-pointer-mangling-and-shadow-stack-bypass.md](wiki/runtime-mitigation-pointer-mangling-and-shadow-stack-bypass.md)
 - [sandbox-capability-and-inherited-channel-bypasses.md](wiki/sandbox-capability-and-inherited-channel-bypasses.md)
 - [stack-control-flow-and-constrained-rop.md](wiki/stack-control-flow-and-constrained-rop.md)
 - [uaf-object-reuse-and-tcache-poisoning.md](wiki/uaf-object-reuse-and-tcache-poisoning.md)
 
 ### Pentest
 
+- [bgp-rpki-route-hijack.md](wiki/bgp-rpki-route-hijack.md)
+- [dynamic-routing-hijack-transparent-relay.md](wiki/dynamic-routing-hijack-transparent-relay.md)
 - [local-privesc-misconfiguration-and-credential-pivot.md](wiki/local-privesc-misconfiguration-and-credential-pivot.md)
 - [restricted-shell-feature-and-output-channel-escape.md](wiki/restricted-shell-feature-and-output-channel-escape.md)
 - [source-audit-hidden-backdoor-and-debug-mode-discovery.md](wiki/source-audit-hidden-backdoor-and-debug-mode-discovery.md)
 
-### Cross-Platform Exploitation
+### Cross-Direction
 
-- [runtime-mitigation-pointer-mangling-and-shadow-stack-bypass.md](wiki/runtime-mitigation-pointer-mangling-and-shadow-stack-bypass.md)
+- [race-condition-and-concurrency-exploits.md](wiki/race-condition-and-concurrency-exploits.md)
 
 ### Reverse
 
 - [anti-debug-self-check-and-environment-bypass.md](wiki/anti-debug-self-check-and-environment-bypass.md)
 - [compare-breakpoint-plaintext-recovery.md](wiki/compare-breakpoint-plaintext-recovery.md)
 - [constraint-solver-and-symbolic-state-recovery.md](wiki/constraint-solver-and-symbolic-state-recovery.md)
+- [custom-isa-and-mmio-emulation.md](wiki/custom-isa-and-mmio-emulation.md)
 - [custom-vm-and-wasm-state-lifting.md](wiki/custom-vm-and-wasm-state-lifting.md)
-- [embedded-python-pyd-custom-aes.md](wiki/embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](wiki/cython-and-python-extension-checker-recovery.md)
+- [firmware-loader-and-boot-chain-emulation.md](wiki/firmware-loader-and-boot-chain-emulation.md)
+- [font-glyph-and-text-rendering-reconstruction.md](wiki/font-glyph-and-text-rendering-reconstruction.md)
 - [game-asset-and-scene-state-extraction.md](wiki/game-asset-and-scene-state-extraction.md)
 - [managed-runtime-metadata-and-bytecode-recovery.md](wiki/managed-runtime-metadata-and-bytecode-recovery.md)
-- [renderer-glyph-shader-and-legacy-format-reconstruction.md](wiki/renderer-glyph-shader-and-legacy-format-reconstruction.md)
+- [shader-vm-and-graphics-pipeline-emulation.md](wiki/shader-vm-and-graphics-pipeline-emulation.md)
 - [staged-loader-and-runtime-image-recovery.md](wiki/staged-loader-and-runtime-image-recovery.md)
 - [trace-hook-and-state-snapshot-reconstruction.md](wiki/trace-hook-and-state-snapshot-reconstruction.md)
-- [unknown-isa-bootloader-and-firmware-emulation.md](wiki/unknown-isa-bootloader-and-firmware-emulation.md)
-- [vmp-client-server-smc-rc4-recovery.md](wiki/vmp-client-server-smc-rc4-recovery.md)
 - [windows-kernel-ioctl-hidden-feedback-maze.md](wiki/windows-kernel-ioctl-hidden-feedback-maze.md)
 
 ### Forensics
 
 - [3d-printing.md](wiki/3d-printing.md)
-- [archive-repair-and-known-plaintext-recovery.md](wiki/archive-repair-and-known-plaintext-recovery.md)
+- [archive-structure-repair-and-stream-carving.md](wiki/archive-structure-repair-and-stream-carving.md)
 - [blockchain-and-transaction-forensics.md](wiki/blockchain-and-transaction-forensics.md)
+- [dns-tunnel-and-label-reassembly.md](wiki/dns-tunnel-and-label-reassembly.md)
 - [file-format-and-embedded-payload-identification.md](wiki/file-format-and-embedded-payload-identification.md)
 - [filesystem-metadata-and-deleted-artifact-recovery.md](wiki/filesystem-metadata-and-deleted-artifact-recovery.md)
 - [memory-process-and-container-layer-recovery.md](wiki/memory-process-and-container-layer-recovery.md)
@@ -299,6 +300,7 @@
 - [rf-sdr.md](wiki/rf-sdr.md)
 - [structured-document-history-and-hidden-object-recovery.md](wiki/structured-document-history-and-hidden-object-recovery.md)
 - [windows-registry-event-and-credential-correlation.md](wiki/windows-registry-event-and-credential-correlation.md)
+- [zipcrypto-known-plaintext-recovery.md](wiki/zipcrypto-known-plaintext-recovery.md)
 
 ### Stego / Signals
 
@@ -310,7 +312,7 @@
 ### OSINT
 
 - [cross-platform-account-and-public-media-correlation.md](wiki/cross-platform-account-and-public-media-correlation.md)
-- [dns-zone-transfer-tunnel-and-resolution-analysis.md](wiki/dns-zone-transfer-tunnel-and-resolution-analysis.md)
+- [dns-record-enumeration-and-zone-transfer.md](wiki/dns-record-enumeration-and-zone-transfer.md)
 - [public-record-dns-whois-and-archive-pivoting.md](wiki/public-record-dns-whois-and-archive-pivoting.md)
 - [visual-geolocation-and-media-metadata-correlation.md](wiki/visual-geolocation-and-media-metadata-correlation.md)
 

@@ -5,7 +5,8 @@ skills: [ctf-pwn]
 raw:
   - ../raw/pwn/overflow-basics.md
   - ../raw/pwn/stack-pivots-srop-and-seccomp-rop.md
-updated: 2026-07-27
+  - ../raw/pwn/LilacCTF2026-gate-way-wp.md
+updated: 2026-07-28
 ---
 
 # Stack Control-Flow and Constrained ROP
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [overflow-basics.md](../raw/pwn/overflow-basics.md)
 - [stack-pivots-srop-and-seccomp-rop.md](../raw/pwn/stack-pivots-srop-and-seccomp-rop.md)
+- [LilacCTF2026-gate-way-wp](../raw/pwn/LilacCTF2026-gate-way-wp.md)

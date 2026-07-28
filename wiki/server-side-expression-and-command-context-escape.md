@@ -5,7 +5,8 @@ skills: [ctf-web]
 raw:
   - ../raw/web/ruby-php-upload-and-ssti-rce.md
   - ../raw/web/xml-command-and-graphql-injection.md
-updated: 2026-07-27
+  - ../raw/web/D3CTF2021-happy-valentines-day-wp.md
+updated: 2026-07-28
 ---
 
 # Server-Side Expression and Command-Context Escape
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [ruby-php-upload-and-ssti-rce.md](../raw/web/ruby-php-upload-and-ssti-rce.md)
 - [xml-command-and-graphql-injection.md](../raw/web/xml-command-and-graphql-injection.md)
+- [D3CTF2021-happy-valentines-day-wp](../raw/web/D3CTF2021-happy-valentines-day-wp.md)

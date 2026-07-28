@@ -4,7 +4,7 @@ tags: [crypto, family, ecc, dlp, signature, nonce]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/ecc-dlp-and-signature-attacks.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # ECC DLP and Signature Attacks
@@ -50,7 +50,8 @@ updated: 2026-07-27
 
 | 首轮判断 | 具体 technique |
 |---|---|
-| nonce 复用/偏置/部分泄露，或未验证点进入秘密标量乘 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
+| nonce 复用、偏置、部分泄露或 commitment 重复 | [signature-nonce-reuse-and-partial-leakage.md](signature-nonce-reuse-and-partial-leakage.md) |
+| 未验证点进入秘密标量乘、invalid curve 或 small subgroup | [invalid-curve-and-small-subgroup-attacks.md](invalid-curve-and-small-subgroup-attacks.md) |
 | 部分 nonce/HNP 泄露需要格恢复 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
 | 曲线/群关系最终化为有限域、多项式或模根问题 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
 

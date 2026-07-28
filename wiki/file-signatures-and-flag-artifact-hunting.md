@@ -4,7 +4,7 @@ tags: [forensics, file-triage, artifact, family]
 skills: [ctf-forensics]
 raw:
   - ../raw/forensics/file-signatures-and-flag-artifact-hunting.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # File Signatures and Flag Artifact Hunting
@@ -50,7 +50,8 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | 扩展名/magic/容器边界与内嵌对象不一致 | [file-format-and-embedded-payload-identification.md](file-format-and-embedded-payload-identification.md) |
-| 损坏/加密归档需 header、CRC 或已知明文恢复 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| 损坏归档需 header、目录、offset 或流边界恢复 | [archive-structure-repair-and-stream-carving.md](archive-structure-repair-and-stream-carving.md) |
+| ZipCrypto 可由精确已知明文恢复内部 key | [zipcrypto-known-plaintext-recovery.md](zipcrypto-known-plaintext-recovery.md) |
 | 文件系统 metadata/journal/unallocated block 保留删除对象 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
 
 ## 常见陷阱

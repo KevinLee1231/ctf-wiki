@@ -5,7 +5,8 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/anti-analysis.md
   - ../raw/reverse/signal-trace-and-packed-anti-analysis.md
-updated: 2026-07-27
+  - ../raw/reverse/WMCTF2020-welcome-to-ctf-wp.md
+updated: 2026-07-28
 ---
 
 # Anti-Debug, Self-Check and Environment Bypass
@@ -48,7 +49,7 @@ updated: 2026-07-27
 ## 关联技巧
 
 - [anti-analysis.md](anti-analysis.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
+- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 
@@ -56,3 +57,4 @@ updated: 2026-07-27
 
 - [anti-analysis.md](../raw/reverse/anti-analysis.md)
 - [signal-trace-and-packed-anti-analysis.md](../raw/reverse/signal-trace-and-packed-anti-analysis.md)
+- [WMCTF2020-welcome-to-ctf-wp](../raw/reverse/WMCTF2020-welcome-to-ctf-wp.md)

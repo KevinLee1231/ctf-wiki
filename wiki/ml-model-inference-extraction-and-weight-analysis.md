@@ -10,7 +10,7 @@ raw:
   - ../raw/ai-ml/SUCTF2026-babyAIWP.md
   - ../raw/ai-ml/SUCTF2026-easyLLMWP.md
   - ../raw/ai-ml/SUCTF2026-theifWP.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # ML Model Inference, Extraction and Weight Analysis
@@ -59,6 +59,8 @@ updated: 2026-07-27
 |---|---|
 | 参数梯度由单样本生成，需要反演输入/激活 | [gradient-leakage-input-reconstruction.md](gradient-leakage-input-reconstruction.md) |
 | 无激活线性层输出足以解出权重/偏置 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
+| 已知线性模型与输出，需要恢复受字符/噪声约束的离散输入 | [linear-model-discrete-input-recovery.md](linear-model-discrete-input-recovery.md) |
+| 上传结构合法的模型参数即可控制最终决策 | [model-artifact-integrity-and-parameter-tampering.md](model-artifact-integrity-and-parameter-tampering.md) |
 | 已知 Transformer logits，需要逐 token 恢复原像 | [transformer-logit-inversion.md](transformer-logit-inversion.md) |
 
 ## 常见陷阱
@@ -72,7 +74,8 @@ updated: 2026-07-27
 ## 关联技巧
 
 - [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md)
-- [linear-model-input-lattice-recovery.md](linear-model-input-lattice-recovery.md)
+- [linear-model-discrete-input-recovery.md](linear-model-discrete-input-recovery.md)
+- [model-artifact-integrity-and-parameter-tampering.md](model-artifact-integrity-and-parameter-tampering.md)
 - [transformer-logit-inversion.md](transformer-logit-inversion.md)
 - [gradient-leakage-input-reconstruction.md](gradient-leakage-input-reconstruction.md)
 - [adversarial-ml.md](adversarial-ml.md)
@@ -88,10 +91,10 @@ updated: 2026-07-27
 | [LilacCTF2026-residue-wp](../raw/ai-ml/LilacCTF2026-residue-wp.md) | 已知 GPT-2 Medium 权重和目标 logits，可逐位置枚举词表并用 MSE 匹配 logits；KV cache 是可接受复杂度的关键。 | [transformer-logit-inversion.md](transformer-logit-inversion.md) |
 | [SUCTF2026-谁是小偷WP](../raw/ai-ml/SUCTF2026-谁是小偷WP.md) | `Conv2d -> Flatten -> Linear` 且无激活函数，`/predict` 返回完整向量；先用 basis query 恢复整体仿射映射，再拆参数。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
 | [SUCTF2026-我不是神偷WP](../raw/ai-ml/SUCTF2026-我不是神偷WP.md) | 附件结构与线上形状冲突，`/flag` 报错暴露真实 state_dict；先恢复共享线性层，再把两层卷积分解为等效核。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
-| [SUCTF2026-babyAIWP](../raw/ai-ml/SUCTF2026-babyAIWP.md) | `Conv1d -> Linear` 无激活且权重藏在 `model.pth`；展开成带小噪声的模线性方程后用 LLL/Babai 恢复 flag 字节。 | [linear-model-input-lattice-recovery.md](linear-model-input-lattice-recovery.md) |
+| [SUCTF2026-babyAIWP](../raw/ai-ml/SUCTF2026-babyAIWP.md) | `Conv1d -> Linear` 无激活且权重藏在 `model.pth`；展开成带小噪声的模线性方程后用 LLL/Babai 恢复 flag 字节。 | [linear-model-discrete-input-recovery.md](linear-model-discrete-input-recovery.md) |
 | [SUCTF2026-easyLLMWP](../raw/ai-ml/SUCTF2026-easyLLMWP.md) | LLM 输出被直接派生为 AES key，且模型、prompt、temperature 和输出格式已知；先采样候选输出并用密文/PKCS#7 oracle 碰撞验证，不要当普通 prompt injection 处理。 | [llm-attacks.md](llm-attacks.md)、[block-mode-misuse-family.md](block-mode-misuse-family.md) |
 | [SUCTF2026-theifWP](../raw/ai-ml/SUCTF2026-theifWP.md) | 模型上传接口只比较部分参数，四维卷积权重校验缺口可配合 `/predict` 输出恢复被检查线性层。 | [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md) |
-| [0xGame2025-week4-旧吊带袜天使想吃真蛋糕的Stocking-wp](../raw/ai-ml/0xGame2025-week4-旧吊带袜天使想吃真蛋糕的Stocking-wp.md) | 本题考查模型参数完整性，而不是不安全反序列化。`weights_only=True` 限制了可反序列化对象，却不会判断张量参数是否可信；只要攻击者能上传结构合法的 `state_dict`，就能通过控制最后一层权重和偏置决定所有分类结果。生产环境需要对模型制品做签名、来源验证和行为测试，不能把“能成功加载”当作“模型可信”。 | 本页对应路线 |
+| [0xGame2025-week4-旧吊带袜天使想吃真蛋糕的Stocking-wp](../raw/ai-ml/0xGame2025-week4-旧吊带袜天使想吃真蛋糕的Stocking-wp.md) | `weights_only=True` 只限制对象反序列化；保持完整 key/shape 并改最后一层权重与 bias，仍可稳定控制分类。 | [model-artifact-integrity-and-parameter-tampering.md](model-artifact-integrity-and-parameter-tampering.md) |
 | [MoeCTF2023-A-very-happy-MLP-wp](../raw/ai-ml/MoeCTF2023-A-very-happy-MLP-wp.md) | 本题的关键是区分“求一个输入原像”和“训练模型”。线性层降维后没有唯一逆，但伪逆能给出一个可验证的原像；单调激活可以在值域内逐点求逆。逆推神经网络时应从输出层向输入层逐层进行，并在每一步检查激活函数值域，最后用原模型重新前向验证结果。 | 本页对应路线 |
 | [MoeCTF2023-Visual-Hacker-wp](../raw/ai-ml/MoeCTF2023-Visual-Hacker-wp.md) | 本题把分类式角度回归、三维方向向量和射线—平面求交串成一条完整的数据恢复链。容易出错的地方有三个：确认模型输出头的顺序、在推理前切换到 `eval()`、统一摄像机与书写者的坐标系。最终轨迹包含噪声时，应依据整组几何形状识别字符，而不是期待每帧都落在理想笔画上。 | 本页对应路线 |
 | [UMDCTF2023-elgyems-password-wp](../raw/ai-ml/UMDCTF2023-elgyems-password-wp.md) | 没有激活函数的深层网络并不增加表达能力，可以精确折叠为一个仿射变换；伪逆只给出某个实数解；flag 格式和可打印 ASCII 是选出离散原像的必要约束。 | 本页对应路线 |

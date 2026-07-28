@@ -4,7 +4,7 @@ tags: [reverse, technique, windows-kernel, driver, ioctl, maze, side-channel]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/Spirit2026-5-kernelmaze-wp.md
-updated: 2026-05-21
+updated: 2026-07-28
 ---
 
 # Windows Kernel Driver IOCTL Hidden Feedback Maze
@@ -57,7 +57,7 @@ Windows 驱动题同时给出 `.sys` 和用户态客户端，客户端只暴露 
 - [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
 - [self-decrypting-strings-and-lattice-patterns.md](self-decrypting-strings-and-lattice-patterns.md)
-- [vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)
+- [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md)
 
 ## 来自 WP 的案例索引
 

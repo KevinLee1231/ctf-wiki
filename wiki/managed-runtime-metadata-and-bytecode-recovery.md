@@ -5,7 +5,8 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/go-rust-jvm-and-cpp-reversing.md
   - ../raw/reverse/python-bytecode-esolangs-and-uefi.md
-updated: 2026-07-27
+  - ../raw/reverse/UMDCTF2017-yarv-abuse-wp.md
+updated: 2026-07-28
 ---
 
 # Managed-Runtime Metadata and Bytecode Recovery
@@ -49,9 +50,10 @@ updated: 2026-07-27
 
 - [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md)
 - [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 
 ## 原始资料
 
 - [go-rust-jvm-and-cpp-reversing.md](../raw/reverse/go-rust-jvm-and-cpp-reversing.md)
 - [python-bytecode-esolangs-and-uefi.md](../raw/reverse/python-bytecode-esolangs-and-uefi.md)
+- [UMDCTF2017-yarv-abuse-wp](../raw/reverse/UMDCTF2017-yarv-abuse-wp.md)

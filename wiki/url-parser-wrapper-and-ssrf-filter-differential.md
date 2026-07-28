@@ -5,7 +5,8 @@ skills: [ctf-web]
 raw:
   - ../raw/web/polyglot-url-tricks-and-ssrf-leaks.md
   - ../raw/web/parser-wrapper-and-legacy-ssrf-tricks.md
-updated: 2026-07-27
+  - ../raw/web/UMDCTF2022-customer-support-wp.md
+updated: 2026-07-28
 ---
 
 # URL Parser, Wrapper and SSRF Filter Differential
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [polyglot-url-tricks-and-ssrf-leaks.md](../raw/web/polyglot-url-tricks-and-ssrf-leaks.md)
 - [parser-wrapper-and-legacy-ssrf-tricks.md](../raw/web/parser-wrapper-and-legacy-ssrf-tricks.md)
+- [UMDCTF2022-customer-support-wp](../raw/web/UMDCTF2022-customer-support-wp.md)

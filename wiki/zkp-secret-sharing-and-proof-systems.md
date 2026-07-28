@@ -4,7 +4,7 @@ tags: [crypto, family, zkp, secret-sharing, garbled-circuit, pairing, proof-syst
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/zkp-secret-sharing-and-proof-systems.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # ZKP, Secret Sharing and Proof Systems
@@ -44,7 +44,8 @@ updated: 2026-07-27
 
 | 首轮判断 | 具体 technique |
 |---|---|
-| 签名/证明 transcript 的 nonce、challenge 或子群绑定失败 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
+| 证明 transcript 的 nonce/commitment 重复或 challenge 绑定失败 | [signature-nonce-reuse-and-partial-leakage.md](signature-nonce-reuse-and-partial-leakage.md) |
+| 群元素未验证、cofactor/subgroup 绑定失败 | [invalid-curve-and-small-subgroup-attacks.md](invalid-curve-and-small-subgroup-attacks.md) |
 | `(x,y)` 份额、阈值、Vandermonde 或多项式承诺可恢复秘密 | [secret-sharing-and-polynomial-interpolation.md](secret-sharing-and-polynomial-interpolation.md) |
 | 证明关系需在有限域/多项式环中插值、消元或求根 | [algebraic-polynomial-and-modular-root-reconstruction.md](algebraic-polynomial-and-modular-root-reconstruction.md) |
 

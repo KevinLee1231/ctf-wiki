@@ -4,7 +4,8 @@ tags: [hardware-embedded, forensics, logic-analyzer, uart, spi, i2c]
 skills: [ctf-hardware-embedded, ctf-forensics]
 raw:
   - ../raw/hardware-embedded/signals-and-hardware.md
-updated: 2026-07-27
+  - ../raw/hardware-embedded/UMDCTF2017-verilog-2-wp.md
+updated: 2026-07-28
 ---
 
 # Bus, Logic and Serial-Frame Decoding
@@ -53,3 +54,4 @@ updated: 2026-07-27
 ## 原始资料
 
 - [signals-and-hardware.md](../raw/hardware-embedded/signals-and-hardware.md)
+- [UMDCTF2017-verilog-2-wp](../raw/hardware-embedded/UMDCTF2017-verilog-2-wp.md)

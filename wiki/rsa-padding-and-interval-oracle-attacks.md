@@ -4,7 +4,8 @@ tags: [crypto, rsa, padding-oracle, interval-oracle, adaptive-query]
 skills: [ctf-crypto]
 raw:
   - ../raw/crypto/rsa-specialized-structures-and-oracles.md
-updated: 2026-07-27
+  - ../raw/crypto/UMDCTF2026-no-brainrot-allowed-wp.md
+updated: 2026-07-28
 ---
 
 # RSA Padding and Interval Oracle Attacks
@@ -53,3 +54,4 @@ updated: 2026-07-27
 ## 原始资料
 
 - [rsa-specialized-structures-and-oracles.md](../raw/crypto/rsa-specialized-structures-and-oracles.md)
+- [UMDCTF2026-no-brainrot-allowed-wp](../raw/crypto/UMDCTF2026-no-brainrot-allowed-wp.md)

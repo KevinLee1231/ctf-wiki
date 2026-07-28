@@ -4,7 +4,8 @@ tags: [pentest, privesc, linux, credentials, misconfiguration]
 skills: [ctf-pentest]
 raw:
   - ../raw/pentest/linux-privesc.md
-updated: 2026-07-27
+  - ../raw/pentest/0xGame2025-week4-ezHack-wp.md
+updated: 2026-07-28
 ---
 
 # Local Privesc Misconfiguration and Credential Pivot
@@ -53,3 +54,4 @@ updated: 2026-07-27
 ## 原始资料
 
 - [linux-privesc.md](../raw/pentest/linux-privesc.md)
+- [0xGame2025-week4-ezHack-wp](../raw/pentest/0xGame2025-week4-ezHack-wp.md)

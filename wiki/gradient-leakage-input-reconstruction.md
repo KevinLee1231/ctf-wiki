@@ -4,7 +4,7 @@ tags: [ai-ml, gradient-leakage, model-inversion, milp, technique]
 skills: [ctf-ai-ml]
 raw:
   - ../raw/ai-ml/UMDCTF2026-french-baguette-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Gradient Leakage Input Reconstruction
@@ -52,7 +52,7 @@ updated: 2026-07-27
 ## 关联技巧
 
 - [ml-model-inference-extraction-and-weight-analysis.md](ml-model-inference-extraction-and-weight-analysis.md)
-- [linear-model-input-lattice-recovery.md](linear-model-input-lattice-recovery.md)
+- [linear-model-discrete-input-recovery.md](linear-model-discrete-input-recovery.md)
 - [linear-model-parameter-recovery.md](linear-model-parameter-recovery.md)
 - [ai-ml-tooling.md](ai-ml-tooling.md)
 

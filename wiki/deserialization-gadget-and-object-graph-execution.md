@@ -5,7 +5,8 @@ skills: [ctf-web]
 raw:
   - ../raw/web/php-java-python-deserialization.md
   - ../raw/web/sqli-upload-deser-and-command-rce.md
-updated: 2026-07-27
+  - ../raw/web/D3CTF2021-pool-calc-wp.md
+updated: 2026-07-28
 ---
 
 # Deserialization Gadget and Object-Graph Execution
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [php-java-python-deserialization.md](../raw/web/php-java-python-deserialization.md)
 - [sqli-upload-deser-and-command-rce.md](../raw/web/sqli-upload-deser-and-command-rce.md)
+- [D3CTF2021-pool-calc-wp](../raw/web/D3CTF2021-pool-calc-wp.md)

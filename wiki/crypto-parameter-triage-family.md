@@ -2,7 +2,7 @@
 type: family
 tags: [crypto, family, triage]
 skills: [ctf-crypto]
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Crypto Parameter and Oracle Triage
@@ -135,7 +135,8 @@ updated: 2026-07-27
 |---|---|
 | RSA 小指数、共模、广播或相关消息关系 | [rsa-low-exponent-and-related-message-attacks.md](rsa-low-exponent-and-related-message-attacks.md) |
 | 有界未知、partial key/nonce 或小根关系需要格 | [lattice-small-root-and-partial-leakage.md](lattice-small-root-and-partial-leakage.md) |
-| nonce 重用、点验证或小子群缺陷泄露标量 | [signature-nonce-and-subgroup-failures.md](signature-nonce-and-subgroup-failures.md) |
+| 签名 nonce 重用、偏置或部分泄露 | [signature-nonce-reuse-and-partial-leakage.md](signature-nonce-reuse-and-partial-leakage.md) |
+| 未验证点、无效曲线或小子群泄露秘密标量 | [invalid-curve-and-small-subgroup-attacks.md](invalid-curve-and-small-subgroup-attacks.md) |
 
 ## 常见陷阱
 

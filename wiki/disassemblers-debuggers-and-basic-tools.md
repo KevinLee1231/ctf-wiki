@@ -4,7 +4,7 @@ tags: [reverse, tooling, disassembler, debugger]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/disassemblers-debuggers-and-basic-tools.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Disassemblers, Debuggers and Basic Tools
@@ -58,7 +58,7 @@ updated: 2026-07-27
 - [reverse-first-pass-workflow-and-debugging.md](reverse-first-pass-workflow-and-debugging.md)
 - [anti-analysis.md](anti-analysis.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
-- [embedded-python-pyd-custom-aes.md](embedded-python-pyd-custom-aes.md)
+- [cython-and-python-extension-checker-recovery.md](cython-and-python-extension-checker-recovery.md)
 
 ## 来自 WP 的案例索引
 

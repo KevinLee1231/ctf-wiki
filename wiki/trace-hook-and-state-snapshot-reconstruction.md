@@ -5,7 +5,8 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/runtime-patching-oracles-and-tracing.md
   - ../raw/reverse/signal-trace-and-packed-anti-analysis.md
-updated: 2026-07-27
+  - ../raw/reverse/NCTF2026-hook-my-secret-wp.md
+updated: 2026-07-28
 ---
 
 # Trace, Hook and State-Snapshot Reconstruction
@@ -48,10 +49,11 @@ updated: 2026-07-27
 ## 关联技巧
 
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
-- [signal-trace-and-packed-anti-analysis.md](signal-trace-and-packed-anti-analysis.md)
+- [anti-analysis.md](anti-analysis.md)
 - [anti-debug-self-check-and-environment-bypass.md](anti-debug-self-check-and-environment-bypass.md)
 
 ## 原始资料
 
 - [runtime-patching-oracles-and-tracing.md](../raw/reverse/runtime-patching-oracles-and-tracing.md)
 - [signal-trace-and-packed-anti-analysis.md](../raw/reverse/signal-trace-and-packed-anti-analysis.md)
+- [NCTF2026-hook-my-secret-wp](../raw/reverse/NCTF2026-hook-my-secret-wp.md)

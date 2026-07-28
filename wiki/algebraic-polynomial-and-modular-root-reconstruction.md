@@ -5,7 +5,8 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/number-theory-and-algebra-attacks.md
   - ../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md
-updated: 2026-07-27
+  - ../raw/crypto/0xGame2025-week2-PolyRSA-wp.md
+updated: 2026-07-28
 ---
 
 # Algebraic Polynomial and Modular-Root Reconstruction
@@ -55,3 +56,4 @@ updated: 2026-07-27
 
 - [number-theory-and-algebra-attacks.md](../raw/crypto/number-theory-and-algebra-attacks.md)
 - [exotic-secret-sharing-rabin-and-polynomials.md](../raw/crypto/exotic-secret-sharing-rabin-and-polynomials.md)
+- [0xGame2025-week2-PolyRSA-wp](../raw/crypto/0xGame2025-week2-PolyRSA-wp.md)

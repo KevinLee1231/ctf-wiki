@@ -5,7 +5,8 @@ skills: [ctf-crypto]
 raw:
   - ../raw/crypto/mt-lcg-and-seed-recovery.md
   - ../raw/crypto/prng-z3-lcg-and-timing-attacks.md
-updated: 2026-07-27
+  - ../raw/crypto/VNCTF2026-numberguesser-wp.md
+updated: 2026-07-28
 ---
 
 # Linear PRNG State and Seed Recovery
@@ -56,3 +57,4 @@ updated: 2026-07-27
 
 - [mt-lcg-and-seed-recovery.md](../raw/crypto/mt-lcg-and-seed-recovery.md)
 - [prng-z3-lcg-and-timing-attacks.md](../raw/crypto/prng-z3-lcg-and-timing-attacks.md)
+- [VNCTF2026-numberguesser-wp](../raw/crypto/VNCTF2026-numberguesser-wp.md)

@@ -5,7 +5,9 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/network-covert-auth-and-reassembly.md
   - ../raw/forensics/pcap-protocol-credential-recovery.md
-updated: 2026-07-27
+  - ../raw/forensics/UMDCTF2017-leetfiltration-wp.md
+  - ../raw/forensics/WMCTF2023-oversharing-wp.md
+updated: 2026-07-28
 ---
 
 # Protocol Stream Reassembly and Credential Extraction
@@ -49,9 +51,11 @@ PCAP/日志中应用对象、凭据、token 或文件被 TCP 分段、重传、�
 
 - [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)
 - [network-covert-auth-and-reassembly.md](network-covert-auth-and-reassembly.md)
-- [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md)
+- [dns-tunnel-and-label-reassembly.md](dns-tunnel-and-label-reassembly.md)
 
 ## 原始资料
 
 - [network-covert-auth-and-reassembly.md](../raw/forensics/network-covert-auth-and-reassembly.md)
 - [pcap-protocol-credential-recovery.md](../raw/forensics/pcap-protocol-credential-recovery.md)
+- [UMDCTF2017-leetfiltration-wp](../raw/forensics/UMDCTF2017-leetfiltration-wp.md)
+- [WMCTF2023-oversharing-wp](../raw/forensics/WMCTF2023-oversharing-wp.md)

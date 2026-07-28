@@ -4,7 +4,7 @@ tags: [osint, family, public-web, dns, archive, public-index]
 skills: [ctf-osint]
 raw:
   - ../raw/osint/web-and-dns.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Web and DNS OSINT
@@ -45,7 +45,9 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | DNS/WHOIS/CT/archive/repo/document metadata 扩展公开证据 | [public-record-dns-whois-and-archive-pivoting.md](public-record-dns-whois-and-archive-pivoting.md) |
-| zone transfer、记录、TTL/rebinding 或 DNS tunnel 决定路线 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| 权威记录、zone transfer 与子域关系扩展资产 | [dns-record-enumeration-and-zone-transfer.md](dns-record-enumeration-and-zone-transfer.md) |
+| 校验/连接的二次解析、TTL 或 cache 差异形成 rebinding | [dns-resolution-rebinding-and-cache-differentials.md](dns-resolution-rebinding-and-cache-differentials.md) |
+| 抓包中 DNS label/响应承载分块数据 | [dns-tunnel-and-label-reassembly.md](dns-tunnel-and-label-reassembly.md) |
 | 账号、公开媒体和跨平台标识用于确认实体归属 | [cross-platform-account-and-public-media-correlation.md](cross-platform-account-and-public-media-correlation.md) |
 
 ## 合并与拆分结论

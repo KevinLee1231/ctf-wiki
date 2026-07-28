@@ -4,7 +4,8 @@ tags: [web, jwt, auth, key-confusion, kid, jku]
 skills: [ctf-web]
 raw:
   - ../raw/web/auth-jwt.md
-updated: 2026-07-27
+  - ../raw/web/ACTF2023-easylatex-wp.md
+updated: 2026-07-28
 ---
 
 # Auth Token Key and Lookup Confusion
@@ -53,3 +54,4 @@ JWT/JWE/签名 token 的算法、密钥类型或 key lookup 由攻击者可控 h
 ## 原始资料
 
 - [auth-jwt.md](../raw/web/auth-jwt.md)
+- [ACTF2023-easylatex-wp](../raw/web/ACTF2023-easylatex-wp.md)

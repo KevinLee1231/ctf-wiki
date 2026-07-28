@@ -4,7 +4,8 @@ tags: [malware, reverse, script, deobfuscation, staged-payload]
 skills: [ctf-malware, ctf-reverse]
 raw:
   - ../raw/malware/scripts-and-obfuscation.md
-updated: 2026-07-27
+  - ../raw/malware/UMDCTF2025-suspicious-button-wp.md
+updated: 2026-07-28
 ---
 
 # Script Deobfuscation and Staged-Payload Recovery
@@ -53,3 +54,4 @@ PowerShell/JavaScript/VBA/SVG/包脚本通过字符串拼接、编码、动态�
 ## 原始资料
 
 - [scripts-and-obfuscation.md](../raw/malware/scripts-and-obfuscation.md)
+- [UMDCTF2025-suspicious-button-wp](../raw/malware/UMDCTF2025-suspicious-button-wp.md)

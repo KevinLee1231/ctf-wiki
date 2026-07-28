@@ -5,7 +5,7 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/packers-deobfuscation-and-debug-automation.md
   - ../raw/reverse/WMCTF2025-videoplayer-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Packers, Deobfuscation and Debug Automation
@@ -73,12 +73,12 @@ updated: 2026-07-27
 
 ## 合并与拆分结论
 
-该页不再作为 technique 使用。壳、商业虚拟化、控制流混淆、动态解密、patch 和 trace 自动化的共同点是“先找到真实逻辑边界”，但后续路线依赖保护类型分叉。具体单点模式应落到 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)、[vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) 或工具页；本页只保留分流和降维判断。
+该页不再作为 technique 使用。壳、商业虚拟化、控制流混淆、动态解密、patch 和 trace 自动化的共同点是“先找到真实逻辑边界”，但后续路线依赖保护类型分叉。具体单点模式应落到 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)、[staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md)、[runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md) 或工具页；本页只保留分流和降维判断。
 
 ## 关联技巧
 
 - [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
-- [vmp-client-server-smc-rc4-recovery.md](vmp-client-server-smc-rc4-recovery.md)
+- [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md)
 - [anti-analysis.md](anti-analysis.md)
 - [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)
 - [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)

@@ -4,7 +4,7 @@ tags: [cross-category, family, dns, rebinding, tunneling, enumeration]
 skills: [ctf-web, ctf-forensics, ctf-osint, ctf-pentest, ctf-malware]
 raw:
   - ../raw/pentest/dns.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # DNS Exploitation Techniques
@@ -47,7 +47,9 @@ updated: 2026-07-27
 
 | 首轮判断 | 具体 technique |
 |---|---|
-| AXFR/记录/TTL/rebinding/tunnel 本身决定证据路径 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| 权威记录、AXFR/IXFR 或子域枚举决定资产边界 | [dns-record-enumeration-and-zone-transfer.md](dns-record-enumeration-and-zone-transfer.md) |
+| PCAP 中 DNS label/响应承载分块数据 | [dns-tunnel-and-label-reassembly.md](dns-tunnel-and-label-reassembly.md) |
+| 校验与连接二次解析、TTL/cache 差异决定 SSRF 路线 | [dns-resolution-rebinding-and-cache-differentials.md](dns-resolution-rebinding-and-cache-differentials.md) |
 | DNS/WHOIS/CT/Archive 用于公开资产和历史 pivot | [public-record-dns-whois-and-archive-pivoting.md](public-record-dns-whois-and-archive-pivoting.md) |
 | PCAP 中 DNS label/会话需要排序、去 framing 和重组 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
 

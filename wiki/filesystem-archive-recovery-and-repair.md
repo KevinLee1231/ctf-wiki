@@ -6,7 +6,7 @@ raw:
   - ../raw/forensics/disk-recovery.md
   - ../raw/forensics/WMCTF2025-githacker-wp.md
   - ../raw/crypto/SUCTF2026-chaosWP.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Filesystem and Archive Recovery Repair
@@ -15,7 +15,7 @@ updated: 2026-07-27
 
 本页是文件系统与归档恢复 family。题目核心是从磁盘镜像中的文件系统、压缩包、损坏容器、删除文件、嵌套归档或结构化文件中恢复数据。
 
-边界在于“文件/归档层恢复”：如果问题还停留在证据载体选择、VM/container/cloud 层级判断，先转 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)；如果需要处理分区表、RAID、VMDK sparse、minidump/core dump 或内存 key carving，转 [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)。PCAP 转 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)，图片/音频隐写转对应媒体页。
+边界在于“文件/归档层恢复”：如果问题还停留在证据载体选择、分区表、RAID、VMDK sparse、minidump/core dump、VM/container/cloud 层级判断或内存 key carving，先转 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。PCAP 转 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)，图片/音频隐写转对应媒体页。
 
 ## 识别信号
 
@@ -56,7 +56,8 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | inode/MFT/journal/unallocated metadata 可恢复删除文件 | [filesystem-metadata-and-deleted-artifact-recovery.md](filesystem-metadata-and-deleted-artifact-recovery.md) |
-| central directory/流边界/CRC/ZipCrypto 需要修复 | [archive-repair-and-known-plaintext-recovery.md](archive-repair-and-known-plaintext-recovery.md) |
+| central directory、header、流边界或成员 offset 损坏 | [archive-structure-repair-and-stream-carving.md](archive-structure-repair-and-stream-carving.md) |
+| ZipCrypto 有精确明文/压缩流可用于恢复内部 key | [zipcrypto-known-plaintext-recovery.md](zipcrypto-known-plaintext-recovery.md) |
 | RAID/VMDK/分卷/损坏 partition 需先重建底层映射 | [raid-vm-disk-and-fragmented-volume-reconstruction.md](raid-vm-disk-and-fragmented-volume-reconstruction.md) |
 
 ## 常见陷阱
@@ -70,7 +71,7 @@ updated: 2026-07-27
 
 - [file-triage-archives-and-one-liners.md](file-triage-archives-and-one-liners.md)
 - [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)
-- [filesystems-memory-dumps-and-raid.md](filesystems-memory-dumps-and-raid.md)
+- [raid-vm-disk-and-fragmented-volume-reconstruction.md](raid-vm-disk-and-fragmented-volume-reconstruction.md)
 - [linux-git-browser-and-container-forensics.md](linux-git-browser-and-container-forensics.md)
 - [cross-domain-forensics-technique-map.md](cross-domain-forensics-technique-map.md)
 

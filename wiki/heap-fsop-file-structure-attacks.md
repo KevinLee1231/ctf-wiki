@@ -4,7 +4,7 @@ tags: [pwn, family, heap, fsop, file-structure, glibc]
 skills: [ctf-pwn]
 raw:
   - ../raw/pwn/heap-fsop-file-structure-attacks.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Heap FSOP and FILE Structure Attacks
@@ -43,7 +43,8 @@ updated: 2026-07-27
 
 | 首轮判断 | 具体 technique |
 |---|---|
-| FILE/wide-data/exit/TLS 结构提供泄露或控制流 | [file-structure-and-exit-handler-control-flow.md](file-structure-and-exit-handler-control-flow.md) |
+| FILE/wide-data/_IO_list_all 提供泄露或控制流 | [glibc-file-structure-and-fsop.md](glibc-file-structure-and-fsop.md) |
+| `__exit_funcs`、atexit 或 TLS destructor 提供终止触发 | [exit-handler-and-tls-destructor-hijacking.md](exit-handler-and-tls-destructor-hijacking.md) |
 | chunk/bin metadata 先提供可写目标或地址泄露 | [heap-metadata-and-bin-list-corruption.md](heap-metadata-and-bin-list-corruption.md) |
 | 格式化字符串可先覆盖 FILE 指针/字段或获取地址 | [format-string.md](format-string.md) |
 

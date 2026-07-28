@@ -5,7 +5,7 @@ skills: [ctf-forensics]
 raw:
   - ../raw/forensics/network-covert-auth-and-reassembly.md
   - ../raw/forensics/WMCTF2025-voice-hacker-wp.md
-updated: 2026-07-27
+updated: 2026-07-28
 ---
 
 # Network Covert Channels, Auth and Reassembly
@@ -52,7 +52,7 @@ updated: 2026-07-27
 | 首轮判断 | 具体 technique |
 |---|---|
 | TCP/HTTP/WebSocket/DNS 分段需按会话和序号重组 | [protocol-stream-reassembly-and-credential-extraction.md](protocol-stream-reassembly-and-credential-extraction.md) |
-| DNS label/TTL/zone/rebinding 是隐蔽信道或解析关键 | [dns-zone-transfer-tunnel-and-resolution-analysis.md](dns-zone-transfer-tunnel-and-resolution-analysis.md) |
+| DNS label/响应中存在序号、编码和分块载荷 | [dns-tunnel-and-label-reassembly.md](dns-tunnel-and-label-reassembly.md) |
 | 响应差异/timing 先要建成可重复 oracle | [adaptive-oracle-response-modeling.md](adaptive-oracle-response-modeling.md) |
 
 ## 合并与拆分结论
