@@ -4,7 +4,7 @@ tags: [reverse, tooling, emulation, tracing, instrumentation]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/qiling-triton-pin-and-ldpreload.md
-updated: 2026-07-06
+updated: 2026-07-28
 ---
 
 # Qiling, Triton, Pin and LD_PRELOAD
@@ -15,7 +15,7 @@ updated: 2026-07-06
 
 ## 触发证据
 
-- 普通 GDB/Ghidra/Frida 已经能定位目标片段，但运行依赖 rootfs、syscall、文件路径、动态库、时间/随机源、跨架构环境或黑盒计数反馈。
+- 普通 IDA Pro MCP/GDB/Frida 已经能定位目标片段，但运行依赖 rootfs、syscall、文件路径、动态库、时间/随机源、跨架构环境或黑盒计数反馈。
 - 需要在可控环境中重放真实代码，而不是只做静态伪代码理解；已有最小输入、目标函数、目标分支或 side-channel 指标。
 - raw 证据显示失败来自环境不一致、系统调用缺失、反调试结果、库函数返回值、输入计数差异或动态链接行为。
 - 如果只是想 patch 一个函数返回值或断最终比较点，优先使用 [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md) 或 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)，不要直接上重型模拟。

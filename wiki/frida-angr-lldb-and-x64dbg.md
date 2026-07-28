@@ -4,7 +4,7 @@ tags: [reverse, tooling, instrumentation, symbolic-execution, debugger]
 skills: [ctf-reverse, ctf-mobile]
 raw:
   - ../raw/reverse/frida-angr-lldb-and-x64dbg.md
-updated: 2026-07-11
+updated: 2026-07-28
 ---
 
 # Frida, angr, lldb and x64dbg
@@ -16,7 +16,7 @@ updated: 2026-07-11
 ## 稳定调用方式
 
 - Frida：先确认进程、架构、模块加载时机和 hook 点，再用 `frida -f ./target -l hook.js --no-pause` 或移动端 attach；脚本里优先枚举模块/导出后再 patch 具体函数。
-- angr：先从 Ghidra/r2/GDB 得到 `find`、`avoid`、输入长度和字符集约束，再写最小 `angr.Project(...).factory.full_init_state()` 路线；库函数、复杂校验和环境输入能 hook 就 hook。
+- angr：先从 IDA Pro MCP/r2/GDB 得到 `find`、`avoid`、输入长度和字符集约束，再写最小 `angr.Project(...).factory.full_init_state()` 路线；库函数、复杂校验和环境输入能 hook 就 hook。
 - lldb/x64dbg：先固定平台、位数、ASLR/PIE 基址和断点地址；用条件断点或脚本化断点记录寄存器/内存，不把长单步当作分析结果。
 - 调用前必须有静态或动态证据支撑 hook/符号执行目标；如果还没有入口和比较点，先回 [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)。
 
@@ -24,7 +24,7 @@ updated: 2026-07-11
 
 | 工具 | 触发信号 | 优先解决的问题 | 失败后转向 |
 |---|---|---|---|
-| Frida | 程序可运行，但关键值在运行时生成；需要 hook 函数、改返回值、扫内存或绕过反调试 | 动态插桩、函数替换、Stalker trace、移动端 Java/native 桥接 | hook 点不稳定时先回到 GDB/r2/Ghidra 定位；系统环境依赖重时转 Qiling。 |
+| Frida | 程序可运行，但关键值在运行时生成；需要 hook 函数、改返回值、扫内存或绕过反调试 | 动态插桩、函数替换、Stalker trace、移动端 Java/native 桥接 | hook 点不稳定时先回到 IDA Pro MCP/GDB/r2 定位；IDA 不可用时 Ghidra 也可作普通静态辅助，系统环境依赖重时转 Qiling。 |
 | r2frida | 已在 Radare2 中定位函数，希望直接联动运行时观察 | 把静态地址、符号和 Frida hook 串起来 | 若地址随机化或加载时机复杂，先用 Frida 枚举模块和导出。 |
 | angr | 输入空间大、分支条件清晰、目标/避开地址明确 | 自动路径探索、约束恢复、hook 掉复杂库函数 | 路径爆炸时收紧输入长度/字符集，或改用动态 trace 找关键分支。 |
 | lldb | Mach-O、iOS/macOS、LLVM 生态或题目明确给出 lldb 线索 | 平台调试、断点脚本、寄存器和内存观察 | 若是移动端 app，通常要和 Frida/Jailbreak 环境配合。 |

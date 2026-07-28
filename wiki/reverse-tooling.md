@@ -1,8 +1,8 @@
 ---
 type: tooling
-tags: [reverse, tooling, tools, environment]
-skills: [ctf-reverse, ctf-mobile]
-updated: 2026-07-11
+tags: [reverse, tooling, tools, environment, ida, idalib, ghidra]
+skills: [ctf-reverse, ctf-mobile, ctf-malware, ctf-pwn, ctf-hardware-embedded]
+updated: 2026-07-28
 ---
 
 # Reverse Tooling
@@ -13,7 +13,8 @@ updated: 2026-07-11
 
 ### 入口选择
 
-- 普通 binary 首选 Ghidra MCP；Ghidra 未启动时只能得到有限桥接能力，启动并打开项目后再使用完整分析工具。
+- 普通 native binary 首选 IDA Pro MCP（`idalib`）：先发现或打开会话，再用一次全局 survey 建立函数、字符串、导入和调用图画像。
+- Ghidra MCP 降为普通静态分析工具；IDA 不可用、处理器/文件格式支持不合适、需要显式 raw language 导入或已有 Ghidra 项目时再切换。
 - 首轮仍先用 `file`、`strings`、`capa`、`objdump/readelf` 定性，不要直接进入重型符号执行。
 - Python bytecode、Android、firmware、跨架构和 Windows/.NET 各有专用入口，按本页路径调用。
 
@@ -25,7 +26,8 @@ updated: 2026-07-11
 
 ### 补工具经验的触发条件
 
-- raw 暴露 Ghidra MCP 连接、函数命名、手动 create function 或 trace 保存的稳定流程。
+- raw 暴露 IDA Pro MCP 的会话发现、数据库打开、survey、反编译、类型恢复或保存流程。
+- raw 暴露 Ghidra MCP 的实例连接、显式 language 导入或既有项目协作流程。
 - Mobile/game 题需要 IL2CPP metadata、Unity assets、Android native/Java 交叉工具链。
 - VM/obfuscation 题需要 handler table、dispatcher、trace slicing 或 IR lifting 的可复用步骤。
 
@@ -35,9 +37,10 @@ updated: 2026-07-11
 
 | 工具 | 为什么放在首轮 |
 |---|---|
-| Ghidra MCP | 普通二进制的主分析入口 |
+| IDA Pro MCP（`idalib`） | 普通 native binary 的首选分析入口；一次 survey 即可得到全局画像 |
 | `file` / `strings` | 先确认载体类型和明显线索 |
 | `capa` | 未知 binary 先看能力画像 |
+| Ghidra MCP | IDA 不适用时的普通静态分析备选 |
 | `/home/kali/pycdc/build/pycdc` | 一旦确认是 `.pyc`，它就是最快路径；当前不在 `PATH` 中 |
 
 ### 专项按需
@@ -50,27 +53,47 @@ updated: 2026-07-11
 
 ### 当前未装 / 建议按需补装
 
-- 当前没有明显基础缺口。RE 这里真正更重要的是保持 Ghidra MCP 的连接流程和项目能力说明准确。
+- 当前没有明显基础缺口。更重要的是保持 IDA Pro MCP 的会话生命周期、首轮 survey 和保存边界准确，并把 Ghidra 维持为可替换的普通工具。
 
 ## 失败信号与转向
 
-- Ghidra/反编译伪代码不可读：回到汇编、字符串、交叉引用和运行时断点；若是 VM/壳/SMC，转 [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) 或 [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)。
+- IDA 会话、Hex-Rays 或自动分析不可用：先保留 `file`/字符串/导入/汇编事实；普通格式可转 Ghidra MCP，运行时生成代码则直接转动态 dump，不要只反复更换反编译器。
+- IDA/Ghidra 伪代码都不可读：回到汇编、字符串、交叉引用和运行时断点；若是 VM/壳/SMC，转 [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) 或 [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)。
 - 程序一运行就退出、检测调试器或时间环境：先转 [anti-analysis.md](anti-analysis.md)，不要继续换反编译器。
 - 只差最终输入但比较点可断：转 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)，优先抓明文 buffer 或最终比较参数。
 - 目标依赖完整系统调用、rootfs、跨架构环境或固件：转 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md) 或 [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)。
 
 ## 详细清单
 
-RE 优先使用 **Ghidra MCP**。
+RE 优先使用 **IDA Pro MCP（`idalib`）**。
 
-- Ghidra 未启动时，桥接层通常只暴露少量静态工具；先检查是否存在可连接实例。
-- 启动 Ghidra 并打开项目后，再连接实例进入完整分析模式，随后才使用反编译、交叉引用、调试与 trace 等项目级能力。
+### IDA Pro MCP（首选）
 
-### Ghidra MCP（首选）
+稳定调用顺序：
 
-| 工具 | 功能 | 调用方式 |
-|---|---|---|
-| Ghidra MCP | 反编译/函数分析/交叉引用/调试/trace | 先用 `list_instances` 检查实例；Ghidra 已启动时再 `connect_instance`，连接后使用完整分析工具 |
+1. `idb_list`：发现已经被 MCP 接管的 GUI/worker 会话；不要猜测 database/session id。
+2. `idb_open`：没有目标会话时按绝对路径打开 binary。自动化默认可用 headless；需要沿用当前 GUI 数据库时选择 GUI 模式，并按需启用自动分析、Hex-Rays 和缓存。
+3. `survey_binary`：作为打开后的首个分析调用；普通目标用 `standard`，函数超过约一万时用 `minimal`，不要先分别拉全量函数、导入和字符串。
+4. 根据 survey 证据再用 `decompile`、`analyze_component`、交叉引用、重命名和类型恢复工具；不要无目标地批量反编译。
+5. 只有确实修改数据库且需要持久化时才调用 `idb_save`；GUI 会话保存到当前数据库，headless 会话才适合打包为独立 `.i64/.idb`。
+
+| 状态 | 处理 |
+|---|---|
+| `idb_list` 没有目标会话 | 用 `idb_open` 打开绝对路径，不把“无 GUI”误判为 MCP 不可用。 |
+| `idb_open` 或 Hex-Rays 初始化失败 | 保留静态首检结果；尝试不依赖伪代码的汇编/交叉引用，或转 Ghidra MCP。 |
+| raw firmware 架构无法可靠识别 | 先确认架构、端序和装载基址；需要显式 language 导入时可转 Ghidra。 |
+| 大型 binary survey 输出过重 | 改用 `detail_level="minimal"`，再围绕少量候选函数深挖。 |
+
+### Ghidra MCP（普通工具）
+
+- 先用 `list_instances` 检查实例；需要项目级分析时再 `connect_instance`。
+- 连接成功后工具列表会动态扩展，随后才调用反编译、交叉引用、导入或调试能力。
+- 没有实例时，不把静态桥接工具误认为已经进入项目；需要导入 raw firmware 时显式给出 language/编译器规格。
+
+| 适用情况 | 调用方式 |
+|---|---|
+| IDA 不可用、处理器支持不合适或已有 Ghidra 项目 | `list_instances` → `connect_instance` → 项目分析工具 |
+| raw firmware 需要显式 language 导入 | 连接项目后使用 `import_file`，明确 `language`，再等待分析完成 |
 
 ### Python 包（ctf-tools conda）
 
