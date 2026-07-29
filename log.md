@@ -1991,3 +1991,13 @@
 - Blockchain 与 Cloud/Infra 当前没有独立 tooling 页：其专项 CLI/API 继续以对应 skill 的“常用工具”为入口，只有实际转入 Crypto/Web/Pentest 分支后才读取这些方向的 tooling，避免为了形式统一制造错误工具边界。
 - 修改前备份为 `backups/pre-skill-wiki-routing-20260728-225409.zip`，包含当前 Wiki、`index.md`、`log.md`、根维护文档和 16 个仓库外 skill，共 248 个条目，大小 885698 字节，SHA-256 为 `58a9821e22d78a53bd50f7c4a1b60e91deceb2dada653f485f223c4187dfe07`。按最新三份策略删除 `pre-wiki-full-ingest-20260727-221458.zip`，未保留展开备份目录。
 - 校验结果：14 个专项 skill 均具备“核心入口 / 常见信号下一跳”，`ctf-solve-challenge` 与 `ctf-writeup` 的查询边界单独成立；16 个 skill 共 136 条知识库文件引用、99 个唯一目标，断链为 0。IDA Pro MCP 的 `idb_list` 与 Ghidra MCP 的 `list_instances` 均可调用，当前都没有活动分析会话；5 个涉及 native 静态分析的 skill 均先列 IDA 且把全部 Ghidra 表述为普通备选。全库 228 篇 wiki 仍为 family 99、technique 116、tooling 13，全部被 index 覆盖；99 篇 family 的路由章节均直连至少 3 篇 technique，116 篇 technique 均有 wiki 入链，13 篇 tooling 的触发、调用、失败与转向字段完整。1295 篇 active Markdown 在排除 fenced/inline code 示例后解析 5633 条本地链接与 576 条图片引用，断链为 0；3 份 ZIP 可逐条读取，Markdown 表格和 Git whitespace 检查均通过。
+
+## 2026-07-29 — R3CTF2026 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善并通过证据审查的 26 篇 R3CTF2026 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `R3CTF2026-<challenge>-wp.md`，文件名、资源目录和图片文件只包含英文字母、数字与必要连字符，Markdown 一级标题继续保留题目的原始大小写、空格和撇号。本轮只归档已有成稿，不为前一阶段因证据不足而跳过的 8 题补写内容。
+- 按决定性主障碍归档为 Cloud/Infra 1 篇、Crypto 7 篇、Forensics 1 篇、Hardware/Embedded 2 篇、Pwn 11 篇、Reverse 3 篇、Stego 1 篇。分类复核后无需迁移：`NetShare` 由 Kubernetes EndpointSlice、NetworkPolicy 与 CNI IPAM 组合语义主导；`Tsuki's Rhythm Game` 以多类数字证据和攻击时间线恢复为终点；`Time Capsule` 以跨载体隐藏载荷重组为主；`Mafuyuuuuu`、`r3chat` 与 `Whisper` 虽有 Web、Electron 或 Android 外壳，但决定性步骤仍是原生利用与执行边界突破。
+- 将 2 个必要视觉资源目录及 3 张图片一并归档，目录统一与 Markdown basename 相同，图片使用 `metamask-recovery-phrase.png`、`piet-password-program.png` 与 `voxel-qr-faces.png` 等语义化名称。源目录名已经符合归档规范，因此保持同名移动，3 条相对图片链接在目标位置无需文本替换并已逐条解析验证。
+- 目标端 29 个文件逐一做 SHA-256 对照且完全一致；事件级 Markdown、链接与资源预验收通过后，将源 `wp` 下 26 篇 Markdown 和 2 个资源目录移入 Windows 回收站。源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：Cloud/Infra 由 6 增至 7、Crypto 由 216 增至 223、Forensics 由 61 增至 62、Hardware/Embedded 由 8 增至 10、Pwn 由 189 增至 200、Reverse 由 210 增至 213、Stego 由 50 增至 51，raw 总数由 1063 增至 1089；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/R3CTF2026-wp-before-archive-20260729-131825.zip`，包含 29 个文件，大小 910166 字节，SHA-256 为 `d1035f5c492ec325ebc2808c982222ea87ce76ba77bc1ed0facf75305154ab13`；ZIP 内全部条目均已读取验证。
+- 校验结果：26 篇 R3CTF2026 WP 的三段结构、代码围栏、数学公式定界、UTF-8、目标命名和 3 条图片引用均无异常；2 个资源目录均有同 basename Markdown，事件内资源无空目录、无零引用文件。全库 1321 篇 active Markdown 中解析出 5636 条本地链接和 579 条图片引用，断链为 0；142 个 raw 资源目录均有同 basename Markdown 且无空目录，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、backups ZIP 约束与源目录清理状态均通过检查。
