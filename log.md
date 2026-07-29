@@ -2001,3 +2001,13 @@
 - `index.md` live raw 统计同步更新：Cloud/Infra 由 6 增至 7、Crypto 由 216 增至 223、Forensics 由 61 增至 62、Hardware/Embedded 由 8 增至 10、Pwn 由 189 增至 200、Reverse 由 210 增至 213、Stego 由 50 增至 51，raw 总数由 1063 增至 1089；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/R3CTF2026-wp-before-archive-20260729-131825.zip`，包含 29 个文件，大小 910166 字节，SHA-256 为 `d1035f5c492ec325ebc2808c982222ea87ce76ba77bc1ed0facf75305154ab13`；ZIP 内全部条目均已读取验证。
 - 校验结果：26 篇 R3CTF2026 WP 的三段结构、代码围栏、数学公式定界、UTF-8、目标命名和 3 条图片引用均无异常；2 个资源目录均有同 basename Markdown，事件内资源无空目录、无零引用文件。全库 1321 篇 active Markdown 中解析出 5636 条本地链接和 579 条图片引用，断链为 0；142 个 raw 资源目录均有同 basename Markdown 且无空目录，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、backups ZIP 约束与源目录清理状态均通过检查。
+
+## 2026-07-29 — R3CTF2025 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善并通过证据审查的 24 篇 R3CTF2025 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `R3CTF2025-<challenge>-wp.md`，文件名、资源目录和图片文件只包含英文字母、数字与必要连字符，Markdown 一级标题继续保留题目的原始大小写和空格。本轮只归档已有成稿，不为前一阶段因证据不足而跳过的 19 题补写内容。
+- 按决定性主障碍归档为 AI/ML 1 篇、Blockchain 3 篇、Crypto 8 篇、OSINT 1 篇、Pwn 2 篇、Reverse 4 篇、Stego 1 篇、Web 4 篇。分类复核后无需迁移：`r3craft` 与 `r4craft` 以 Java 插件和 GrimAC 行为还原为主，归 Reverse；`The R3 Pig Problem` 以 TCP 时间隐蔽信道提取为主，归 Stego；`R3GIRL in Paris` 的决定性证据来自公开来源关联，归 OSINT。
+- 将 `R3CTF2025-R3GIRL-in-Paris-wp/` 资源目录及其中的 `church-mural.png` 一并归档。源目录、Markdown basename 和语义化图片名已经符合规范，因此保持同名移动，正文中的相对图片链接无需文本替换，并已在目标位置解析验证。
+- 目标端 25 个文件逐一做 SHA-256 对照且完全一致；事件级 Markdown、链接与资源预验收通过后，将源 `wp` 下 24 篇 Markdown 和 1 个资源目录移入 Windows 回收站。源树剩余文件和同名资源目录均为 0，15 个一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：AI/ML 由 31 增至 32、Blockchain 由 21 增至 24、Crypto 由 223 增至 231、OSINT 由 18 增至 19、Pwn 由 200 增至 202、Reverse 由 213 增至 217、Stego 由 51 增至 52、Web 由 209 增至 213，raw 总数由 1089 增至 1113；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/R3CTF2025-wp-before-archive-20260729-163846.zip`，包含 25 个文件，大小 1295297 字节，SHA-256 为 `54ce280eae1bc6c7295b601b9a7f40965a048f7a212d4634ef58322341717ee4`；ZIP 内全部条目均已读取验证。
+- 校验结果：24 篇 R3CTF2025 WP 的三段结构、代码围栏、数学公式定界、UTF-8、目标命名和图片引用均无异常；资源目录有同 basename Markdown，事件内资源无空目录、无零引用文件。全库 1345 篇 active Markdown 中解析出 5637 条本地链接和 580 条图片引用，断链为 0；143 个 raw 资源目录均有同 basename Markdown 且无空目录，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、backups ZIP 约束与源目录清理状态均通过检查。
