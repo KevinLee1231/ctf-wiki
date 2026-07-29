@@ -2021,3 +2021,13 @@
 - `index.md` live raw 统计同步更新：AI/ML 由 32 增至 33、Blockchain 由 24 增至 26、Cloud/Infra 由 7 增至 8、Crypto 由 231 增至 237、Forensics 由 62 增至 63、OSINT 由 19 增至 20、Pwn 由 202 增至 206、Reverse 由 217 增至 218、Stego 由 52 增至 55、Web 由 213 增至 217，raw 总数由 1113 增至 1137；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/R3CTF2024-wp-before-archive-20260729-183500.zip`，包含 25 个文件，大小 251874 字节，SHA-256 为 `5a7e610832cdb1ff6d2cfc09de0bf5183e2252ccf90730ae5849c20bbfb58e73`；ZIP 内全部条目均已读取验证。
 - 校验结果：24 篇 R3CTF2024 WP 的三段结构、代码围栏、数学公式定界、UTF-8、安全命名和图片引用均无异常；资源目录有同 basename Markdown，事件内资源无空目录、无零引用文件。全库 1369 篇 active Markdown 中解析出 5638 条本地链接和 581 条图片引用，断链为 0；144 个 raw 资源目录均有同 basename Markdown 且无空目录，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、backups ZIP 约束与源目录清理状态均通过检查。
+
+## 2026-07-29 — SekaiCTF2025 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善的 35 篇 SekaiCTF2025 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `SekaiCTF2025-<challenge>-wp.md`，文件名、资源目录和图片文件只包含英文字母、数字与必要连字符，Markdown 一级标题继续保留题目的原始大小写、空格、撇号和 `++` 等特殊字符。
+- 按决定性主障碍归档为 `_unclassified` 3 篇、Blockchain 4 篇、Crypto 8 篇、Mobile 2 篇、Pwn 5 篇、Reverse 6 篇、Web 7 篇。逐篇复核后无需跨类迁移：三道 Nokotan 题分别由局部轮换构造、区间调度 DP 和 2-tree 最短路数据结构主导，继续暂存 `_unclassified`；`Literal Eval` 的终点是重复使用 WOTS 叶子后的签名伪造，归 Crypto；`Discrepancy` 以三套 Pickle 实现的解析语义恢复为目标，归 Reverse；两道 SEKAI Bank 由 Android 证书、组件、Intent 与 URI grant 机制主导，归 Mobile。
+- `I Dream of Genni` 的题面漫画只承载可复制的逐位乘法示例，已将 `39876877 × 9564546 = 381404224402842` 及完整拼接过程转写为文本，不再归档图片。`Alchemy Master` 的 5 张材料依赖图包含节点关系、方向和高亮路径，保留在与 Markdown 同 basename 的资源目录中，并重命名为 `m1-reaction-2210-flow.png`、`m1-reaction-2327-flow.png`、`m5-reaction-2156-flow.png`、`m5-reaction-2355-flow.png` 与 `m5-reaction-2362-flow.png`；5 条 alt 文本同步说明目标材料、反应编号和高亮路径。
+- 目标端 40 个文件逐一做 SHA-256 对照且完全一致；事件级 Markdown、分类、命名、链接和资源预验收通过后，将源 `wp` 下 35 篇 Markdown 与 2 个图片目录移入 Windows 回收站。源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：`_unclassified` 由 6 增至 9、Blockchain 由 26 增至 30、Crypto 由 237 增至 245、Mobile 由 6 增至 8、Pwn 由 206 增至 211、Reverse 由 218 增至 224、Web 由 217 增至 224，raw 总数由 1137 增至 1172；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/SekaiCTF2025-wp-before-archive-20260729-224741.zip`，包含 41 个文件，大小 835788 字节，SHA-256 为 `a0e29411b40b143e2874c5e0550fc19692ffeeee97e398cd4629f42f2a9a78133`；ZIP 内全部条目均已读取验证。
+- 校验结果：35 篇 SekaiCTF2025 WP 的三段结构、代码围栏、数学公式定界、UTF-8/LF、安全命名和 5 条图片引用均无异常；资源目录有同 basename Markdown，事件内无空目录、无零引用文件。全库 1404 篇 active Markdown 中解析出 5643 条本地链接和 586 条图片引用，断链为 0；145 个 raw 资源目录均有同 basename Markdown 且无空目录，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、3 份 backups ZIP、live 统计和源目录清理状态均通过检查。
