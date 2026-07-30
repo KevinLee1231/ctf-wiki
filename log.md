@@ -2074,3 +2074,13 @@
 - `index.md` live raw 统计同步更新：AI/ML 由 34 增至 37、Blockchain 由 39 增至 41、Cloud/Infra 由 9 增至 11、Crypto 由 265 增至 271、Forensics 由 69 增至 72、Pwn 由 227 增至 233、Reverse 由 241 增至 245、Web 由 241 增至 248，raw 总数由 1282 增至 1315；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/SUCTF2025-wp-before-archive-20260730-122443.zip`，包含 34 个文件、未压缩数据 5555631 字节，SHA-256 为 `dc9daa0da2140a5855187bc074a4ff98c18b7071b9d8b94df31512dcc2499e27`；ZIP 内 34 个文件条目均已逐条读取验证。
 - 校验结果：33 篇 SUCTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和图片引用均无异常；赛事资源目录有同 basename Markdown，事件内无空目录、无零引用文件。全库 1547 篇 active Markdown 中解析出 5665 条本地引用和 608 条图片引用，断链为 0；156 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、3 份 backups ZIP、live 统计和源目录清理状态均通过检查。
+
+## 2026-07-30 — L3akCTF2025 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善的 51 篇 L3akCTF2025 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `L3akCTF2025-<challenge>-wp.md`。文件名、资源目录和图片文件只包含英文字母、数字、点号与必要连字符，Markdown 一级标题继续保留题目的原始大小写、空格和特殊字符。
+- 按决定性主障碍归档为 Crypto 7 篇、Forensics 6 篇、Mobile 3 篇、Pwn 9 篇、Reverse 10 篇、Stego 6 篇、Web 10 篇。分类以最小预期解法中的关键障碍为准：Android 组件与平台运行时机制归 Mobile，程序行为恢复归 Reverse，构造执行边界利用归 Pwn，数字证据恢复归 Forensics，隐藏载荷提取归 Stego。
+- 纯代码、终端输出、表格或可复制文字截图均已转写为正文，不再作为图片归档。保留的 4 张图片分别承载 `Wi-Fight A Ghost` 的咖啡馆步行路线、`Puzzles 5` 的最终点阵 flag 画面，以及 `Quantam Exfil` 原始封面与 DCT 系数隐写载荷的视觉对照；图片使用 `fort-collins-cafe-route.png`、`level5-flag-artwork.png`、`original-cover.jpg` 和 `dct-hidden-payload.jpg` 等语义化名称，alt 文本说明画面及其解题意义。3 个资源目录统一改为与 Markdown basename 相同的 `L3akCTF2025-...-wp/`，正文链接同步更新。
+- 目标端 55 个文件均与归档前 ZIP 条目逐一完成 SHA-256 对照。归档完成后，源 `wp` 下文件和嵌套资源目录均为 0，15 个空的一级方向目录作为后续工作骨架保留。
+- `index.md` live raw 统计同步更新：Crypto 由 271 增至 278、Forensics 由 72 增至 78、Mobile 由 9 增至 12、Pwn 由 233 增至 242、Reverse 由 245 增至 255、Stego 由 61 增至 67、Web 由 248 增至 258，raw 总数由 1315 增至 1366；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/L3akCTF2025-wp-before-archive-20260730-160006.zip`，包含 55 个文件、未压缩数据 4669038 字节，SHA-256 为 `dfa2083ada7d058379bbe7ecb38ca815e93c0fee68996138f7f1165575558e8b`；ZIP 内 55 个文件条目均已逐条读取验证。
+- 校验结果：51 篇 L3akCTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 4 条图片引用均无异常；3 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。提交快照中的 1598 篇 active Markdown 共解析出 5669 条本地引用和 612 条图片引用，断链为 0；159 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、3 份 backups ZIP、live 统计和源目录清理状态均通过检查。
