@@ -2124,3 +2124,13 @@
 - `index.md` live raw 统计同步更新：AI/ML 由 40 增至 43、Crypto 由 300 增至 306、Forensics 由 85 增至 87、Hardware/Embedded 由 16 增至 17、OSINT 由 29 增至 34、Pwn 由 262 增至 263、Reverse 由 273 增至 277、Stego 由 75 增至 76、Web 由 277 增至 285，raw 总数由 1488 增至 1519；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/N0PSctf2024-wp-before-archive-20260731-012001.zip`，包含 41 个文件，ZIP 大小 10884760 字节，SHA-256 为 `a03ca957e38c527ca6b213a422515d64d492802cb3c2ffe9609766527c59eadc`；ZIP 内 41 个文件条目均已逐条读取并与源文件哈希核对。
 - 校验结果：31 篇 N0PSctf2024 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名、38 个 Python 代码块和 10 条图片引用均无异常；8 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 1751 篇 active Markdown 共解析出 5712 条本地引用和 655 条图片引用，断链为 0；189 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计和源目录清理状态均通过检查。
+
+## 2026-07-31 — D3CTF2026 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善的 13 篇 D3CTF2026 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `D3CTF2026-<challenge>-wp.md`，文件名只包含英文字母、数字、点号与必要连字符，Markdown 一级标题继续保留 `dddɘw` 等题目原始特殊字符。
+- 按决定性主障碍归档为 `_unclassified` 1 篇、Crypto 1 篇、Pwn 5 篇、Reverse 4 篇、Web 2 篇。`proxyport` 的核心是还原 GOST 与 FRP 在 TCP 转发、半关闭和连接回收上的实现语义，因此从临时 `_unclassified` 调整到 Reverse；`PRISM's end BLACKBOX` 由 $5\times5\times5$ 贴纸置换与组合搜索主导，不依赖现有 14 个安全方向的专有机制，继续暂存 `_unclassified`。
+- 对 182 页官方 PDF 按题目逐页视觉核对。原文中的 10 张嵌入图片均为 IDA 伪代码、函数列表或代码文本截图，不承载控制流拓扑、界面状态等不可替代的视觉信息，已转写为可复制的代码或正文；本批不保留图片，也不创建空资源目录。
+- 逐篇复核题目附件、源码与官方脚本后，补充了 `d3kbus` 的 QEMU TCG 非预期路径、`d3kheap2pro` 的 OOM/QEMU 路径、`D3HFERP` 的 $D=4$ XL 建模和附件参数漂移等关键机制；28 条外链所承载的必要结论均已在正文概括，WP 主线不依赖读者打开外链。最终语法验收还将 `d3llvm` 中两处标为 Python 的伪代码改成等价的 `% (1 << 64)` 模运算与字节串 `+` 拼接写法。
+- 移动前 13 个归档目标均无冲突，raw 中不存在同赛事旧稿；初次移动后 13 篇 Markdown 与源稿逐一通过 SHA-256 对照。除 `d3llvm` 的两处预期语法修正外，其余 12 篇保持和源稿逐字一致。归档完成后，源 `wp` 下文件与嵌套资源目录均为 0，15 个空的一级方向目录作为后续工作骨架保留。
+- `index.md` live raw 统计同步更新：`_unclassified` 由 24 增至 25、Crypto 由 306 增至 307、Pwn 由 263 增至 268、Reverse 由 277 增至 281、Web 由 285 增至 287，raw 总数由 1519 增至 1532；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 校验结果：13 篇 D3CTF2026 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 35 个 Python 代码块均无异常，图片引用为 0。全库 1764 篇 active Markdown 共解析出 5712 条本地引用和 655 条图片引用，断链为 0；189 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计和源目录清理状态均通过检查。
