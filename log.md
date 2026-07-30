@@ -2064,3 +2064,13 @@
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/SekaiCTF2022-wp-before-archive-20260730-050424.zip`，包含 49 个文件、未压缩数据 2444895 字节，SHA-256 为 `6010e01b8bb74dd3f6e8d34c3be182deba6c5b4ac041988cdb9f3857110b7d56`；ZIP 内 49 个文件条目均已逐条读取验证。归档完成后，源 `wp` 下文件和嵌套资源目录均为 0，15 个空的一级方向目录作为后续工作骨架保留。
 - `index.md` live raw 统计同步更新：`_unclassified` 由 16 增至 21、AI/ML 由 33 增至 34、Blockchain 由 37 增至 39、Crypto 由 258 增至 265、Forensics 由 65 增至 69、Malware 由 18 增至 19、Pwn 由 223 增至 227、Reverse 由 236 增至 241、Stego 由 57 增至 61、Web 由 235 增至 241，raw 总数由 1243 增至 1282；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 校验结果：39 篇 SekaiCTF2022 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 10 条图片引用均无异常；5 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 1514 篇 active Markdown 中解析出 5664 条本地引用和 607 条图片引用，断链为 0；155 个 raw 资源目录均有同 basename Markdown 且无空目录，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
+
+## 2026-07-30 — SUCTF2025 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善的 33 篇 SUCTF2025 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `SUCTF2025-<challenge>-wp.md`，题目 slug 中的下划线改为连字符，并去掉 `SU_BBRE_WP` 文件名中与 `-wp` 后缀重复的 `WP`。文件名、资源目录和图片文件只包含英文字母、数字、点号与必要连字符，Markdown 一级标题继续保留题目的原始下划线、大小写和完整名称。
+- 按决定性主障碍归档为 AI/ML 3 篇、Blockchain 2 篇、Cloud/Infra 2 篇、Crypto 6 篇、Forensics 3 篇、Pwn 6 篇、Reverse 4 篇、Web 7 篇。原 Misc 的两道 Onchain 题由链上交易和合约语义主导，归 Blockchain；三道 AI 题由模型行为或参数恢复主导，归 AI/ML；两道 easyk8s 由 Kubernetes、服务账户或云元数据权限语义主导，归 Cloud/Infra；`SU_BBRE_WP` 虽来自 Rev 目录，但终点是覆盖返回地址构造执行边界利用，因此归 Pwn。
+- 本批材料只有 `SU_forensics` 的手写符号密文图具有纯文本无法替代的字形与空间布局信息，因此保留 `handwritten-symbol-cipher.png`。资源目录改为与 Markdown basename 相同的 `SUCTF2025-SU-forensics-wp/`；alt 文本同步说明 $69\times12$ 网格、重复字形和原始行列关系。图片内容和文件名本身已符合语义化要求，不再进行无意义的二次改名。
+- 目标端 34 个文件完成事件级核对：32 篇 Markdown 与源稿逐字一致，`SU_forensics` Markdown 仅包含预期的资源目录和 alt 文本改写，图片 SHA-256 与源文件一致。目标结构、命名、分类、围栏、公式、图片引用和资源反向引用预验收通过后，将源 `wp` 下 33 篇 Markdown 与 1 个图片目录移入 Windows 回收站；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：AI/ML 由 34 增至 37、Blockchain 由 39 增至 41、Cloud/Infra 由 9 增至 11、Crypto 由 265 增至 271、Forensics 由 69 增至 72、Pwn 由 227 增至 233、Reverse 由 241 增至 245、Web 由 241 增至 248，raw 总数由 1282 增至 1315；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/SUCTF2025-wp-before-archive-20260730-122443.zip`，包含 34 个文件、未压缩数据 5555631 字节，SHA-256 为 `dc9daa0da2140a5855187bc074a4ff98c18b7071b9d8b94df31512dcc2499e27`；ZIP 内 34 个文件条目均已逐条读取验证。
+- 校验结果：33 篇 SUCTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和图片引用均无异常；赛事资源目录有同 basename Markdown，事件内无空目录、无零引用文件。全库 1547 篇 active Markdown 中解析出 5665 条本地引用和 608 条图片引用，断链为 0；156 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、3 份 backups ZIP、live 统计和源目录清理状态均通过检查。
