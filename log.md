@@ -2093,3 +2093,13 @@
 - 目标端事件预验收通过后，源 `wp` 下文件和嵌套资源目录均为 0，15 个空的一级方向目录作为后续工作骨架保留。经用户确认，将 PDF 渲染与提取临时目录 `.tmp-l3akctf2024` 以及 IDA 生成的 `real-vm.i64` 移入 Windows 回收站。
 - `index.md` live raw 统计同步更新：`_unclassified` 由 21 增至 23、Blockchain 由 41 增至 42、Crypto 由 278 增至 287、Forensics 由 78 增至 79、Hardware/Embedded 由 10 增至 15、Malware 由 19 增至 21、Pwn 由 242 增至 253、Reverse 由 255 增至 263、Stego 由 67 增至 68、Web 由 258 增至 265，raw 总数由 1366 增至 1413；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 校验结果：47 篇 L3akCTF2024 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名、77 个 Python 代码块、2 个 JSON 代码块和 9 条图片引用均无异常；6 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 1645 篇 active Markdown 共解析出 5678 条本地引用和 621 条图片引用，断链为 0；164 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、backups ZIP、live 统计和源目录清理状态均通过检查。
+
+## 2026-07-30 — NepCTF2026 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐题完善的 36 篇 NepCTF2026 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `NepCTF2026-<challenge>-wp.md`，文件名、资源目录和图片文件只包含英文字母、数字、点号与必要连字符，Markdown 一级标题继续保留题目的中文、下划线、句点和其它原始特殊字符。`ezgame` 与 `TetrisJourney` 缺少足以还原完整解题链的官方解法、脚本或可验证公开材料，继续遵守证据阈值跳过，不生成 WP；`T.A.S.P.W.N` 则根据官方验收条件、上游漏洞记录和固定提交的公开 PoC 补齐了可复现机制。
+- 按决定性主障碍归档为 AI/ML 3 篇、Crypto 6 篇、Forensics 1 篇、OSINT 2 篇、Pentest 2 篇、Pwn 6 篇、Reverse 8 篇、Stego 3 篇、Web 5 篇。程序或固件行为恢复归 Reverse，单一目标的低层利用与沙箱逃逸归 Pwn，多设备工业控制攻击链归 Pentest，外部公开资料识别与地理定位归 OSINT，位平面、二维码和 Sixel 隐藏载荷提取归 Stego。
+- 逐张视觉复核 10 张引用图片，均承载纯文本无法替代的地理场景对照、设备通信拓扑、位平面线索、二维码或游戏关卡布局，因此全部保留。图片使用 `street-clue-scene.webp`、`device-communication-graph.webp`、`hidden-order-clue.webp`、`decoded-qr.png`、`game-level-layout.webp` 等语义化名称，alt 文本同步说明画面内容及解题作用；7 个实际为 WebP 的文件由错误的 `.png` 扩展名改为 `.webp`，7 个资源目录统一改为与 Markdown basename 相同的 `NepCTF2026-...-wp/`，10 条相对引用逐篇更新。
+- 归档目标共 46 个文件，36 篇 Markdown 与 10 张图片逐一通过 SHA-256 对照。目标端事件预验收通过后，将源 `wp` 下 36 篇 Markdown 和 7 个资源目录移入 Windows 回收站；源树剩余文件与嵌套资源目录均为 0，15 个空的一级方向目录作为后续工作骨架保留。
+- `index.md` live raw 统计同步更新：AI/ML 由 37 增至 40、Crypto 由 287 增至 293、Forensics 由 79 增至 80、OSINT 由 20 增至 22、Pentest 由 17 增至 19、Pwn 由 253 增至 259、Reverse 由 263 增至 271、Stego 由 68 增至 71、Web 由 265 增至 270，raw 总数由 1413 增至 1449；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/NepCTF2026-wp-before-archive-20260730-222331.zip`，包含 46 个文件、未压缩数据 381855 字节，ZIP 大小 346086 字节，SHA-256 为 `d6edea25db810a52fe7f62054a42897f51dc197cd962fe039c6f99e493101ea1`；ZIP 内 46 个文件条目均已逐条读取验证。
+- 校验结果：36 篇 NepCTF2026 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 10 条图片引用均无异常；7 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 1681 篇 active Markdown 共解析出 5688 条本地引用和 631 条图片引用，断链为 0；171 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、backups ZIP、live 统计和源目录清理状态均通过检查。
