@@ -2,7 +2,7 @@
 
 ## 题目简述
 
-题目给出了 Linux 7.1.4 内核、`rootfs.qcow2`、内核配置和 QEMU 启动脚本。系统启动后会加载 `/root/d3kbus.ko`，并创建所有用户均可访问的 `/dev/d3kbus`。flag 被复制到 `/flag`，权限设为 `root:root 0400`，随后以 `ctf` 用户启动交互 shell：
+运行环境使用 Linux 7.1.4，启动后加载 `d3kbus.ko`，并创建所有用户均可访问的 `/dev/d3kbus`。flag 被复制到 `/flag`，权限设为 `root:root 0400`，随后以 `ctf` 用户启动交互 shell：
 
 ```sh
 chown root:root /flag
@@ -18,19 +18,6 @@ poweroff -d 0 -f
 `run.sh` 开启了 KASLR、KPTI、SMEP、SMAP，内核配置中还启用了 slab freelist random/hardening，并设置了 `oops=panic panic=1`。因此，依赖内核地址泄漏和内核 ROP 的方案既复杂又脆弱。模块真正的问题是一个数据完整性漏洞：普通用户可以让模块把计算出的 CRC32C 写回只读文件的 page cache，最终得到受控的 4 字节覆盖。
 
 利用时修改静态链接的 `/bin/busybox` 中 `poweroff_main`。杀死当前 `ctf` shell 后，root 身份的启动脚本继续执行 `poweroff`，从而运行被替换的代码并读取 `/flag`。整个过程不需要知道内核基址，也不需要在内核态执行 shellcode。
-
-附件及关键文件指纹如下：
-
-```text
-rootfs.qcow2
-d39a46f33cb9c413cb320d0ae3a6120f03fcbce51b6755fb9cdc180608c3799d
-
-/root/d3kbus.ko（从原始 rootfs 提取）
-52f158bf1de001d67ec8b5a1d7b3edd1c50fb05e873db2ed6749c2f3b6fc6f4f
-
-/bin/busybox（从原始 rootfs 提取）
-bbc4c150f0dd092062cda5430c6e795a8fb444a75fe74f61e847db2ac58634bf
-```
 
 ## 解题过程
 
@@ -276,7 +263,7 @@ exit(0);
 
 ### 6. 非预期解：QEMU TCG 跨页访问下溢
 
-官方 PDF 还记录了一条与 `d3kbus.ko` 无关的非预期解。比赛环境使用不带 KVM 的 QEMU TCG，而当时版本的 x86 访存辅助函数 `access_ptr()` 使用了下面这种无符号减法边界判断：
+本题还存在一条与 `d3kbus.ko` 无关的非预期解。比赛环境使用不带 KVM 的 QEMU TCG，而当时版本的 x86 访存辅助函数 `access_ptr()` 使用了下面这种无符号减法边界判断：
 
 ```c
 if (offset <= ac->size1 - len)
@@ -289,7 +276,7 @@ assert(offset <= ac->size - len);
 
 取得物理读写后，利用按 2 MiB 对齐扫描内核映像，用固定指令指纹定位内核基址，再把 `setuid` 权限检查附近的条件跳转从 `JE` 改为 `JNE`。随后执行 `setuid(0)` 即可获得 root 并读取 `/flag`。这条链绕过了题目模块本身，因而属于平台层非预期，而不是 `d3kbus` 的预期漏洞。
 
-发现者公开文章 [QEMU 0day 分析](https://kqx.io/post/qemu-0day/)给出了 TCG `access_ptr` 下溢的完整背景；本文已概括其触发点和提权落点，不依赖外链也能理解利用链。官方给出的修复将减法改写为先验证被减数：
+发现者公开文章 [QEMU 0day 分析](https://kqx.io/post/qemu-0day/)给出了 TCG `access_ptr` 下溢的完整背景。其修复方式是先验证被减数，再执行减法：
 
 ```c
 if (offset <= ac->size1 && len <= ac->size1 - offset)
@@ -300,47 +287,9 @@ assert(offset <= ac->size && len <= ac->size - offset);
 
 跨入第二页时还必须确认 `haddr2` 非空。这样只有在 `offset` 与 `len` 均落入已验证范围后才会执行减法，不再产生下溢。该修复后来用于 revenge 环境；普通版仍可用这条 QEMU 路径非预期提权。
 
-### 7. Exploit 与远程脚本
+### 7. 验证结果
 
-目录中提供两份等价 exploit：
-
-- `exploit.c`：带完整错误信息和逐块校验，便于阅读与本地调试；使用 `--trigger` 时会自动杀死父 shell。
-- `exploit_min.c`：不依赖 libc，只使用 x86-64 syscall，静态二进制约 9 KiB，适合通过串口远程上传。
-
-编译：
-
-```sh
-make
-```
-
-`remote_solve.py` 使用 pwntools 建立 TLS 连接，等待 guest shell 真正启动后，把 `exploit_min` 以 Base64 分块上传到 `/tmp/d3exp`。脚本会在远端计算 SHA-256，确认文件没有被串口截断后才执行，并从输出中提取 flag。运行方式：
-
-```sh
-source /home/kali/miniforge3/etc/profile.d/conda.sh
-conda activate ctf-tools
-python remote_solve.py <host> 443
-conda deactivate
-```
-
-远程上传所用二进制为：
-
-```text
-exploit_min
-f3547094161a17f4681e045290d8b996373568c79bc7ea3be2f463b083b2937c
-```
-
-关键输出如下：
-
-```text
-[+] guest shell 就绪，上传 8864 字节 exploit
-[+] 上传校验通过，触发漏洞
-................
-[+] patched; triggering root poweroff
-Killed
-d3ctf{I-WiIl-Ch4Ng3-th4t_woR1D-lNTo-soMetHinG-bEtT3R_HOney!0}
-```
-
-最终 flag：
+完成 16 次 CRC 覆盖并结束 `ctf` shell 后，root 启动脚本进入被改写的 `poweroff_main`，输出：
 
 ```text
 d3ctf{I-WiIl-Ch4Ng3-th4t_woR1D-lNTo-soMetHinG-bEtT3R_HOney!0}
@@ -367,4 +316,4 @@ d3ctf{I-WiIl-Ch4Ng3-th4t_woR1D-lNTo-soMetHinG-bEtT3R_HOney!0}
 
 选择 `poweroff_main` 作为 root 触发点，则充分利用了题目已有的启动流程，不需要覆盖内核代码、泄漏地址或绕过 SMEP/SMAP。将 CRC 的可控输入建模为 GF(2) 仿射映射，又把看似只能写校验值的原语提升成了确定性的任意 32 位写，最终形成稳定、可重复的远程利用。
 
-官方赛后材料还给出了 QEMU TCG `access_ptr()` 无符号减法下溢的非预期路径。它从 x87 跨页访问取得宿主侧越界读写，再把来宾页表提升为任意物理内存读写并修改内核权限检查。预期链和非预期链应分开理解：前者揭示模块把完整性检查误当授权检查，后者则是虚拟化平台本身的边界校验漏洞。
+QEMU TCG `access_ptr()` 的无符号减法下溢则提供了另一条非预期路径：从 x87 跨页访问取得宿主侧越界读写，再把来宾页表提升为任意物理内存读写并修改内核权限检查。预期链和非预期链应分开理解：前者揭示模块把完整性检查误当授权检查，后者属于虚拟化平台本身的边界校验漏洞。

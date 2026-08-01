@@ -2,7 +2,7 @@
 
 ## 题目简述
 
-题目只提供一个 TLS 交互服务。连接后先出现 `mirror token`，必须把 token 整体逆序回传，之后才能使用命令行接口。服务没有附件，也没有公开提示；题面故事与解法无关。
+这是一个 TLS 上的 raw TCP 黑盒交互题。连接后先出现 `mirror token`，必须把 token 整体逆序回传，之后才能使用命令行接口。
 
 握手后可以使用的核心命令如下：
 
@@ -95,7 +95,7 @@ hashlib.blake2s(
 ).hexdigest()
 ```
 
-由于本地已经枚举了 18 个物理动作，可以分别模拟动作并计算摘要，再与远程 `shadow` 返回值比较，从而识别一条文本命令对应的物理动作。
+预先枚举 18 个物理动作后，可以分别模拟动作并计算摘要，再与服务端 `shadow` 返回值比较，从而识别一条文本命令对应的物理动作。
 
 每个 opening 只有五次 `shadow` 额度，恰好可以用以下命令恢复整套映射：
 
@@ -143,7 +143,7 @@ b -> c
 c -> a
 ```
 
-第 5、6 道均经过远程 `verify`，证明该循环方向与从左到右的组合顺序正确。
+第 5、6 道的 `verify` 结果可以确认，该循环方向与从左到右的组合顺序正确。
 
 ### 5. 搜索策略
 
@@ -182,22 +182,19 @@ occupied[step][position]
 
 1. 用当次 wiring 翻译为文本命令；
 2. 发送 `turn`；
-3. 在本地完整状态上应用同一物理置换。
+3. 在客户端维护的完整状态上应用同一物理置换。
 
-全部动作执行完后，再次读取 `scan ids`，首先检查它与本地预测值完全一致，然后检查当前 oracle 的槽位条件，最后才发送 `verify`。这可以在消耗 opening 前及时发现 wiring、坐标方向或循环方向错误。
+全部动作执行完后，再次读取 `scan ids`，首先检查它与客户端预测值完全一致，然后检查当前 oracle 的槽位条件，最后才发送 `verify`。这可以在消耗 opening 前及时发现 wiring、坐标方向或循环方向错误。
 
 运行命令如下。目标地址会变化，因此通过 `--host` 传入当前实例域名：
 
 ```bash
-source /home/kali/miniforge3/etc/profile.d/conda.sh
-conda activate ctf-tools
 python -u solve.py \
-  --host "$TARGET" \
+  --host "<challenge-host>" \
   solve \
   --max-openings 21 \
   --max-depth 22 \
   --engine auto
-conda deactivate
 ```
 
 最终服务端输出：
@@ -208,7 +205,7 @@ the prism opens.
 d3ctf{8d761350-a9f9-1244-d6bf-13950377c1f4}}
 ```
 
-原始输出末尾多打印了一个 `}`。按标准 flag 格式取到第一个右花括号，最终 flag 为：
+服务端输出末尾多打印了一个 `}`。按标准 flag 格式取到第一个右花括号，最终 flag 为：
 
 ```text
 d3ctf{8d761350-a9f9-1244-d6bf-13950377c1f4}

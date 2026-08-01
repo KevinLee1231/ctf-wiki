@@ -18,15 +18,6 @@
 d3ctf{S3ArCHF0R-h1dDEn-zeRO-GHO5t_Int3RFACE_Cr@ck1TR1GHTyeah0}
 ```
 
-配套文件：
-
-- `solve.py`：完整一键利用脚本；
-- `analyze_pcap.py`：不依赖 Scapy 的 PCAP/HTTP/JWT 解析脚本；
-- `artifacts/archive.sqlite3`：从 `sqlite_dbpage` 重组出的数据库；
-- `artifacts/fe291443882d55af94bff1f9cddffb73.pcap`：恢复并下载的已删抓包；
-- `artifacts/ghost-zero-pcap.json`：抓包解析结果；
-- `artifacts/exploit-result.json`：最终利用证据与 flag。
-
 ## 解题过程
 
 ### 1. 还原前端加密传输
@@ -338,19 +329,12 @@ Accept: application/json
 }
 ```
 
-### 7. 一键复现
+### 7. 自动化复现
 
-在 WSL Kali 中使用固定的 `ctf-tools` 环境：
+将前述加密传输、SQL 注入、数据库页重组、PCAP 解析和票据兑换步骤整合后，可直接运行：
 
 ```bash
-source /home/kali/miniforge3/etc/profile.d/conda.sh
-conda activate ctf-tools
-cd "/mnt/d/文档/新建文件夹/D3CTF2026/Ghost Zero"
-python solve.py \
-  "https://r5sxgzpx5nazoixunzlkfzlrwla.cloud.d3c.tf" \
-  --exploit \
-  --timeout 30
-conda deactivate
+python solve.py "https://<challenge-origin>" --exploit --timeout 30
 ```
 
 脚本会依次完成：
@@ -376,8 +360,7 @@ conda deactivate
 如果只想离线检查已经恢复的抓包，可执行：
 
 ```bash
-python analyze_pcap.py \
-  artifacts/fe291443882d55af94bff1f9cddffb73.pcap
+python analyze_pcap.py recovered.pcap
 ```
 
 ## 方法总结

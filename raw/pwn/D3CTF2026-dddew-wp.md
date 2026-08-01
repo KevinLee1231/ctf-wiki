@@ -88,7 +88,7 @@ trigger = (
 ).encode()
 ```
 
-为了缩短 resource，并避免在 filter brigade 中增加一个会改变堆布局的 `zlib.inflate` filter，我把 gzip 放在 resource wrapper 层：
+为了缩短 resource，并避免在 filter brigade 中增加会改变堆布局的 `zlib.inflate` filter，可以把 gzip 放在 resource wrapper 层：
 
 ```python
 compressor = zlib.compressobj(level=9, wbits=31)
@@ -130,8 +130,7 @@ c($m[0], $m[1], $m[2]);
 - 被攻击的顶层 `HashTable` 也正确；
 - 但最后伪造的引用指针落到目标后一页，泄漏值仍是普通字符串。
 
-为排除版本误差，我按 Dockerfile 固定的 Ubuntu digest、PHP commit
-`25360ef24951f1c6b83f8bf85fbdcaff4a1a40e1` 和三份 patch 构建了本地镜像，并恢复同一份旧 gconv 模块。随后分别用 GDB 跟踪：
+为排除版本误差，需要按 Dockerfile 固定的 Ubuntu digest、PHP commit `25360ef24951f1c6b83f8bf85fbdcaff4a1a40e1` 和三份 patch 重建运行环境，并恢复同一份旧 gconv 模块。随后分别用 GDB 跟踪：
 
 - `ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_VAR_HANDLER`；
 - `zif_json_encode`；
@@ -146,8 +145,7 @@ c($m[0], $m[1], $m[2]);
 $v[$y] = md5_file($z);
 ```
 
-中，Zend VM 会释放旧引用。伪引用的 refcount 地址被布置到
-`real_array["R96"] + 8`，所以“refcount 减一”实际作用在 R96 的 `type_info` 上：
+中，Zend VM 会释放旧引用。伪引用的 refcount 地址被布置到 `real_array["R96"] + 8`，所以“refcount 减一”实际作用在 R96 的 `type_info` 上：
 
 ```text
 IS_STRING = 6
@@ -240,8 +238,7 @@ fake_ht[5] = [[0x1337]]
 - `fake_ht[4]` 成为伪析构函数指针；
 - 嵌套数组负责触发析构路径。
 
-本题 write 阶段同样比参考题差一页，因此把三个连续洞从
-`25/26/27` 平移为 `26/27/28`：
+本题 write 阶段同样比参考题差一页，因此把三个连续洞从 `25/26/27` 平移为 `26/27/28`：
 
 ```python
 for index in range(26, 29):
@@ -265,7 +262,7 @@ real_data    = ...890008
 da28dbab52c3bf778ba65fe790fefd55
 ```
 
-它与本地精确镜像完全一致，因此 `system` 在 libc 内的页内偏移确定。未知量只剩 libc 映射相对 Zend 主 chunk 的页差。沿用参考 exploit 的扫描公式：
+它与按题目配置重建的 libc 完全一致，因此 `system` 在 libc 内的页内偏移确定。未知量只剩 libc 映射相对 Zend 主 chunk 的页差。沿用参考 exploit 的扫描公式：
 
 ```python
 pc = (
@@ -288,15 +285,14 @@ echo <page> >/tmp/dp;#
 EXP = f"echo {page:x}>/tmp/dp;#".ljust(32)
 ```
 
-随后用正常请求计算 `/tmp/dp` 的 MD5，并与
-`md5((hex(page) + "\n").encode())` 比较。只有真正进入 `system()` 的候选会留下对应标记。该实例命中：
+随后用正常请求计算 `/tmp/dp` 的 MD5，并与 `md5((hex(page) + "\n").encode())` 比较。只有真正进入 `system()` 的候选会留下对应标记。该实例命中：
 
 ```text
 page = 0x6f
 system = 0x7f22f804bd70
 ```
 
-Solver 会先尝试 `0x6f` 和本地镜像常见的 `0x74`，若未命中再覆盖参考脚本的完整页范围。错误候选即使杀死 FPM worker，master 重新 fork 的 worker 仍继承相同映射，本实例中 Zend 主 chunk 地址保持不变。
+Solver 会先尝试 `0x6f` 和重建环境中常见的 `0x74`，若未命中再覆盖参考脚本的完整页范围。错误候选即使杀死 FPM worker，master 重新 fork 的 worker 仍继承相同映射，本实例中 Zend 主 chunk 地址保持不变。
 
 ### 7. 四次 system 调用与最终 flag 回显
 
@@ -309,8 +305,7 @@ arg0 + 0x20
 arg0 + 0x30
 ```
 
-如果直接放长命令，后续调用会从命令中间开始。例如 suffix
-`>index.php` 会在 flag 写入后再次把文件截断为空。最终把命令前置 48 个空格：
+如果直接放长命令，后续调用会从命令中间开始。例如 suffix `>index.php` 会在 flag 写入后再次把文件截断为空。最终把命令前置 48 个空格：
 
 ```python
 EXP = (
@@ -333,10 +328,7 @@ EXP = (
 执行 Solver：
 
 ```bash
-source /home/kali/miniforge3/etc/profile.d/conda.sh
-conda activate ctf-tools
 python solve.py --url '<TARGET>' --system-page 0x6f
-conda deactivate
 ```
 
 关键输出如下：
@@ -358,11 +350,10 @@ d3ctf{NOw-iT_ls-TiM3_T0-hoLd-a-FunEr@I_F0R_cTF.990}
 
 ## 方法总结
 
-- 核心技巧：利用 `md5_file()` 接受 stream wrapper，把 glibc
-  `ISO-2022-CN-EXT` 的 CVE-2024-2961 越界写转成 PHP bucket UAF，再通过伪引用的 refcount 减一完成指针泄漏，最后伪造 `HashTable` 析构函数指针取得代码执行。
+- 核心技巧：利用 `md5_file()` 接受 stream wrapper，把 glibc `ISO-2022-CN-EXT` 的 CVE-2024-2961 越界写转成 PHP bucket UAF，再通过伪引用的 refcount 减一完成指针泄漏，最后伪造 `HashTable` 析构函数指针取得代码执行。
 - 识别信号：Dockerfile 特意“备份旧 gconv 模块、升级系统、再恢复模块”，同时业务代码把可控字符串传给 `md5_file()`，几乎就是 CNEXT 的明示。看到 PHP filter、旧 iconv 模块和大 JSON 输入时，应优先检查堆风水，而不是停留在普通任意文件哈希。
 - 适配要点：公开 exploit 的漏洞原语可以复用，但函数包装、URL 解码、局部变量、JSON 限制和 VM handler 都会改变对象地址。本题必须用精确镜像确认“越界命中”和“目标 zval 命中”是两件不同的事。
 - 压缩要点：为了省 JSON 体积，应复现分配次数和 size class，而不只是复现总字节数。65 个 256 元素 packed array 能模拟 65 次 4 KiB 分配；一个 16384 元素大数组虽然总大小相同，却不能替代。
 - 调试要点：泄漏阶段跟踪最终赋值 target、伪引用 pointer 和 JSON 输出 bucket；写阶段同时记录 fake array 数据、命令字符串和函数入口。只看 200/502 很容易把布局失败、错误函数地址和命令失败混为一谈。
 - 复用要点：当目标本身提供文件哈希 oracle 时，可以让候选代码执行写入带编号的临时文件，再用哈希确认候选。这比依赖响应状态或外部 webhook 更稳定，也减少了盲扫。
-- 外部参考：上文链接的 R3CTF 参考题提供了重复键、堆洞和伪 `HashTable` 的基础形状；Lexfo 分析与 Ambionics exploit 解释了 iconv OOB 和 PHP filter bucket；[GhostFrank 的 PHP 复现材料](https://github.com/GhostFrankWu/PHP-security-research/tree/main/CVE-2024-2961) 可用于交叉核对环境条件。本文已经把本题实际使用的触发方式、布局改动、限制压缩和最终验证写入正文，复现不依赖这些链接继续可用。
+- 外部参考：上文链接的 R3CTF 参考题提供了重复键、堆洞和伪 `HashTable` 的基础形状；Lexfo 分析与 Ambionics exploit 解释了 iconv OOB 和 PHP filter bucket；[GhostFrank 的 PHP 复现材料](https://github.com/GhostFrankWu/PHP-security-research/tree/main/CVE-2024-2961) 可用于交叉核对环境条件。触发方式、布局改动、输入限制适配与验证方法均已在正文展开，复现不依赖这些链接继续可用。
