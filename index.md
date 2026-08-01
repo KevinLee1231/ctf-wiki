@@ -333,22 +333,22 @@
 
 | Direction | Markdown |
 |---|---:|
-| _unclassified（暂存） | 26 |
+| _unclassified（暂存） | 28 |
 | ai-ml | 46 |
 | blockchain | 50 |
 | cloud-infra | 11 |
-| crypto | 346 |
-| forensics | 111 |
+| crypto | 360 |
+| forensics | 114 |
 | hardware-embedded | 19 |
-| malware | 22 |
+| malware | 24 |
 | mobile | 14 |
-| osint | 53 |
-| pentest | 20 |
-| pwn | 321 |
-| reverse | 313 |
-| stego | 84 |
-| web | 314 |
-| **Total** | **1750** |
+| osint | 63 |
+| pentest | 24 |
+| pwn | 335 |
+| reverse | 322 |
+| stego | 88 |
+| web | 321 |
+| **Total** | **1819** |
 
 ## 维护入口
 
