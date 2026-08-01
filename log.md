@@ -2142,3 +2142,13 @@
 - `d3kheap2pro` 与 revenge 版重新收束为 double free、per-CPU sheaf 延迟批量释放、PCP/buddy 页面流转、credential 重占、`INIT_ON_ALLOC` 清零和 `fchmodat2()` 提权主线，并把 OOM shell 与 QEMU TCG 越界明确分离为普通版的两条非预期路径。`d3gomoku` 则按 EPT 双视图、真实 64 位目标、base-37 逆推、唯一十轮棋谱和两层 SHA-256 校验重写，删除机器环境、调试脚本、产物表与另一套补充求解流程。
 - 13 道题均重新查看对应 PDF 的关键页面，逐题核对标题边界、公式、表格、代码和跨页衔接；纯代码与终端内容继续以可复制文本保留，不新增图片。异常硬换行已逐段修正，三段结构和数学定界统一完成。
 - 本轮不增删或迁移 raw，赛事篇数和 `index.md` 统计保持不变。验收结果：13 篇 WP 均为 UTF-8/LF，固定三段结构、代码围栏和数学定界无异常，24 个 Python 代码块全部通过语法编译；全库 1764 篇 active Markdown 共解析出 5712 条本地引用和 655 条图片引用，断链为 0，189 个 raw 资源目录均有同 basename Markdown，`git diff --check` 通过。
+
+## 2026-08-01 — GlacierCTF2025 Raw WP 归档
+
+- 将源 `D:/文档/新建文件夹/wp` 中已经逐篇完善的 21 篇 GlacierCTF2025 单题 WP 归档至 `raw/<direction>/`；文件统一使用 `GlacierCTF2025-<challenge>-wp.md`。文件名、资源目录和图片文件只包含英文字母、数字、点号与必要连字符，Markdown 一级标题继续保留题目的原始大小写、空格和下划线。21 道题均有官方 WP、solver、源码或可验证附件支撑，没有因证据不足跳过的题目。
+- 按决定性主障碍归档为 Crypto 3 篇、Forensics 1 篇、OSINT 1 篇、Pwn 8 篇、Reverse 2 篇、Stego 2 篇、Web 4 篇。`best-food` 依赖公开地图设施关联与坐标验证，归 OSINT；`gitresethard` 由 Git 悬空提交恢复主导，归 Forensics；`findme-v2` 与 `rfc1035` 分别从 PDF 孤立对象和 DNS TXT 分片中提取隐藏载荷，归 Stego；原 Misc 中需要突破程序、内核或沙箱执行边界的题目归 Pwn，需要恢复 Typst/NES 程序行为的题目归 Reverse。
+- 逐张视觉复核源稿中的 2 张图片。`findme-v2` 的提取结果只有题名与可复制 flag，不依赖颜色或空间关系，已转写为文本且不创建资源目录；`rfc1035` 的图片是 DNS TXT 字节分片成功重组后的实际 PNG 证据，保留在同 basename 目录 `GlacierCTF2025-rfc1035-wp/`，重命名为 `dns-reassembled-flag.png`，alt 文本说明 DNS 解码、顺序重组和冰川 flag 画面。四条外部原始资料链接的必要机制均已写入正文，WP 主线不依赖读者打开外链。
+- 初始复制后，21 篇 Markdown 与源稿逐一通过 SHA-256 对照，保留图片也与源文件哈希一致；最终验收将 `noisy-neighbour` 中使用 `PR.<x>` 的 SageMath 代码块由错误的 `python` 标签改为 `sage`。目标端事件预验收通过后，将源 `wp` 下 21 篇 Markdown 与 2 个资源目录移入 Windows 回收站；源树剩余文件和嵌套目录均为 0，15 个一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：Crypto 由 307 增至 310、Forensics 由 87 增至 88、OSINT 由 34 增至 35、Pwn 由 268 增至 276、Reverse 由 281 增至 283、Stego 由 76 增至 78、Web 由 287 增至 291，raw 总数由 1532 增至 1553；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 最终 raw 归档快照为 `D:/文档/新建文件夹/wp-archive-backups/GlacierCTF2025-raw-archive-20260801-211023.zip`，包含 21 篇 WP 与 1 张保留图片，未压缩数据 108465 字节，ZIP 大小 87873 字节，SHA-256 为 `129e1cb7769dea83eb3014a24eae0918e935102ae0c28364246274c417053cb1`；ZIP 内 22 个文件条目均已逐条读取验证。源文件已移入 Windows 回收站，仍可单独恢复。
+- 校验结果：21 篇 GlacierCTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和图片引用均无异常，12 个 Python 代码块通过语法编译，1 个 SageMath 代码块已正确标注；赛事资源目录有同 basename Markdown，事件内无空目录、无零引用文件。全库 1785 篇 active Markdown 共解析出 5713 条本地引用和 656 条图片引用，断链为 0；190 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
