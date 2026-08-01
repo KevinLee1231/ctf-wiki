@@ -2174,3 +2174,15 @@
 - `index.md` live raw 统计同步更新：Blockchain 由 46 增至 50、Crypto 由 314 增至 320、Pwn 由 286 增至 295、Reverse 由 286 增至 290、Web 由 294 增至 296，raw 总数由 1579 增至 1604；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/GlacierCTF2023-wp-before-archive-20260801-230119.zip`，包含 25 个文件、未压缩数据 45877 字节，ZIP 大小 36019 字节，SHA-256 为 `ee4f569c8b2261ee45cc393edb55b84d56304519862b16c7ad838e2f78bd4343`；ZIP 文件条目数和总体积均已读取验证。
 - 校验结果：25 篇 GlacierCTF2023 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 Python 代码语法均无异常，图片引用为 0。全库 1836 篇 active Markdown 共解析出 5716 条本地引用和 659 条图片引用，断链为 0；192 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
+
+## 2026-08-01 — GlacierCTF2022 Raw WP 归档
+
+- 逐题检查 `D:/文档/新建文件夹/GlacierCTF2022-main` 的题面、源码、构建配置、官方 solver 与已发布附件，将 21 道题全部整理为 `GlacierCTF2022-<challenge>-wp.md`。全部题目均有足够的一手证据，没有因信息不足跳过；正文对仓库中仅写“运行 solver”的短说明补全了实际漏洞原语、数据流、关键偏移与最终利用链。
+- 按决定性主障碍归档为 Crypto 5 篇、Pwn 4 篇、Reverse 5 篇、Stego 2 篇、Web 5 篇。原 Hardware 的 `Stack Math` 只涉及 Verilog 描述的自定义栈机与短程序合成，没有物理接口、采样信号或启动链；原 Misc 的 `ClipRip`、`Fuzzy Dungeon` 分别由容器状态变化和 16 位无符号算术主导，三题均归 Reverse。`Break the Calculator` 与 `ClipRip 2` 分别突破 JavaScript 语言沙箱和格式化字符串执行边界，归 Pwn；视频尺寸和 JPEG 追加载荷两题归 Stego。
+- 仓库没有 PDF。逐张视觉复核 6 个栅格图片路径，并检查赛事 SVG 的矢量源码；两个 Web 路径是同一装饰背景副本，赛事标志与 ChaCha60 梗图不承载额外机制，均不保留。本批只保留 2 张视觉证据：`Strange Letters` 的西多会数字字形重命名为 `cistercian-numeral-cipher.png`，`The Climber` 从偏移 996161 提取且与仓库副本逐字节一致的第二张 JPEG 重命名为 `embedded-glacier-flag.jpg`。两个资源目录与 Markdown basename 完全一致，alt 文本说明符号结构、提取来源与低对比度 flag 位置。
+- `Size Matters` 的 WebM 不作为 WP 图片保存；正文根据生成器、关键帧清单和 libvpx 日志完整记录先提取 VP8/IVF 轨道、忽略 bounce 高度噪声、按 $360-w$ 还原 ASCII 的过程，并以附件关键帧逐项验证出完整 flag。`The Climber` 还通过 JPEG SOI/EOI 偏移和切片哈希确认尾部不是误报；图片搜索所需的关键作用已概括为“取得干净基线后对齐差分”，正文不依赖外链。
+- 源码复核修正了两处官方文字漂移：`crypto_zeski` 的 README 误留 Simple Crypto 的 scytale 说明，成稿改以 `src.py`、`secret.py` 与 `sol.sage` 的 $m=ab$、离散对数和 MT19937 状态恢复为准；`Stack Math` 的 Verilog 规定十六进制 8 为 SUB、9 为 ADD，而 `solver.py` 助记符表反写，正文按实际 Verilog 列出编码，并说明正式因数分解生成路径从不发出这两条指令，所以官方 exploit 不受影响。Simple Crypto 的官方 offset 30 则明确为一基计数，对应 Python 切片的零基偏移 29 与步长 101。
+- 23 个归档目标在复制前均无冲突，21 篇 Markdown 与 2 张图片复制后逐一通过 SHA-256 对照。目标端预验收通过后，将源 `wp` 下 21 篇 Markdown 和 2 个赛事资源目录移入 Windows 回收站；源树剩余文件与嵌套目录均为 0，15 个空的一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：Crypto 由 320 增至 325、Pwn 由 295 增至 299、Reverse 由 290 增至 295、Stego 由 79 增至 81、Web 由 296 增至 301，raw 总数由 1604 增至 1625；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/GlacierCTF2022-wp-before-archive-20260801-233428.zip`，包含 23 个文件、未压缩数据 2171078 字节，ZIP 大小 2142939 字节，SHA-256 为 `2509d2035c37c629c9cbe58dc705a9e8bf56b417115f7cb3d7b8e48a56dda248`；ZIP 内 23 个条目均已逐一与源文件做 SHA-256 对照，差异为 0。
+- 校验结果：21 篇 GlacierCTF2022 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名、21 个 Python 代码块和 2 条图片引用均无异常；2 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 1857 篇 active Markdown 共解析出 5718 条本地引用和 661 条图片引用，断链为 0；194 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
