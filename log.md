@@ -2163,3 +2163,14 @@
 - `index.md` live raw 统计同步更新：Blockchain 由 42 增至 46、Crypto 由 310 增至 314、Mobile 由 13 增至 14、Pwn 由 276 增至 286、Reverse 由 283 增至 286、Stego 由 78 增至 79、Web 由 291 增至 294，raw 总数由 1553 增至 1579；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/GlacierCTF2024-wp-before-archive-20260801-222218.zip`，包含 29 个文件、未压缩数据 633936 字节，ZIP 大小 587988 字节，SHA-256 为 `3a01a9510749a00baef9f62025f96557feba34f932e8fe5f3773a267c2debb02`；ZIP 内全部条目均已逐条读取验证。
 - 校验结果：26 篇 GlacierCTF2024 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 3 条图片引用均无异常；2 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 1811 篇 active Markdown 共解析出 5716 条本地引用和 659 条图片引用，断链为 0；192 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
+
+## 2026-08-01 — GlacierCTF2023 Raw WP 归档
+
+- 逐题检查 `D:/文档/新建文件夹/GlacierCTF2023_writeups-main` 的题面、源码、官方正文和 solver，将 25 道题全部整理为 `GlacierCTF2023-<challenge>-wp.md`。20 道题有官方正文，其余题目依据仓库中的源码与官方利用脚本重建；全部题目均达到证据阈值，没有跳过。`password_recovery` 的当前源码可确定输入 `LosCapitan` 映射为 `stmhrrlcjy`，但仓库没有比赛端 flag 包装配置，正文明确保留该边界而未虚构最终 flag。
+- 按决定性主障碍归档为 Blockchain 4 篇、Crypto 6 篇、Pwn 9 篇、Reverse 4 篇、Web 2 篇。原 Intro 中的 `skilift` 只需还原 Verilog 组合逻辑，不依赖物理接口、采样信号或启动链，归 Reverse；原 Misc 中 `Avatar`、`Glacier Military Daemon` 和 `Silent Snake` 的终点分别是 Python jail、错误恢复执行边界和 procfs 隐蔽信道，均归 Pwn。
+- 仓库没有 PDF。18 张源图片已逐张视觉复核：Crypto 讲义图已完整转写为代数关系，`Write Byte Where` 的 7 张反汇编、内存和终端截图已转写为调用链、字段偏移与最终输出，`GlacierXchange` 的 9 张界面及装饰素材和赛事 SVG 标志不承载不可替代的解题证据，因此本批不保留图片，也不创建资源目录。
+- 三条保留外链分别指向 CSIDH 原始论文、Wasmtime 受影响版本的 GitHub 安全公告和 `Los-ifier` 的独立完整复现；论文所需的交换作用、公告中的版本与移位截断条件、独立复现中的八进制缓冲区、85 字节偏移和栈对齐结论均已写入正文，WP 主线不依赖读者打开外链。`flipper` 还明确区分题面、作者简述与仓库实现的次数限制漂移，并以官方 solver 的自修改内核路径为实际解法。
+- 25 个归档目标在复制前均无冲突，复制后与源稿逐一通过 SHA-256 对照。逐篇读回时补清了 `Silent Snake` 的命令边界：REPL 提交 `ls <directory>`，独立命令服务验证目录后实际执行 `ls -l`，因此符号链接目标确实可见。目标端预验收通过后，将源 `wp` 下 25 篇 Markdown 移入 Windows 回收站；源树剩余文件与嵌套目录均为 0，15 个空的一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：Blockchain 由 46 增至 50、Crypto 由 314 增至 320、Pwn 由 286 增至 295、Reverse 由 286 增至 290、Web 由 294 增至 296，raw 总数由 1579 增至 1604；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/GlacierCTF2023-wp-before-archive-20260801-230119.zip`，包含 25 个文件、未压缩数据 45877 字节，ZIP 大小 36019 字节，SHA-256 为 `ee4f569c8b2261ee45cc393edb55b84d56304519862b16c7ad838e2f78bd4343`；ZIP 文件条目数和总体积均已读取验证。
+- 校验结果：25 篇 GlacierCTF2023 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 Python 代码语法均无异常，图片引用为 0。全库 1836 篇 active Markdown 共解析出 5716 条本地引用和 659 条图片引用，断链为 0；192 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
