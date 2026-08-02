@@ -2303,3 +2303,14 @@
 - `index.md` live raw 统计同步更新：Crypto 由 390 增至 397、Pwn 由 356 增至 365、Reverse 由 340 增至 344、Stego 由 96 增至 97、Web 由 347 增至 350，raw 总数由 1945 增至 1969；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/TSGCTF2024-wp-before-archive-20260802-230243.zip`，包含带分类相对路径的 27 个文件，ZIP 大小 78975 字节，SHA-256 为 `61ee6ae674c29a60f103470edbecf3e130412c3aec43e03f4ce7aba3e4fb2ee9`；ZIP 内条目与源文件逐项哈希差异为 0。
 - 校验结果：24 篇 TSGCTF2024 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 3 条图片引用均无异常；1 个赛事资源目录有同 basename Markdown 且无零引用文件。全库 2199 篇 active Markdown 共解析出 7522 条普通链接 token 和 707 条图片引用，断链为 0；231 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 各方向 live 统计与 `index.md` 完全一致，总数为 1969。
+
+## 2026-08-02 — TSGCTF2021 Raw WP 归档
+
+- 逐题检查 `D:/文档/新建文件夹/tsgctf2021-main` 中 Crypto、Pwn、Web、Rev、Misc 与 PPC 下实际存在的 25 个题目目录，以及题面、源码、官方 solver、构建配置和现有 writeup，将 25 道题全部整理为独立 `TSGCTF2021-<challenge>-WP.md`。`Natural Flag Processing` 的发布模型在当前仓库快照中缺失，正文明确这一证据边界，并以生成器、官方逆权重脚本、自动机 PDF 和仓库 flag 的一致性还原机制；其余题目均有足够源码或官方解法支撑，没有跳过。
+- 按决定性主障碍归档为 AI/ML 1 篇、Crypto 8 篇、Pwn 8 篇、Reverse 2 篇、Stego 2 篇、Web 4 篇。原 Rev 下的 `Natural Flag Processing` 实质是从稀疏 RNN 权重恢复 DFA，归 AI/ML；原 Misc 下的 `Advanced Fisher` 与 `Kotlin Lovers Society` 分别依赖洗牌音频的相位频数和 SGI 图像解码行为，归 Stego，`B??e64` 归 Crypto，`UB#` 归 Pwn；两道 PPC 的决定性障碍都是高精度指数尾数与丢番图逼近，归 Crypto。
+- `natural_flag_processing/src/automaton.pdf` 共 1 页，已渲染并逐页视觉对照，黄色主链、红色转移和周围干扰分支完整转写为 RNN/DFA 权重关系，没有保留难以阅读的超长状态图。仓库 6 张 PNG 与 2 份 SVG 均逐张检查；两份 Giita SVG 还分别渲染后视觉确认，与 PNG 一样只是重复品牌图。Kotlin 的三个单通道图和重复原图仅用于调试，最终只保留具有题目目标视觉信息的彩色标志，并重命名为 `kotlin-symbol-target.png`，置于同 basename 资源目录且使用具体 alt 描述。
+- 逐篇人工复读并回查源码时，修复了早期稿中的 LaTeX 反斜杠损坏，补齐 `cling` 的完整 JIT 三目表达式常量，将 `Advanced Fisher` 的音频时长从错误的约 64 秒校正为约 21.5 秒，并明确 `optimized` 虽传入 18 字节字面量、OpenSSL ChaCha20 实际只读取前 16 字节 IV。提交前还把 Giita payload 的必要行尾空格改为显式 `<SPACE>` 标记，并保留可直接提交的精确 Python 字符串；外链中的关键机制均已内联，最终正文不依赖外部 URL。
+- 25 篇 Markdown 与 1 张图片复制到 raw 后，源稿、归档前 ZIP 条目和目标文件逐一通过 SHA-256 三方对照，差异为 0。目标端预验收通过后，将 `wp` 下 25 篇源稿、1 个赛事资源目录、PDF 渲染目录和 SVG 视觉核对目录送入 Windows 回收站；源仓库保留不动，`wp` 内剩余文件和嵌套目录均为 0，15 个空的一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：AI/ML 由 47 增至 48、Crypto 由 397 增至 405、Pwn 由 365 增至 373、Reverse 由 344 增至 346、Stego 由 97 增至 99、Web 由 350 增至 354，raw 总数由 1969 增至 1994；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/TSGCTF2021-wp-before-archive-20260802-235258.zip`，包含带分类相对路径的 26 个文件，ZIP 大小 51816 字节，SHA-256 为 `7fea1d01d2786d6e48a8c2fa805ce075156af3db7148ee480ded69e87396d4b6`；最终 lint 修正后重新建立源稿、ZIP 条目与 raw 目标的三方对照，逐项哈希差异为 0，旧的预修正版 ZIP 已送入 Windows 回收站。
+- 校验结果：25 篇 TSGCTF2021 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 1 条图片引用均无异常；1 个赛事资源目录有同 basename Markdown 且无零引用文件。全库 2224 篇 active Markdown 共解析出 7522 条普通链接 token 和 708 条图片引用，断链为 0；232 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 各方向 live 统计与 `index.md` 完全一致，总数为 1994。
