@@ -338,17 +338,17 @@
 | blockchain | 51 |
 | cloud-infra | 11 |
 | crypto | 379 |
-| forensics | 118 |
+| forensics | 119 |
 | hardware-embedded | 19 |
 | malware | 24 |
 | mobile | 14 |
-| osint | 74 |
+| osint | 75 |
 | pentest | 24 |
-| pwn | 341 |
-| reverse | 327 |
+| pwn | 343 |
+| reverse | 329 |
 | stego | 94 |
-| web | 333 |
-| **Total** | **1884** |
+| web | 336 |
+| **Total** | **1893** |
 
 ## 维护入口
 
