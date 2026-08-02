@@ -2271,3 +2271,14 @@
 - 9 篇 Markdown 复制到 raw 后均与源稿逐一通过 SHA-256 对照，差异为 0。目标端预验收通过后，将源 `wp` 下 9 篇 Markdown 和精确命名的 `N1CTF2022-analysis` PDF/渲染临时目录移入 Windows 回收站；`wp` 内剩余文件与嵌套目录均为 0，15 个空的一级方向目录继续保留。`index.md` live raw 统计同步更新：Forensics 由 118 增至 119、OSINT 由 74 增至 75、Pwn 由 341 增至 343、Reverse 由 327 增至 329、Web 由 333 增至 336，raw 总数由 1884 增至 1893；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/N1CTF2022-wp-before-archive-20260802-135138.zip`，包含带分类相对路径的 9 个文件，ZIP 大小 21576 字节，SHA-256 为 `a916f375ac8862955aa546171e2bcc1875f33ff771595b3b3743026b99ab2b53`；ZIP 内条目数量、事件前缀和分类路径均已读取核对。
 - 校验结果：9 篇 N1CTF2022 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名、8 条外链和 0 条图片引用均无异常。全库 2123 篇 active Markdown 共解析出 7511 条链接 token 和 704 条图片引用，断链为 0；230 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 各方向 live 统计与 `index.md` 完全一致，总数为 1893。
+
+## 2026-08-02 — N1CTF2021 Raw WP 归档
+
+- 逐题检查 `D:/文档/新建文件夹/n1ctf-2021-main` 中实际存在的 21 道题及其 README、源码、官方 solver、EXP、部署配置与录屏，全部整理为独立的 `N1CTF2021-<challenge>-wp.md`。官方内容为 WIP 或极短提示的 `collision`、`signin` 等题均以当前仓库代码和可核验参赛者复盘补齐；外部资料的关键控制流、请求和限制均已写入正文，不要求读者另开外链才能理解解法。
+- 按决定性主障碍归档为 AI/ML 1 篇、Blockchain 1 篇、Crypto 5 篇、Pwn 5 篇、Reverse 3 篇、Stego 1 篇、Web 5 篇。原 Misc 下的 `collision` 依赖受约束对抗样本，归 AI/ML；`ctfhub` 的核心是三轮 Feistel 差分恢复密钥，归 Crypto；`funny_misc` 的阻断点是内核 initramfs 解密逻辑，归 Reverse；`hacker vs hacker` 通过 TCP FIN 时序承载字符判断，归 Stego。
+- 仓库没有 PDF。`funny_misc`、`hello` 与 `py` 共 5 张 PNG 均逐张视觉检查，内容只是反编译代码、常量或终端文字，已完整转写为文本；`easyX11` 的 53.766 秒录屏抽取 8 个关键帧并逐帧人工核对，确认 XIM 注入、地址泄露、取得 shell 与 `cat flag` 全链路。比赛 flag `n1ctf{now_y0u_k0ow_xim}` 与仓库占位值的差异已在正文说明。所有图片和帧均无独立视觉证据价值，因此本轮保留 0 个资源目录。
+- 逐篇复核修正并验证关键细节：`checkin` 补齐全部 RSA 参数，将官方浮点平方根改为整数平方根，在 Sage 中实跑通过 `p*q == n` 并解出 `n1ctf{093fd4c4-5cc9-427e-98ef-5a04914c8b4e}`；`n1token2` 补齐 250 字节样本并复算得到官方 flag；`QQQueryyy all the things` 以 Docker、xinetd 和官方说明确认正确 IoT.js 端口为 16324，同时明确仓库和公开复盘均缺少原生模块本体，没有把两阶段示意脚本写成完整可运行 EXP；`signin` 的两次请求和最终 flag 由比赛期间复盘补齐。
+- 21 篇 Markdown 复制到 raw 后，源稿、归档前 ZIP 条目与目标稿逐一通过 SHA-256 三方对照，差异为 0。目标端预验收通过后，将 `wp` 下 21 篇源稿与精确命名的 `N1CTF2021-analysis` 目录送入 Windows 回收站，并删除 WSL `/tmp` 中 5 个精确核对过的 `N1CTF2021*` 临时项；`wp` 内剩余文件为 0，15 个空的一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：AI/ML 由 46 增至 47、Blockchain 由 51 增至 52、Crypto 由 379 增至 384、Pwn 由 343 增至 348、Reverse 由 329 增至 332、Stego 由 94 增至 95、Web 由 336 增至 341，raw 总数由 1893 增至 1914；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/N1CTF2021-wp-before-archive-20260802-144919.zip`，包含带分类相对路径的 21 个文件，ZIP 大小 49404 字节，SHA-256 为 `b7e2b06b9e93d2d4b1b60cdae8c26f2906defe804cbd02c569c398a37fa6d6b1`；ZIP 内条目数量、分类路径和逐文件内容均已读取核对。
+- 校验结果：21 篇 N1CTF2021 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名、6 条保留外链和 0 条图片引用均无异常。全库 2144 篇 active Markdown 共解析出 7517 条链接 token 和 704 条图片引用，断链为 0；230 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖；raw 各方向 live 统计与 `index.md` 完全一致，总数为 1914。
