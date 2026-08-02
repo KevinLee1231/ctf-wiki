@@ -335,20 +335,20 @@
 |---|---:|
 | _unclassified（暂存） | 29 |
 | ai-ml | 46 |
-| blockchain | 50 |
+| blockchain | 51 |
 | cloud-infra | 11 |
-| crypto | 372 |
+| crypto | 375 |
 | forensics | 118 |
 | hardware-embedded | 19 |
 | malware | 24 |
 | mobile | 14 |
 | osint | 74 |
 | pentest | 24 |
-| pwn | 335 |
+| pwn | 337 |
 | reverse | 326 |
 | stego | 94 |
-| web | 326 |
-| **Total** | **1862** |
+| web | 330 |
+| **Total** | **1872** |
 
 ## 维护入口
 

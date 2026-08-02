@@ -2240,3 +2240,14 @@
 - 43 篇 Markdown 与 20 张图片复制到 raw 后均与源稿逐一通过 SHA-256 对照，差异为 0。目标端预验收通过后，将源 `wp` 下 43 篇 Markdown、17 个赛事资源目录，以及 PDF/媒体视觉核对的 2 个临时目录移入 Windows 回收站；`wp` 内剩余文件和嵌套目录均为 0，15 个空的一级方向目录继续保留。`index.md` live raw 统计同步更新：`_unclassified` 由 28 增至 29、Crypto 由 360 增至 372、Forensics 由 114 增至 118、OSINT 由 63 增至 74、Reverse 由 322 增至 326、Stego 由 88 增至 94、Web 由 321 增至 326，raw 总数由 1819 增至 1862；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/BYUCTF2022-wp-before-archive-20260802-041954.zip`，包含 63 个文件、未压缩数据 14042935 字节，ZIP 大小 13896092 字节，SHA-256 为 `30490dbc88f770f875040cd91edc349b7648f60eeaaa15c6429676f7e282043a`；ZIP 内全部条目均已逐一与源文件做 SHA-256 对照，差异为 0。
 - 校验结果：43 篇 BYUCTF2022 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名、13 条外链和 20 条图片引用均无异常；17 个赛事资源目录均有同 basename Markdown，事件内无空目录、无零引用文件。全库 2094 篇 active Markdown 共解析出 5761 条本地引用和 704 条图片引用，断链为 0；230 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，页面类型仍为 family 99、technique 116、tooling 13；raw 一级目录、live 统计、备份 ZIP 与源目录清理状态均通过检查。
+
+## 2026-08-02 — N1CTF2025 Raw WP 归档
+
+- 逐题检查 `D:/文档/新建文件夹/n1ctf-2025-main` 的题面、源码、官方 solver、构建配置、二进制和作者补充材料，将仓库中实际存在的 10 道题全部整理为 `N1CTF2025-<challenge>-wp.md`。`eezzjs`、`n1cat` 的仓库 README 只有作者博客链接，`N1drone`、`n1flgsrv` 主要提供利用脚本，其余短说明均依据当前源码和官方脚本补齐关键数据流、漏洞原语与复现步骤；10 题均达到证据阈值，没有跳过。
+- 按决定性主障碍归档为 Blockchain 1 篇、Crypto 3 篇、Pwn 2 篇、Web 4 篇。`Bridge` 的终点是 Solana/Anchor 账户约束、Token-2022 Transfer Hook 与链下事件解析错栈，归 Blockchain；`N1SAML` 虽部署于 Kubernetes Pod，但 flag 由 curl 参数注入、Raft metadata 替换和 SAML 身份信任链决定，归 Web。
+- 仓库没有 PDF 或图片。`n1share` 引用的 Coppersmith–Sudan 三维噪声曲线重构论文共 7 页，已下载、逐页渲染并逐页视觉核对；同步错误、高重数带权插值、右核分块定位坏点和参数条件 $t>\ell/r$ 均已写入正文，因此不保留论文页面截图。其余保留外链只指向 Anchor 修复 PR、`sha.js` 公告、Node 模块文档、Tomcat 公告、N1SAML 作者分析和 Magento 修复提交，复现所需的重要信息均已内联。
+- 逐篇源码回读修正了官方材料中的两个实际问题：`eezzjs/solution/poc.js` 的硬编码空消息 SHA-256 摘要只有 56 个十六进制字符，无法通过 32 字节长度校验，正文改为完整 64 字符摘要；`solution/exp.cc` 的 `cp /flag > /app/uploads/flag.txt` 缺少复制目标，正文明确标注笔误并给出正确命令。`n1cat` 还补入 `/download?path=..%2fWEB-INF%2fweb.xml` 的可重放路径绕过和最简 JNDI 触发请求，不以 CVE 名称代替利用过程。
+- 10 篇 Markdown 复制到 raw 后均与源稿逐一通过 SHA-256 对照。目标端预验收通过后，将源 `wp` 下 10 篇 Markdown 和 `N1CTF2025-analysis` 临时目录移入 Windows 回收站，并删除 WSL 中两个精确核对过的分析目录；`wp` 内剩余文件和嵌套目录均为 0，15 个空的一级方向目录继续保留。
+- `index.md` live raw 统计同步更新：Blockchain 由 50 增至 51、Crypto 由 372 增至 375、Pwn 由 335 增至 337、Web 由 326 增至 330，raw 总数由 1862 增至 1872；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/N1CTF2025-wp-before-archive-20260802-122853.zip`，包含 10 个文件，ZIP 大小 28372 字节，SHA-256 为 `83e7ae4f861f8290de654df3e81eee6dd8ffe4ed0db95cdbabfa9605a7f87805`；ZIP 内全部条目均逐一与源文件做 SHA-256 对照，差异为 0。
+- 校验结果：10 篇 N1CTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 0 条图片引用均无异常。全库 2102 篇 active Markdown 共解析出 7497 条链接 token 和 704 条图片引用，断链为 0；230 个 raw 资源目录均有同 basename Markdown，raw 各方向 live 统计与 `index.md` 完全一致，总数为 1872。
