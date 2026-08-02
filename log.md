@@ -2251,3 +2251,13 @@
 - `index.md` live raw 统计同步更新：Blockchain 由 50 增至 51、Crypto 由 372 增至 375、Pwn 由 335 增至 337、Web 由 326 增至 330，raw 总数由 1862 增至 1872；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/N1CTF2025-wp-before-archive-20260802-122853.zip`，包含 10 个文件，ZIP 大小 28372 字节，SHA-256 为 `83e7ae4f861f8290de654df3e81eee6dd8ffe4ed0db95cdbabfa9605a7f87805`；ZIP 内全部条目均逐一与源文件做 SHA-256 对照，差异为 0。
 - 校验结果：10 篇 N1CTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 0 条图片引用均无异常。全库 2102 篇 active Markdown 共解析出 7497 条链接 token 和 704 条图片引用，断链为 0；230 个 raw 资源目录均有同 basename Markdown，raw 各方向 live 统计与 `index.md` 完全一致，总数为 1872。
+
+## 2026-08-02 — N1CTF2023 Raw WP 归档
+
+- 逐题检查 `D:/文档/新建文件夹/n1ctf-2023-main` 的题面、源码、官方 solver、利用脚本、构建配置和补充材料，将仓库中实际存在的 12 道题全部整理为 `N1CTF2023-<challenge>-wp.md`。只有脚本或简短说明的题目均依据当前源码补齐决定性机制；缺少历史远程 flag 的 `n1canary`、`n1proxy`、`ezmaria`、`laravel` 与 `ytiruces` 没有编造结果。
+- 按决定性主障碍归档为 Crypto 4 篇、Pwn 4 篇、Reverse 1 篇、Web 3 篇。`pwn1OS` 虽以 iOS 应用和 UIWebView 为入口，但终点依赖 Objective-C UAF、类型混淆、任意读与伪造 `NSInvocation`，因此归 Pwn；`h2o` 需要从 Subleq 固定模板恢复 H2OASM 并逆向自定义 XTEA，归 Reverse。
+- 仓库没有 PDF，唯一图片是 `pwn1OS` 的应用图标，逐张视觉检查后确认仅为装饰素材，未保留资源目录。代码、终端和算法内容全部转写为可复制文本；保留的外链仅用于 e2D1p/e2Is0 独立复现、pwn1OS 特定 iOS 偏移、Ignition 修复与 iconv 字典、ytiruces WebVTT/CSS 泄露原理，关键事实与复现步骤均已写入正文。
+- 逐篇源码回读修正了初稿中的边界：`e2Is0` 的指数先在 `Zmod(p^2)` 中得到代表元 `p^2-2`，再模乘法群阶化为 $-1$；`anime` 的 `exploit.lua` 只保留三个占位原语，实际 `pwn.out` 需手工改字节码，静态 libc 的 `__mprotect` 会自行页对齐；`n1canary` 使用真实输入提示串；`ytiruces` 的 32 字节限制约束 WebVTT 头，六组候选则用于控制每条 bot URL 的 CSS 规模。`e2$m4` 与 `h2o` 的官方 solver 已本地复算得到 flag；`e2Is0` 在修正当前 Sage 多项式兼容性后恢复样例 guess；`e2D1p` 的 Sage LLL 在本机 5 分钟窗口内未结束，正文明确采用官方关系与独立复现结果，没有把超时写成运行成功。
+- 12 篇 Markdown 复制到 raw 后均与源稿逐一通过 SHA-256 对照，差异为 0。目标端预验收通过后，将源 `wp` 下 12 篇 Markdown 与精确命名的 `N1CTF2023-analysis` 目录移入 Windows 回收站，并删除 WSL 中 `/tmp/N1CTF2023-h2o-sol`；`wp` 内剩余文件和嵌套目录均为 0，15 个空的一级方向目录继续保留。`index.md` live raw 统计同步更新：Crypto 由 375 增至 379、Pwn 由 337 增至 341、Reverse 由 326 增至 327、Web 由 330 增至 333，raw 总数由 1872 增至 1884；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 归档前源备份为 `D:/文档/新建文件夹/wp-archive-backups/N1CTF2023-wp-before-archive-20260802-131641.zip`，包含 12 个文件，ZIP 大小 26136 字节，SHA-256 为 `1804a671d3cc38f4be9941f781d8641d85ecaa3f60e332b5a19eaf5dfca4d3ee`；ZIP 内全部条目均已读取并核对事件前缀。
+- 校验结果：12 篇 N1CTF2023 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8/LF、安全命名和 0 条图片引用均无异常。全库 2114 篇 active Markdown 共解析出 7503 条链接 token 和 704 条图片引用，断链为 0；230 个 raw 资源目录均有同 basename Markdown 且非空，raw 各方向 live 统计与 `index.md` 完全一致，总数为 1884。
