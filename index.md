@@ -272,6 +272,9 @@
 ### Reverse
 
 - [anti-debug-self-check-and-environment-bypass.md](wiki/anti-debug-self-check-and-environment-bypass.md)
+- [binary-diff-and-symbol-migration.md](wiki/binary-diff-and-symbol-migration.md)
+- [browser-extension-manifest-worker-and-message-flow.md](wiki/browser-extension-manifest-worker-and-message-flow.md)
+- [browser-javascript-runtime-reconstruction.md](wiki/browser-javascript-runtime-reconstruction.md)
 - [compare-breakpoint-plaintext-recovery.md](wiki/compare-breakpoint-plaintext-recovery.md)
 - [constraint-solver-and-symbolic-state-recovery.md](wiki/constraint-solver-and-symbolic-state-recovery.md)
 - [custom-isa-and-mmio-emulation.md](wiki/custom-isa-and-mmio-emulation.md)
@@ -281,6 +284,7 @@
 - [font-glyph-and-text-rendering-reconstruction.md](wiki/font-glyph-and-text-rendering-reconstruction.md)
 - [game-asset-and-scene-state-extraction.md](wiki/game-asset-and-scene-state-extraction.md)
 - [managed-runtime-metadata-and-bytecode-recovery.md](wiki/managed-runtime-metadata-and-bytecode-recovery.md)
+- [ollvm-control-flow-and-mba-deobfuscation.md](wiki/ollvm-control-flow-and-mba-deobfuscation.md)
 - [shader-vm-and-graphics-pipeline-emulation.md](wiki/shader-vm-and-graphics-pipeline-emulation.md)
 - [staged-loader-and-runtime-image-recovery.md](wiki/staged-loader-and-runtime-image-recovery.md)
 - [trace-hook-and-state-snapshot-reconstruction.md](wiki/trace-hook-and-state-snapshot-reconstruction.md)

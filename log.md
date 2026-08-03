@@ -2410,3 +2410,12 @@
 - 归档前备份 `D:/文档/新建文件夹/wp-archive-backups/UIUCTF2023-wp-before-archive-20260803-170336.zip` 含 35 篇 Markdown 与 4 张图片，共 39 个文件、未压缩数据 5297655 字节，ZIP 大小 5261878 字节，SHA-256 为 `daba052e5123ec57552307321954c9b0035a26d7fd5e089e3561791e948ea24a`；ZIP 条目与源稿逐文件 SHA-256 对照差异为 0。源稿复制到 raw 后再次完成源/目标 39 文件哈希对照，差异为 0；目标验收通过后，将 `wp` 中精确匹配的 35 篇源稿和 3 个资源目录送入 Windows 回收站，并清理 3 个 PDF 视觉渲染临时目录。题目源码仓库保持不动；`wp` 内文件和嵌套目录均为 0，只保留 15 个正式空方向目录。
 - `index.md` live raw 统计同步更新：Crypto 由 471 增至 477、OSINT 由 96 增至 102、Pwn 由 432 增至 445、Reverse 由 387 增至 392、Stego 由 117 增至 118、Web 由 405 增至 409，raw 总数由 2287 增至 2322；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 校验结果：35 篇 UIUCTF2023 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、安全命名、4 条图片引用和资源配对均无异常；27 个 Python 代码围栏全部通过 AST 解析。全库 2554 篇 active Markdown 共解析出 7574 条普通链接 token 和 759 条图片引用，本地断链为 0；273 个 raw 资源目录均有同 basename Markdown 且非空，228 篇 wiki 页面全部由 `index.md` 覆盖，raw 各方向 live 统计与 `index.md` 完全一致，总数为 2322。
+
+## 2026-08-03 — CTF Reverse skill 与知识网优化
+
+- 保持 `ctf-solve-challenge → ctf-* → wiki → raw` 的现有路由与知识层级不变，只吸收可复用的逆向方法、确定性脚本和跨 skill 路由；未注册新 MCP，也未修改 PATH、Conda、IDA、Ghidra、浏览器或系统配置。
+- 新增 4 个 technique 节点：浏览器 JavaScript 按 `Observe → Capture → Rebuild → Patch → DeepDive` 捕获和重建运行时；浏览器扩展按 manifest/worker/content/message/storage/sink 还原；OLLVM-like 混淆按 flattening/BCF/MBA 分层验证；二进制差分按独立锚点验证函数匹配后再迁移符号。
+- 重构并补强 managed runtime、custom VM/WASM、packer/deobfuscation、Reverse/Web first-pass 和 tooling 节点；明确 CLR/NativeAOT/IL2CPP 边界、JS-hosted VM 的 host bridge、OLLVM 的 ground-truth 验证、binary diff 的符号迁移停止点，并补齐 index 与 family/skill 入链。
+- 对应外部 `ctf-reverse/SKILL.md` 保持原名称与路由边界，只增加证据闭环、4 类新信号和只读 Android Manifest 摘要脚本；脚本显式禁止 DTD/外部实体，由 XML reader 按 BOM/声明判定编码，并通过正常 fixture 与 DTD 拒绝回归。`ctf-web`/`ctf-malware` 只增加必要的交叉路由。
+- 只读工具审计确认 IDA/Ghidra MCP 可调用但当时均无活动会话；WSL baseline 已有 radare2 6.0.5、GDB 17.2、strace 7.0、QEMU user 11.0.1、capa 9.4.0、angr、Frida、Qiling、Unicorn、pycdc 等。`reverse-tooling.md` 将原“没有明显基础缺口”改为“baseline 完整，但有窄缺口”，并按优先级记录 JADX、r2pipe、Miasm/d810-ng、APKiD/Androguard、`bbpb` (Blackbox Protobuf)、jshookmcp 和重型固件框架候选。
+- 本轮未新增 raw，reverse 保持 392、raw 总数保持 2322；wiki 新增 4 篇 technique，页面类型和 L0–L4 整体架构不变。

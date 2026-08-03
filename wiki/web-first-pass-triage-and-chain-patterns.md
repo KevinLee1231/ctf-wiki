@@ -4,7 +4,7 @@ tags: [web, family, triage]
 skills: [ctf-web]
 raw:
   - ../raw/web/web-first-pass-triage-and-chain-patterns.md
-updated: 2026-07-27
+updated: 2026-08-03
 ---
 
 # First-Pass Triage and Chain Patterns
@@ -48,6 +48,7 @@ updated: 2026-07-27
 | Node、prototype pollution、workflow runner、internal API | [node-and-prototype.md](node-and-prototype.md)、[workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) | 对象合并、包生命周期、worker/runner 信任链和内部 API 权限。 |
 | 远控/relay/client backend、第三方协议字段进入内网服务 | [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md) | 控制面 key 校验是否覆盖所有消息路径，目标是否会主动连接本机 Redis/Docker/API。 |
 | XSS、DOM、admin bot、CSP、XS-Leak、cache/MIME | [xss-dom-and-browser-tricks.md](xss-dom-and-browser-tricks.md)、[csp-xsleak-and-browser-exfiltration.md](csp-xsleak-and-browser-exfiltration.md) | 浏览器上下文、CSP/同源限制、外带 oracle 和 bot 触发条件。 |
+| 前端压缩/VM JavaScript 的 DOM/storage/WebCrypto/worker 依赖决定校验或签名 | [browser-javascript-runtime-reconstruction.md](browser-javascript-runtime-reconstruction.md) | 先捕获真实运行时值，再建最小 harness；若主障碍是 HTTP/同源/认证仍留在 Web。 |
 | 已知组件、CVE、WordPress/Chromium/ExifTool/框架版本 | [known-cves-and-n-day-exploits.md](known-cves-and-n-day-exploits.md) | 版本、补丁边界、利用前置条件和是否需要串其它漏洞。 |
 | Jail、表达式沙箱、Python/Web 混合过滤 | [pyjails.md](pyjails.md) | 过滤发生在语言、表达式、对象图还是 Web 包装层。 |
 
@@ -74,6 +75,7 @@ updated: 2026-07-27
 - [path-traversal-ssrf-upload-and-rsc.md](path-traversal-ssrf-upload-and-rsc.md)
 - [ruby-php-upload-and-ssti-rce.md](ruby-php-upload-and-ssti-rce.md)
 - [xss-dom-and-browser-tricks.md](xss-dom-and-browser-tricks.md)
+- [browser-javascript-runtime-reconstruction.md](browser-javascript-runtime-reconstruction.md)
 - [sqli-filter-and-oracle-family.md](sqli-filter-and-oracle-family.md)
 
 ## WP 案例沉淀

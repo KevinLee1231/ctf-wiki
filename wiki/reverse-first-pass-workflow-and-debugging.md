@@ -4,7 +4,7 @@ tags: [reverse, family, triage]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/reverse-first-pass-workflow-and-debugging.md
-updated: 2026-07-28
+updated: 2026-08-03
 ---
 
 # First-Pass Workflow and Debugging
@@ -44,6 +44,10 @@ updated: 2026-07-28
 | Go/Rust/JVM/C++/Swift/Kotlin/D/Haskell/Cython | [go-rust-jvm-and-cpp-reversing.md](go-rust-jvm-and-cpp-reversing.md) | 语言运行时、对象布局、符号、类型、协程/异常和标准库模式。 |
 | Python bytecode、Pyarmor、Nuitka、Brainfuck、UEFI、HarmonyOS ABC | [python-bytecode-esolangs-and-uefi.md](python-bytecode-esolangs-and-uefi.md) | 先恢复字节码/解释器/低频格式，再谈算法。 |
 | 自定义 VM、dispatch loop、opcode、flattening、字节变换 | [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) | handler、状态寄存器、opcode stream、trace 和 forward checker。 |
+| 浏览器压缩/VM JavaScript、DOM/storage/WebCrypto/worker 依赖 | [browser-javascript-runtime-reconstruction.md](browser-javascript-runtime-reconstruction.md) | 先捕获真实 runtime 输入，再建最小 harness 并记录首个分歧点。 |
+| CRX/XPI、manifest、service worker/content script 与 runtime message | [browser-extension-manifest-worker-and-message-flow.md](browser-extension-manifest-worker-and-message-flow.md) | 权限、执行上下文、message schema、storage 与高影响 sink。 |
+| OLLVM-like dispatcher、opaque predicate、MBA 或代码替换 | [ollvm-control-flow-and-mba-deobfuscation.md](ollvm-control-flow-and-mba-deobfuscation.md) | 分层清理 flattening/BCF/MBA，每层对照 CFG、trace 和 I/O。 |
+| 同源 old/new/patched binary、已分析参考版 | [binary-diff-and-symbol-migration.md](binary-diff-and-symbol-migration.md) | 先验证函数匹配，再迁移符号/类型，在语义变化处停止。 |
 | 二阶段 loader、image/bitmap、kernel module、binfmt、shared library backdoor | [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md) | 真实逻辑何时加载、映射、解密或被内核/loader 解释。 |
 | ptrace、Frida 检测、TLS callback、anti-VM、时间/环境检测 | [anti-analysis.md](anti-analysis.md) | 先跨过检测，不要把反分析门槛误当主算法。 |
 | 最终比较点可断、明文 buffer 可 dump | [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md) | 抓最终明文或中间 buffer，比完整逆向更短。 |
@@ -65,6 +69,10 @@ updated: 2026-07-28
 | loader/packer 运行时映射第二阶段，需要 dump 与修复 | [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md) |
 | Python/JVM/.NET/Go/Rust metadata/bytecode 可恢复语义 | [managed-runtime-metadata-and-bytecode-recovery.md](managed-runtime-metadata-and-bytecode-recovery.md) |
 | 静态控制流失真，API/比较/阶段边界适合 trace/hook | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+| 前端 JavaScript 需要捕获运行时依赖并离线重建 | [browser-javascript-runtime-reconstruction.md](browser-javascript-runtime-reconstruction.md) |
+| 浏览器扩展需要从 manifest 还原 worker/content/message 链 | [browser-extension-manifest-worker-and-message-flow.md](browser-extension-manifest-worker-and-message-flow.md) |
+| OLLVM-like 混淆需要分层恢复 CFG 和 MBA 语义 | [ollvm-control-flow-and-mba-deobfuscation.md](ollvm-control-flow-and-mba-deobfuscation.md) |
+| 多版本 binary 需要差分、函数匹配与符号迁移 | [binary-diff-and-symbol-migration.md](binary-diff-and-symbol-migration.md) |
 
 ## 常见误判
 
@@ -84,6 +92,10 @@ updated: 2026-07-28
 - [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)
 - [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)
 - [font-shader-firmware-and-legacy-patterns.md](font-shader-firmware-and-legacy-patterns.md)
+- [browser-javascript-runtime-reconstruction.md](browser-javascript-runtime-reconstruction.md)
+- [browser-extension-manifest-worker-and-message-flow.md](browser-extension-manifest-worker-and-message-flow.md)
+- [ollvm-control-flow-and-mba-deobfuscation.md](ollvm-control-flow-and-mba-deobfuscation.md)
+- [binary-diff-and-symbol-migration.md](binary-diff-and-symbol-migration.md)
 
 ## WP 案例沉淀
 

@@ -2,7 +2,7 @@
 type: tooling
 tags: [reverse, tooling, tools, environment, ida, idalib, ghidra]
 skills: [ctf-reverse, ctf-mobile, ctf-malware, ctf-pwn, ctf-hardware-embedded]
-updated: 2026-07-28
+updated: 2026-08-03
 ---
 
 # Reverse Tooling
@@ -53,7 +53,19 @@ updated: 2026-07-28
 
 ### 当前未装 / 建议按需补装
 
-- 当前没有明显基础缺口。更重要的是保持 IDA Pro MCP 的会话生命周期、首轮 survey 和保存边界准确，并把 Ghidra 维持为可替换的普通工具。
+当前 native、动态调试、符号执行、跨架构、Python bytecode、固件提取和 APK 低层解包的 baseline 已经完整，但不应再概括为“没有缺口”。2026-08-03 只读审计得到以下窄缺口：
+
+| 候选 | 当前状态 | 是否值得补 | 边界 |
+|---|---|---|---|
+| JADX | Windows/WSL `PATH` 均未发现 | 高 | 补 APK/DEX 的 Java-like 反编译、xref 和搜索；与 `apktool`/`baksmali` 互补，不替代 smali 核验。 |
+| `r2pipe` | `ctf-tools` 未安装，但 radare2 CLI 已有 | 中 | 只在需要批量 JSON/函数级自动化时补；单题手工分析不缺。 |
+| Miasm / d810-ng | Miasm 未在 `ctf-tools`；d810-ng 未确认安装 | 中，按题 | 专用于 IR/符号反混淆与 IDA microcode 规则；安装前需核对 IDA/Python 兼容性。 |
+| APKiD / Androguard | `ctf-tools` 未安装 | 中，按 APK 频率 | 前者补 packer/protector/obfuscator 指纹，后者补可编程 APK/DEX/resource 分析；不与 JADX 重复优先级。 |
+| `bbpb` (Blackbox Protobuf) | `ctf-tools` 未安装；旧包名 `blackboxprotobuf` 也未安装 | 中低，协议题按需 | 当前上游把 `bbpb` 列为官方 PyPI 包；只在缺少 `.proto` 且 protobuf 编码是主障碍时补。 |
+| jshookmcp | 当前没有可调用的对应 MCP | 中低，浏览器 JS 频繁时 | 会引入新服务/配置层；本次只列候选，不注册。 |
+| EMBA/Firmadyne 类固件框架 | 常用 WSL 路径未发现 | 低，仅固件题频繁时 | 体积、依赖和运行成本高；现有 `binwalk`/`unsquashfs`/QEMU/Qiling 先用。 |
+
+`anything-analyzer`、公开去混淆服务、自动 bootstrap 和自建 IDA HTTP server 不列为本机 baseline：前两者与现有工具重叠或有样本外传边界，后两者会改变环境/会话治理。
 
 ## 失败信号与转向
 
@@ -68,6 +80,8 @@ updated: 2026-07-28
 RE 优先使用 **IDA Pro MCP（`idalib`）**。
 
 ### IDA Pro MCP（首选）
+
+当前 MCP 工具已可调用；2026-08-03 审计时 `idb_list` 返回 0 个会话。这表示“当时无已打开数据库”，不表示 IDA MCP 缺失。
 
 稳定调用顺序：
 
@@ -85,6 +99,8 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | 大型 binary survey 输出过重 | 改用 `detail_level="minimal"`，再围绕少量候选函数深挖。 |
 
 ### Ghidra MCP（普通工具）
+
+当前 MCP 工具已可调用；2026-08-03 审计时 `list_instances` 没有正在运行的实例。这是运行状态，不是安装结论。
 
 - 先用 `list_instances` 检查实例；需要项目级分析时再 `connect_instance`。
 - 连接成功后工具列表会动态扩展，随后才调用反编译、交叉引用、导入或调试能力。
@@ -123,7 +139,7 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | **readelf** | `/usr/bin/readelf` | ELF 结构分析 | `readelf -S binary; readelf -l binary` |
 | **nm** | `/usr/bin/nm` | 符号表列出 | `nm binary \| grep main` |
 | **apktool** | `/usr/bin/apktool` 2.7.0 | APK 解包 | `apktool d app.apk -o decoded/` |
-| **strace** | `/usr/bin/strace` 6.18 | 系统调用跟踪 | `strace -f ./bin` |
+| **strace** | `/usr/bin/strace` 7.0 | 系统调用跟踪 | `strace -f ./bin` |
 | **ltrace** | `/usr/bin/ltrace` 0.7.91 | 库函数调用跟踪 | `ltrace ./bin` |
 | **upx** | `/usr/bin/upx` 4.2.4 | 脱壳 | `upx -d packed -o unpacked` |
 | **one_gadget** | `/usr/local/bin/one_gadget` 1.10.0 | libc gadget 查找 | `one_gadget libc.so.6` |
@@ -131,15 +147,18 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | **seccomp-tools** | `/usr/local/bin/seccomp-tools` 1.6.2 | SECCOMP/BPF 转储 | `seccomp-tools dump ./bin` |
 | **baksmali** | `/usr/bin/baksmali` 2.5.2 | DEX 字节码反汇编 | `baksmali d classes.dex -o smali/` |
 | **unsquashfs** | `/usr/bin/unsquashfs` 4.7.5 | SquashFS 提取 | `unsquashfs -d out/ firmware.sqfs` |
-| **qemu-riscv64** | `/usr/bin/qemu-riscv64` 10.2.2 | RISC-V 模拟 | `qemu-riscv64 -L /usr/riscv64-linux-gnu/ ./bin` |
-| **qemu-arm** | `/usr/bin/qemu-arm` 10.2.2 | ARM 模拟 | `qemu-arm -L /usr/arm-linux-gnueabihf/ ./bin` |
-| **qemu-mips** | `/usr/bin/qemu-mips` 10.2.2 | MIPS 模拟 | `qemu-mips -L /usr/mips-linux-gnu/ ./bin` |
+| **qemu-riscv64** | `/usr/bin/qemu-riscv64` 11.0.1 | RISC-V 模拟 | `qemu-riscv64 -L /usr/riscv64-linux-gnu/ ./bin` |
+| **qemu-arm** | `/usr/bin/qemu-arm` 11.0.1 | ARM 模拟 | `qemu-arm -L /usr/arm-linux-gnueabihf/ ./bin` |
+| **qemu-mips** | `/usr/bin/qemu-mips` 11.0.1 | MIPS 模拟 | `qemu-mips -L /usr/mips-linux-gnu/ ./bin` |
 
 ### Windows 本地
 
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
 | **dnSpy** | `D:\CTF工具\dnSpy-net-win64\dnSpy.exe` | .NET 反编译/调试 | GUI 打开 binary 或 Assembly-CSharp.dll |
+| **Node.js** | `"C:/Program Files/nodejs/node.exe"` 24.13.0 | 浏览器 JavaScript 的最小离线 harness | 只引入已捕获的必要环境值，按首个状态分歧点补 mock |
+| **OpenJDK** | `"C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe"` 21.0.10 | APK/JAR 工具的 Java 运行时 | 当前可满足 JADX 等候选工具的 Java 前置，但不表示 JADX 已安装 |
+| **Manifest summary** | `C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1` | 只读摘要已解码 Android Manifest 的 SDK、权限、组件、intent-filter 和 launcher | `& "C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1" -ManifestPath "decoded/AndroidManifest.xml"` |
 
 ### 专项全路径工具
 

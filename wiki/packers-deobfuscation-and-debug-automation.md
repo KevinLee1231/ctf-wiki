@@ -5,7 +5,7 @@ skills: [ctf-reverse]
 raw:
   - ../raw/reverse/packers-deobfuscation-and-debug-automation.md
   - ../raw/reverse/WMCTF2025-videoplayer-wp.md
-updated: 2026-07-28
+updated: 2026-08-03
 ---
 
 # Packers, Deobfuscation and Debug Automation
@@ -48,8 +48,8 @@ updated: 2026-07-28
 | VMProtect / Themida | 先识别壳特征和反调试点，再决定动态 trace、OEP dump、handler 抽象或只抓最终比较反馈。 |
 | VMP OEP dump followed by business logic tracing | 找到 OEP/dump 只是开始，后续仍要跟登录状态、机器绑定、解密函数和返回 buffer。 |
 | 自定义 VM | 重点是 dispatcher、handler 表、opcode/operand 编码和 VM state；能 lift 就 lift，不能 lift 就 trace 切片。 |
-| Binary diffing | 有 patched/old/new 两个版本时，优先用函数匹配和差异点缩小搜索范围，再回到具体校验逻辑。 |
-| Deobfuscation IR | 控制流扁平化、表达式膨胀和 opaque predicate 可先 lift 到 IR，做常量传播、死代码删除和表达式简化。 |
+| Binary diffing | 有 patched/old/new 两个版本时，优先用函数匹配和差异点缩小搜索范围，再回到具体校验逻辑；符号迁移前见 [binary-diff-and-symbol-migration.md](binary-diff-and-symbol-migration.md)。 |
+| OLLVM / Deobfuscation IR | 先区分 flattening、bogus control flow 和 MBA，再 lift 到 IR 做常量传播、不可达边删除和表达式简化；详见 [ollvm-control-flow-and-mba-deobfuscation.md](ollvm-control-flow-and-mba-deobfuscation.md)。 |
 | Dynamic instrumentation | Frida/GDB/Qiling/Triton 等只用于捕获边界证据：函数参数、比较值、内存明文、分支约束或 handler 执行序列。 |
 | Patching strategy | Patch 应服务于验证假设：跳过 anti-debug、固定时间/随机、强制走成功分支或暴露解密结果，不应破坏真实校验语义。 |
 | Debug automation | 当比较点很多或输入按位反馈时，用 GDB/Python/trace 自动收集 CMP/ZF/内存写入，再转成 solver。 |
@@ -70,6 +70,8 @@ updated: 2026-07-28
 | 壳/loader 运行时映射解密第二阶段，需 dump 修复 | [staged-loader-and-runtime-image-recovery.md](staged-loader-and-runtime-image-recovery.md) |
 | anti-debug/self-check/环境检测阻断真实解包路径 | [anti-debug-self-check-and-environment-bypass.md](anti-debug-self-check-and-environment-bypass.md) |
 | 动态解密、API 和阶段状态适合 hook/trace/snapshot | [trace-hook-and-state-snapshot-reconstruction.md](trace-hook-and-state-snapshot-reconstruction.md) |
+| OLLVM-like flattening、opaque predicate 或 MBA 需要分层语义验证 | [ollvm-control-flow-and-mba-deobfuscation.md](ollvm-control-flow-and-mba-deobfuscation.md) |
+| old/new/patched binary 需要函数匹配或符号迁移 | [binary-diff-and-symbol-migration.md](binary-diff-and-symbol-migration.md) |
 
 ## 合并与拆分结论
 
@@ -85,6 +87,8 @@ updated: 2026-07-28
 - [disassemblers-debuggers-and-basic-tools.md](disassemblers-debuggers-and-basic-tools.md)
 - [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)
 - [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md)
+- [ollvm-control-flow-and-mba-deobfuscation.md](ollvm-control-flow-and-mba-deobfuscation.md)
+- [binary-diff-and-symbol-migration.md](binary-diff-and-symbol-migration.md)
 
 ## 来自 WP 的案例索引
 
