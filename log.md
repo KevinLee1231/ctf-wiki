@@ -2419,3 +2419,10 @@
 - 对应外部 `ctf-reverse/SKILL.md` 保持原名称与路由边界，只增加证据闭环、4 类新信号和只读 Android Manifest 摘要脚本；脚本显式禁止 DTD/外部实体，由 XML reader 按 BOM/声明判定编码，并通过正常 fixture 与 DTD 拒绝回归。`ctf-web`/`ctf-malware` 只增加必要的交叉路由。
 - 只读工具审计确认 IDA/Ghidra MCP 可调用但当时均无活动会话；WSL baseline 已有 radare2 6.0.5、GDB 17.2、strace 7.0、QEMU user 11.0.1、capa 9.4.0、angr、Frida、Qiling、Unicorn、pycdc 等。`reverse-tooling.md` 将原“没有明显基础缺口”改为“baseline 完整，但有窄缺口”，并按优先级记录 JADX、r2pipe、Miasm/d810-ng、APKiD/Androguard、`bbpb` (Blackbox Protobuf)、jshookmcp 和重型固件框架候选。
 - 本轮未新增 raw，reverse 保持 392、raw 总数保持 2322；wiki 新增 4 篇 technique，页面类型和 L0–L4 整体架构不变。
+
+## 2026-08-03 — 登记 JADX 1.5.6 固定路径
+
+- 只读验证用户安装的 `D:/CTF工具/jadx-1.5.6`：发行目录包含 `bin/`、`lib/`、LICENSE 和 README，`bin/jadx.bat --version` 返回 1.5.6，CLI 帮助可正常读取；现有 Temurin OpenJDK 21.0.10 与 `JAVA_HOME` 可直接驱动，无需修改 PATH 或 Java 配置。
+- `ctf-reverse/SKILL.md` 增加 JADX 的固定绝对路径，`reverse-tooling.md` 将其从候选缺口移入已验证 Windows 专项工具，并记录 GUI、CLI、失败模式和 ZIP/XML 安全边界；基础工具节点同步改为指向 tooling 页的真实路径。
+- APKiD 3.1.0 与 Androguard 4.1.4 当前均未安装。两者都是 Python 项目，但 APKiD 以 CLI 为主、适合隔离 `uv tool`，Androguard 若要供分析脚本导入则应使用独立 `uv venv`；APKiD 的 `yara-python-dex` 与 `ctf-tools` 现有 `yara-python` 共享模块名，直接混装会破坏依赖边界。
+- 校验结果：`ctf-reverse` 通过 `quick_validate.py`，Manifest 摘要回归输出 27 行并继续拒绝 DTD；全库 2558 篇 active Markdown 共解析 7627 条普通链接和 759 条图片引用，本地断链为 0，232 篇 wiki 均已索引，raw 总数保持 2322。

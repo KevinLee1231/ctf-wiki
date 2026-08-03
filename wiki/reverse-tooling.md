@@ -53,19 +53,26 @@ updated: 2026-08-03
 
 ### 当前未装 / 建议按需补装
 
-当前 native、动态调试、符号执行、跨架构、Python bytecode、固件提取和 APK 低层解包的 baseline 已经完整，但不应再概括为“没有缺口”。2026-08-03 只读审计得到以下窄缺口：
+当前 native、动态调试、符号执行、跨架构、Python bytecode、固件提取，以及 APK 高层反编译和低层解包的 baseline 已经完整，但仍有以下窄缺口：
 
 | 候选 | 当前状态 | 是否值得补 | 边界 |
 |---|---|---|---|
-| JADX | Windows/WSL `PATH` 均未发现 | 高 | 补 APK/DEX 的 Java-like 反编译、xref 和搜索；与 `apktool`/`baksmali` 互补，不替代 smali 核验。 |
 | `r2pipe` | `ctf-tools` 未安装，但 radare2 CLI 已有 | 中 | 只在需要批量 JSON/函数级自动化时补；单题手工分析不缺。 |
 | Miasm / d810-ng | Miasm 未在 `ctf-tools`；d810-ng 未确认安装 | 中，按题 | 专用于 IR/符号反混淆与 IDA microcode 规则；安装前需核对 IDA/Python 兼容性。 |
-| APKiD / Androguard | `ctf-tools` 未安装 | 中，按 APK 频率 | 前者补 packer/protector/obfuscator 指纹，后者补可编程 APK/DEX/resource 分析；不与 JADX 重复优先级。 |
+| APKiD / Androguard | `ctf-tools` 未安装；WSL `uv` 0.11.8 可用 | 中，按 APK 频率 | 两者都是 Python 项目；APKiD 以 CLI 为主，适合 `uv tool`，Androguard 若需脚本导入则使用独立 `uv venv`。不要写入现有 `ctf-tools`。 |
 | `bbpb` (Blackbox Protobuf) | `ctf-tools` 未安装；旧包名 `blackboxprotobuf` 也未安装 | 中低，协议题按需 | 当前上游把 `bbpb` 列为官方 PyPI 包；只在缺少 `.proto` 且 protobuf 编码是主障碍时补。 |
 | jshookmcp | 当前没有可调用的对应 MCP | 中低，浏览器 JS 频繁时 | 会引入新服务/配置层；本次只列候选，不注册。 |
 | EMBA/Firmadyne 类固件框架 | 常用 WSL 路径未发现 | 低，仅固件题频繁时 | 体积、依赖和运行成本高；现有 `binwalk`/`unsquashfs`/QEMU/Qiling 先用。 |
 
 `anything-analyzer`、公开去混淆服务、自动 bootstrap 和自建 IDA HTTP server 不列为本机 baseline：前两者与现有工具重叠或有样本外传边界，后两者会改变环境/会话治理。
+
+#### APKiD / Androguard 的 uv 安装边界
+
+- APKiD 3.1.0 是 Python CLI，入口为 `apkid`，用于识别 compiler、packer、protector、obfuscator 和其他 APK/DEX 特征；其运行依赖是 `yara-python-dex>=1.0.1`。
+- Androguard 4.1.4 是 Python 3.9+ 的库和 CLI，入口为 `androguard`，覆盖 APK/DEX、binary XML、resources、反汇编和可编程分析。4.x 与旧版 3.3.5 API 有明显差异，旧脚本迁移时不能只替换版本号。
+- 不把两者直接装入 `ctf-tools`：APKiD 的 `yara-python-dex` 与环境中已有的 `yara-python` 都提供 `yara` 模块；Androguard 的依赖更新也不应影响通用 CTF 环境。
+- APKiD 使用命令级 `UV_TOOL_DIR=/home/kali/ctf-uv-tools` 和 `UV_TOOL_BIN_DIR=/home/kali/ctf-uv-tools/bin` 创建持久隔离工具环境，不执行 `uv tool update-shell`，后续调用 `/home/kali/ctf-uv-tools/bin/apkid`。
+- Androguard 仅用 CLI 时也可安装到该 `uv tool` 层；若 solver/分析脚本需要 `import androguard`，则创建 `/home/kali/androguard-venv`，并固定使用其中的 `bin/python` 和 `bin/androguard`，不要假设 `ctf-tools` 可以导入它。
 
 ## 失败信号与转向
 
@@ -156,9 +163,31 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
 | **dnSpy** | `D:\CTF工具\dnSpy-net-win64\dnSpy.exe` | .NET 反编译/调试 | GUI 打开 binary 或 Assembly-CSharp.dll |
+| **JADX 1.5.6** | `D:/CTF工具/jadx-1.5.6/bin/jadx.bat`；GUI 为同目录 `jadx-gui.bat` | APK/DEX/AAB/APKM 的 Java-like 反编译、资源查看、搜索、xref、单类恢复和调用图导出 | `& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "jadx-output" "app.apk"`；GUI：`& "D:/CTF工具/jadx-1.5.6/bin/jadx-gui.bat" "app.apk"` |
 | **Node.js** | `"C:/Program Files/nodejs/node.exe"` 24.13.0 | 浏览器 JavaScript 的最小离线 harness | 只引入已捕获的必要环境值，按首个状态分歧点补 mock |
-| **OpenJDK** | `"C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe"` 21.0.10 | APK/JAR 工具的 Java 运行时 | 当前可满足 JADX 等候选工具的 Java 前置，但不表示 JADX 已安装 |
+| **OpenJDK** | `"C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe"` 21.0.10 | APK/JAR 工具的 Java 运行时 | `JAVA_HOME` 已指向该 JDK，并已验证可运行 JADX 1.5.6 |
 | **Manifest summary** | `C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1` | 只读摘要已解码 Android Manifest 的 SDK、权限、组件、intent-filter 和 launcher | `& "C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1" -ManifestPath "decoded/AndroidManifest.xml"` |
+
+#### JADX 1.5.6 固定用法
+
+```powershell
+# 版本与帮助
+& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" --version
+& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" --help
+
+# GUI 导航
+& "D:/CTF工具/jadx-1.5.6/bin/jadx-gui.bat" "D:/题目路径/app.apk"
+
+# CLI 全量输出；输出目录应位于当前题目工作区
+& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "D:/题目路径/jadx-output" "D:/题目路径/app.apk"
+
+# 只恢复源码，跳过 resources
+& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" --no-res -d "D:/题目路径/jadx-sources" "D:/题目路径/app.apk"
+```
+
+- 默认先用 `auto` 模式导航；结构化伪代码明显失真时，用 `--decompilation-mode simple` 或 `fallback` 对照，不把 `--show-bad-code` 产生的代码当作正确语义。
+- JADX 用于 Java/Kotlin-like 视图、搜索和 xref；关键条件、异常处理、JNI 边界和反编译失败函数仍用 `baksmali`/DEX 或 native 工具核验。
+- 保持 `JADX_DISABLE_XML_SECURITY`、`JADX_DISABLE_ZIP_SECURITY` 未设置；不为处理异常附件而关闭 ZIP/XML 安全限制。
 
 ### 专项全路径工具
 

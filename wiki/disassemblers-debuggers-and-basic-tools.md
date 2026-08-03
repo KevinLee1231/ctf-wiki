@@ -4,7 +4,7 @@ tags: [reverse, tooling, disassembler, debugger, ida, idalib, ghidra]
 skills: [ctf-reverse, ctf-pwn, ctf-malware]
 raw:
   - ../raw/reverse/disassemblers-debuggers-and-basic-tools.md
-updated: 2026-07-28
+updated: 2026-08-03
 ---
 
 # Disassemblers, Debuggers and Basic Tools
@@ -34,7 +34,7 @@ updated: 2026-07-28
 | 小段代码解密、指令级模拟、混合模式片段 | Unicorn | 适合从二进制中切出稳定函数或 shellcode；如果依赖完整系统调用、文件系统或动态库，转 Qiling。 |
 | Python 字节码恢复 | `pycdc` / `pycdas` / `uncompyle6` | 先确认 Python 版本和 magic；反编译失败时退回字节码和常量表，而不是只换反编译器。 |
 | WASM 分析 | `wasm2wat` / `wasm-decompile` / 浏览器调试器 | 先看导入导出、线性内存和校验函数；复杂控制流再转 trace 或手写解释。 |
-| Android APK | `apktool` / `jadx` / `baksmali` | 先分 Java/Kotlin 层和 native 层；JNI 或 native 校验应转入普通二进制逆向。 |
+| Android APK | `apktool` / JADX 1.5.6 / `baksmali` | JADX 固定路径和 PowerShell 用法见 [reverse-tooling.md](reverse-tooling.md)；先分 Java/Kotlin 层和 native 层，JNI 或 native 校验应转入普通二进制逆向。 |
 | .NET 样本 | dnSpy / ILSpy | 先看 IL、资源和混淆器痕迹；动态加载或加密资源需要运行时 dump。 |
 | UPX、PyInstaller、简单 packer | `upx` / `pyinstxtractor` / 运行时 dump | 工具能解就解，不能解就从 OEP、解密后内存和最终比较点入手。 |
 
