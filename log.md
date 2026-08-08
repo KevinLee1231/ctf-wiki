@@ -2426,3 +2426,13 @@
 - `ctf-reverse/SKILL.md` 增加 JADX 的固定绝对路径，`reverse-tooling.md` 将其从候选缺口移入已验证 Windows 专项工具，并记录 GUI、CLI、失败模式和 ZIP/XML 安全边界；基础工具节点同步改为指向 tooling 页的真实路径。
 - APKiD 3.1.0 与 Androguard 4.1.4 当前均未安装。两者都是 Python 项目，但 APKiD 以 CLI 为主、适合隔离 `uv tool`，Androguard 若要供分析脚本导入则应使用独立 `uv venv`；APKiD 的 `yara-python-dex` 与 `ctf-tools` 现有 `yara-python` 共享模块名，直接混装会破坏依赖边界。
 - 校验结果：`ctf-reverse` 通过 `quick_validate.py`，Manifest 摘要回归输出 27 行并继续拒绝 DTD；全库 2558 篇 active Markdown 共解析 7627 条普通链接和 759 条图片引用，本地断链为 0，232 篇 wiki 均已索引，raw 总数保持 2322。
+
+## 2026-08-08 — MiniLCTF2026 Raw WP 归档
+
+- 将 `D:/文档/新建文件夹/miniLCTF_2026-main/wp` 与 `challenge` 中的题解、源码、solver 和三份 PDF 逐题核对后，整理并归档 31 篇 `MiniLCTF2026-<challenge>-wp.md`。`EZarcade_hall` 1 页、`EZcs` 3 页、`secret_of_dll` 22 页均已逐页视觉对照；纯代码、终端和调试器截图的信息已转写为 Markdown，其中 `secret_of_dll` 的完整 Frida Hook 脚本已恢复并通过语法检查。
+- 按本轮用户指定与 raw 方向规则归档为 Crypto 6 篇、Forensics 2 篇、Pentest 1 篇、Pwn 7 篇、Reverse 8 篇、Stego 2 篇、Web 5 篇。题目“！？数独独数？！”从 `_unclassified` 调整到 Crypto；`Ezdomain` 按 AD 多阶段攻击链归 Pentest，`EzOmniProbe` 按 JavaScript 沙箱逃逸和 setuid helper 利用归 Pwn。
+- 图片重新按信息价值审核后只保留 2 张不可由纯文本替代的视觉证据：`license-hand-token.png` 与 `bird-call-symbol-spectrogram.png`。资源目录分别规范为 `MiniLCTF2026-License-Recovery-wp` 和 `MiniLCTF2026-as-the-birds-say-wp`，与 Markdown basename 完全一致；两条图片 alt 均说明视觉内容及其在 token 恢复或鸟鸣符号判定中的作用。代码截图、日志截图和纯文字图没有作为冗余图片归档。
+- 文件和资源目录使用 `MiniLCTF2026` 赛事前缀及安全 slug；将 `EZarcade_hall`、`local_music`、`secret_of_dll`、`snake_minil` 的归档文件名分别规范为 `EZarcade-hall`、`local-music`、`secret-of-dll`、`snake-minil`，Markdown 一级标题继续保留题目原名。
+- 归档前备份为 `D:/文档/新建文件夹/wp-archive-backups/MiniLCTF2026-wp-before-archive-20260808-213943.zip`，含 31 篇 Markdown 与 2 张图片，共 33 个文件、未压缩数据 345189 字节，ZIP 大小 272286 字节，SHA-256 为 `925857d42349d1590cfead2263523c0f7e1ead8d205d7216eb2da4133e63b8ee`。ZIP 条目与最终 raw 逐文件 SHA-256 对照差异为 0；归档完成后 `D:/文档/新建文件夹/wp` 的 15 个一级方向目录均保留且其中无文件或子目录。
+- `index.md` live raw 统计同步更新：Crypto 由 477 增至 483、Forensics 由 129 增至 131、Pentest 由 28 增至 29、Pwn 由 445 增至 452、Reverse 由 392 增至 400、Stego 由 118 增至 120、Web 由 409 增至 414，raw 总数由 2322 增至 2353；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 校验结果：31 篇 MiniLCTF2026 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8、安全命名、2 条图片引用和资源配对均通过；全库 2589 篇 active Markdown 共解析 8348 条普通链接与图片链接 token，本地断链为 0。275 个 raw 资源目录均有同 basename Markdown 且非空；232 篇 wiki 页面全部由 `index.md` 覆盖，页面类型保持 family 99、technique 120、tooling 13；raw 各方向 live 统计与 `index.md` 完全一致。
