@@ -2436,3 +2436,13 @@
 - 归档前备份为 `D:/文档/新建文件夹/wp-archive-backups/MiniLCTF2026-wp-before-archive-20260808-213943.zip`，含 31 篇 Markdown 与 2 张图片，共 33 个文件、未压缩数据 345189 字节，ZIP 大小 272286 字节，SHA-256 为 `925857d42349d1590cfead2263523c0f7e1ead8d205d7216eb2da4133e63b8ee`。ZIP 条目与最终 raw 逐文件 SHA-256 对照差异为 0；归档完成后 `D:/文档/新建文件夹/wp` 的 15 个一级方向目录均保留且其中无文件或子目录。
 - `index.md` live raw 统计同步更新：Crypto 由 477 增至 483、Forensics 由 129 增至 131、Pentest 由 28 增至 29、Pwn 由 445 增至 452、Reverse 由 392 增至 400、Stego 由 118 增至 120、Web 由 409 增至 414，raw 总数由 2322 增至 2353；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
 - 校验结果：31 篇 MiniLCTF2026 WP 的固定三段结构、CommonMark 标题、代码围栏、数学公式定界、UTF-8、安全命名、2 条图片引用和资源配对均通过；全库 2589 篇 active Markdown 共解析 8348 条普通链接与图片链接 token，本地断链为 0。275 个 raw 资源目录均有同 basename Markdown 且非空；232 篇 wiki 页面全部由 `index.md` 覆盖，页面类型保持 family 99、technique 120、tooling 13；raw 各方向 live 统计与 `index.md` 完全一致。
+
+## 2026-08-08 — MiniLCTF2025 Raw WP 归档
+
+- 逐题核对 `D:/文档/新建文件夹/miniLCTF_2025-main/wp`、`challenge`、官方脚本和可用附件后，整理并归档 25 篇 `MiniLCTF2025-<challenge>-wp.md`。按决定性主障碍归档为 Crypto 3 篇、Forensics 2 篇、Pwn 8 篇、Reverse 4 篇、Web 8 篇；原 Misc 的 `PyJail` 与 Web 目录下的 `PyBox` 都以语言沙箱逃逸或执行边界突破为终点，归 Pwn，`麦霸评分` 与 `吃豆人` 由 HTTP 接口和客户端状态校验主导，归 Web。
+- 仓库两份 PDF 共 11 页：`ezCC_Official.pdf` 7 页、`rbf.pdf` 4 页，均逐页渲染并以页面视觉对照正文、代码、公式、抓包和调试信息。可由文本表达的代码、终端与 HTTP 抓包截图均已转写，不保留冗余整页截图；`rbf` 末页原公式存在裁切时在 WP 中明确保留证据边界，没有补造不可见常量。
+- 原 Misc 题解的 21 张候选图片逐张视觉检查后，只保留 `MiniForensics I` 中不可由文字等价替代的两张坐标点阵，语义化命名为 `b-coordinate-decoy-plot.png` 与 `c-coordinate-algebra-hint.png`，放入同 basename 资源目录 `MiniLCTF2025-MiniForensics-I-wp`，并用具体 alt 说明伪 flag 形状与代数提示。其余代码、终端、浏览器、压缩软件、Wireshark 和 BitLocker 界面截图的信息均已写入正文。
+- 外部资料只用于补足本地证据缺口：三道 Crypto 的公开复现参数、`PyJail` 的生成器帧链背景，以及 `MiniForensicsⅡ` 的不可变 Git 历史提交，关键条件、算法和验证步骤均已概括进正文。逐篇复核时同时记录版本边界：`MiniSnake` 官方旧 seed 与当前发布二进制地址不一致，当前候选 seed 只验证到目标字节，没有伪报动态 getshell；`x96re`、`hdHessian` 等缺少完整运行材料的题目也没有编造实测回包。
+- 归档前备份为 `D:/文档/新建文件夹/wp-archive-backups/MiniLCTF2025-wp-before-archive-20260808-221716.zip`，含 25 篇 Markdown 与 2 张图片，共 27 个文件、未压缩数据 122197 字节，ZIP 大小 94089 字节，SHA-256 为 `549f1824d42407b12443b6eb1c9a43e8556741c1b3077cb425792d8f6d955db6`。ZIP 条目与最终 raw 逐文件 SHA-256 对照差异为 0；归档完成后 `D:/文档/新建文件夹/wp` 只保留 15 个正式一级方向目录，目录内文件和子目录均为 0。
+- `index.md` live raw 统计同步更新：Crypto 由 483 增至 486、Forensics 由 131 增至 133、Pwn 由 452 增至 460、Reverse 由 400 增至 404、Web 由 414 增至 422，raw 总数由 2353 增至 2378；本轮是 raw-only 归档，未新增或修改 `wiki/*.md`。
+- 校验结果：25 篇 MiniLCTF2025 WP 的固定三段结构、CommonMark 标题、代码围栏、安全命名、2 条图片引用和资源配对均通过；34 个 Python 代码围栏全部通过 AST 解析。全库 2614 篇 active Markdown 共解析 7635 条普通链接与 763 条图片链接，本地断链为 0；276 个 raw 资源目录均有同 basename Markdown 且非空，232 篇 wiki 页面全部由 `index.md` 覆盖，页面类型保持 family 99、technique 120、tooling 13；raw 各方向 live 统计与 `index.md` 完全一致，总数为 2378。
