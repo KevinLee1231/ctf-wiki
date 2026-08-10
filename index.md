@@ -338,21 +338,21 @@
 | Direction | Markdown |
 |---|---:|
 | _unclassified（暂存） | 47 |
-| ai-ml | 58 |
-| blockchain | 63 |
+| ai-ml | 59 |
+| blockchain | 68 |
 | cloud-infra | 15 |
-| crypto | 588 |
-| forensics | 165 |
-| hardware-embedded | 28 |
+| crypto | 604 |
+| forensics | 171 |
+| hardware-embedded | 32 |
 | malware | 31 |
 | mobile | 21 |
 | osint | 120 |
 | pentest | 36 |
-| pwn | 573 |
-| reverse | 501 |
-| stego | 149 |
-| web | 534 |
-| **Total** | **2929** |
+| pwn | 589 |
+| reverse | 516 |
+| stego | 153 |
+| web | 547 |
+| **Total** | **3009** |
 
 ## 维护入口
 
