@@ -1,67 +1,61 @@
-# DUCTF 2023 apbq-rsa-ii
+# DownUnderCTF 2023 apbq rsa ii Writeup
 
 ## 题目简述
 
-题目是一个 RSA 变种。生成脚本先取 1024 bit 素数 `p, q`，令 `n = p*q`、`e = 0x10001`，再输出三条提示：
-
-```python
-hints.append(a * p + b * q)
-```
-
-其中每组 `a, b` 都是不超过 `2^312` 的随机整数。附件同时给出 `n`、密文 `c` 和三个 `hint`。目标是利用这些小系数线性提示分解 RSA 模数，再正常 RSA 解密。
+第二题仍公开 $n=pq$、RSA 密文和线性提示 $h_i=a_ip+b_iq$，但现在有三个提示，且 $a_i,b_i$ 都扩展到 312 位，无法直接穷举。三个提示组成的向量位于两个短系数向量张成的平面中，可以用正交格恢复该平面的短基。
 
 ## 解题过程
 
-### 关键观察
+记：
 
-三条提示形如：
+$$
+\mathbf h=p\mathbf a+q\mathbf b,
+$$
 
-```text
-h1 = a1*p + b1*q
-h2 = a2*p + b2*q
-h3 = a3*p + b3*q
-```
+其中 $\mathbf a,\mathbf b\in\mathbb Z^3$ 的坐标约为 312 位。向量 $\mathbf r=\mathbf a\times\mathbf b$ 同时与两者正交，所以满足精确关系 $\mathbf r\cdot\mathbf h=0$。第一轮 LLL 在放大后的提示向量旁附加单位阵，找出这个整数关系；第二轮 LLL 再求与 $\mathbf r$ 正交的短向量，得到 $\mathbf a,\mathbf b$ 所在平面的短基。
 
-虽然 `a_i, b_i` 未知，但它们很小。可以构造一个格，让 LLL 寻找小整数关系，使提示之间的线性组合在模 `n` 意义下消掉前几项。现有解法使用 6 维格，并对前三列乘上较大的缩放因子，使 LLL 更容易返回形如 `(0, 0, 0, x1, x2, x3)` 的短向量。随后对这些 `x_i` 与 `n` 取 gcd，若得到非平凡因子，就完成分解。
-
-### 求解步骤
-
-Sage 脚本核心如下：
+下面保留了官方 Sage 解法的核心构造：
 
 ```python
-from sage.all import *
+from itertools import product
 from Crypto.Util.number import long_to_bytes
 
-n = Integer(...)
-c = Integer(...)
-h1, h2, h3 = map(Integer, hints)
-e = 0x10001
+exec(open("output.txt", "r").read())
 
-M = Matrix([
-    [h2,  h3,  0,  1, 0, 0],
-    [-h1, 0,   h3, 0, 1, 0],
-    [0,  -h1, -h2, 0, 0, 1],
-    [n,   0,   0,  0, 0, 0],
-    [0,   n,   0,  0, 0, 0],
-    [0,   0,   n,  0, 0, 0],
-])
+values = hints
+scale = 2**800
 
-k = 2 ** (1024 + 312)
-W = diagonal_matrix([k, k, k, 1, 1, 1])
-R = (M * W).LLL() / W
+# 找到 h 的短整数正交关系。
+lattice = Matrix.column([scale * value for value in values])
+lattice = lattice.augment(identity_matrix(len(values)))
+reduced = [row[1:] for row in lattice.LLL()]
 
-for row in R:
-    if row[0] == row[1] == row[2] == 0:
-        for x in row[3:]:
-            p = gcd(Integer(x), n)
-            if 1 < p < n:
-                q = n // p
-                d = inverse_mod(e, (p - 1) * (q - 1))
-                print(long_to_bytes(int(pow(c, d, n))))
-                raise SystemExit
+# 在该关系的正交平面中恢复短基。
+lattice = (scale * Matrix(reduced[:len(values) - 2])).T
+lattice = lattice.augment(identity_matrix(len(values)))
+basis = [
+    row[-len(values):]
+    for row in lattice.LLL()
+    if set(row[:len(values) - 2]) == {0}
+]
+
+factor = None
+for s, t in product(range(4), repeat=2):
+    coeffs = s * basis[0] + t * basis[1]
+    a0, a1, _ = coeffs
+    candidate = gcd(a0 * hints[1] - a1 * hints[0], n)
+    if 1 < candidate < n:
+        factor = int(candidate)
+        break
+
+assert factor is not None
+q = factor
+p = n // q
+d = pow(0x10001, -1, (p - 1) * (q - 1))
+print(long_to_bytes(pow(c, d, n)).decode())
 ```
 
-运行 `solve2.sage` 后恢复出 RSA 私钥并得到：
+恢复出的 flag 为：
 
 ```text
 DUCTF{0rtho_l4tt1c3_1s_a_fun_and_gr34t_t3chn1que_f0r_the_t00lbox!}
@@ -69,6 +63,4 @@ DUCTF{0rtho_l4tt1c3_1s_a_fun_and_gr34t_t3chn1que_f0r_the_t00lbox!}
 
 ## 方法总结
 
-- 核心技巧：把小系数 RSA 线性提示转化为短向量问题，通过 LLL 找到可用于分解 `n` 的关系。
-- 识别信号：看到 `a*p + b*q` 这类提示，且 `a, b` 明显小于 `p, q` 时，要考虑格约简而不是直接求解线性方程。
-- 复用要点：缩放因子决定 LLL 搜索方向；脚本应在找到候选关系后立即用 `gcd(x, n)` 验证，不能只凭短向量形态判断成功。
+当线性提示的系数不再可穷举时，可以利用“提示向量由少量短向量线性生成”的几何结构。先求精确正交关系，再在正交补中找短基，最后枚举极少量基组合并沿用第一题的消元与 `gcd`，即可完成分解。
