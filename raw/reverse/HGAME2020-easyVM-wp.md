@@ -1,0 +1,70 @@
+# easyVM
+
+## 题目简述
+
+程序实现了一套简单的栈式虚拟机，并用字节码校验 40 字节输入。还原调度器后可以发现，决定结果的指令只是依次取输入字节、与固定字节流异或，再和固定密文比较。无需完整反编译所有无关指令，提取两组 40 字节常量即可逆向恢复 flag。
+
+## 解题过程
+
+先定位虚拟机主循环：它读取一字节 opcode，根据分支修改虚拟栈和虚拟寄存器，再回到取指位置。给各分支按副作用命名后，校验路径可简化为：
+
+```text
+for i in range(40):
+    value = input[i]
+    value ^= xor_stream[i]
+    if value != cipher[i]:
+        fail
+success
+```
+
+程序在进入虚拟机前还检查输入长度必须为 40，因此两组常量都应完整提取，不能遇到 `0x00` 就按 C 字符串截断。比较目标为：
+
+```python
+cipher = [
+    0x3A, 0x54, 0x2F, 0x2A, 0x2F, 0x36, 0x13, 0x01,
+    0x2E, 0x03, 0x35, 0x40, 0x47, 0x0E, 0x5F, 0x59,
+    0x01, 0x69, 0x27, 0x08, 0x3D, 0x4C, 0x33, 0x1A,
+    0x2D, 0x0B, 0x40, 0x0E, 0x4B, 0x24, 0x41, 0x27,
+    0x25, 0x28, 0x29, 0x2A, 0x02, 0x02, 0x5D, 0x24,
+]
+```
+
+逐字节异或的固定流为：
+
+```python
+xor_stream = [
+    0x52, 0x33, 0x4E, 0x47, 0x4A, 0x4D, 0x67, 0x69,
+    0x47, 0x70, 0x6A, 0x36, 0x2A, 0x51, 0x36, 0x2A,
+    0x5E, 0x36, 0x54, 0x67, 0x4E, 0x23, 0x40, 0x75,
+    0x5E, 0x64, 0x33, 0x61, 0x38, 0x4B, 0x32, 0x48,
+    0x56, 0x47, 0x76, 0x4F, 0x63, 0x71, 0x24, 0x59,
+]
+```
+
+由于异或是自身的逆运算，明文满足：
+
+$$
+input_i=cipher_i\oplus xor\_stream_i.
+$$
+
+直接计算：
+
+```python
+assert len(cipher) == len(xor_stream) == 40
+flag = bytes(a ^ b for a, b in zip(cipher, xor_stream))
+print(flag.decode())
+```
+
+输出：
+
+```text
+hgame{this_vm_is__sosososososososo_easy}
+```
+
+虚拟机指令含义与两组完整常量由 [HGAME 2020 Week 4 Reverse 复盘](https://www.cnblogs.com/harmonica11/p/12292804.html) 和原 PDF 共同核对；正文已经保留恢复输入所需的全部数据与算法。
+
+## 方法总结
+
+- 分析简单 VM 时先按栈增减、内存读写、算术和跳转给 handler 建立语义表，再只追踪通向最终比较的路径。
+- 本题的虚拟化只是控制流外壳，决定性操作仍是固定流异或；识别最小校验切片比逐条美化全部伪代码更高效。
+- 常量数组必须按字节和原始长度提取，并用最终输入重新走一遍校验逻辑，防止顺序或符号扩展错误。
