@@ -1,0 +1,100 @@
+# vm
+
+## 题目简述
+
+程序实现了一组带 `ax`、`bx`、`cx`、栈和字节流的自定义虚拟机指令。入口先计算输入长度，要求恰好为 34；随后从字符串末尾向前执行两轮原地变换：第一轮按递增密钥异或，第二轮按循环密钥做减法。官方 PDF 完整给出了字节码语义，却没有附上最终比较数组；结合公开参赛者记录中的 34 字节密文即可逆运算恢复 flag。
+
+## 解题过程
+
+虚拟机入口先调用 `_strlen`：
+
+```text
+CALL _strlen
+PUSH 34
+POP_BX
+CMP
+JE _main
+TERMINATE
+```
+
+`_main` 为两轮子程序分别设置初始 `bx`：
+
+```text
+PUSH 0xfe
+POP_BX
+PUSH_CX
+CALL _xor
+POP_CX
+
+PUSH 0x7a
+POP_BX
+CALL _sub
+TERMINATE
+```
+
+`cx` 最初保存字符串长度。`_xor` 每轮先执行 `SUB_CX, 1`，所以访问顺序是下标 33、32、……、0；当前字节与 `bx` 异或后写回，然后执行 `ADD_BX, 0x23`。可还原成：
+
+```python
+bx = 0xFE
+for index in range(33, -1, -1):
+    stream[index] ^= bx
+    bx = (bx + 0x23) & 0xFF
+```
+
+第二轮同样逆序遍历，但变换改为减法，并在每轮后执行 `SUB_BX, 0x60`：
+
+```python
+bx = 0x7A
+for index in range(33, -1, -1):
+    stream[index] = (stream[index] - bx) & 0xFF
+    bx = (bx - 0x60) & 0xFF
+```
+
+解密时按相反顺序撤销：先把第二轮减去的值加回，再撤销第一轮异或。公开调试记录补全了官方 PDF 中缺失的最终比较字节：
+
+```python
+encrypted = bytes([
+    0xCF, 0xBF, 0x80, 0x3B, 0xF6, 0xAF, 0x7E, 0x02,
+    0x24, 0xED, 0x70, 0x3A, 0xF4, 0xEB, 0x7A, 0x4A,
+    0xE7, 0xF7, 0xA2, 0x67, 0x17, 0xF0, 0xC6, 0x76,
+    0x36, 0xE8, 0xAD, 0x82, 0x2E, 0xDB, 0xB7, 0x4F,
+    0xE6, 0x09,
+])
+
+xor_key = bytes([
+    0xFE, 0x21, 0x44, 0x67, 0x8A, 0xAD, 0xD0, 0xF3,
+    0x16, 0x39, 0x5C, 0x7F, 0xA2, 0xC5, 0xE8, 0x0B,
+    0x2E, 0x51, 0x74, 0x97, 0xBA, 0xDD, 0x00, 0x23,
+    0x46, 0x69, 0x8C, 0xAF, 0xD2, 0xF5, 0x18, 0x3B,
+    0x5E, 0x81,
+])
+
+subtract_key = bytes([
+    0x7A, 0x1A, 0xBA, 0x5A, 0xFA, 0x9A, 0x3A, 0xDA,
+    0x7A, 0x1A, 0xBA, 0x5A, 0xFA, 0x9A, 0x3A, 0xDA,
+    0x7A, 0x1A, 0xBA, 0x5A, 0xFA, 0x9A, 0x3A, 0xDA,
+    0x7A, 0x1A, 0xBA, 0x5A, 0xFA, 0x9A, 0x3A, 0xDA,
+    0x7A, 0x1A,
+])
+
+plain = bytearray()
+for index, value in enumerate(encrypted):
+    reverse_index = 33 - index
+    value = (value + subtract_key[reverse_index]) & 0xFF
+    value ^= xor_key[reverse_index]
+    plain.append(value)
+
+print(plain.decode())
+```
+
+输出为：
+
+```text
+hgame{w0W!itS_CpP_wItH_little_vM!}
+```
+
+缺失的比较数组与调试结果来自 [R0gerThat 的 HGAME Week4 复盘](https://wr-web.github.io/2021/03/14/HGAME_WEEK4_WP/index.html)。正文已经给出该来源对求解有用的全部常量和逆变换，链接仅保留作交叉核验。
+
+## 方法总结
+
+分析 VM 不必一开始就为每条指令写完整反编译器。先追踪控制流、三个寄存器和流下标，就能把长字节码压缩为“逆序异或”和“逆序减法”两段循环。还原时要同时注意遍历方向、8 位溢出和两轮变换的逆序；PDF 缺少比较目标时，应明确标注外部补全证据，而不是凭 flag 格式猜测结果。
