@@ -342,17 +342,17 @@
 | blockchain | 93 |
 | cloud-infra | 28 |
 | crypto | 790 |
-| forensics | 234 |
+| forensics | 240 |
 | hardware-embedded | 69 |
 | malware | 37 |
 | mobile | 21 |
 | osint | 189 |
 | pentest | 36 |
-| pwn | 775 |
-| reverse | 687 |
-| stego | 210 |
-| web | 748 |
-| **Total** | **4075** |
+| pwn | 780 |
+| reverse | 692 |
+| stego | 212 |
+| web | 752 |
+| **Total** | **4097** |
 
 ## 维护入口
 
