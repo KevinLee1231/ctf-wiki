@@ -2834,3 +2834,11 @@
 - 最终可恢复快照为 `D:/文档/新建文件夹/wp-archive-backups/CakeCTF2023-wp-final-20260814-135111.zip`，包含 20 篇 Markdown、0 张图片，ZIP 大小 46517 字节，SHA-256 为 `a38be69ca018b16d166fcf573ba0d23e33a6ce4806de7b4b96e9bfa9c719ddd0`；ZIP 与 raw 的 20 个条目逐文件 SHA-256 差异为 0。验收后已将 staging 中 20 篇 Markdown 与 imgchk 图片目录送入 Windows 回收站，`D:/文档/新建文件夹/wp` 只保留 15 个空的一级方向目录，目录内文件和嵌套目录均为 0。
 - `index.md` 按当前文件树重算：Crypto 由 831 增至 836、Pwn 由 828 增至 834、Reverse 由 729 增至 734、Web 由 790 增至 794，raw Markdown 总数由 4315 增至 4335；本轮未修改 `wiki/*.md`。
 - 验收结果：20 篇 WP 的严格 UTF-8、LF 文件尾、安全命名、唯一 H1、固定三段 H2、CommonMark 围栏、数学公式定界和无图片资源状态均通过，32 个标准 Python 代码块通过 AST 解析。全库当前包含 4571 篇 active Markdown、4335 篇 raw Markdown 与 232 篇 wiki 页面；Markdown-it 解析得到的 6097 个本地链接目标断链为 0，987 条图片引用有效，422 个 raw 资源目录均有同 basename Markdown 且非空，wiki 页面保持 family 99、technique 120、tooling 13，`index.md` 逐方向统计与当前文件树一致。
+
+## 2026-08-14 — CakeCTF2022 Raw WP 归档
+
+- 按 `CakeCTF2022` 赛事名归档 20 篇单题 WP：Crypto 4 篇、Malware 1 篇、Pwn 6 篇、Reverse 4 篇、Web 5 篇。文件统一命名为 `CakeCTF2022-<challenge>-wp.md`，仅使用英文字母、数字和连字符；分类按决定性主障碍复核，`readme 2022` 的核心是受限文件读取边界绕过，归 Pwn，`zundamon` 的核心是键盘记录器与 Redis C2 协议恢复，归 Malware，`Cake Memory` 按程序状态与解密逻辑归 Reverse。归档前按赛事前缀、目标文件名与正文 H1 跨 raw 排重，没有同题旧版本或覆盖冲突。
+- 原赛事仓库与本批 staging 均没有 PDF、可归档图片、图片引用或二级资源目录，因此没有建立空图片文件夹，也不存在需要从 `image1` 一类序号名迁移的资源。题目所需代码、终端输出与协议字段均已写成 Markdown 正文或语义明确的代码块；正文不依赖外链才能理解解法。
+- 最终可恢复快照为 `D:/文档/新建文件夹/wp-archive-backups/CakeCTF2022-wp-final-20260814-160448.zip`，包含 20 篇 Markdown、0 张图片，ZIP 大小 37348 字节，SHA-256 为 `e399ef01ff24cd81b0b522c0a2346cbfc5f0d258a7298eaeeb28f6d6c7a20e14`；ZIP 与 raw 的 20 个条目逐文件 SHA-256 差异为 0。归档后 `D:/文档/新建文件夹/wp` 只保留 15 个空的一级方向目录，一级方向内没有 Markdown、图片文件或二级资源目录。
+- `index.md` 按当前文件树重算：Crypto 由 836 增至 840、Malware 由 40 增至 41、Pwn 由 834 增至 840、Reverse 由 734 增至 738、Web 由 794 增至 799，raw Markdown 总数由 4335 增至 4355；本轮未修改 `wiki/*.md`。
+- 验收结果：20 篇 WP 的严格 UTF-8、LF 文件尾、安全命名、唯一 H1、固定三段 H2、CommonMark 围栏、数学公式定界和无图片资源状态均通过；25 个 Python、4 个 JavaScript 和 4 个 JSON 代码块通过语法解析。全库当前包含 4591 篇 active Markdown、4355 篇 raw Markdown 与 232 篇 wiki 页面；Markdown-it 解析得到的 6097 个本地目标断链为 0，987 条图片引用有效，422 个 raw 资源目录均有同 basename Markdown 且非空，wiki 页面保持 family 99、technique 120、tooling 13，`index.md` 逐方向统计与当前文件树一致。
