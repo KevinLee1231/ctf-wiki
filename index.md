@@ -4,7 +4,7 @@
 
 - Knowledge base path: `D:/文档/markdown文件/ctf-wiki`
 - Structure: flat graph
-- Updated: 2026-08-13
+- Updated: 2026-08-14
 
 ## 查询顺序
 
@@ -338,21 +338,21 @@
 | Direction | Markdown |
 |---|---:|
 | _unclassified（暂存） | 81 |
-| ai-ml | 78 |
+| ai-ml | 79 |
 | blockchain | 93 |
 | cloud-infra | 28 |
-| crypto | 796 |
-| forensics | 248 |
-| hardware-embedded | 69 |
+| crypto | 804 |
+| forensics | 256 |
+| hardware-embedded | 70 |
 | malware | 39 |
 | mobile | 21 |
-| osint | 193 |
+| osint | 194 |
 | pentest | 36 |
-| pwn | 796 |
-| reverse | 705 |
-| stego | 218 |
-| web | 764 |
-| **Total** | **4165** |
+| pwn | 804 |
+| reverse | 712 |
+| stego | 220 |
+| web | 772 |
+| **Total** | **4209** |
 
 ## 维护入口
 
