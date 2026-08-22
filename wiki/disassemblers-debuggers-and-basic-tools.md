@@ -1,6 +1,6 @@
 ---
-type: tooling
-tags: [reverse, tooling, disassembler, debugger, ida, idalib, ghidra]
+type: technique
+tags: [reverse, disassembler, debugger, ida, idalib, ghidra]
 skills: [ctf-reverse, ctf-pwn, ctf-malware]
 raw:
   - ../raw/reverse/disassemblers-debuggers-and-basic-tools.md
@@ -13,7 +13,7 @@ updated: 2026-08-03
 
 这是逆向题的第一层工具路由页：用于把未知 ELF/PE/APK/WASM/pyc/.NET/固件先拆成可观察的入口、字符串、导入、交叉引用、运行时状态和最小可复现行为。它不负责记录某一种攻击技巧，而是说明静态反汇编、动态调试、轻量模拟和格式专用工具分别该在什么时候上场。
 
-当问题已经明确落到反调试、壳/虚拟化、自定义 VM、符号执行或运行时 hook 时，应从这里转入相应 technique 或更专门的 tooling 页。
+当问题已经明确落到反调试、壳/虚拟化、自定义 VM、符号执行或运行时 hook 时，应从这里转入相应 technique；所有工具的当前状态、版本、路径、环境、完整命令和失败处理统一读取 [reverse-tooling.md](reverse-tooling.md)。
 
 ## 触发证据
 

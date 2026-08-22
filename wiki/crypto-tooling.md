@@ -10,6 +10,18 @@ skills: [ctf-crypto]
 
 本页只保留当前真实状态，不维护核验时间、变更历史或旧版本说明。实际环境与本文不一致时，直接修正文中现状。
 
+## 完整调用约定
+
+所有终端命令从 `pwsh` 发起。Conda 工具用固定入口运行；WSL 系统工具和独立项目用其绝对路径：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/script.py --example-argument value
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/to/script.sage
+wsl /usr/bin/openssl version
+```
+
+独立 Python venv 是否激活只由该工具自身决定。激活的作用通常只是调整 `PATH`；自动化可直调 venv 入口，交互操作也可在最小 `bash -lc` 中按需 `source`，两种方式都必须使用同一个有效 venv 解释器。
+
 ## 工具选择边界
 
 ### 入口选择
@@ -54,7 +66,7 @@ skills: [ctf-crypto]
 ### 当前可用性
 
 - `ctf-tools` 中本页列出的 Python 包均已安装；SageMath 与系统全局命令可调用，两项 HashClash 入口文件存在且可执行。
-- RsaCtfTool 项目、独立 venv 和入口文件存在，但入口当前因 venv 中缺少 `RsaCtfTool` 项目模块而不可用。修复并重新确认前，不要把它作为可执行入口；优先使用 FactorDB、SageMath 或题目专用脚本。
+- RsaCtfTool 项目、独立 venv、入口文件和 Python 3.13 的已安装模块都存在，但 venv 的 `python3` 链接已漂移到系统 Python 3.14，导致 3.13 `site-packages` 不在 `sys.path`。因此直调入口和先激活 venv 都会失败；当前只能使用下文的显式 Python 3.13 兼容调用，或先修复 venv 链接。
 
 ## 失败信号与转向
 
@@ -123,12 +135,30 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/t
 
 | 工具 | 路径 | 功能 | 当前状态 |
 |---|---|---|---|
-| **RsaCtfTool** | `/home/kali/RsaCtfTool/venv/bin/RsaCtfTool` | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard 等常见方法） | 当前不可用：入口报 `ModuleNotFoundError: No module named 'RsaCtfTool'` |
+| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；项目 commit `e261e73888b857c61c0b1877fbb484b9a06758b9` | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard 等常见方法） | Console entry 当前不可用：Python 3.13 venv 的 `python3` 链接解析到系统 Python 3.14.6，报 `ModuleNotFoundError`；显式 Python 3.13 兼容调用可用 |
 
-环境修复并确认入口可用后，从 `pwsh` 直接调用独立 venv 中的入口：
+当前可用的兼容调用显式固定 Python 3.13 和原 venv 的 3.13 `site-packages`：
 
 ```pwsh
+wsl --cd /home/kali/RsaCtfTool /usr/bin/env PYTHONPATH=/home/kali/RsaCtfTool/venv/lib/python3.13/site-packages /usr/bin/python3.13 -m RsaCtfTool.main --publickey key.pub --attack wiener --private
+```
+
+当前故障不是“未激活 venv”。以下两种正常入口在解释器链接修复后等价：自动化可直接执行 console entry；需要交互式 PATH 简写时可按需激活并在同一 shell 中退出。
+
+```pwsh
+# 自动化：直接使用 venv console entry
 wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --publickey key.pub --attack wiener --private
+
+# 交互式 PATH 语义：按需激活，运行后退出
+wsl --cd /home/kali/RsaCtfTool /usr/bin/bash -lc 'source venv/bin/activate && RsaCtfTool --publickey key.pub --attack wiener --private; status=$?; deactivate; exit $status'
+```
+
+修复时应先取得修改工具环境的授权，再把 `venv/bin/python3` 重新指向仍存在的 `/usr/bin/python3.13`，随后检查解释器、依赖与入口；不要把重新激活当作修复：
+
+```pwsh
+wsl --cd /home/kali/RsaCtfTool /usr/bin/ln -sfn /usr/bin/python3.13 venv/bin/python3
+wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/python -m pip check
+wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --help
 ```
 
 ### 系统全局命令（WSL Kali）

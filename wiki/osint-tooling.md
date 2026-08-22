@@ -2,12 +2,26 @@
 type: tooling
 tags: [osint, tooling, tools, environment]
 skills: [ctf-osint]
-updated: 2026-07-06
 ---
 
 # OSINT Tooling
 
-本页记录 `ctf-osint` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-osint` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-osint/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。公开事实的时效性仍须在每道题中实时验证。
+
+## 完整调用约定
+
+系统 CLI 用绝对路径从 `pwsh` 调用 WSL；Python 查询脚本使用 `ctf-tools`：
+
+```pwsh
+wsl /usr/bin/exiftool /path/to/photo.jpg
+wsl /usr/bin/whois example.com
+wsl /usr/bin/dig example.com A
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/osint_query.py
+```
+
+所有在线查询都应同时保存查询条件、来源 URL、响应或快照和查询时间；命令可执行不等于结论仍然有效。
 
 ## 工具选择边界
 
@@ -73,9 +87,9 @@ updated: 2026-07-06
 | 工具 | 路径 | 版本 | 功能 | 典型用法 |
 |---|---|---|---|---|
 | **whois** | `/usr/bin/whois` | 5.6.6 | WHOIS 查询 | `whois target.com` |
-| **dig** | `/usr/bin/dig` | 9.20.22 | DNS 查询（bind9-dnsutils） | `dig -t any target.com` |
+| **dig** | `/usr/bin/dig` | 9.20.26 | DNS 查询（bind9-dnsutils） | `dig -t any target.com` |
 | **nmap** | `/usr/bin/nmap` | 7.99 | 端口/服务扫描 | `nmap -sV target` |
-| **exiftool** | `/usr/bin/exiftool` | 13.50 | 图像/文件元数据 | `exiftool photo.jpg` |
-| **curl** | `/usr/bin/curl` | 8.19.0 | HTTP 请求 | `curl -v https://target.com` |
-| **convert** | `/usr/bin/convert` | 7.1.2 | ImageMagick 图像处理 | `convert image.jpg -resize 50% out.jpg` |
+| **exiftool** | `/usr/bin/exiftool` | 13.55 | 图像/文件元数据 | `exiftool photo.jpg` |
+| **curl** | `/usr/bin/curl` | 8.21.0 | HTTP 请求 | `curl -v https://target.com` |
+| **convert** | `/usr/bin/convert` | 7.1.2-27 | ImageMagick 图像处理 | `convert image.jpg -resize 50% out.jpg` |
 | **sherlock** | `/usr/bin/sherlock` | 0.16.0 | 用户名跨平台枚举 | `sherlock username` |

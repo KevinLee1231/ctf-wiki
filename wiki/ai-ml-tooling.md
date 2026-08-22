@@ -2,12 +2,24 @@
 type: tooling
 tags: [ai-ml, tooling, tools, environment]
 skills: [ctf-ai-ml]
-updated: 2026-07-06
 ---
 
 # AI/ML Tooling
 
-本页记录 `ctf-ai-ml` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-ai-ml` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-ai-ml/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+
+## 完整调用约定
+
+AI/ML 的 Python 工具位于 WSL `ctf-tools` Conda 环境。所有命令从 `pwsh` 发起，不激活环境：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/script.py --example-argument value
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python -m pip show numpy scipy Pillow scikit-learn
+```
+
+表格中的 Python 片段应写入题目工作区脚本，再用第一条命令执行；不要把它们误当成 `pwsh` 命令。
 
 ## 工具选择边界
 
@@ -61,7 +73,7 @@ updated: 2026-07-06
 
 ## 详细清单
 
-### ctf-tools conda 环境
+### ctf-tools Conda 环境
 
 | 工具 | 版本 | 功能 | 典型用法 |
 |---|---|---|---|

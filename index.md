@@ -26,7 +26,7 @@
 |---|---|---|
 | `family` | 分流页、技巧族入口、跨技巧 map。负责连接多个 technique，并说明首轮判断、变体 pivot 和失败后转向。 | 可以挂 raw，尤其是承载大量 WP case 的方向入口页。 |
 | `technique` | 具体可复用技巧、攻击模式、恢复路径或判断模型。负责适用场景、识别信号、最小证据、解法骨架和常见坑。 | 可以挂 raw，作为案例和证据来源。 |
-| `tooling` | 工具入口、环境限制、稳定调用方式和常见失败状态。 | 只挂工具资料或与工具调用直接相关的 raw。 |
+| `tooling` | 每个正式方向唯一的工具事实页；维护当前状态、版本、路径、环境、完整调用和失败处理。 | 只挂工具资料或与工具调用直接相关的 raw；工具方法型知识页归 `technique`。 |
 
 ## 方向入口速查
 
@@ -36,19 +36,19 @@
 |---|---|---|---|
 | AI / ML | [ml-model-inference-extraction-and-weight-analysis.md](wiki/ml-model-inference-extraction-and-weight-analysis.md)、[adversarial-ml.md](wiki/adversarial-ml.md)、[llm-attacks.md](wiki/llm-attacks.md) | [ai-ml-tooling.md](wiki/ai-ml-tooling.md) | 模型权重、logits、query extraction、adversarial/poisoning、prompt/tool 注入。 |
 | Crypto | [encodings-qr-and-esolangs.md](wiki/encodings-qr-and-esolangs.md)、[crypto-parameter-triage-family.md](wiki/crypto-parameter-triage-family.md) | [crypto-tooling.md](wiki/crypto-tooling.md) | Base/hex/URL/ROT、字符编码、自定义码表、多层可逆编码，以及参数、密文、oracle、PRNG、签名、格/数论/对称模式。 |
-| Blockchain | [blockchain-smart-contract-exploitation.md](wiki/blockchain-smart-contract-exploitation.md)、[blockchain-and-transaction-forensics.md](wiki/blockchain-and-transaction-forensics.md) | 专项工具先看 `ctf-blockchain/SKILL.md`；跨到密码/Web 后再读对应 tooling | 合约状态、交易、存储布局、EVM/链运行时和链上证据；普通 dApp 漏洞仍回 Web。 |
+| Blockchain | [blockchain-smart-contract-exploitation.md](wiki/blockchain-smart-contract-exploitation.md)、[blockchain-and-transaction-forensics.md](wiki/blockchain-and-transaction-forensics.md) | [blockchain-tooling.md](wiki/blockchain-tooling.md) | 合约状态、交易、存储布局、EVM/链运行时和链上证据；普通 dApp 漏洞仍回 Web。 |
 | Web | [web-first-pass-triage-and-chain-patterns.md](wiki/web-first-pass-triage-and-chain-patterns.md) | [web-tooling.md](wiki/web-tooling.md) | HTTP 应用、认证、浏览器 bot、解析器差异、内部服务或漏洞链。 |
-| Cloud / Infra | [oauth-saml-cors-and-cicd.md](wiki/oauth-saml-cors-and-cicd.md)、[pentest-attack-chains-and-tunneling.md](wiki/pentest-attack-chains-and-tunneling.md) | 云 CLI/API 先看 `ctf-cloud-infra/SKILL.md`；进入 Web/Pentest 分支后再读对应 tooling | IAM、云控制面、资源策略、Serverless、编排、IaC、CI/CD 和供应链。 |
-| Pwn | [pwn-first-pass-red-flags-and-protections.md](wiki/pwn-first-pass-red-flags-and-protections.md) | [pwn-tooling.md](wiki/pwn-tooling.md)、[reverse-tooling.md](wiki/reverse-tooling.md) | 二进制、libc/heap/ROP、kernel、sandbox、JIT/VM primitive 和保护组合；native 静态分析复用 IDA 首选路径。 |
+| Cloud / Infra | [oauth-saml-cors-and-cicd.md](wiki/oauth-saml-cors-and-cicd.md)、[pentest-attack-chains-and-tunneling.md](wiki/pentest-attack-chains-and-tunneling.md) | [cloud-infra-tooling.md](wiki/cloud-infra-tooling.md) | IAM、云控制面、资源策略、Serverless、编排、IaC、CI/CD 和供应链。 |
+| Pwn | [pwn-first-pass-red-flags-and-protections.md](wiki/pwn-first-pass-red-flags-and-protections.md) | [pwn-tooling.md](wiki/pwn-tooling.md) | 二进制、libc/heap/ROP、kernel、sandbox、JIT/VM primitive 和保护组合。 |
 | Reverse | [reverse-first-pass-workflow-and-debugging.md](wiki/reverse-first-pass-workflow-and-debugging.md) | [reverse-tooling.md](wiki/reverse-tooling.md) | 普通 native binary 由 IDA Pro MCP 首选分析；Ghidra MCP 是普通备选，再按载体、VM/obfuscation、运行时和平台边界分流。 |
-| Mobile | [mobile-firmware-kernel-and-game-re.md](wiki/mobile-firmware-kernel-and-game-re.md)、[android-games-hardware-and-runtime-platforms.md](wiki/android-games-hardware-and-runtime-platforms.md) | [reverse-tooling.md](wiki/reverse-tooling.md)、[frida-angr-lldb-and-x64dbg.md](wiki/frida-angr-lldb-and-x64dbg.md) | Android/iOS 组件、IPC、权限、签名、Keystore/Keychain 与平台运行时；native 静态分析同样首选 IDA，普通 APK 算法还原仍回 Reverse。 |
-| Hardware / Embedded | [hardware-isa-bootloader-and-kvm.md](wiki/hardware-isa-bootloader-and-kvm.md)、[signals-and-hardware.md](wiki/signals-and-hardware.md) | [reverse-tooling.md](wiki/reverse-tooling.md)、[forensics-tooling.md](wiki/forensics-tooling.md) | JTAG/UART、总线、MCU、RF、侧信道、Secure Boot 与硬件信号。 |
+| Mobile | [mobile-firmware-kernel-and-game-re.md](wiki/mobile-firmware-kernel-and-game-re.md)、[android-games-hardware-and-runtime-platforms.md](wiki/android-games-hardware-and-runtime-platforms.md) | [mobile-tooling.md](wiki/mobile-tooling.md) | Android/iOS 组件、IPC、权限、签名、Keystore/Keychain 与平台运行时；普通 APK 算法还原仍回 Reverse。 |
+| Hardware / Embedded | [hardware-isa-bootloader-and-kvm.md](wiki/hardware-isa-bootloader-and-kvm.md)、[signals-and-hardware.md](wiki/signals-and-hardware.md) | [hardware-embedded-tooling.md](wiki/hardware-embedded-tooling.md) | JTAG/UART、总线、MCU、RF、侧信道、Secure Boot 与硬件信号。 |
 | Forensics | [cross-domain-forensics-technique-map.md](wiki/cross-domain-forensics-technique-map.md) | [forensics-tooling.md](wiki/forensics-tooling.md) | 文件、PCAP、磁盘/内存、日志、外设采集和容器证据恢复。 |
-| Stego | [image-bitplane-qr-and-jpeg-stego.md](wiki/image-bitplane-qr-and-jpeg-stego.md)、[audio-frequency-and-archive-stego.md](wiki/audio-frequency-and-archive-stego.md)、[video-document-and-media-stego.md](wiki/video-document-and-media-stego.md) | [forensics-tooling.md](wiki/forensics-tooling.md) | 图像、音频、视频、文档、QR 碎片、视觉/空间线索、游戏场景或隐蔽信道中隐藏信息的检测、重组与提取。 |
+| Stego | [image-bitplane-qr-and-jpeg-stego.md](wiki/image-bitplane-qr-and-jpeg-stego.md)、[audio-frequency-and-archive-stego.md](wiki/audio-frequency-and-archive-stego.md)、[video-document-and-media-stego.md](wiki/video-document-and-media-stego.md) | [stego-tooling.md](wiki/stego-tooling.md) | 图像、音频、视频、文档、QR 碎片、视觉/空间线索、游戏场景或隐蔽信道中隐藏信息的检测、重组与提取。 |
 | Cross-category（调度状态） | [cross-category-triage-family.md](wiki/cross-category-triage-family.md) | [cross-category-tooling.md](wiki/cross-category-tooling.md) | 证据不足时由 `ctf-solve-challenge` 继续首轮分流；不是 raw 一级方向或执行型专项。 |
 | OSINT | [osint-account-public-media-correlation.md](wiki/osint-account-public-media-correlation.md)、[geolocation-and-media.md](wiki/geolocation-and-media.md)、[web-and-dns.md](wiki/web-and-dns.md) | [osint-tooling.md](wiki/osint-tooling.md) | 公开账号、地理/媒体、DNS/历史网页和可复查公开证据链。 |
 | Pentest | [pentest-attack-chains-and-tunneling.md](wiki/pentest-attack-chains-and-tunneling.md)、[linux-privesc.md](wiki/linux-privesc.md) | [pentest-tooling.md](wiki/pentest-tooling.md) | 凭据、服务枚举、隧道、横向移动和 Linux 本机提权。 |
-| Malware | [scripts-and-obfuscation.md](wiki/scripts-and-obfuscation.md)、[pe-and-dotnet.md](wiki/pe-and-dotnet.md)、[malware-c2-session-key-and-protocol-recovery.md](wiki/malware-c2-session-key-and-protocol-recovery.md) | [malware-tooling.md](wiki/malware-tooling.md)、[reverse-tooling.md](wiki/reverse-tooling.md) | 脚本/包载荷、PE/.NET、shellcode、配置提取、C2 协议和会话恢复；native 静态分析复用 Reverse 的 IDA 首选路径。 |
+| Malware | [scripts-and-obfuscation.md](wiki/scripts-and-obfuscation.md)、[pe-and-dotnet.md](wiki/pe-and-dotnet.md)、[malware-c2-session-key-and-protocol-recovery.md](wiki/malware-c2-session-key-and-protocol-recovery.md) | [malware-tooling.md](wiki/malware-tooling.md) | 脚本/包载荷、PE/.NET、shellcode、配置提取、C2 协议和会话恢复。 |
 
 ## Family Pages
 
@@ -159,18 +159,20 @@
 | Direction | Tooling |
 |---|---|
 | ai-ml | [ai-ml-tooling.md](wiki/ai-ml-tooling.md) |
+| blockchain | [blockchain-tooling.md](wiki/blockchain-tooling.md) |
+| cloud-infra | [cloud-infra-tooling.md](wiki/cloud-infra-tooling.md) |
 | crypto | [crypto-tooling.md](wiki/crypto-tooling.md) |
 | forensics | [forensics-tooling.md](wiki/forensics-tooling.md) |
+| hardware-embedded | [hardware-embedded-tooling.md](wiki/hardware-embedded-tooling.md) |
 | malware | [malware-tooling.md](wiki/malware-tooling.md) |
-| cross-category | [cross-category-tooling.md](wiki/cross-category-tooling.md) |
+| mobile | [mobile-tooling.md](wiki/mobile-tooling.md) |
 | osint | [osint-tooling.md](wiki/osint-tooling.md) |
 | pentest | [pentest-tooling.md](wiki/pentest-tooling.md) |
 | pwn | [pwn-tooling.md](wiki/pwn-tooling.md) |
 | reverse | [reverse-tooling.md](wiki/reverse-tooling.md) |
-| reverse | [disassemblers-debuggers-and-basic-tools.md](wiki/disassemblers-debuggers-and-basic-tools.md) |
-| reverse | [frida-angr-lldb-and-x64dbg.md](wiki/frida-angr-lldb-and-x64dbg.md) |
-| reverse | [qiling-triton-pin-and-ldpreload.md](wiki/qiling-triton-pin-and-ldpreload.md) |
+| stego | [stego-tooling.md](wiki/stego-tooling.md) |
 | web | [web-tooling.md](wiki/web-tooling.md) |
+| cross-category triage | [cross-category-tooling.md](wiki/cross-category-tooling.md) |
 
 ## Technique Pages
 
@@ -280,11 +282,14 @@
 - [custom-isa-and-mmio-emulation.md](wiki/custom-isa-and-mmio-emulation.md)
 - [custom-vm-and-wasm-state-lifting.md](wiki/custom-vm-and-wasm-state-lifting.md)
 - [cython-and-python-extension-checker-recovery.md](wiki/cython-and-python-extension-checker-recovery.md)
+- [disassemblers-debuggers-and-basic-tools.md](wiki/disassemblers-debuggers-and-basic-tools.md)
 - [firmware-loader-and-boot-chain-emulation.md](wiki/firmware-loader-and-boot-chain-emulation.md)
 - [font-glyph-and-text-rendering-reconstruction.md](wiki/font-glyph-and-text-rendering-reconstruction.md)
+- [frida-angr-lldb-and-x64dbg.md](wiki/frida-angr-lldb-and-x64dbg.md)
 - [game-asset-and-scene-state-extraction.md](wiki/game-asset-and-scene-state-extraction.md)
 - [managed-runtime-metadata-and-bytecode-recovery.md](wiki/managed-runtime-metadata-and-bytecode-recovery.md)
 - [ollvm-control-flow-and-mba-deobfuscation.md](wiki/ollvm-control-flow-and-mba-deobfuscation.md)
+- [qiling-triton-pin-and-ldpreload.md](wiki/qiling-triton-pin-and-ldpreload.md)
 - [shader-vm-and-graphics-pipeline-emulation.md](wiki/shader-vm-and-graphics-pipeline-emulation.md)
 - [staged-loader-and-runtime-image-recovery.md](wiki/staged-loader-and-runtime-image-recovery.md)
 - [trace-hook-and-state-snapshot-reconstruction.md](wiki/trace-hook-and-state-snapshot-reconstruction.md)

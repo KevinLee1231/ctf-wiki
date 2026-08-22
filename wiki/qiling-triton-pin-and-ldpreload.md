@@ -1,6 +1,6 @@
 ---
-type: tooling
-tags: [reverse, tooling, emulation, tracing, instrumentation]
+type: technique
+tags: [reverse, emulation, tracing, instrumentation]
 skills: [ctf-reverse]
 raw:
   - ../raw/reverse/qiling-triton-pin-and-ldpreload.md
@@ -12,6 +12,8 @@ updated: 2026-07-28
 ## 作用边界
 
 本页覆盖逆向中的重型运行控制工具：完整环境模拟、指令级动态符号执行、二进制插桩计数和动态库劫持。它们适合在普通调试器、反汇编器或 Frida hook 已经无法稳定观察目标时使用，但使用成本更高，必须先明确要控制的环境变量、系统调用、输入长度、目标分支或侧信道指标。
+
+本页只维护路线选择、最小前置条件与失败判断。当前安装状态、版本、路径、环境和完整命令统一读取 [reverse-tooling.md](reverse-tooling.md)。
 
 ## 触发证据
 

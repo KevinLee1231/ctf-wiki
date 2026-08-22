@@ -1,13 +1,28 @@
 ---
 type: tooling
 tags: [reverse, tooling, tools, environment, ida, idalib, ghidra]
-skills: [ctf-reverse, ctf-mobile, ctf-malware, ctf-pwn, ctf-hardware-embedded]
-updated: 2026-08-03
+skills: [ctf-reverse]
 ---
 
 # Reverse Tooling
 
-本页记录 `ctf-reverse` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-reverse` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-reverse/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。Mobile、Malware、Pwn 与 Hardware/Embedded 的方向工具状态由各自 tooling 页维护。
+
+## 完整调用约定
+
+Python 分析工具使用 WSL `ctf-tools`；系统 CLI 和独立项目使用绝对路径；Windows 工具由 `pwsh` 直接执行。Conda 不激活环境：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools capa -vv /path/to/binary
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/analyze.py
+wsl /usr/bin/file /path/to/binary
+wsl /home/kali/pycdc/build/pycdc /path/to/file.pyc
+& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "D:/path/to/jadx-output" "D:/path/to/app.apk"
+```
+
+MCP 工具不是 shell 命令：先检查当前 callable 和会话/实例，再按本页对应顺序调用。表格中的 Linux 片段说明参数语义；实际执行时使用同一行绝对路径。
 
 ## 工具选择边界
 
@@ -88,7 +103,7 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 
 ### IDA Pro MCP（首选）
 
-当前 MCP 工具已可调用；2026-08-03 审计时 `idb_list` 返回 0 个会话。这表示“当时无已打开数据库”，不表示 IDA MCP 缺失。
+当前 MCP 工具可调用，`idb_list` 返回 0 个会话。这表示当前没有已打开数据库，不表示 IDA MCP 缺失；MCP 未暴露可写入本文的 IDA 版本号。
 
 稳定调用顺序：
 
@@ -107,7 +122,7 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 
 ### Ghidra MCP（普通工具）
 
-当前 MCP 工具已可调用；2026-08-03 审计时 `list_instances` 没有正在运行的实例。这是运行状态，不是安装结论。
+当前 MCP 工具可调用，`list_instances` 没有正在运行的实例。这是当前运行状态，不是安装缺失结论；MCP 未暴露可写入本文的 Ghidra 版本号。
 
 - 先用 `list_instances` 检查实例；需要项目级分析时再 `connect_instance`。
 - 连接成功后工具列表会动态扩展，随后才调用反编译、交叉引用、导入或调试能力。
@@ -154,9 +169,9 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | **seccomp-tools** | `/usr/local/bin/seccomp-tools` 1.6.2 | SECCOMP/BPF 转储 | `seccomp-tools dump ./bin` |
 | **baksmali** | `/usr/bin/baksmali` 2.5.2 | DEX 字节码反汇编 | `baksmali d classes.dex -o smali/` |
 | **unsquashfs** | `/usr/bin/unsquashfs` 4.7.5 | SquashFS 提取 | `unsquashfs -d out/ firmware.sqfs` |
-| **qemu-riscv64** | `/usr/bin/qemu-riscv64` 11.0.1 | RISC-V 模拟 | `qemu-riscv64 -L /usr/riscv64-linux-gnu/ ./bin` |
-| **qemu-arm** | `/usr/bin/qemu-arm` 11.0.1 | ARM 模拟 | `qemu-arm -L /usr/arm-linux-gnueabihf/ ./bin` |
-| **qemu-mips** | `/usr/bin/qemu-mips` 11.0.1 | MIPS 模拟 | `qemu-mips -L /usr/mips-linux-gnu/ ./bin` |
+| **qemu-riscv64** | `/usr/bin/qemu-riscv64` 11.0.3 | RISC-V 模拟 | `qemu-riscv64 -L /usr/riscv64-linux-gnu/ ./bin` |
+| **qemu-arm** | `/usr/bin/qemu-arm` 11.0.3 | ARM 模拟 | `qemu-arm -L /usr/arm-linux-gnueabihf/ ./bin` |
+| **qemu-mips** | `/usr/bin/qemu-mips` 11.0.3 | MIPS 模拟 | `qemu-mips -L /usr/mips-linux-gnu/ ./bin` |
 
 ### Windows 本地
 

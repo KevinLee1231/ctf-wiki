@@ -2935,3 +2935,10 @@
 - 修正 `wiki/ai-ml-tooling.md`、`wiki/crypto-tooling.md`、`wiki/pwn-tooling.md` 与 `wiki/reverse-tooling.md` 中的环境调用：Windows 侧统一从 `pwsh` 直接发起 `wsl`，Conda 环境统一通过绝对入口执行 `conda run --no-capture-output`，不再激活环境或绕过 Conda 入口直调环境内二进制。
 - 同步纠正仓库外全局 `AGENTS.md` 的终端与双侧 Conda 路由，并删除 13 个专项 skill 中失效的 Hermes 继承说明。tooling 页继续只保留当前调用方式，日志不复制环境命令清单。
 - 页面路径、类型和索引入口均未变化，因此无需修改 `index.md`。13 个外部 skill 与 8 个 `pwsh` 代码块通过结构/语法校验；全库 4903 篇 Markdown、7950 条链接、1008 条图片引用和 6120 个本地目标无断链，232 篇 wiki 页面全部被索引覆盖，类型保持 family 99、technique 120、tooling 13。
+
+## 2026-08-22 — CTF 专项工具事实源统一
+
+- 将 14 个 CTF 专项 skill 统一收窄为进入条件、工具或知识页选择条件以及转向条件；每个方向由一个对应的 `*-tooling.md` 页面独占维护工具当前状态、版本、路径、环境、完整 `pwsh` 调用和失败处理。`ctf-solve-challenge` 继续只承担未知题目的首轮分流。
+- 新增 Blockchain、Cloud/Infra、Hardware/Embedded、Mobile 与 Stego 五个方向工具页，统一改造其余九个方向工具页，并把三篇 Reverse 工具方法页改为 technique；`cross-category-tooling.md` 只保留未分类侦察工具，`index.md` 已同步新的入口与类型。
+- 现场核验了当前 WSL/Windows 工具层与 MCP 可用性。RsaCtfTool 的现有 venv 因解释器链接漂移无法由激活修复，Crypto 工具页记录了当前可用调用、激活语义和需授权的修复路径；本轮未修改该 venv。
+- 验收覆盖 4908 篇 active Markdown、8993 条链接与图片引用、6155 个本地目标，断链为 0；237 篇 wiki 页面全部被索引覆盖，类型为 family 99、technique 123、tooling 15。14 个专项 skill 均通过结构与快速校验，26 个 `pwsh` 代码块通过语法解析，`git diff --check` 通过。

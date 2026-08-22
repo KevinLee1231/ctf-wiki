@@ -2,12 +2,26 @@
 type: tooling
 tags: [pwn, tooling, tools, environment]
 skills: [ctf-pwn]
-updated: 2026-07-11
 ---
 
 # Pwn Tooling
 
-本页记录 `ctf-pwn` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-pwn` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-pwn/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+
+## 完整调用约定
+
+Exploit 脚本和 Python 入口使用 WSL `ctf-tools`；调试器、二进制工具和模拟器使用系统绝对路径。所有命令从 `pwsh` 发起，不激活环境：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/exploit.py
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn checksec /path/to/binary
+wsl /usr/bin/gdb -q /path/to/binary -ex start -ex checksec
+wsl /usr/local/bin/seccomp-tools dump /path/to/binary
+```
+
+表格中的 Linux 片段说明参数语义；实际执行时使用同一行的绝对路径。启动内核/QEMU、编译 rootfs、fuzz 或连接远程题目服务前，先确认范围和运行成本。
 
 ## 工具选择边界
 
@@ -60,6 +74,13 @@ updated: 2026-07-11
 
 ## 详细清单
 
+### Native 静态分析 MCP
+
+| 工具 | 当前状态 | 环境/路径 | 完整调用与失败处理 |
+|---|---|---|---|
+| IDA Pro MCP（`idalib`） | 方法可调用；当前 `idb_list` 返回 0 个会话；版本未由 MCP 暴露 | MCP，不是 shell 路径 | `idb_list` → `idb_open(绝对路径)` → `survey_binary`；无会话不等于 MCP 不可用，打开失败时保留 `file`/保护/汇编证据并转 Ghidra 或 GDB。 |
+| Ghidra MCP | 方法可调用；当前没有运行实例；版本未由 MCP 暴露 | MCP，不是 shell 路径 | `list_instances` → `connect_instance`；没有实例时先启动或连接项目，不把静态桥接方法当作已进入分析会话。 |
+
 ### Python 包（ctf-tools conda 环境）
 
 | 工具 | 版本 | 功能 | 典型用法 |
@@ -91,13 +112,13 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn she
 | 工具 | 路径 | 版本 | 功能 | 典型用法 |
 |---|---|---|---|---|
 | **GDB + pwndbg** | `/usr/bin/gdb` + `/home/kali/pwndbg` | 17.2 | 源码/汇编级调试，`~/.gdbinit` 已配置自动加载 pwndbg | `gdb -q ./bin -ex 'start' -ex 'checksec'` |
-| **objdump** | `/usr/bin/objdump` | 2.46 | 二进制反汇编 | `objdump -d ./bin \| grep -B1 "pop.*rdi"` |
-| **readelf** | `/usr/bin/readelf` | 2.46 | ELF 结构分析（节头/段头/符号表/动态表） | `readelf -h ./bin; readelf -S ./bin` |
-| **nm** | `/usr/bin/nm` | 2.46 | 符号表列出 | `nm ./bin \| grep win` |
-| **strings** | `/usr/bin/strings` | 2.46 | 提取可读字符串（GLIBC 版本检测/密码搜索） | `strings libc.so.6 \| grep GLIBC` |
-| **file** | `/usr/bin/file` | 5.46 | 识别文件类型（位宽/架构/链接方式） | `file ./binary` |
+| **objdump** | `/usr/bin/objdump` | 2.47 | 二进制反汇编 | `objdump -d ./bin \| grep -B1 "pop.*rdi"` |
+| **readelf** | `/usr/bin/readelf` | 2.47 | ELF 结构分析（节头/段头/符号表/动态表） | `readelf -h ./bin; readelf -S ./bin` |
+| **nm** | `/usr/bin/nm` | 2.47 | 符号表列出 | `nm ./bin \| grep win` |
+| **strings** | `/usr/bin/strings` | 2.47 | 提取可读字符串（GLIBC 版本检测/密码搜索） | `strings libc.so.6 \| grep GLIBC` |
+| **file** | `/usr/bin/file` | 5.47 | 识别文件类型（位宽/架构/链接方式） | `file ./binary` |
 | **ldd** | `/usr/bin/ldd` | 2.42 | 显示共享库依赖与加载路径 | `ldd ./binary` |
-| **strace** | `/usr/bin/strace` | 6.18 | 系统调用跟踪 | `strace ./binary` |
+| **strace** | `/usr/bin/strace` | 7.0 | 系统调用跟踪 | `strace ./binary` |
 | **ltrace** | `/usr/bin/ltrace` | 0.7.91 | 库函数调用跟踪 | `ltrace ./binary` |
 | **checksec** | `/usr/bin/checksec` | 2.6.0 | 二进制保护检测（PIE/RELRO/NX/Canary） | `checksec --file=./binary` |
 
@@ -108,7 +129,7 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn she
 | **one_gadget** | `/usr/local/bin/one_gadget` | 1.10.0 | libc one-shot RCE gadget 查找 | `one_gadget libc.so.6` |
 | **seccomp-tools** | `/usr/local/bin/seccomp-tools` | 1.6.2 | dump seccomp BPF 过滤规则 | `seccomp-tools dump ./binary` |
 
-#### 跨架构模拟（qemu-user 10.2.2）
+#### 跨架构模拟（QEMU 11.0.3）
 
 | 工具 | 功能 | 典型用法 |
 |---|---|---|
@@ -124,7 +145,7 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn she
 | 工具 | 路径 | 版本 | 功能 | 典型用法 |
 |---|---|---|---|---|
 | **upx** | `/usr/bin/upx` | 4.2.4 | 可执行文件压缩（内核 exploit 体积压缩） | `upx --best exploit` |
-| **libc6-dbg** | apt 已安装 | 2.42-13 | glibc 调试符号 | GDB 中 `b __malloc` / `p __malloc_hook` |
+| **libc6-dbg** | apt 已安装 | 2.42-17 | glibc 调试符号 | GDB 中 `b __malloc` / `p __malloc_hook` |
 
 
 ---

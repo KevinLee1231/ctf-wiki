@@ -1,20 +1,34 @@
 ---
 type: tooling
 tags: [forensics, tooling, tools, environment]
-skills: [ctf-forensics, ctf-stego, ctf-hardware-embedded]
-updated: 2026-07-27
+skills: [ctf-forensics]
 ---
 
 # Forensics Tooling
 
-本页记录 `ctf-forensics` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-forensics` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-forensics/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。Stego 与 Hardware/Embedded 的专项工具分别由 [stego-tooling.md](stego-tooling.md) 和 [hardware-embedded-tooling.md](hardware-embedded-tooling.md) 维护。
+
+## 完整调用约定
+
+系统工具通过绝对路径直接交给 WSL；Python/Conda 工具使用 `ctf-tools` 环境。所有命令从 `pwsh` 发起，不激活环境：
+
+```pwsh
+wsl /usr/bin/file /path/to/evidence.bin
+wsl /usr/bin/tshark -r /path/to/capture.pcap -Y http
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools vol -f /path/to/memory.dmp windows.pslist
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/analysis.py
+```
+
+表格中的 Linux 片段说明工具参数；执行时应使用同一行给出的绝对路径，并保留输入证据和输出目录。
 
 ## 工具选择边界
 
 ### 入口选择
 
 - 首轮先用 system-global 工具识别载体：`file`、`exiftool`、`tshark`、`binwalk`、Sleuth Kit。
-- 需要 Python 图像/信号/内存处理时再进入 `ctf-tools`，并显式激活/退出 Conda。
+- 需要 Python 图像、信号或内存处理时再用固定 Conda 入口运行 `ctf-tools`，不激活或退出环境。
 - 对磁盘镜像、内存 dump、PCAP 和媒体文件，优先导出中间产物，避免只保留工具 UI 结论。
 
 ### 不应进入 Forensics 工具链的情况

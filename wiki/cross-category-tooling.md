@@ -2,14 +2,25 @@
 type: tooling
 tags: [cross-category, tooling, triage, tools, environment]
 skills: [ctf-solve-challenge]
-updated: 2026-07-11
 ---
 
 # Cross-Category Triage Tooling
 
 本页为 `ctf-solve-challenge` 提供跨方向首检工具、调用层和失败转向。它不是第十五个方向，也不承担专项求解；证据足以判断决定性主障碍后，应立即进入 14 个正式 `ctf-*` 专项之一。
 
-一旦进入 Crypto，本页不再作为工具事实来源；Crypto 工具的当前状态、版本、路径、环境和完整调用统一读取 [crypto-tooling.md](crypto-tooling.md)。本页只维护跨方向首检和其他方向共享工具。
+一旦进入任一正式方向，本页不再作为该方向的工具事实来源；工具的当前状态、版本、路径、环境、完整调用和失败处理统一读取对应 `<direction>-tooling.md`。本页只维护类别尚未确定时的跨方向首检工具。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+
+## 完整调用约定
+
+跨方向 Python 首检使用 `ctf-tools`，系统格式工具使用 WSL 绝对路径。所有命令从 `pwsh` 发起，不激活环境：
+
+```pwsh
+wsl /usr/bin/file /path/to/unknown
+wsl /usr/bin/xxd -g 1 /path/to/unknown
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/triage.py
+```
 
 ## 工具选择边界
 
@@ -93,15 +104,15 @@ updated: 2026-07-11
 |---|---|---|---|---|
 | zbarimg | /usr/bin/zbarimg | 0.23.93 | 二维码/条形码解码 | `zbarimg qrcode.png` |
 | qrencode | /usr/bin/qrencode | 4.1.1 | 二维码生成 | `qrencode -o out.png "flag{...}"` |
-| ffmpeg | /usr/bin/ffmpeg | 8.1 | 音视频转换/频谱图 | `ffmpeg -i audio.wav -lavfi showspectrumpic spec.png` |
-| sox | /usr/bin/sox | — | 音频处理 / 频谱 / 反转 | `sox audio.wav -n spectrogram` |
+| ffmpeg | /usr/bin/ffmpeg | 8.1.2 | 音视频转换/频谱图 | `ffmpeg -i audio.wav -lavfi showspectrumpic spec.png` |
+| sox | /usr/bin/sox | 14.7.1.2 | 音频处理 / 频谱 / 反转 | `sox audio.wav -n spectrogram` |
 | qsstv | /usr/bin/qsstv | — | SSTV 慢扫描电视解码 | GUI 打开并载入音频 |
-| exiftool | /usr/bin/exiftool | 13.50 | 文件元数据读写 | `exiftool audio.wav` |
+| exiftool | /usr/bin/exiftool | 13.55 | 文件元数据读写 | `exiftool audio.wav` |
 | zsteg | /usr/local/bin/zsteg | 0.2.14 | PNG/BMP 位面隐写检测 | `zsteg -a image.png` |
-| binwalk | /usr/bin/binwalk | — | 文件嵌入提取与分析 | `binwalk -Me file.bin` |
+| binwalk | /usr/bin/binwalk | 2.4.3 | 文件嵌入提取与分析 | `binwalk -Me file.bin` |
 | nmap | /usr/bin/nmap | 7.99 | 端口扫描/服务检测 | `nmap -sV target` |
 | nc | /usr/bin/nc | — | TCP/UDP 网络连接 | `nc target 1337` |
-| 7z | /usr/bin/7z | 26.00 | 通用压缩/解压 | `7z x archive.7z` |
+| 7z | /usr/bin/7z | 26.02 | 通用压缩/解压 | `7z x archive.7z` |
 | netpbm | (系统包) | 11.13.03 | 图像格式转换工具集 | `pamscale` / `pnmtopng` / `ppmtopgm` |
 | npiet | /usr/local/bin/npiet | — | Piet esolang 解释器 | `npiet program.png` |
 | npietedit | /usr/local/bin/npietedit | — | Piet 程序图像编辑辅助工具 | `npietedit program.png` |
@@ -110,7 +121,7 @@ updated: 2026-07-11
 
 ### 专项数学与密码环境
 
-进入 Crypto 后直接读取 [crypto-tooling.md](crypto-tooling.md)。本页不重复 SageMath、密码学 Python 包或 RSA 专项工具的版本、路径和调用方式。
+进入任一正式方向后读取其唯一 tooling 页。本页不重复专项工具的版本、路径和调用方式。
 
 ### 独立工具
 

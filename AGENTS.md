@@ -15,7 +15,7 @@ Always respond in Chinese-simplified.
 ```text
 当前题目证据                    L0：题面、附件、服务、运行结果、已有分析
 ctf-solve-challenge / SKILL.md  L1：全局分流、方向判断、何时进入专项 skill
-ctf-* / SKILL.md                L2：专项边界、首轮判断、工具入口和 wiki 直链
+ctf-* / SKILL.md                L2：专项边界、首轮判断、何时选择工具类别/知识页、何时转出
 ctf-wiki/wiki/*.md              L3：扁平技巧知识图谱
 ctf-wiki/raw/<direction>/       L4：原始资料正文，作为证据和案例来源
 ```
@@ -42,7 +42,7 @@ active tree 只保留 `raw/`、`wiki/`、`backups/` 和根文档。不要新增�
 
 - `family`：分流页、技巧族入口、首轮/方向页和跨技巧 map。负责连接多个 technique，并说明首轮判断、变体 pivot 和失败后转向。
 - `technique`：具体可复用技巧、攻击模式、恢复路径或判断模型。负责适用场景、识别信号、最小证据、解法骨架和常见坑。
-- `tooling`：工具入口、环境限制、稳定调用方式和常见失败状态。负责说明何时用工具、怎么稳定调用、失败后转向哪里。
+- `tooling`：某一正式方向的工具事实唯一权威页。负责维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理；不在 skill 或其它知识页复制这些事实。
 
 不要在 `wiki/` 中引入第四类 active 页面。原先承担“首轮判断”“方向入口”“triage”“map”的页面统一视为 `family`。
 
@@ -107,9 +107,11 @@ family 页应回答共同适用场景、首轮变体判断、最小证据、失�
 
 ## tooling 页
 
-`tooling` 页记录工具的使用边界、入口、环境限制、最小命令和常见错误。工具页不是安装流水账，也不是工具百科。
+每个正式方向固定只有一个 `wiki/<direction>-tooling.md` 作为该方向的工具事实唯一权威来源；14 个方向必须全覆盖。`cross-category-tooling.md` 只服务类别尚未确定时的首检，不替代任何方向 tooling。以某一工具组合或方法为主题、但不维护当前机器状态的页面应标为 `technique`，不能形成同方向的第二个工具事实源。
 
-工具页应说明：适合什么问题、什么证据触发使用、当前环境如何稳定调用、常见失败状态、失败后转向哪里，以及它和对应 `ctf-* / SKILL.md` 的工具入口是否一致。
+`tooling` 页记录工具的使用边界、当前状态、版本、路径、环境、完整命令和常见错误。工具页不是安装流水账、核验时间线或旧版本历史，也不是工具百科；环境变化时直接更新当前事实。
+
+工具页应说明：适合什么问题、什么证据触发使用、当前工具是可用还是缺失、版本与绝对路径/环境、从 `pwsh` 发起的完整命令、常见失败状态、失败后转向哪里，以及它和对应 `ctf-* / SKILL.md` 的选择入口是否一致。未安装的工具必须明确写“未发现/未安装”，不得给出会让 agent 误以为当前可执行的命令。
 
 工具页必须写具体工具路由、环境边界和失败转向；不要使用“关注触发条件、最小 payload / 最小样本、失败信号和可自动化验证方式”这类可套用到任意页面的占位句，也不要把 raw 标题机械展开成工具百科表。
 
@@ -118,7 +120,7 @@ family 页应回答共同适用场景、首轮变体判断、最小证据、失�
 解题或回答问题时，不要一次性加载全库：
 
 1. 先读已激活 `ctf-* / SKILL.md`。
-2. 读取 skill 给出的 wiki 直链或 `<direction>-tooling.md`。
+2. 需要技巧知识时读取 skill 给出的 family/technique 直链；确定要使用工具时读取唯一的 `<direction>-tooling.md`。
 3. 信号不够明确时查 `index.md`。
 4. 只读取最相关的 `wiki/*.md`。
 5. 需要案例细节、命令输出、原始推导或资料出处时，再回查 `raw/<direction>/`。
@@ -233,7 +235,7 @@ cloud-infra
 写入位置按以下规则判断：
 
 - 具体技巧和案例模式写入 `wiki/*.md`；
-- 工具、路径、安装状态、调用层差异写入 `wiki/<direction>-tooling.md`；
+- 工具的当前状态、版本、路径、环境、完整调用和失败处理只写入 `wiki/<direction>-tooling.md`；
 - 没有合适页面时，新建语义化文件名，不使用 `misc.md`、`advanced.md`、`notes.md`、`tricks.md` 这类弱名称。
 
 新增或显著改动的 wiki 页必须有入链：来自 `index.md`、family 页、相邻 technique 页或对应 skill。
@@ -251,7 +253,7 @@ cloud-infra
 skill 协同规则：
 
 - `ctf-wiki` 不复制 `ctf-writeup`、`pdf` 或专项 `ctf-*` skill 的规则。
-- 新知识影响首轮判断、常用 pivot、工具路径或高频页面直链时，同步修改对应 `ctf-* / SKILL.md`。
+- 新知识影响首轮判断、常用 pivot、工具类别选择或高频页面直链时，同步修改对应 `ctf-* / SKILL.md`；工具路径、版本和命令只改 tooling 页。
 - 需要同步 skill 时直接修改对应 `SKILL.md`，并在 `log.md` 记录原因。
 - `ctf-solve-challenge` 是分流入口；它的 `references/` 是本地速查资料，不替代本库 wiki 图谱。
 
@@ -268,7 +270,8 @@ skill 协同规则：
 - `index.md` 是否覆盖所有 active wiki 页面；
 - 新增页是否有来自 index、family、相邻 technique 或 skill 的入口；
 - family 页是否仍提供 pivot 价值；
-- tooling 页与 `ctf-* / SKILL.md` 是否一致；
+- 14 个正式方向是否各有且只有一个 `<direction>-tooling.md` 工具事实源，`cross-category-tooling.md` 是否只承担未分类首检；
+- tooling 页与 `ctf-* / SKILL.md` 的“何时选择”是否一致，skill 是否误写了状态、版本、路径、环境、完整命令或失败处理；
 - 页面过长且出现两个以上独立技巧时，是否应拆分；
 - 重复页面是否应合并，并保留更语义化的文件名；
 - 是否误改了 `raw/` 正文；

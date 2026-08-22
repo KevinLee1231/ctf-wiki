@@ -2,12 +2,26 @@
 type: tooling
 tags: [web, tooling, tools, environment]
 skills: [ctf-web]
-updated: 2026-07-11
 ---
 
 # Web Tooling
 
-本页记录 `ctf-web` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-web` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-web/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+
+## 完整调用约定
+
+系统 CLI 通过绝对路径从 `pwsh` 调用 WSL；Python 包与入口使用 `ctf-tools`。MCP 方法只在当前工具清单实际暴露时调用：
+
+```pwsh
+wsl /usr/bin/curl -i -sS https://target.example/
+wsl /usr/bin/ffuf -u https://target.example/FUZZ -w /path/to/wordlist.txt
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools flask-unsign --decode --cookie eyJ...
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/web_solver.py
+```
+
+表格中的 Linux 片段说明参数语义；实际执行时使用同一行绝对路径。扫描、爆破、Intruder 和主动漏洞验证只对题目明确授权的目标执行。
 
 ## 工具选择边界
 
@@ -51,7 +65,8 @@ updated: 2026-07-11
 
 ### 当前未装 / 建议按需补装
 
-- 当前没有明显缺口。`jwcrypto` 已在 `ctf-tools` 中，只有在需要完整 JWT/JWS/JWE 构造、验证或调试时才把它拉进首轮流程；不要把它当成 `flask-unsign` 的替代品。
+- `pdfdetach` 当前未安装；需要处理 PDF 附件时先转 Forensics，并用当前可用的 `/usr/bin/mutool` 1.27.0 检查和提取，不从旧命令推断 Poppler 已安装。
+- `jwcrypto` 已在 `ctf-tools` 中，只有在需要完整 JWT/JWS/JWE 构造、验证或调试时才进入；不要把它当成 `flask-unsign` 的替代品。
 
 ## 失败信号与转向
 
@@ -64,7 +79,7 @@ updated: 2026-07-11
 
 ### Burp Suite MCP（可选，先检查）
 
-Burp MCP 是高信息密度入口，但不是稳定常驻事实。当前桥接端口不可达且工具清单未暴露 Burp 方法；每次使用前先检查 callable，失败时用 `curl`、浏览器开发者工具或手工 Burp 建 baseline。
+Burp MCP 是高信息密度入口，但不是稳定常驻事实。当前工具清单未暴露 Burp 方法；每次使用前先检查 callable，失败时用 `curl`、浏览器开发者工具或手工 Burp 建 baseline。
 
 | 工具 | 功能 | 调用方式 |
 |---|---|---|
@@ -86,21 +101,21 @@ Burp MCP 是高信息密度入口，但不是稳定常驻事实。当前桥接�
 | **gobuster** | `/usr/bin/gobuster` 3.8.2 | 目录/文件快速扫描 | `gobuster dir -u URL -w /usr/share/wordlists/dirb/common.txt` |
 | **ffuf** | `/usr/bin/ffuf` 2.1.0-dev | 灵活 Web fuzzer（支持参数化 fuzz） | `ffuf -u URL/FUZZ -w wordlist.txt` |
 | **feroxbuster** | `/usr/bin/feroxbuster` 2.13.1 | 递归内容发现，适合目录树较深时补强 `gobuster` / `ffuf` | `feroxbuster -u URL` |
-| **nuclei** | `/usr/bin/nuclei` 3.8.0 | YAML 模板驱动漏洞扫描（CVE/配置/泄露） | `nuclei -u URL -t cves/ -t exposures/` |
-| **sqlmap** | `/usr/bin/sqlmap` 1.10.4 | SQL 注入自动检测与利用 | `sqlmap -u "URL?id=1" --dbs` |
-| **hydra** | `/usr/bin/hydra` 9.6 | 在线口令爆破（HTTP/FTP/SSH 等） | `hydra -l admin -P pass.txt target http-post-form "/login:user=^USER^&pass=^PASS^:F=error"` |
+| **nuclei** | `/usr/bin/nuclei` 3.11.0 | YAML 模板驱动漏洞扫描（CVE/配置/泄露） | `nuclei -u URL -t cves/ -t exposures/` |
+| **sqlmap** | `/usr/bin/sqlmap` 1.10.8 | SQL 注入自动检测与利用 | `sqlmap -u "URL?id=1" --dbs` |
+| **hydra** | `/usr/bin/hydra` 9.7 | 在线口令爆破（HTTP/FTP/SSH 等） | `hydra -l admin -P pass.txt target http-post-form "/login:user=^USER^&pass=^PASS^:F=error"` |
 | **nmap** | `/usr/bin/nmap` 7.99 | 端口扫描/服务版本/脚本引擎 | `nmap -sV -sC target` |
-| **subfinder** | `/usr/bin/subfinder` 2.13.0 | 被动子域名发现 | `subfinder -d target.com` |
+| **subfinder** | `/usr/bin/subfinder` 2.14.0 | 被动子域名发现 | `subfinder -d target.com` |
 | **nikto** | `/usr/bin/nikto` | Web 服务器检查 | `nikto -h https://target.com` |
-| **tshark** | `/usr/bin/tshark` 4.6.4 | 命令行 Wireshark（PCAP 分析） | `tshark -r capture.pcap -Y "http"` |
+| **tshark** | `/usr/bin/tshark` 4.6.6 | 命令行 Wireshark（PCAP 分析） | `tshark -r capture.pcap -Y "http"` |
 | **curl** | `/usr/bin/curl` | HTTP 客户端（请求/响应测试） | `curl -v http://target.com` |
 | **nc** | `/usr/bin/nc` | TCP/UDP 连接/netcat | `nc target 80 <<< "GET / HTTP/1.0"` |
 | **hash_extender** | `/usr/local/bin/hash_extender` | CLI 哈希长度扩展攻击 | `hash_extender -d data -s hash -a append -l len` |
 | **john** | `/usr/sbin/john` 1.9.0-jumbo | 哈希破解/JWT secret 暴力 | `john jwt.txt --wordlist=rockyou.txt` |
 | **hashcat** | `/usr/bin/hashcat` 7.1.2 | GPU 哈希破解（全类型支持） | `hashcat -m 16500 jwt.txt rockyou.txt` |
-| **jq** | `/usr/bin/jq` 1.8.1 | JSON 解析/查询/格式化 | `curl -s API \| jq '.flag'` |
+| **jq** | `/usr/bin/jq` 1.8.2 | JSON 解析/查询/格式化 | `curl -s API \| jq '.flag'` |
 | **tcpdump** | `/usr/bin/tcpdump` 4.99.6 | 网络流量抓取 | `tcpdump -i eth0 -w capture.pcap port 80` |
-| **pdfdetach** | `/usr/bin/pdfdetach` 25.03.0 | PDF 附件提取 | `pdfdetach -saveall file.pdf` |
+| **pdfdetach** | 当前未安装 | PDF 附件提取 | 转 Forensics；当前先用 `/usr/bin/mutool extract file.pdf` |
 
 ### Python 包（ctf-tools conda）
 
