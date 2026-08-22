@@ -72,10 +72,10 @@ updated: 2026-07-06
 
 ### 需安装的 Python 包（不在 ctf-tools 中）
 
-```bash
-conda activate ctf-tools
-pip install torch transformers safetensors
-conda deactivate
+安装会修改 `ctf-tools` 环境，执行前遵循全局确认规则。从 `pwsh` 直接运行：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python -m pip install torch transformers safetensors
 ```
 
 ### 系统组件（WSL Kali）

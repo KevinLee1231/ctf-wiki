@@ -195,5 +195,5 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 |---|---|---|---|
 | **pycdc** | `/home/kali/pycdc/build/pycdc` | Python 3.9+ `.pyc` 反编译主力；旧版本字节码按需与 `decompyle3` / `uncompyle6` 交叉验证 | `/home/kali/pycdc/build/pycdc file.pyc` |
 | **pycdas** | `/home/kali/pycdc/build/pycdas` | Python 字节码反汇编 | `/home/kali/pycdc/build/pycdas file.pyc` |
-| **capa** | `/home/kali/miniforge3/envs/ctf-tools/bin/capa` | `ctf-tools` 内命令行工具；自动识别 binary 能力（加密/通信/反分析） | `conda activate ctf-tools && capa -vv binary && conda deactivate` |
+| **capa** | `ctf-tools` Conda 环境 | 自动识别 binary 能力（加密/通信/反分析） | `wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools capa -vv binary` |
 | **decompyle3** | `/home/kali/.local/bin/decompyle3` | 用户层 Python bytecode 反编译器；只在传统 Python 反编译链更适合时，作为 `pycdc` 的补充交叉验证 | `/home/kali/.local/bin/decompyle3 file.pyc` |

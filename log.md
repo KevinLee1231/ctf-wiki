@@ -2929,3 +2929,9 @@
 - 将 `wiki/crypto-tooling.md` 收敛为 Crypto 工具安装状态、版本、路径、环境、完整调用与失败处理的唯一权威来源；移除 frontmatter 更新时间和页尾重复速查，只保留当前状态，不在日志中复制易漂移的工具细节。
 - 同步收窄外部 `ctf-solve-challenge` 与 `ctf-crypto` skill：前者只承担首轮分流，后者只说明何时进入 Crypto、何时选择工具或知识页；全局 `AGENTS.md` 只保留跨任务原则和稳定环境路由。`wiki/cross-category-tooling.md` 也移除 Crypto 专项工具事实，改为路由到唯一权威页。
 - 页面路径、类型和索引入口均未变化，因此无需修改 `index.md`。验收覆盖 4903 篇 Markdown、7950 条链接、1008 条图片引用和 6120 个本地目标，本地断链为 0；232 篇 wiki 页面全部被索引覆盖，类型保持 family 99、technique 120、tooling 13。
+
+## 2026-08-22 — WSL 与 Conda 调用路由纠正
+
+- 修正 `wiki/ai-ml-tooling.md`、`wiki/crypto-tooling.md`、`wiki/pwn-tooling.md` 与 `wiki/reverse-tooling.md` 中的环境调用：Windows 侧统一从 `pwsh` 直接发起 `wsl`，Conda 环境统一通过绝对入口执行 `conda run --no-capture-output`，不再激活环境或绕过 Conda 入口直调环境内二进制。
+- 同步纠正仓库外全局 `AGENTS.md` 的终端与双侧 Conda 路由，并删除 13 个专项 skill 中失效的 Hermes 继承说明。tooling 页继续只保留当前调用方式，日志不复制环境命令清单。
+- 页面路径、类型和索引入口均未变化，因此无需修改 `index.md`。13 个外部 skill 与 8 个 `pwsh` 代码块通过结构/语法校验；全库 4903 篇 Markdown、7950 条链接、1008 条图片引用和 6120 个本地目标无断链，232 篇 wiki 页面全部被索引覆盖，类型保持 family 99、technique 120、tooling 13。

@@ -75,12 +75,13 @@ updated: 2026-07-11
 | **pyelftools** | 0.32 | ELF 文件解析，读取节头/段头/动态符号 | `from elftools.elf.elffile import ELFFile` |
 | **numpy** | 2.4.4 | 数组/矩阵运算，权重/偏置操作 | `import numpy as np` |
 
-```bash
-conda activate ctf-tools
-pwn checksec <binary>              # 查 PIE/RELRO/NX/Canary
-pwn cyclic 200 / pwn cyclic -l <v> # De Bruijn 偏移计算
-pwn shellcraft amd64.linux.sh()    # shellcode 生成
-conda deactivate
+从 `pwsh` 直接调用 `ctf-tools` 环境中的入口：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn checksec ./binary
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn cyclic 200
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn cyclic -l offset-value
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn shellcraft 'amd64.linux.sh()'
 ```
 
 ### 系统全局命令（WSL Kali）

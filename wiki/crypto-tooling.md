@@ -78,15 +78,10 @@ skills: [ctf-crypto]
 
 ### Python 包（ctf-tools conda）
 
-完整环境调用：
+从 `pwsh` 直接调用：
 
-```bash
-source /home/kali/miniforge3/etc/profile.d/conda.sh
-conda activate ctf-tools || exit
-python /path/to/script.py --example-argument value
-crypto_status=$?
-conda deactivate
-exit "$crypto_status"
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/script.py --example-argument value
 ```
 
 | 工具 | 版本 | 功能 | 典型用法 |
@@ -104,15 +99,10 @@ exit "$crypto_status"
 
 ### SageMath（sage conda）
 
-完整环境调用：
+从 `pwsh` 直接调用：
 
-```bash
-source /home/kali/miniforge3/etc/profile.d/conda.sh
-conda activate sage || exit
-sage /path/to/script.sage
-sage_status=$?
-conda deactivate
-exit "$sage_status"
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/to/script.sage
 ```
 
 | 工具 | 版本 | 关键功能 | 典型用法 |
@@ -135,15 +125,10 @@ exit "$sage_status"
 |---|---|---|---|
 | **RsaCtfTool** | `/home/kali/RsaCtfTool/venv/bin/RsaCtfTool` | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard 等常见方法） | 当前不可用：入口报 `ModuleNotFoundError: No module named 'RsaCtfTool'` |
 
-环境修复并确认入口可用后，固定调用顺序为：
+环境修复并确认入口可用后，从 `pwsh` 直接调用独立 venv 中的入口：
 
-```bash
-cd /home/kali/RsaCtfTool
-source venv/bin/activate || exit
-RsaCtfTool --publickey key.pub --attack wiener --private
-rsa_status=$?
-deactivate
-exit "$rsa_status"
+```pwsh
+wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --publickey key.pub --attack wiener --private
 ```
 
 ### 系统全局命令（WSL Kali）
