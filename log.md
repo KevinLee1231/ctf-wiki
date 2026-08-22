@@ -2923,3 +2923,9 @@
 - 最终可恢复快照为 `D:/文档/新建文件夹/wp-archive-backups/HackINI2024-wp-final-20260816-092034.zip`，包含 69 篇 Markdown、0 张图片，共 69 个条目、未压缩数据 132918 字节，ZIP 大小 97186 字节，SHA-256 为 `b72b10d3271ac75778e2572a506e9d009f07512f00adc789eaf9901f420b5a71`；staging、raw 与 ZIP 的 69 组逐文件 SHA-256 差异均为 0。验收后已将 staging 中 69 篇 Markdown 送入 Windows 回收站，`D:/文档/新建文件夹/wp` 只保留 15 个空一级方向目录，目录内文件与二级资源目录均为 0。
 - `index.md` 按当前文件树重算：AI/ML 由 82 增至 83、Blockchain 由 100 增至 108、Crypto 由 890 增至 906、Forensics 由 279 增至 285、Malware 由 48 增至 50、OSINT 由 201 增至 203、Pwn 由 889 增至 901、Reverse 由 772 增至 780、Stego 由 235 增至 237、Web 由 851 增至 863，raw Markdown 总数由 4598 增至 4667；本轮是 raw-only 归档，未修改 `wiki/*.md`。
 - 批次验收结果：69 篇 WP 的严格 UTF-8、LF 文件尾、安全命名、唯一 H1、固定三段 H2、CommonMark 围栏、数学公式定界和无图片资源状态均通过；60 个 Python、6 个 JSON、4 个 JavaScript 与 1 个 PowerShell 代码块分别通过 AST、JSON、Node 和 PowerShell 语法解析。全库当前包含 4903 篇 active Markdown、4667 篇 raw Markdown 与 232 篇 wiki 页面；Markdown-it 排除代码后解析的 5110 条普通本地链接与 1008 条图片引用均无断链，438 个 raw 资源目录均有同 basename Markdown 且非空，wiki 页面保持 family 99、technique 120、tooling 13，`index.md` 覆盖全部 wiki 页面且逐方向统计与当前文件树一致。
+
+## 2026-08-22 — Crypto 工具说明权威来源收敛
+
+- 将 `wiki/crypto-tooling.md` 收敛为 Crypto 工具安装状态、版本、路径、环境、完整调用与失败处理的唯一权威来源；移除 frontmatter 更新时间和页尾重复速查，只保留当前状态，不在日志中复制易漂移的工具细节。
+- 同步收窄外部 `ctf-solve-challenge` 与 `ctf-crypto` skill：前者只承担首轮分流，后者只说明何时进入 Crypto、何时选择工具或知识页；全局 `AGENTS.md` 只保留跨任务原则和稳定环境路由。`wiki/cross-category-tooling.md` 也移除 Crypto 专项工具事实，改为路由到唯一权威页。
+- 页面路径、类型和索引入口均未变化，因此无需修改 `index.md`。验收覆盖 4903 篇 Markdown、7950 条链接、1008 条图片引用和 6120 个本地目标，本地断链为 0；232 篇 wiki 页面全部被索引覆盖，类型保持 family 99、technique 120、tooling 13。

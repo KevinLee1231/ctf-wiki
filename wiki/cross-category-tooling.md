@@ -9,6 +9,8 @@ updated: 2026-07-11
 
 本页为 `ctf-solve-challenge` 提供跨方向首检工具、调用层和失败转向。它不是第十五个方向，也不承担专项求解；证据足以判断决定性主障碍后，应立即进入 14 个正式 `ctf-*` 专项之一。
 
+一旦进入 Crypto，本页不再作为工具事实来源；Crypto 工具的当前状态、版本、路径、环境和完整调用统一读取 [crypto-tooling.md](crypto-tooling.md)。本页只维护跨方向首检和其他方向共享工具。
+
 ## 工具选择边界
 
 ### 入口选择
@@ -47,7 +49,7 @@ updated: 2026-07-11
 - 协议与网络：`requests`、`dnspython`、`dnslib`
 - 打包/字节码：`pyinstxtractor-ng`、`uncompyle6`
 - 识别/条码/esolang：`pywhat`、`pyzbar`、`zxing-cpp`、`npiet`、`npietedit`
-- 交叉题型辅助：`pycryptodome`、`flask-unsign`
+- 交叉题型辅助：`flask-unsign`
 
 ### 当前未装 / 建议按需补装
 
@@ -70,7 +72,6 @@ updated: 2026-07-11
 | angr | 9.2.209 | 二进制符号执行框架 | `angr.Project('binary').explore(find=...)` | ctf-reverse / ctf-pwn |
 | pwntools | 4.15.0 | CTF 漏洞利用工具库 | `from pwn import *` | ctf-pwn |
 | sympy | 1.14.0 | 符号数学计算 | `sympy.solve(equation, x)` | ctf-crypto / ctf-reverse |
-| gmpy2 | 2.3.0 | 高精度多精度算术 | `gmpy2.invert(a, n)` | ctf-crypto |
 | numpy | 2.4.4 | 多维数组数值计算 | `np.fromfile('data', dtype=np.complex64)` | ctf-ai-ml / ctf-forensics / ctf-stego / ctf-hardware-embedded |
 | scipy | 1.17.1 | 科学计算/信号处理 | `scipy.signal.spectrogram(audio)` | ctf-ai-ml / ctf-stego / ctf-hardware-embedded |
 | Pillow | 11.3.0 | Python 图像处理 | `Image.open('puzzle.png')` | ctf-ai-ml / ctf-forensics / ctf-stego |
@@ -78,7 +79,6 @@ updated: 2026-07-11
 | requests | 2.33.1 | HTTP 客户端 | `requests.get(url)` | ctf-web / ctf-osint / ctf-cloud-infra |
 | dnspython | 2.8.0 | DNS 协议 Python 实现 | `dns.resolver.resolve('example.com')` | ctf-web / ctf-forensics / ctf-osint / ctf-pentest |
 | dnslib | 0.9.26 | DNS 报文构造与解析 | `dnslib.DNSRecord.parse(packet)` | ctf-web / ctf-forensics / ctf-malware |
-| pycryptodome | 3.17 | 加密算法库 | `Crypto.Cipher.AES.new(key, ...)` | ctf-crypto |
 | pyinstxtractor-ng | 2026.4.7 | PyInstaller 打包 exe 解包 | `pyinstxtractor-ng packed.exe` | ctf-reverse / ctf-malware |
 | uncompyle6 | 3.9.3 | Python 2.7-3.8 bytecode 反编译 | `uncompyle6 compiled.pyc` | ctf-reverse |
 | flask-unsign | 1.2.1 | Flask session 签名/解码 | `flask-unsign -d -c 'cookie'` | ctf-web |
@@ -108,11 +108,9 @@ updated: 2026-07-11
 | wasm2wat | /usr/bin/wasm2wat | — | WebAssembly 二进制转文本 | `wasm2wat module.wasm -o module.wat` |
 | wat2wasm | /usr/bin/wat2wasm | — | WebAssembly 文本转二进制 | `wat2wasm module.wat -o module.wasm` |
 
-### 数学环境
+### 专项数学与密码环境
 
-| 工具 | 路径 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|---|
-| SageMath | conda 环境 sage | 10.7 | 完整数学软件系统 | `sage script.sage` |
+进入 Crypto 后直接读取 [crypto-tooling.md](crypto-tooling.md)。本页不重复 SageMath、密码学 Python 包或 RSA 专项工具的版本、路径和调用方式。
 
 ### 独立工具
 

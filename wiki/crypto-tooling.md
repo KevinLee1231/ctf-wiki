@@ -2,19 +2,20 @@
 type: tooling
 tags: [crypto, tooling, tools, environment]
 skills: [ctf-crypto]
-updated: 2026-07-11
 ---
 
 # Crypto Tooling
 
-本页记录 `ctf-crypto` 方向的本机工具清单、调用层、路径和适用边界。`SKILL.md` 只保留首轮工具摘要；需要详细路径、环境和专项工具说明时读取本页。
+本页是 `ctf-crypto` 方向本机工具信息的唯一权威来源，负责维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-crypto/SKILL.md` 只说明何时使用工具，`ctf-solve-challenge/SKILL.md` 只负责分流；两者都不复制本页细节。
+
+本页只保留当前真实状态，不维护核验时间、变更历史或旧版本说明。实际环境与本文不一致时，直接修正文中现状。
 
 ## 工具选择边界
 
 ### 入口选择
 
 - 小脚本和对称/哈希实验默认走 `ctf-tools`；数论、格、ECC、Coppersmith 和 Sage 专属能力走 `sage` 环境。
-- RsaCtfTool、HashClash 属于专项全路径/独立项目工具，必须按本页路径调用，不要假设全局命令可用。
+- RsaCtfTool、HashClash 属于专项全路径/独立项目工具；先核对本页“当前可用性”，再按本页路径调用，不要假设全局命令可用。
 - RSA 模数首轮先查 FactorDB Web/API；只有当前会话确实暴露 callable 的 FactorDB MCP 时才走 MCP，再决定是否进入 Sage/RsaCtfTool。
 
 ### 不应进入 Crypto 工具链的情况
@@ -38,7 +39,7 @@ updated: 2026-07-11
 | FactorDB Web/API；可选 MCP | RSA 模数或可疑合数出现时，先验证“是不是先分解”；MCP 必须 live verify |
 | SageMath | 需要数论、格、ECC、DLP 时的主工作台 |
 | `pycryptodome` | 快速识别和复现对称加密模式 |
-| RsaCtfTool | 在确认是 RSA 后，快速覆盖常见攻击族 |
+| RsaCtfTool | 确认是 RSA、需要覆盖常见攻击族，且本页显示入口可用后再使用 |
 
 ### 专项按需
 
@@ -48,23 +49,25 @@ updated: 2026-07-11
 - 哈希类：`hashpumpy`、HashClash
 - 自动化与杂项：`ciphey`、`pwntools`、`numpy`
 - 外部爆破/分解：`hashcat`、`john`、`yafu`
+- 古典替换密码：在线 `quipqiup`
 
-### 当前未装 / 建议按需补装
+### 当前可用性
 
-- 当前没有明显缺口。Crypto 这套更需要按题型切换工具，而不是继续堆更多默认依赖。
+- `ctf-tools` 中本页列出的 Python 包均已安装；SageMath 与系统全局命令可调用，两项 HashClash 入口文件存在且可执行。
+- RsaCtfTool 项目、独立 venv 和入口文件存在，但入口当前因 venv 中缺少 `RsaCtfTool` 项目模块而不可用。修复并重新确认前，不要把它作为可执行入口；优先使用 FactorDB、SageMath 或题目专用脚本。
 
 ## 失败信号与转向
 
 - FactorDB、gcd、低指数和近似平方根都无结果：先回到 [crypto-parameter-triage-family.md](crypto-parameter-triage-family.md) 重列参数、未知量和可复算方程，不要盲跑 Sage。
 - Sage/LLL/Z3 长时间无解：检查变量界、泄露位宽、模数和方程是否对应真实代码；格问题转 [lattice-and-lwe.md](lattice-and-lwe.md)，PRNG 约束转 [prng-z3-lcg-and-timing-attacks.md](prng-z3-lcg-and-timing-attacks.md)。
-- RsaCtfTool 没覆盖：判断是否是 specialized prime/oracle/padding/fault，而不是继续换自动工具；转 [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)。
+- RsaCtfTool 入口不可用或没有覆盖：改用 FactorDB、SageMath 或题目专用脚本，并判断是否是 specialized prime/oracle/padding/fault；转 [rsa-specialized-structures-and-oracles.md](rsa-specialized-structures-and-oracles.md)。
 - 证据来自 Web token、JSON parser、签名接口或 PCAP：保留 crypto 方程，但把请求/协议层转到 Web、Forensics 或 Pentest 对应 family。
 
 ## 详细清单
 
 ### FactorDB Web/API 与可选 MCP
 
-当前会话未配置 callable 的 FactorDB MCP，不能把下面的 MCP 方法当作稳定入口。默认使用 FactorDB Web/API；只有工具清单实际出现相应方法时，才按下表调用。
+默认使用 FactorDB Web/API。每次使用前检查当前会话的 callable 工具清单；只有实际出现相应 FactorDB MCP 方法时，才按下表调用，不要从本文假设连接已存在。
 
 | 工具 | 功能 | 调用方式 |
 |---|---|---|
@@ -74,6 +77,17 @@ updated: 2026-07-11
 | `factordb_report_factor_by_id` | 按 ID 向 FactorDB 提交因子 | 仅当 MCP callable，且提交外部数据前确认；传入 `id` + `factor` |
 
 ### Python 包（ctf-tools conda）
+
+完整环境调用：
+
+```bash
+source /home/kali/miniforge3/etc/profile.d/conda.sh
+conda activate ctf-tools || exit
+python /path/to/script.py --example-argument value
+crypto_status=$?
+conda deactivate
+exit "$crypto_status"
+```
 
 | 工具 | 版本 | 功能 | 典型用法 |
 |---|---|---|---|
@@ -90,9 +104,20 @@ updated: 2026-07-11
 
 ### SageMath（sage conda）
 
+完整环境调用：
+
+```bash
+source /home/kali/miniforge3/etc/profile.d/conda.sh
+conda activate sage || exit
+sage /path/to/script.sage
+sage_status=$?
+conda deactivate
+exit "$sage_status"
+```
+
 | 工具 | 版本 | 关键功能 | 典型用法 |
 |---|---|---|---|
-| **SageMath** | 10.7 | 全面符号数学环境 | `conda activate sage && sage script.sage && conda deactivate` |
+| **SageMath** | 10.9 | 全面符号数学环境 | `sage script.sage` |
 | | | LLL/BKZ 格基规约 | `M.LLL(); M.BKZ(block_size=20)` |
 | | | Coppersmith 小根攻击 | `f.small_roots(X=2^N, beta=0.5)` |
 | | | 离散对数（DLP/Pohlig-Hellman） | `discrete_log(h, g)` |
@@ -106,9 +131,20 @@ updated: 2026-07-11
 
 ### RsaCtfTool（独立 venv）
 
-| 工具 | 路径 | 功能 | 激活方式 |
+| 工具 | 路径 | 功能 | 当前状态 |
 |---|---|---|---|
-| **RsaCtfTool** | `/home/kali/RsaCtfTool/venv/bin/RsaCtfTool` | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard 等 30+ 方法） | `cd /home/kali/RsaCtfTool && source venv/bin/activate && RsaCtfTool ... && deactivate` |
+| **RsaCtfTool** | `/home/kali/RsaCtfTool/venv/bin/RsaCtfTool` | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard 等常见方法） | 当前不可用：入口报 `ModuleNotFoundError: No module named 'RsaCtfTool'` |
+
+环境修复并确认入口可用后，固定调用顺序为：
+
+```bash
+cd /home/kali/RsaCtfTool
+source venv/bin/activate || exit
+RsaCtfTool --publickey key.pub --attack wiener --private
+rsa_status=$?
+deactivate
+exit "$rsa_status"
+```
 
 ### 系统全局命令（WSL Kali）
 
@@ -117,7 +153,7 @@ updated: 2026-07-11
 | **hashcat** | `/usr/bin/hashcat` 7.1.2 | GPU 哈希破解（全类型支持） | `hashcat -m 0 -a 3 hash.txt ?l?l?l?l` |
 | **john** | `/usr/sbin/john` 1.9.0-jumbo | CPU 哈希破解 / JWT secret 暴力 | `john hash.txt --wordlist=rockyou.txt` |
 | **xxd** | `/usr/bin/xxd` | 十六进制转储与还原 | `xxd -p ciphertext \| head` |
-| **openssl** | `/usr/bin/openssl` 3.6.1 | 加解密/签名/证书操作 | `openssl rsautl -decrypt -inkey key.pem` |
+| **openssl** | `/usr/bin/openssl` 3.6.3 | 加解密/签名/证书操作 | `openssl pkeyutl -decrypt -inkey key.pem -in ciphertext.bin` |
 | **hashid** | `/usr/bin/hashid` 3.1.4 | 哈希类型识别 | `hashid '$2y$10$...'` |
 | **yafu** | `/usr/local/bin/yafu` 3.1.2 | 自动化大整数分解（ECM/QS/NFS） | `yafu "factor(@)" -batchfile nums.txt` |
 
@@ -132,15 +168,11 @@ updated: 2026-07-11
 
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
-| **CyberChef** | `D:\CTF工具\CyberChef\CyberChef_v10.23.0.html` 或在线 https://gchq.github.io/CyberChef/ | 万能编解码瑞士军刀（300+ 操作，Magic 自动识别编码） | 浏览器打开 html，拖入文件或粘贴文本 |
-| **fastcoll** | `D:\CTF工具\fastcoll\fastcoll_v1.0.0.5_exe\fastcoll_v1.0.0.5.exe` | MD5 相同前缀碰撞生成 | `fastcoll_v1.0.0.5.exe -p prefix -o out1 out2` |
+| **CyberChef** | `D:/CTF工具/CyberChef/CyberChef_v10.23.0.html` 或在线 https://gchq.github.io/CyberChef/ | 万能编解码工具（含 Magic 自动识别） | 浏览器打开 HTML，拖入文件或粘贴文本 |
+| **fastcoll** | `D:/CTF工具/fastcoll/fastcoll_v1.0.0.5_exe/fastcoll_v1.0.0.5.exe` | MD5 相同前缀碰撞生成 | `fastcoll_v1.0.0.5.exe -p prefix -o out1 out2` |
 
+### 在线工具
 
----
-
-## 补充速查
-
-- **Python:** `conda activate ctf-tools` 然后 `pip install pycryptodome z3-solver sympy gmpy2`，用完后 `conda deactivate`
-- **SageMath:** `conda activate sage` 然后 `sage -python script.py` (required for ECC, Coppersmith, lattice attacks)，用完后 `conda deactivate`
-- **RsaCtfTool:** `cd /home/kali/RsaCtfTool && source venv/bin/activate && /home/kali/RsaCtfTool/venv/bin/RsaCtfTool -n <n> -e <e> --uncipher <c> && deactivate` — automated RSA attack suite
-- **quipqiup.com:** Automated substitution cipher solver (frequency + word pattern analysis)
+| 工具 | 地址 | 功能 | 适用边界 |
+|---|---|---|---|
+| **quipqiup** | https://quipqiup.com/ | 自动求解保留词边界的简单替换密码 | 已确认是古典 substitution cryptogram 时使用；不替代通用密码分析 |
