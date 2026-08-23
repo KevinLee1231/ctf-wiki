@@ -2942,3 +2942,10 @@
 - 新增 Blockchain、Cloud/Infra、Hardware/Embedded、Mobile 与 Stego 五个方向工具页，统一改造其余九个方向工具页，并把三篇 Reverse 工具方法页改为 technique；`cross-category-tooling.md` 只保留未分类侦察工具，`index.md` 已同步新的入口与类型。
 - 现场核验了当前 WSL/Windows 工具层与 MCP 可用性。RsaCtfTool 的现有 venv 因解释器链接漂移无法由激活修复，Crypto 工具页记录了当前可用调用、激活语义和需授权的修复路径；本轮未修改该 venv。
 - 验收覆盖 4908 篇 active Markdown、8993 条链接与图片引用、6155 个本地目标，断链为 0；237 篇 wiki 页面全部被索引覆盖，类型为 family 99、technique 123、tooling 15。14 个专项 skill 均通过结构与快速校验，26 个 `pwsh` 代码块通过语法解析，`git diff --check` 通过。
+
+## 2026-08-23 — RsaCtfTool Sage 隔离环境重建
+
+- 重新 clone 后按独立项目层重建 RsaCtfTool：由 Sage Conda 环境的 Python 创建不继承基础 `site-packages` 的项目 venv，RsaCtfTool 依赖只安装进该 venv，运行时由外层 `conda run` 提供 Sage 命令。基础 Sage 环境的 Python 包版本未被降级或覆盖。
+- 对当前源码中可复现的 Sage 集成缺陷做最小修复：补齐 Sage 二进制依赖声明，修复 `partial_d.sage` 语法、binary-polynomial 脚本入口与输出解析，移除 lattice 初始化副作用并校验 Sage 返回因子，同时把 Sage 脚本纳入 wheel package data；项目 venv 与 pytest 缓存加入忽略规则。
+- 验收包括依赖一致性、解释器与 PATH 隔离、激活 venv 后的 Sage 路由、核心选集 121 项测试（其中 5 项为 Sage 集成测试）、Wiener CLI、真实 Sage 子进程攻击和 wheel 内 13 个 Sage 文件。上游广覆盖测试的首个失败是 Lehman 用例对模 4 条件的错误断言，且存在未标记耗时用例，因此只记录针对性验证通过，不宣称上游全量测试基线通过。
+- `wiki/crypto-tooling.md` 已替换旧 Python 3.13 软链接故障说明，记录当前唯一有效调用、重建边界与失败转向。页面路径、类型和索引入口均未变化，因此无需修改 `index.md`。

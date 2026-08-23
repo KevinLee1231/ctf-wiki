@@ -20,7 +20,7 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/t
 wsl /usr/bin/openssl version
 ```
 
-独立 Python venv 是否激活只由该工具自身决定。激活的作用通常只是调整 `PATH`；自动化可直调 venv 入口，交互操作也可在最小 `bash -lc` 中按需 `source`，两种方式都必须使用同一个有效 venv 解释器。
+独立 Python venv 是否激活只由该工具自身决定。激活的作用通常只是调整 `PATH`；自动化应直调 venv 绝对入口，需要复合 shell 语义时才在 `conda run` 创建的环境内用最小 `bash -c` 按需 `source`。两种方式都不得依赖终端预先激活的 Conda 或 venv 状态。
 
 ## 工具选择边界
 
@@ -66,7 +66,7 @@ wsl /usr/bin/openssl version
 ### 当前可用性
 
 - `ctf-tools` 中本页列出的 Python 包均已安装；SageMath 与系统全局命令可调用，两项 HashClash 入口文件存在且可执行。
-- RsaCtfTool 项目、独立 venv、入口文件和 Python 3.13 的已安装模块都存在，但 venv 的 `python3` 链接已漂移到系统 Python 3.14，导致 3.13 `site-packages` 不在 `sys.path`。因此直调入口和先激活 venv 都会失败；当前只能使用下文的显式 Python 3.13 兼容调用，或先修复 venv 链接。
+- RsaCtfTool 0.1.0 已以 editable 方式安装到项目独立 venv。该 venv 由 `sage` Conda 环境的 Python 3.12 创建且不继承基础 `site-packages`；从 `conda run -n sage` 直调 venv 入口时，RsaCtfTool 依赖留在 venv，子进程 `sage` 由 Sage 环境提供。CLI、依赖一致性、代表性 Python 攻击和真实 Sage 子进程攻击均已验证可用。
 
 ## 失败信号与转向
 
@@ -131,35 +131,40 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/t
 | | | Jordan 标准型 | `A.jordan_form()` |
 | | | p-adic 数 | `Qp(p, prec).log(a)` |
 
-### RsaCtfTool（独立 venv）
+### RsaCtfTool（Sage-Python 基础的独立 venv）
 
-| 工具 | 路径 | 功能 | 当前状态 |
+| 工具 | 路径与版本 | 功能 | 当前状态 |
 |---|---|---|---|
-| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；项目 commit `e261e73888b857c61c0b1877fbb484b9a06758b9` | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard 等常见方法） | Console entry 当前不可用：Python 3.13 venv 的 `python3` 链接解析到系统 Python 3.14.6，报 `ModuleNotFoundError`；显式 Python 3.13 兼容调用可用 |
+| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；上游基线 commit `af87bb487666b1bf3070e1bb058d97b78a342808`，叠加当前本地 Sage 集成修复 | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard、格与 Sage 辅助攻击等） | 可用；venv Python 3.12.13，`sys.base_prefix=/home/kali/miniforge3/envs/sage`，`include-system-site-packages=false`；必须由外层 `conda run -n sage` 提供 `sage` 命令 |
 
-当前可用的兼容调用显式固定 Python 3.13 和原 venv 的 3.13 `site-packages`：
-
-```pwsh
-wsl --cd /home/kali/RsaCtfTool /usr/bin/env PYTHONPATH=/home/kali/RsaCtfTool/venv/lib/python3.13/site-packages /usr/bin/python3.13 -m RsaCtfTool.main --publickey key.pub --attack wiener --private
-```
-
-当前故障不是“未激活 venv”。以下两种正常入口在解释器链接修复后等价：自动化可直接执行 console entry；需要交互式 PATH 简写时可按需激活并在同一 shell 中退出。
+自动化固定调用 venv 的绝对入口。RsaCtfTool 主进程使用 venv Python；声明 `required_binaries = ["sage"]` 的攻击通过 `PATH` 找到 `/home/kali/miniforge3/envs/sage/bin/sage`，Sage 启动器再使用 Sage 环境自己的 Python。不要把 RsaCtfTool 依赖安装进 Sage 基础环境：
 
 ```pwsh
-# 自动化：直接使用 venv console entry
-wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --publickey key.pub --attack wiener --private
-
-# 交互式 PATH 语义：按需激活，运行后退出
-wsl --cd /home/kali/RsaCtfTool /usr/bin/bash -lc 'source venv/bin/activate && RsaCtfTool --publickey key.pub --attack wiener --private; status=$?; deactivate; exit $status'
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --publickey /path/to/key.pub --attack wiener --private
 ```
 
-修复时应先取得修改工具环境的授权，再把 `venv/bin/python3` 重新指向仍存在的 `/usr/bin/python3.13`，随后检查解释器、依赖与入口；不要把重新激活当作修复：
+确实需要同一 shell 内的 venv PATH 简写时，先由 `conda run` 建立 Sage PATH，再激活项目 venv；激活后 `python` 指向 venv，`sage` 仍指向 Sage Conda 环境：
 
 ```pwsh
-wsl --cd /home/kali/RsaCtfTool /usr/bin/ln -sfn /usr/bin/python3.13 venv/bin/python3
-wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/python -m pip check
-wsl --cd /home/kali/RsaCtfTool /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --help
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /usr/bin/bash -c 'source /home/kali/RsaCtfTool/venv/bin/activate && RsaCtfTool --publickey /path/to/key.pub --attack wiener --private'
 ```
+
+环境重建属于写操作，须先取得授权。重建时由 Sage 环境 Python 创建 venv，再始终使用 venv 的绝对 Python 安装；不要使用 `--system-site-packages`、裸 `pip` 或 `conda activate`：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage python -m venv /home/kali/RsaCtfTool/venv
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/python -m pip install -e /home/kali/RsaCtfTool
+```
+
+安装或 Sage 环境升级后按以下顺序检查。期望 `sys.executable` 位于项目 venv、`sys.base_prefix` 位于 Sage 环境、`shutil.which("sage")` 返回 Sage 绝对路径：
+
+```pwsh
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/python -c 'import shutil,sys; print(sys.executable); print(sys.base_prefix); print(shutil.which("sage"))'
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/python -m pip check
+wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --help
+```
+
+若只激活 venv 后 `sage` 不存在，说明外层缺少 `conda run -n sage`；若 `sys.base_prefix` 不再指向 Sage 环境，或 Sage 环境更换了 Python 小版本，应删除并重建项目 venv，而不是手工改解释器软链接。当前针对性验证覆盖核心选集 121 项（其中 5 项为 Sage 集成测试）、Wiener CLI、真实 binary-polynomial Sage 子进程和包含 13 个 Sage 文件的 wheel；上游全量测试仍含与本次安装无关的错误断言和未标记耗时用例，因此不能据此宣称全量测试基线通过。
 
 ### 系统全局命令（WSL Kali）
 
