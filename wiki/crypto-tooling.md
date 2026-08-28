@@ -135,13 +135,15 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/t
 
 | 工具 | 路径与版本 | 功能 | 当前状态 |
 |---|---|---|---|
-| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；上游基线 commit `af87bb487666b1bf3070e1bb058d97b78a342808`，叠加当前本地 Sage 集成修复 | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard、格与 Sage 辅助攻击等） | 可用；venv Python 3.12.13，`sys.base_prefix=/home/kali/miniforge3/envs/sage`，`include-system-site-packages=false`；必须由外层 `conda run -n sage` 提供 `sage` 命令 |
+| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；本地分支 `sage-compat-and-fixes`（Sage 兼容修复 + 四轮源码审计修复，已推 fork `KevinLee1231`） | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard、格与 Sage 辅助攻击等） | 可用；venv Python 3.12.13，`sys.base_prefix=/home/kali/miniforge3/envs/sage`，`include-system-site-packages=false`；必须由外层 `conda run -n sage` 提供 `sage` 命令 |
 
 自动化固定调用 venv 的绝对入口。RsaCtfTool 主进程使用 venv Python；声明 `required_binaries = ["sage"]` 的攻击通过 `PATH` 找到 `/home/kali/miniforge3/envs/sage/bin/sage`，Sage 启动器再使用 Sage 环境自己的 Python。不要把 RsaCtfTool 依赖安装进 Sage 基础环境：
 
 ```pwsh
 wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --publickey /path/to/key.pub --attack wiener --private
 ```
+
+Sage 子进程攻击统一设有 180s 超时下限（`max(--timeout, 180)`；qicheng 保持 900s 下限匹配其 200 次 ECM 尝试预算），传入更大的 `--timeout` 时以传入值为准；对 1024 位以上密钥的格/ECM/QS 攻击应显式调大 `--timeout`。
 
 确实需要同一 shell 内的 venv PATH 简写时，先由 `conda run` 建立 Sage PATH，再激活项目 venv；激活后 `python` 指向 venv，`sage` 仍指向 Sage Conda 环境：
 
@@ -164,7 +166,27 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/R
 wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/RsaCtfTool/venv/bin/RsaCtfTool --help
 ```
 
-若只激活 venv 后 `sage` 不存在，说明外层缺少 `conda run -n sage`；若 `sys.base_prefix` 不再指向 Sage 环境，或 Sage 环境更换了 Python 小版本，应删除并重建项目 venv，而不是手工改解释器软链接。当前针对性验证覆盖核心选集 121 项（其中 5 项为 Sage 集成测试）、Wiener CLI、真实 binary-polynomial Sage 子进程和包含 13 个 Sage 文件的 wheel；上游全量测试仍含与本次安装无关的错误断言和未标记耗时用例，因此不能据此宣称全量测试基线通过。
+若只激活 venv 后 `sage` 不存在，说明外层缺少 `conda run -n sage`；若 `sys.base_prefix` 不再指向 Sage 环境，或 Sage 环境更换了 Python 小版本，应删除并重建项目 venv，而不是手工改解释器软链接。
+
+Sage 攻击脚本可用性（全部 10 个 `.sage` 已做 preparse+compile 静态检查并逐脚本实跑）：
+
+| 脚本 | 状态 | 依据 |
+|---|---|---|
+| qs / ecm / ecm2 / smallfraction / small_crt_exp / boneh_durfee | 可用 | 构造弱密钥端到端实跑，因子/d 恢复且校验通过 |
+| binary_polynomial_factoring | 可用 | 真实 Sage 子进程 pytest 通过 |
+| roca_attack.py | 可执行 | 非 ROCA 输入正确输出 FAIL；完整分解路径需真 ROCA 密钥未测 |
+| partial_d | 可用 | Coppersmith X 上界多档扫描覆盖因子位长超过 n/2 的场景；泄露 200 位弱密钥与作者样例回归全部命中 |
+| lattice | 可用 | Coppersmith small_roots 已知高位分解；beta 取保守下界 `(pbits-1)/nbits` 保证 `factor >= n^beta` 前提成立，搜索窗多档扫描。平衡因子 96 位未知 8/8 命中 |
+| qicheng | 可用 | 自包含标准 ECM（随机曲线 + 阶乘阶梯 + 模逆失败 gcd 提取）；timeout 强制下限 900s 匹配 attempts=200。实测命中 36 位因子；40 位以上建议优先用 GMP-ECM 的 ecm 攻击 |
+
+neca、wolframalpha 攻击因对应二进制缺失在框架层 warning 后跳过。
+
+### 算法库质量状态
+
+- 项目全量测试套件 239 项全部通过、0 跳过（须由外层 `conda run -n sage` 提供 PATH；否则 sage 集成测试被 skip）。
+- 经四轮源码审计修复并回归：QS 由逐点试除重写为素数幂筛线 + Hensel 提升的对数筛网（2.7–3x 加速）；mlucas 改 MSB-first Lucas 链；inv_mod_pow_of_2 重写为牛顿迭代；pollard_rho/hart/lehman 加固并统一 None 失败契约；same_n_huge_e 补 gcd(e1,e2)>1 处理；noveltyprimes 候选素性过滤；conspicuous_check 报告完整性；sage 攻击脚本缺失由 required_scripts 预检拦截（ecm.sage/ecm2.sage 曾在本地丢失，已从上游恢复）。行为由 `tests/test_audit_regressions.py` 固化。
+- 核心算法人工审阅确认正确：Dixon 关系收集 + GF(2) 高斯消元 + 零空间依赖遍历、QS 因子基构建与关系筛选（负 Q(x) 的 -1 parity 处理正确）、euler 两平方和方法、fermat 增量式、wiener 连分数后处理、solve_partial_q 三重校验。
+- 已知限制（使用时留意，非缺陷）：`dixon`/`kraitchik`/`lehman`/`hart` 为教学级实现，大数性能有限，实际分解任务优先 QS/SIQS/ECM/factordb；`binary_polynomial_factoring.sage` 依赖 `str(factor(...))` 打印格式解析，Sage 大版本升级时需复测。
 
 ### 系统全局命令（WSL Kali）
 

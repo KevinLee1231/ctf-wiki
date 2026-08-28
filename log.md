@@ -2949,3 +2949,10 @@
 - 对当前源码中可复现的 Sage 集成缺陷做最小修复：补齐 Sage 二进制依赖声明，修复 `partial_d.sage` 语法、binary-polynomial 脚本入口与输出解析，移除 lattice 初始化副作用并校验 Sage 返回因子，同时把 Sage 脚本纳入 wheel package data；项目 venv 与 pytest 缓存加入忽略规则。
 - 验收包括依赖一致性、解释器与 PATH 隔离、激活 venv 后的 Sage 路由、核心选集 121 项测试（其中 5 项为 Sage 集成测试）、Wiener CLI、真实 Sage 子进程攻击和 wheel 内 13 个 Sage 文件。上游广覆盖测试的首个失败是 Lehman 用例对模 4 条件的错误断言，且存在未标记耗时用例，因此只记录针对性验证通过，不宣称上游全量测试基线通过。
 - `wiki/crypto-tooling.md` 已替换旧 Python 3.13 软链接故障说明，记录当前唯一有效调用、重建边界与失败转向。页面路径、类型和索引入口均未变化，因此无需修改 `index.md`。
+
+## 2026-08-28 — RsaCtfTool CLI 层修复与 Sage 攻击超时下限
+
+- 按 `wiki/crypto-tooling.md` 现场核验 RsaCtfTool 时发现 CLI 层故障：`abstract_attack.py` 的 `_ROOTPATH` 行尾混入 `, TimeoutError` 成为元组，且 `..` 深度解析到 `src/` 而非包根目录，8 个声明 `required_scripts` 的 Sage 攻击经 CLI 全部在 `can_run()` 抛 TypeError。已修复为包根目录单级解析；修复后 boneh_durfee 经 CLI 端到端恢复弱密钥私钥，8 个攻击 `can_run()` 全部通过。
+- 为 10 个 Sage 子进程攻击增设 180s 超时下限（`max(--timeout, 180)`，qicheng 保持既有 900s 下限），与 dixon/quadratic_sieve/pollard_rho 的既有重型攻击预算一致；用户传入更大的 `--timeout` 时以传入值为准。两项改动在 RsaCtfTool 本地分支 `sage-compat-and-fixes` 分两次提交，未推送 fork。
+- 回归：全量测试套件 239 项通过。核验期间出现过一次 `test_decrypt_multiple_files` 失败，定位为该测试依赖 FactorDB 网络查询，网络抖动时落入真实 Sage 攻击链并超出测试自身 300s 上限所致，单独重跑与后续全量复跑均通过，与本次修复无关。
+- `wiki/crypto-tooling.md` 补充 Sage 攻击超时下限说明；同页此前未提交的 RsaCtfTool 分支状态、Sage 脚本可用性表与算法库质量状态段落经审阅与本轮实测一致，随本轮一并入库。页面路径、类型和索引入口未变化，无需修改 `index.md`。
