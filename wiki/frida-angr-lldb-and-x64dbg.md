@@ -4,7 +4,7 @@ tags: [reverse, instrumentation, symbolic-execution, debugger]
 skills: [ctf-reverse, ctf-mobile]
 raw:
   - ../raw/reverse/frida-angr-lldb-and-x64dbg.md
-updated: 2026-07-28
+updated: 2026-09-07
 ---
 
 # Frida, angr, lldb and x64dbg
@@ -34,6 +34,17 @@ updated: 2026-07-28
 
 ## 使用原则
 
+### Windows 参数观测与 patch 验证
+
+1. 先固定本次问题：哪一个输入在什么调用或比较点变成了什么值。记录模块基址、RVA、线程和函数原型；ASLR 或模块重载后重新计算地址。
+2. 在函数入口观测参数，在匹配的返回点观测返回值。标准 Windows x64 的前四个整数/指针参数通常对应 RCX、RDX、R8、R9；浮点参数对应相应 XMM 寄存器，函数中部不能继续假定入口栈布局。具体日志文本和条件设置只从 [reverse-tooling.md](reverse-tooling.md#条件断点与日志) 读取。
+3. 先收集原程序的输入、分支、关键值和输出，再做一个能检验假设的最小 patch。保留原字节/寄存器值，并记录补丁范围；补丁改变了输出，只能证明该执行条件下的影响，还要用原始语义或独立复算核对所恢复的算法。
+4. 验证结束后恢复本次修改，重新运行相同输入确认基线；存在多线程或重入时，按线程和调用实例关联入口与返回记录，不将两次不同调用拼成一条证据。
+
+如果需要导出解密后的映像，还要检查入口点、节布局、导入和重定位等恢复条件；一次内存 dump 或工具给出的 OEP 候选不能代替恢复验证，相关路线见 [loader-vm-image-and-kernel-patterns.md](loader-vm-image-and-kernel-patterns.md)。反调试 API、时间差及调试填充值只能作为定位信号，应结合返回值、位掩码和后续分支确认作用；不能从固定常量推断完整算法或调试状态。
+
+### 其他使用原则
+
 - 先有地址、符号、导入、字符串或比较点，再写 hook；没有定位依据的全局 hook 很容易制造噪声。
 - Frida 适合快速验证“如果这个函数返回 X 会怎样”；angr 适合回答“是否存在一条路径让状态满足 Y”。
 - angr 的输入要尽量小，库函数要能 hook 就 hook，目标状态和避开状态要先从静态/动态证据中抽出来。
@@ -59,3 +70,5 @@ updated: 2026-07-28
 ## 原始资料
 
 - [frida-angr-lldb-and-x64dbg.md](../raw/reverse/frida-angr-lldb-and-x64dbg.md)
+- [Microsoft x64 调用约定](https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention)
+- [x64dbg 条件断点](https://help.x64dbg.com/en/latest/introduction/ConditionalBreakpoint.html)

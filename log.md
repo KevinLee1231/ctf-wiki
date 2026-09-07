@@ -2956,3 +2956,13 @@
 - 为 10 个 Sage 子进程攻击增设 180s 超时下限（`max(--timeout, 180)`，qicheng 保持既有 900s 下限），与 dixon/quadratic_sieve/pollard_rho 的既有重型攻击预算一致；用户传入更大的 `--timeout` 时以传入值为准。两项改动在 RsaCtfTool 本地分支 `sage-compat-and-fixes` 分两次提交，未推送 fork。
 - 回归：全量测试套件 239 项通过。核验期间出现过一次 `test_decrypt_multiple_files` 失败，定位为该测试依赖 FactorDB 网络查询，网络抖动时落入真实 Sage 攻击链并超出测试自身 300s 上限所致，单独重跑与后续全量复跑均通过，与本次修复无关。
 - `wiki/crypto-tooling.md` 补充 Sage 攻击超时下限说明；同页此前未提交的 RsaCtfTool 分支状态、Sage 脚本可用性表与算法库质量状态段落经审阅与本轮实测一致，随本轮一并入库。页面路径、类型和索引入口未变化，无需修改 `index.md`。
+
+## [2026-09-07] skill-consolidation | IDAPython 收窄与 x64dbg 知识摄入
+
+- 保留仓库外 `C:/Users/LMY/.agents/skills/idapython/SKILL.md`，将触发范围收窄为 IDAPython 代码编写、修改和调试；明确仅调用现成 IDA MCP 工具时不加载脚本资料。保留模块资料及按需查询入口，不把未标统一版本的历史快照当作当前 API 保证。
+- 校正外部 `idapython/docs/ida_typeinf.md`、`ida_kernwin.md`、`ida_hexrays.md`：修复结构体成员 bit/byte 单位、`parse_decl` 输出契约、地址类型读取模块、命名类型返回码、主线程调度、ctree visitor 初始化和局部变量持久化说明。移除入口中对 `int_convert` 和特定 `@idasync` 包装器的通用强制依赖。
+- `wiki/reverse-tooling.md` 接收 IDAPython 脚本入口，以及 x64dbg 的本机文件状态、GUI 调用、MCP 可用性边界、条件断点、日志格式和失败处理。工具文件及插件存在与当前会话是否暴露 MCP 分开记录；不继续维护重复的固定数量工具目录。
+- `wiki/frida-angr-lldb-and-x64dbg.md` 补充参数观测、调用实例关联、patch 前后验证及映像恢复的证据边界。原 skill 的常量/填充值速查表未作为新 technique 搬入；保留其作为定位线索而非结论的必要边界，避免扩张为工具百科。`index.md` 和外部 `ctf-reverse/SKILL.md` 已接入对应路线。
+- 已移除仓库外 `C:/Users/LMY/.agents/skills/x64dbg-reverse-engineering`。移除前核对精确目录、reparse point、内容清单和归档逐文件 SHA-256，仅删除两份已归档文件及其空目录。本地恢复快照为 `backups/x64dbg-skill-before-ingest-20260907.zip`，按现有 `.gitignore` 规则不纳入 Git；SHA-256：`364dafd971e04d885a2098ba988c603fa5e67d66929a2f5d0f5917119efea7bc`。
+- 验收覆盖知识库 active Markdown 与 5 份修改的外部 Markdown；本地链接及本次新增锚点、237 篇 wiki 的索引覆盖、14 个方向和唯一 tooling 来源均通过。页面类型保持 family 99、technique 123、tooling 15。两个外部 skill 通过快速校验，7 个 Python 代码块和 3 个 PowerShell 代码块通过语法解析；人工复核了 IDAPython 脚本、现成 IDA MCP 查询及 Windows 参数观测三类入口。
+- 本轮验证为结构、语法、文件状态和官方 API 文档核对，没有在 IDA 中运行示例，也没有启动 x64dbg 调试样本或验证 MCP 连接。5 份外部文件修改及旧 skill 移除属于独立协同结果，不纳入知识库 Git 提交；原有 `wiki/crypto-tooling.md` 修改和未跟踪日志保持原样，raw 正文未改动。

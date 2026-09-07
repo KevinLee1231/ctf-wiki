@@ -4,7 +4,7 @@
 
 - Knowledge base path: `D:/文档/markdown文件/ctf-wiki`
 - Structure: flat graph
-- Updated: 2026-08-15
+- Updated: 2026-09-07
 
 ## 查询顺序
 
@@ -40,7 +40,7 @@
 | Web | [web-first-pass-triage-and-chain-patterns.md](wiki/web-first-pass-triage-and-chain-patterns.md) | [web-tooling.md](wiki/web-tooling.md) | HTTP 应用、认证、浏览器 bot、解析器差异、内部服务或漏洞链。 |
 | Cloud / Infra | [oauth-saml-cors-and-cicd.md](wiki/oauth-saml-cors-and-cicd.md)、[pentest-attack-chains-and-tunneling.md](wiki/pentest-attack-chains-and-tunneling.md) | [cloud-infra-tooling.md](wiki/cloud-infra-tooling.md) | IAM、云控制面、资源策略、Serverless、编排、IaC、CI/CD 和供应链。 |
 | Pwn | [pwn-first-pass-red-flags-and-protections.md](wiki/pwn-first-pass-red-flags-and-protections.md) | [pwn-tooling.md](wiki/pwn-tooling.md) | 二进制、libc/heap/ROP、kernel、sandbox、JIT/VM primitive 和保护组合。 |
-| Reverse | [reverse-first-pass-workflow-and-debugging.md](wiki/reverse-first-pass-workflow-and-debugging.md) | [reverse-tooling.md](wiki/reverse-tooling.md) | 普通 native binary 由 IDA Pro MCP 首选分析；Ghidra MCP 是普通备选，再按载体、VM/obfuscation、运行时和平台边界分流。 |
+| Reverse | [reverse-first-pass-workflow-and-debugging.md](wiki/reverse-first-pass-workflow-and-debugging.md) | [reverse-tooling.md](wiki/reverse-tooling.md) | Native 静态分析、IDAPython 脚本开发入口和 Windows 动态调试；工具页连接脚本 skill 与相应技巧页，具体调用只在工具页维护。 |
 | Mobile | [mobile-firmware-kernel-and-game-re.md](wiki/mobile-firmware-kernel-and-game-re.md)、[android-games-hardware-and-runtime-platforms.md](wiki/android-games-hardware-and-runtime-platforms.md) | [mobile-tooling.md](wiki/mobile-tooling.md) | Android/iOS 组件、IPC、权限、签名、Keystore/Keychain 与平台运行时；普通 APK 算法还原仍回 Reverse。 |
 | Hardware / Embedded | [hardware-isa-bootloader-and-kvm.md](wiki/hardware-isa-bootloader-and-kvm.md)、[signals-and-hardware.md](wiki/signals-and-hardware.md) | [hardware-embedded-tooling.md](wiki/hardware-embedded-tooling.md) | JTAG/UART、总线、MCU、RF、侧信道、Secure Boot 与硬件信号。 |
 | Forensics | [cross-domain-forensics-technique-map.md](wiki/cross-domain-forensics-technique-map.md) | [forensics-tooling.md](wiki/forensics-tooling.md) | 文件、PCAP、磁盘/内存、日志、外设采集和容器证据恢复。 |

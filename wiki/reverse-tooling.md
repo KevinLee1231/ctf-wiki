@@ -1,6 +1,6 @@
 ---
 type: tooling
-tags: [reverse, tooling, tools, environment, ida, idalib, ghidra]
+tags: [reverse, tooling, tools, environment, ida, idalib, idapython, ghidra, x64dbg]
 skills: [ctf-reverse]
 ---
 
@@ -8,7 +8,7 @@ skills: [ctf-reverse]
 
 本页是 `ctf-reverse` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-reverse/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。Mobile、Malware、Pwn 与 Hardware/Embedded 的方向工具状态由各自 tooling 页维护。
+本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。Mobile、Malware、Pwn 与 Hardware/Embedded 的方向工具状态由各自 tooling 页维护。复用本页的 IDAPython 或 Windows 调试入口时直接引用，不另抄工具接口清单。
 
 ## 完整调用约定
 
@@ -120,6 +120,12 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | raw firmware 架构无法可靠识别 | 先确认架构、端序和装载基址；需要显式 language 导入时可转 Ghidra。 |
 | 大型 binary survey 输出过重 | 改用 `detail_level="minimal"`，再围绕少量候选函数深挖。 |
 
+### IDAPython 脚本开发
+
+需要自定义批量提取、类型构造、ctree 遍历或 IDA 插件代码时，读取 [idapython skill](C:/Users/LMY/.agents/skills/idapython/SKILL.md) 并按模块查询其参考资料。直接调用现成的反编译、交叉引用或重命名 MCP 工具时，不需要额外加载脚本开发资料。
+
+执行脚本必须依附已初始化的 IDA/IDAPython 运行时；普通项目 Python 或 MCP 客户端不能直接替代它。先确认 GUI/headless/包装器的实际执行方式和可调用接口，再运行本次脚本。本页不假定某个 MCP 服务必然提供任意 Python 执行功能；只有查询接口时沿现有接口完成查询，脚本需转到明确可用的 IDA 执行入口。
+
 ### Ghidra MCP（普通工具）
 
 当前 MCP 工具可调用，`list_instances` 没有正在运行的实例。这是当前运行状态，不是安装缺失结论；MCP 未暴露可写入本文的 Ghidra 版本号。
@@ -174,6 +180,61 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | **qemu-mips** | `/usr/bin/qemu-mips` 11.0.3 | MIPS 模拟 | `qemu-mips -L /usr/mips-linux-gnu/ ./bin` |
 
 ### Windows 本地
+
+#### x64dbg / x32dbg
+
+适用于 Windows PE 的条件断点、参数观测、线程/异常分析和内存 patch 验证。分析方法见 [frida-angr-lldb-and-x64dbg.md](frida-angr-lldb-and-x64dbg.md)；本节维护本机入口及调用。
+
+| 层次 | 当前事实与调用边界 |
+|---|---|
+| 64 位调试器 | 已发现 `D:/CTF工具/x64dbg/x64/x64dbg.exe`；PE 文件版本字段为 `0.0.2.5`，该字段不代表已核实具体快照构建日期 |
+| 32 位调试器 | 已发现 `D:/CTF工具/x64dbg/x32/x32dbg.exe`；PE 文件版本字段为 `0.0.2.5` |
+| 本地 MCP 插件 | 已发现 `D:/CTF工具/x64dbg/x64/plugins/x64dbg_mcp.dp64`；文件未提供版本字段，文件存在不等于插件已加载或 MCP 已连接 |
+| 当前任务 MCP | 当前会话没有暴露 x64dbg MCP 工具；不能按离线工具目录宣称接口可调用，也不能据此判定调试器未安装 |
+
+GUI 入口按目标 PE 位数选择一条，目标路径替换为本次样本；启动样本属于实际运行操作：
+
+```pwsh
+# 64 位 PE
+& "D:/CTF工具/x64dbg/x64/x64dbg.exe" "D:/题目路径/sample.exe"
+
+# 32 位 PE
+& "D:/CTF工具/x64dbg/x32/x32dbg.exe" "D:/题目路径/sample.exe"
+```
+
+需要 MCP 自动化时先重新发现工具，核对所属后端、目标进程/会话、当前状态与参数 schema。只有当前确实暴露的接口才可调用；不按旧目录拼接工具名、端点或固定工具数量。连接可用后的顺序是：读取调试状态和目标模块 → 确认模块基址、线程及观察地址 → 读取寄存器/内存 → 设置本次需要的断点 → 运行到观察点 → 读取命中状态并验证结果。修改内存或寄存器前记录原值，清理时只处理本次创建的断点和补丁。
+
+##### 条件断点与日志
+
+先用 GUI 设置软件断点并打开 Edit breakpoint，再设置 break condition、log condition 和 log text；MCP 可用时用当前对应接口表达相同设置。以下为 x64dbg 原生日志文本，不是 JSON 参数或 shell 命令。
+
+在标准 Windows x64 整数/指针参数函数的入口、栈尚未调整时：
+
+```text
+entry p1={x:RCX} p2={x:RDX} p3={x:R8} p4={x:R9} p5={x:[RSP+28]} ret={a:[RSP]}
+```
+
+`28` 按十六进制解释，位于返回地址和 32 byte shadow space 之后；浮点参数、隐藏参数、特殊调用约定及函数中部断点必须按实际 ABI/栈布局另行解释。x86 栈传参函数入口可记录：
+
+```text
+entry p1={x:[ESP+4]} p2={x:[ESP+8]} p3={x:[ESP+C]} ret={a:[ESP]}
+```
+
+常用格式为 `{x:RCX}`（十六进制）、`{a:[RSP]}`（返回地址信息）、`{utf16@RCX}`（RCX 指向的 UTF-16 字符串）、`{ascii@RCX}`（ASCII 字符串）。字符串指针必须来自实际原型并指向可读内存，不能多解引用一次。
+
+只记录日志而不暂停时，break condition 设为 `0`、log condition 设为 `1`，并关闭 fast resume；否则 break condition 为 0 时会提前跳过日志。条件表达式与日志格式分别填写。表达式中的整数默认十六进制，十进制使用 `.123` 等写法；无效条件可能导致总是命中，应先在少量调用上确认。断点命令中不嵌入 `run` 等改变运行状态的命令。
+
+| 失败状态 | 下一步 |
+|---|---|
+| MCP 工具未出现或插件连接失败 | 保留已确认的本地 GUI 入口；排查当前插件/连接配置，不猜测接口，也不把静态 IDA 查询当作动态执行结果 |
+| 调试器未加载目标或状态为 stopped | 先确认本次目标及运行条件，再通过已验证入口打开；不直接发起单步或读寄存器 |
+| 断点未命中 | 检查模块加载时机、模块基址加 RVA、目标位数及线程；模块重载后重新定位 |
+| 条件断点总是停住或日志缺失 | 分别核对条件语法、log condition、fast resume、指针有效性与函数入口位置 |
+| 调试后输出或控制流变化 | 转 [anti-analysis.md](anti-analysis.md)，核对异常、时间检测及被修改的分支 |
+
+参考：[x64dbg 日志格式](https://help.x64dbg.com/en/latest/introduction/Formatting.html)、[条件断点](https://help.x64dbg.com/en/latest/introduction/ConditionalBreakpoint.html)、[数值语法](https://help.x64dbg.com/en/latest/introduction/Values.html)、[Microsoft x64 调用约定](https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention)。
+
+#### 其他 Windows 工具
 
 | 工具 | 路径 | 功能 | 典型用法 |
 |---|---|---|---|
