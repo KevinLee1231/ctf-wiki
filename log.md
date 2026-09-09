@@ -2966,3 +2966,10 @@
 - 已移除仓库外 `C:/Users/LMY/.agents/skills/x64dbg-reverse-engineering`。移除前核对精确目录、reparse point、内容清单和归档逐文件 SHA-256，仅删除两份已归档文件及其空目录。本地恢复快照为 `backups/x64dbg-skill-before-ingest-20260907.zip`，按现有 `.gitignore` 规则不纳入 Git；SHA-256：`364dafd971e04d885a2098ba988c603fa5e67d66929a2f5d0f5917119efea7bc`。
 - 验收覆盖知识库 active Markdown 与 5 份修改的外部 Markdown；本地链接及本次新增锚点、237 篇 wiki 的索引覆盖、14 个方向和唯一 tooling 来源均通过。页面类型保持 family 99、technique 123、tooling 15。两个外部 skill 通过快速校验，7 个 Python 代码块和 3 个 PowerShell 代码块通过语法解析；人工复核了 IDAPython 脚本、现成 IDA MCP 查询及 Windows 参数观测三类入口。
 - 本轮验证为结构、语法、文件状态和官方 API 文档核对，没有在 IDA 中运行示例，也没有启动 x64dbg 调试样本或验证 MCP 连接。5 份外部文件修改及旧 skill 移除属于独立协同结果，不纳入知识库 Git 提交；原有 `wiki/crypto-tooling.md` 修改和未跟踪日志保持原样，raw 正文未改动。
+
+## 2026-09-09 — RsaCtfTool 第六轮源码审计收尾同步
+
+- 背景：RsaCtfTool 本地分支 `sage-compat-and-fixes` 的第六轮全库逐文件审计完成收尾；工作区中本页第五/六轮质量状态草稿经审阅与仓库实况一致，随本轮一并入库。
+- 更新 `wiki/crypto-tooling.md`：全量测试计数 313→317；算法库质量状态段补记收尾提交 `ac81a6b`/`c9a5075`——strong_pseudoprime 接受任一方向非平凡平方根（原 p<q 定向检查丢弃约一半可用根，561 前 14 个素数基全部浪费、15 无法分解）、boneh_durfee.sage 空 x 根按失败约定返回 0；并标注攻击层、lib 数学层、CLI 层与全部 Sage 辅助脚本已逐文件复核完毕。
+- RsaCtfTool 侧本轮提交（含 `d9b2def`、`ac81a6b`、`c9a5075`）已全部推送 fork `KevinLee1231/RsaCtfTool`，全量 317 项测试经 `conda run -n sage` 通过；该仓库改动不属于本知识库提交范围。
+- 页面路径、类型与索引入口未变化，`index.md` 无需修改；未改动 raw 正文。
