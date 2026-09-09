@@ -135,7 +135,7 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage sage /path/t
 
 | 工具 | 路径与版本 | 功能 | 当前状态 |
 |---|---|---|---|
-| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；本地分支 `sage-compat-and-fixes`（Sage 兼容修复 + 六轮源码审计修复，已推 fork `KevinLee1231`） | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard、格与 Sage 辅助攻击等） | 可用；venv Python 3.12.13，`sys.base_prefix=/home/kali/miniforge3/envs/sage`，`include-system-site-packages=false`；必须由外层 `conda run -n sage` 提供 `sage` 命令 |
+| **RsaCtfTool** | 0.1.0；`/home/kali/RsaCtfTool/venv/bin/RsaCtfTool`；本地分支 `sage-compat-and-fixes`（已推 fork `KevinLee1231`） | RSA 自动攻击套件（Wiener/Hastad/Fermat/Pollard、格与 Sage 辅助攻击等） | 可用；venv Python 3.12.13，`sys.base_prefix=/home/kali/miniforge3/envs/sage`，`include-system-site-packages=false`；必须由外层 `conda run -n sage` 提供 `sage` 命令 |
 
 自动化固定调用 venv 的绝对入口。RsaCtfTool 主进程使用 venv Python；声明 `required_binaries = ["sage"]` 的攻击通过 `PATH` 找到 `/home/kali/miniforge3/envs/sage/bin/sage`，Sage 启动器再使用 Sage 环境自己的 Python。不要把 RsaCtfTool 依赖安装进 Sage 基础环境：
 
@@ -168,25 +168,9 @@ wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n sage /home/kali/R
 
 若只激活 venv 后 `sage` 不存在，说明外层缺少 `conda run -n sage`；若 `sys.base_prefix` 不再指向 Sage 环境，或 Sage 环境更换了 Python 小版本，应删除并重建项目 venv，而不是手工改解释器软链接。
 
-Sage 攻击脚本可用性（全部 10 个 `.sage` 已做 preparse+compile 静态检查并逐脚本实跑）：
+Sage 子进程攻击当前可用性：qs、ecm、ecm2、smallfraction、small_crt_exp、boneh_durfee、binary_polynomial_factoring、partial_d、lattice、qicheng 均可用；roca_attack.py 可执行，但完整分解路径需真实 ROCA 密钥才能验证。qicheng 是自包含 ECM，预计因子超过 40 位时优先用走 GMP-ECM 的 ecm 攻击；lattice 用于已知因子高位的 Coppersmith 分解，partial_d 用于私钥低位泄露。neca、wolframalpha 攻击因对应二进制缺失在框架层 warning 后跳过。
 
-| 脚本 | 状态 | 依据 |
-|---|---|---|
-| qs / ecm / ecm2 / smallfraction / small_crt_exp / boneh_durfee | 可用 | 构造弱密钥端到端实跑，因子/d 恢复且校验通过 |
-| binary_polynomial_factoring | 可用 | 真实 Sage 子进程 pytest 通过 |
-| roca_attack.py | 可执行 | 非 ROCA 输入正确输出 FAIL；完整分解路径需真 ROCA 密钥未测 |
-| partial_d | 可用 | Coppersmith X 上界多档扫描覆盖因子位长超过 n/2 的场景；泄露 200 位弱密钥与作者样例回归全部命中 |
-| lattice | 可用 | Coppersmith small_roots 已知高位分解；beta 取保守下界 `(pbits-1)/nbits` 保证 `factor >= n^beta` 前提成立，搜索窗多档扫描。平衡因子 96 位未知 8/8 命中 |
-| qicheng | 可用 | 自包含标准 ECM（随机曲线 + 阶乘阶梯 + 模逆失败 gcd 提取）；timeout 强制下限 900s 匹配 attempts=200。实测命中 36 位因子；40 位以上建议优先用 GMP-ECM 的 ecm 攻击 |
-
-neca、wolframalpha 攻击因对应二进制缺失在框架层 warning 后跳过。
-
-### 算法库质量状态
-
-- 项目全量测试套件 317 项全部通过、0 跳过（须由外层 `conda run -n sage` 提供 PATH；否则 sage 集成测试被 skip）。
-- 经五轮源码审计修复并回归：QS 由逐点试除重写为素数幂筛线 + Hensel 提升的对数筛网（2.7–3x 加速）；mlucas 改 MSB-first Lucas 链；inv_mod_pow_of_2 重写为牛顿迭代；pollard_rho/hart/lehman 加固并统一 None 失败契约；same_n_huge_e 补 gcd(e1,e2)>1 处理；noveltyprimes 候选素性过滤；conspicuous_check 报告完整性；sage 攻击脚本缺失由 required_scripts 预检拦截（ecm.sage/ecm2.sage 曾在本地丢失，已从上游恢复）。第五轮（2026-09）：conspicuous_check 改为接受 e·d≡1 (mod λ) 的任意合法 d（φ⁻¹/λ⁻¹ 均通过，消除对工具自产密钥 90% 假阳性）；ecm/ecm2 sage 子进程独立会话（超时清理不再误杀自身进程组）；roca XX 改 Sage 整数开方（992–1952 位档恢复可用，原浮点溢出）；cube_root 加 pow 回验（不再输出垃圾明文中止攻击链）；fermat/lehmer_machine/kraitchik 对素数模数返回 None；PrivateKey 非互素 e 不再抛 ZeroDivisionError；decrypt 每密文单输出（openssl 参数错位死代码移除）；timeout 类负值视为不限时并恢复 SIGTERM handler；multi-key 循环补超时与异常兜底。第五轮性能优化（同日）：fermat_numbers_gcd 用 x 次模平方代替构造 670M 位大数（x=29 单步 ~7000x，整循环 9ms）；close_factor 巨步扫描截到 BSGS 完整界 b（原 b² 为不可达死区），londahl 默认 b 10^7→10^6（原 >2GB 建表饿死扫描阶段，现 |p−q|~2×10^5 的 1025 位密钥 1.6s/119MB 命中）；load_system_consts 加 lru_cache（每 key 重复解析 9.4ms→2μs）；smallq 显式 sieve(100000) 对齐文档界 q<10^5（gmpy 语义下原搜索 1.3M 内 10 万个素数）。行为由 `tests/test_audit_regressions.py`、`tests/test_sage_integration.py` 固化。第六轮（2026-09）复核确认第五轮修复无回归后，同日批次（提交 800e23a..d9b2def）修复了 nonRSA 非互素 e、pollard_strassen 覆盖、partial_q 属性崩溃、roca/siqs 输出加固、smallfraction 乱码输出、common_modulus 包装 m^g、base64 解密输入、dumpkey --ext、p·q≠n 校验与 idrsa 解析防御；第六轮收尾（86ce5ca/1ae45de）：williams_pp1 加显式 stage1_bound=10^5（原隐式 √n 界必耗尽 timeout，硬模数秒级干净失败）、--p/--q 快路径补空壳私钥拦截（gcd(e,φ)≠1 不再误报成功）、补全中断的 number_theory `__all__` 引号化（star-import 恢复）。第六轮全库逐文件复核补漏（ac81a6b/c9a5075）：strong_pseudoprime 接受任一方向的非平凡平方根（原 p<q 定向检查丢弃约一半可用根——561 前 14 个素数基的根全部浪费、15 完全无法分解，现按 p·q==N 自校验并排序返回）；boneh_durfee.sage 空 x 根按脚本自身失败约定返回 0（直接运行不再抛 IndexError 回溯）。至此 single_key/multi_keys 攻击层、lib 数学层、main.py CLI 层与全部 Sage 辅助脚本均已逐文件复核。
-- 核心算法人工审阅确认正确：Dixon 关系收集 + GF(2) 高斯消元 + 零空间依赖遍历、QS 因子基构建与关系筛选（负 Q(x) 的 -1 parity 处理正确）、euler 两平方和方法、fermat 增量式、wiener 连分数后处理、solve_partial_q 三重校验。
-- 已知限制（使用时留意，非缺陷）：`dixon`/`kraitchik`/`lehman`/`hart` 为教学级实现，大数性能有限，实际分解任务优先 QS/SIQS/ECM/factordb；`binary_polynomial_factoring.sage` 依赖 `str(factor(...))` 打印格式解析，Sage 大版本升级时需复测。
+使用时留意的边界：`dixon`/`kraitchik`/`lehman`/`hart` 为教学级实现，大数性能有限，实际分解任务优先 QS/SIQS/ECM/FactorDB；`binary_polynomial_factoring.sage` 依赖 `str(factor(...))` 打印格式解析，Sage 大版本升级后需复测。
 
 ### 系统全局命令（WSL Kali）
 

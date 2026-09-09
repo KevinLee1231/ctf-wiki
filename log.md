@@ -2973,3 +2973,8 @@
 - 更新 `wiki/crypto-tooling.md`：全量测试计数 313→317；算法库质量状态段补记收尾提交 `ac81a6b`/`c9a5075`——strong_pseudoprime 接受任一方向非平凡平方根（原 p<q 定向检查丢弃约一半可用根，561 前 14 个素数基全部浪费、15 无法分解）、boneh_durfee.sage 空 x 根按失败约定返回 0；并标注攻击层、lib 数学层、CLI 层与全部 Sage 辅助脚本已逐文件复核完毕。
 - RsaCtfTool 侧本轮提交（含 `d9b2def`、`ac81a6b`、`c9a5075`）已全部推送 fork `KevinLee1231/RsaCtfTool`，全量 317 项测试经 `conda run -n sage` 通过；该仓库改动不属于本知识库提交范围。
 - 页面路径、类型与索引入口未变化，`index.md` 无需修改；未改动 raw 正文。
+
+## 2026-09-09 — crypto-tooling.md 的 RsaCtfTool 节收窄为使用方法
+
+- 按用户要求将 `wiki/crypto-tooling.md` 的 RsaCtfTool 节收窄为工具使用方法与适用边界：删除"算法库质量状态"小节（测试计数、各轮审计修复记录、人工复核结论不再入页），Sage 脚本可用性表压缩为一段可用性与选用建议（qicheng 与 ecm 的因子规模分工、lattice/partial_d 适用场景、neca/wolframalpha 跳过原因），保留 venv 调用、超时下限、环境重建与检查命令等操作事实。
+- 修复与审计历史只留在 RsaCtfTool 仓库的提交记录中，不进入工具页；页面路径、类型与索引入口未变化，`index.md` 无需修改。
