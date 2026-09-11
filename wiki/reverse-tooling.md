@@ -6,104 +6,40 @@ skills: [ctf-reverse]
 
 # Reverse Tooling
 
-本页是 `ctf-reverse` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-reverse/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页维护 Reverse 方向本机工具的状态、路径、调用与失败处理。相关方向直接引用本页的静态分析、IDAPython、JADX 和 Windows 调试入口，不复制另一份工具目录。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。Mobile、Malware、Pwn 与 Hardware/Embedded 的方向工具状态由各自 tooling 页维护。复用本页的 IDAPython 或 Windows 调试入口时直接引用，不另抄工具接口清单。
+## 平台与入口选择
 
-## 完整调用约定
+普通静态分析、ELF/字节码解析、约束和局部 CPU 模拟优先在 Windows 完成；目标是 Linux 程序本身不构成使用 WSL 的理由。只有实际运行 Linux 目标、ptrace/GDB、Linux 本地 Frida 或跨架构用户态环境需要 WSL。首轮先确认载体、架构与少量字符串，再围绕具体函数深入。
 
-Python 分析工具使用 WSL `ctf-tools`；系统 CLI 和独立项目使用绝对路径；Windows 工具由 `pwsh` 直接执行。Conda 不激活环境：
+Windows Python 为 `D:/文档/新建文件夹/venv/Scripts/python.exe`（3.14.3）。当前可用分析包为：
+
+| Windows venv 包 | 版本 | 用途 |
+|---|---|---|
+| `capstone` | `5.0.7` | 多架构反汇编 |
+| `unicorn` | `2.1.4` | 有界 CPU 指令模拟，不提供完整操作系统语义 |
+| `pyelftools` | `0.32` | ELF header、section、segment 和符号读取 |
+| `z3-solver` | `4.16.0.0` | 已还原逻辑的约束求解 |
+| `ROPGadget` | `7.7` | gadget 搜索；利用阶段转 [pwn-tooling.md](pwn-tooling.md) |
 
 ```pwsh
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools capa -vv /path/to/binary
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/analyze.py
-wsl /usr/bin/file /path/to/binary
-wsl /home/kali/pycdc/build/pycdc /path/to/file.pyc
-& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "D:/path/to/jadx-output" "D:/path/to/app.apk"
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/analyze.py"
+wsl -d kali-linux --exec /usr/bin/file "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/bin/readelf -h -S "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/bin/strings -n 8 "/mnt/d/题目路径/binary"
 ```
 
-MCP 工具不是 shell 命令：先检查当前 callable 和会话/实例，再按本页对应顺序调用。表格中的 Linux 片段说明参数语义；实际执行时使用同一行绝对路径。
+`D:/题目路径` 与 WSL `/mnt/d/题目路径` 指同一 Windows 目录。APT 命令直接从 `pwsh` 调 WSL，不套 Conda；MCP 是会话工具，不是 shell 命令。
 
-## 工具选择边界
+当前 Windows venv 与 WSL `ctf-tools` 均未发现 angr、Qiling、LIEF、capa；旧用户层反编译器和 APKiD/Androguard 隔离入口也已不存在。不要运行旧清单中的命令或把“没有装包”当作必须转 WSL 的证据。需要额外工具时先评估 Windows 兼容版本及当前分析方法是否足够。
 
-### 入口选择
+## Native 静态分析与 IDAPython
 
-- 普通 native binary 首选 IDA Pro MCP（`idalib`）：先发现或打开会话，再用一次全局 survey 建立函数、字符串、导入和调用图画像。
-- Ghidra MCP 降为普通静态分析工具；IDA 不可用、处理器/文件格式支持不合适、需要显式 raw language 导入或已有 Ghidra 项目时再切换。
-- 首轮仍先用 `file`、`strings`、`capa`、`objdump/readelf` 定性，不要直接进入重型符号执行。
-- Python bytecode、Android、firmware、跨架构和 Windows/.NET 各有专用入口，按本页路径调用。
-
-### 不应进入 Reverse 工具链的情况
-
-- 已经确认漏洞 primitive、远程交互和内存破坏路线时，转 Pwn，不把 exploit 阶段写成 RE。
-- 证据主要是磁盘/PCAP/metadata/媒体恢复时，先转 Forensics。
-- Web、协议或认证链是主障碍时，先转 Web/Pentest，Reverse 只处理其中的本地组件。
-
-### 补工具经验的触发条件
-
-- raw 暴露 IDA Pro MCP 的会话发现、数据库打开、survey、反编译、类型恢复或保存流程。
-- raw 暴露 Ghidra MCP 的实例连接、显式 language 导入或既有项目协作流程。
-- Mobile/game 题需要 IL2CPP metadata、Unity assets、Android native/Java 交叉工具链。
-- VM/obfuscation 题需要 handler table、dispatcher、trace slicing 或 IR lifting 的可复用步骤。
-
-## 本机工具清单（按使用时机）
-
-### 首轮常用
-
-| 工具 | 为什么放在首轮 |
-|---|---|
-| IDA Pro MCP（`idalib`） | 普通 native binary 的首选分析入口；一次 survey 即可得到全局画像 |
-| `file` / `strings` | 先确认载体类型和明显线索 |
-| `capa` | 未知 binary 先看能力画像 |
-| Ghidra MCP | IDA 不适用时的普通静态分析备选 |
-| `/home/kali/pycdc/build/pycdc` | 一旦确认是 `.pyc`，它就是最快路径；当前不在 `PATH` 中 |
-
-### 专项按需
-
-- 静态/动态辅助：`radare2`、GDB+pwndbg、`frida`
-- 自动分析与模拟：`angr`、`z3-solver`、`qiling`、`unicorn`
-- 文件格式与补丁：`lief`、`pyelftools`
-- 打包/平台专项：`pyinstxtractor-ng`、`decompyle3`、`uncompyle6`、`apktool`、`baksmali`、`binwalk`、`unsquashfs`、`upx`
-- 跨架构：`qemu-*`
-
-### 当前未装 / 建议按需补装
-
-当前 native、动态调试、符号执行、跨架构、Python bytecode、固件提取，以及 APK 高层反编译和低层解包的 baseline 已经完整，但仍有以下窄缺口：
-
-| 候选 | 当前状态 | 是否值得补 | 边界 |
-|---|---|---|---|
-| `r2pipe` | `ctf-tools` 未安装，但 radare2 CLI 已有 | 中 | 只在需要批量 JSON/函数级自动化时补；单题手工分析不缺。 |
-| Miasm / d810-ng | Miasm 未在 `ctf-tools`；d810-ng 未确认安装 | 中，按题 | 专用于 IR/符号反混淆与 IDA microcode 规则；安装前需核对 IDA/Python 兼容性。 |
-| APKiD / Androguard | `ctf-tools` 未安装；WSL `uv` 0.11.8 可用 | 中，按 APK 频率 | 两者都是 Python 项目；APKiD 以 CLI 为主，适合 `uv tool`，Androguard 若需脚本导入则使用独立 `uv venv`。不要写入现有 `ctf-tools`。 |
-| `bbpb` (Blackbox Protobuf) | `ctf-tools` 未安装；旧包名 `blackboxprotobuf` 也未安装 | 中低，协议题按需 | 当前上游把 `bbpb` 列为官方 PyPI 包；只在缺少 `.proto` 且 protobuf 编码是主障碍时补。 |
-| jshookmcp | 当前没有可调用的对应 MCP | 中低，浏览器 JS 频繁时 | 会引入新服务/配置层；本次只列候选，不注册。 |
-| EMBA/Firmadyne 类固件框架 | 常用 WSL 路径未发现 | 低，仅固件题频繁时 | 体积、依赖和运行成本高；现有 `binwalk`/`unsquashfs`/QEMU/Qiling 先用。 |
-
-`anything-analyzer`、公开去混淆服务、自动 bootstrap 和自建 IDA HTTP server 不列为本机 baseline：前两者与现有工具重叠或有样本外传边界，后两者会改变环境/会话治理。
-
-#### APKiD / Androguard 的 uv 安装边界
-
-- APKiD 3.1.0 是 Python CLI，入口为 `apkid`，用于识别 compiler、packer、protector、obfuscator 和其他 APK/DEX 特征；其运行依赖是 `yara-python-dex>=1.0.1`。
-- Androguard 4.1.4 是 Python 3.9+ 的库和 CLI，入口为 `androguard`，覆盖 APK/DEX、binary XML、resources、反汇编和可编程分析。4.x 与旧版 3.3.5 API 有明显差异，旧脚本迁移时不能只替换版本号。
-- 不把两者直接装入 `ctf-tools`：APKiD 的 `yara-python-dex` 与环境中已有的 `yara-python` 都提供 `yara` 模块；Androguard 的依赖更新也不应影响通用 CTF 环境。
-- APKiD 使用命令级 `UV_TOOL_DIR=/home/kali/ctf-uv-tools` 和 `UV_TOOL_BIN_DIR=/home/kali/ctf-uv-tools/bin` 创建持久隔离工具环境，不执行 `uv tool update-shell`，后续调用 `/home/kali/ctf-uv-tools/bin/apkid`。
-- Androguard 仅用 CLI 时也可安装到该 `uv tool` 层；若 solver/分析脚本需要 `import androguard`，则创建 `/home/kali/androguard-venv`，并固定使用其中的 `bin/python` 和 `bin/androguard`，不要假设 `ctf-tools` 可以导入它。
-
-## 失败信号与转向
-
-- IDA 会话、Hex-Rays 或自动分析不可用：先保留 `file`/字符串/导入/汇编事实；普通格式可转 Ghidra MCP，运行时生成代码则直接转动态 dump，不要只反复更换反编译器。
-- IDA/Ghidra 伪代码都不可读：回到汇编、字符串、交叉引用和运行时断点；若是 VM/壳/SMC，转 [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md) 或 [packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)。
-- 程序一运行就退出、检测调试器或时间环境：先转 [anti-analysis.md](anti-analysis.md)，不要继续换反编译器。
-- 只差最终输入但比较点可断：转 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)，优先抓明文 buffer 或最终比较参数。
-- 目标依赖完整系统调用、rootfs、跨架构环境或固件：转 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md) 或 [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)。
-
-## 详细清单
-
-RE 优先使用 **IDA Pro MCP（`idalib`）**。
+普通 native binary 首选 IDA Pro MCP：发现/打开目标后先做一次全局 survey。IDA 不可用、处理器支持不合适、需要显式 raw language 或已有 Ghidra 项目时，使用 Ghidra。
 
 ### IDA Pro MCP（首选）
 
-当前 MCP 工具可调用，`idb_list` 返回 0 个会话。这表示当前没有已打开数据库，不表示 IDA MCP 缺失；MCP 未暴露可写入本文的 IDA 版本号。
+当前 IDA MCP 的会话查询接口可调用；打开目标前重新读取会话列表。没有会话不表示 MCP 缺失，安装目录名也不能作为实际运行版本的证明。
 
 稳定调用顺序：
 
@@ -128,7 +64,7 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 
 ### Ghidra MCP（普通工具）
 
-当前 MCP 工具可调用，`list_instances` 没有正在运行的实例。这是当前运行状态，不是安装缺失结论；MCP 未暴露可写入本文的 Ghidra 版本号。
+当前 Ghidra MCP 的实例查询接口可调用；本地目录 `D:/CTF工具/ghidra_12.1.2_PUBLIC` 的 application.properties 标明版本 12.1.2。实例是否已启动、连接了哪个项目须使用前查询，文件存在不表示项目已就绪。
 
 - 先用 `list_instances` 检查实例；需要项目级分析时再 `connect_instance`。
 - 连接成功后工具列表会动态扩展，随后才调用反编译、交叉引用、导入或调试能力。
@@ -139,47 +75,41 @@ RE 优先使用 **IDA Pro MCP（`idalib`）**。
 | IDA 不可用、处理器支持不合适或已有 Ghidra 项目 | `list_instances` → `connect_instance` → 项目分析工具 |
 | raw firmware 需要显式 language 导入 | 连接项目后使用 `import_file`，明确 `language`，再等待分析完成 |
 
-### Python 包（ctf-tools conda）
+## WSL 原生运行与系统工具
 
-| 工具 | 版本 | 功能 | 典型用法 |
+`ctf-tools` 保留 `pwntools 4.15.0`、`frida 17.9.1`、`frida-tools 14.8.1` 及必要依赖；其 Python 3.11.15 位于 `/home/kali/miniforge3/envs/ctf-tools`。Linux 本地 Frida CLI 可用，其他平台、USB 设备或 frida-server 连接必须另行核对。通用 Python 分析仍使用 Windows。
+
+```pwsh
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools frida --version
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools frida-ps
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools frida -f "/mnt/d/题目路径/binary" -l "/mnt/d/题目路径/hook.js"
+```
+
+最后一条实际运行目标，只在本次运行授权范围内使用。普通 APK 静态分析或连接远程设备不因已有这套 Frida 就默认走 WSL。
+
+| WSL 工具 | 路径 | APT 包版本或部署状态 | 用途 |
 |---|---|---|---|
-| **angr** | 9.2.209 | 符号执行/CFG 恢复/路径探索 | `angr.Project("./bin").simgr.explore(find=addr)` |
-| **z3-solver** | 4.13.0 | SMT 约束求解（序列号/分支条件） | `Solver().add(...); s.check(); s.model()` |
-| **capstone** | 5.0.6 | 多架构反汇编引擎 | `Cs(CS_ARCH_X86, CS_MODE_64).disasm(code, base)` |
-| **unicorn** | 2.1.2 | CPU 模拟器（x86/ARM/MIPS/SPARC） | `Uc(UC_ARCH_X86, UC_MODE_64).emu_start(b,e)` |
-| **pwntools** | 4.15.0 | ELF 补丁/checksec/GOT/PLT | `ELF("./bin"); elf.asm(addr, "ret"); elf.save()` |
-| **frida** | 17.9.1 | 动态插桩核心库 | `frida -f ./bin -l hook.js` |
-| **frida-tools** | 14.8.1 | Frida CLI（frida-ps/frida-trace） | `frida-trace -i 'strcmp' ./bin` |
-| **qiling** | 1.4.6 | 跨平台模拟（Linux/Win/ARM/MIPS/UEFI） | `Qiling(["./bin"], "rootfs/x8664_linux").run()` |
-| **lief** | 0.17.6 | ELF/PE/Mach-O 解析与修改 | `lief.parse("bin").patch_pltgot("strcmp", addr)` |
-| **keystone-engine** | 0.9.2 | 多架构汇编引擎 | `Ks(KS_ARCH_X86, KS_MODE_64).asm("ret")` |
-| **pyelftools** | 0.32 | ELF 文件解析 | `ELFFile(f).get_section_by_name(".rodata")` |
+| radare2 | `/usr/bin/r2` | `6.0.4+dfsg-1` | CLI 静态分析、汇编和项目检查 |
+| objdump / readelf / nm / strings | `/usr/bin/` 下同名入口 | `binutils 2.47-2` | ELF 与汇编结构 |
+| GDB + pwndbg | `/usr/bin/gdb`、`/home/kali/pwndbg/gdbinit.py` | GDB `17.2-1+b1`，pwndbg 独立 venv | Linux 动态调试，完整约定见 [pwn-tooling.md](pwn-tooling.md) |
+| strace / ltrace | `/usr/bin/strace`、`/usr/bin/ltrace` | `7.0+ds-1` / `0.7.91~git20230705.8eabf68-4+b1` | 系统调用与库调用 trace |
+| upx | `/usr/bin/upx` | `upx-ucl 4.2.4-1.1` | 支持格式的 UPX 解包 |
+| binwalk / unsquashfs | `/usr/bin/binwalk`、`/usr/bin/unsquashfs` | `2.4.3+dfsg1-3` / `1:4.7.5-1` | 固件嵌入识别与 SquashFS 提取 |
+| wasm2wat / wat2wasm | `/usr/bin/wasm2wat`、`/usr/bin/wat2wasm` | `wabt 1.0.41+dfsg+~cs1.0.39-2` | WASM 二进制与文本转换 |
+| pycdc / pycdas | `/home/kali/pycdc/build/pycdc`、`/home/kali/pycdc/build/pycdas` | 手工构建，入口与动态库存在 | Python 字节码反编译/反汇编；不保证支持所有新版本 opcode |
 
-### 系统全局命令（WSL Kali）
+```pwsh
+wsl -d kali-linux --exec env PWNDBG_NO_AUTOUPDATE=1 /usr/bin/gdb -q "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/bin/r2 -q -c "iI;is" "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /home/kali/pycdc/build/pycdc "/mnt/d/题目路径/module.pyc"
+wsl -d kali-linux --exec /home/kali/pycdc/build/pycdas "/mnt/d/题目路径/module.pyc"
+wsl -d kali-linux --exec /usr/bin/wasm2wat "/mnt/d/题目路径/module.wasm" -o "/mnt/d/题目路径/module.wat"
+wsl -d kali-linux --exec /usr/bin/binwalk "/mnt/d/题目路径/firmware.bin"
+```
 
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| **radare2** | `/usr/bin/r2` 6.0.5 | 命令行逆向框架 | `r2 -d ./bin; aaa; afl; pdf @ main` |
-| **GDB+pwndbg** | `/usr/bin/gdb` 17.2 + pwndbg | 动态调试 | `gdb ./bin; start; b *main` |
-| **objdump** | `/usr/bin/objdump` | 反汇编 | `objdump -M intel -d bin` |
-| **strings** | `/usr/bin/strings` | 提取可打印字符串 | `strings bin \| grep -i flag` |
-| **file** | `/usr/bin/file` | 识别文件类型/架构 | `file binary` |
-| **readelf** | `/usr/bin/readelf` | ELF 结构分析 | `readelf -S binary; readelf -l binary` |
-| **nm** | `/usr/bin/nm` | 符号表列出 | `nm binary \| grep main` |
-| **apktool** | `/usr/bin/apktool` 2.7.0 | APK 解包 | `apktool d app.apk -o decoded/` |
-| **strace** | `/usr/bin/strace` 7.0 | 系统调用跟踪 | `strace -f ./bin` |
-| **ltrace** | `/usr/bin/ltrace` 0.7.91 | 库函数调用跟踪 | `ltrace ./bin` |
-| **upx** | `/usr/bin/upx` 4.2.4 | 脱壳 | `upx -d packed -o unpacked` |
-| **one_gadget** | `/usr/local/bin/one_gadget` 1.10.0 | libc gadget 查找 | `one_gadget libc.so.6` |
-| **binwalk** | `/usr/bin/binwalk` 2.4.3 | 固件/嵌入文件提取 | `binwalk -Me firmware.bin` |
-| **seccomp-tools** | `/usr/local/bin/seccomp-tools` 1.6.2 | SECCOMP/BPF 转储 | `seccomp-tools dump ./bin` |
-| **baksmali** | `/usr/bin/baksmali` 2.5.2 | DEX 字节码反汇编 | `baksmali d classes.dex -o smali/` |
-| **unsquashfs** | `/usr/bin/unsquashfs` 4.7.5 | SquashFS 提取 | `unsquashfs -d out/ firmware.sqfs` |
-| **qemu-riscv64** | `/usr/bin/qemu-riscv64` 11.0.3 | RISC-V 模拟 | `qemu-riscv64 -L /usr/riscv64-linux-gnu/ ./bin` |
-| **qemu-arm** | `/usr/bin/qemu-arm` 11.0.3 | ARM 模拟 | `qemu-arm -L /usr/arm-linux-gnueabihf/ ./bin` |
-| **qemu-mips** | `/usr/bin/qemu-mips` 11.0.3 | MIPS 模拟 | `qemu-mips -L /usr/mips-linux-gnu/ ./bin` |
+pwndbg 启动时固定 `PWNDBG_NO_AUTOUPDATE=1`，避免自动变更环境。跨架构 QEMU 与目标 sysroot 的调用见 [pwn-tooling.md](pwn-tooling.md)，硬件外设与启动链见 [hardware-embedded-tooling.md](hardware-embedded-tooling.md)。
 
-### Windows 本地
+## Windows 调试与字节码工具
 
 #### x64dbg / x32dbg
 
@@ -236,40 +166,33 @@ entry p1={x:[ESP+4]} p2={x:[ESP+8]} p3={x:[ESP+C]} ret={a:[ESP]}
 
 #### 其他 Windows 工具
 
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| **dnSpy** | `D:\CTF工具\dnSpy-net-win64\dnSpy.exe` | .NET 反编译/调试 | GUI 打开 binary 或 Assembly-CSharp.dll |
-| **JADX 1.5.6** | `D:/CTF工具/jadx-1.5.6/bin/jadx.bat`；GUI 为同目录 `jadx-gui.bat` | APK/DEX/AAB/APKM 的 Java-like 反编译、资源查看、搜索、xref、单类恢复和调用图导出 | `& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "jadx-output" "app.apk"`；GUI：`& "D:/CTF工具/jadx-1.5.6/bin/jadx-gui.bat" "app.apk"` |
-| **Node.js** | `"C:/Program Files/nodejs/node.exe"` 24.13.0 | 浏览器 JavaScript 的最小离线 harness | 只引入已捕获的必要环境值，按首个状态分歧点补 mock |
-| **OpenJDK** | `"C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe"` 21.0.10 | APK/JAR 工具的 Java 运行时 | `JAVA_HOME` 已指向该 JDK，并已验证可运行 JADX 1.5.6 |
-| **Manifest summary** | `C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1` | 只读摘要已解码 Android Manifest 的 SDK、权限、组件、intent-filter 和 launcher | `& "C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1" -ManifestPath "decoded/AndroidManifest.xml"` |
+| 工具 | 路径与状态 | 用途 |
+|---|---|---|
+| dnSpy | `D:/CTF工具/dnSpy-net-win64/dnSpy.exe`，文件存在 | .NET 反编译、IL 与调试；未启动样本不代表已验证运行行为 |
+| JADX | `D:/CTF工具/jadx-1.5.6/lib/jadx-1.5.6-all.jar`，CLI 版本 `1.5.6` | Java/Kotlin-like 视图、APK/DEX 资源与交叉引用 |
+| Node.js | `C:/Program Files/nodejs/node.exe`，`24.13.0` | JavaScript 最小离线 harness；浏览器对象按观察结果补 mock |
+| OpenJDK | `C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe`，`21.0.10` | 当前 JADX 可用 Java 运行时 |
+| Manifest summary | `C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1` | 只读摘要已解码的 XML Manifest，不能直接读取 APK 内二进制 AXML |
 
-#### JADX 1.5.6 固定用法
+#### JADX 与 Manifest 调用
 
-```powershell
-# 版本与帮助
-& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" --version
-& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" --help
+从 `pwsh` 直接运行 Java jar，不经过 Windows 批处理 shell。先指定本次文件与输出目录：
 
-# GUI 导航
-& "D:/CTF工具/jadx-1.5.6/bin/jadx-gui.bat" "D:/题目路径/app.apk"
-
-# CLI 全量输出；输出目录应位于当前题目工作区
-& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "D:/题目路径/jadx-output" "D:/题目路径/app.apk"
-
-# 只恢复源码，跳过 resources
-& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" --no-res -d "D:/题目路径/jadx-sources" "D:/题目路径/app.apk"
+```pwsh
+& "C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe" -jar "D:/CTF工具/jadx-1.5.6/lib/jadx-1.5.6-all.jar" --version
+& "C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe" -jar "D:/CTF工具/jadx-1.5.6/lib/jadx-1.5.6-all.jar" -d "D:/题目路径/jadx-output" "D:/题目路径/app.apk"
+& "C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe" -jar "D:/CTF工具/jadx-1.5.6/lib/jadx-1.5.6-all.jar" --no-res --single-class "com.example.MainActivity" --single-class-output "D:/题目路径/MainActivity.java" "D:/题目路径/app.apk"
+& "C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1" -ManifestPath "D:/题目路径/jadx-output/resources/AndroidManifest.xml"
 ```
 
-- 默认先用 `auto` 模式导航；结构化伪代码明显失真时，用 `--decompilation-mode simple` 或 `fallback` 对照，不把 `--show-bad-code` 产生的代码当作正确语义。
-- JADX 用于 Java/Kotlin-like 视图、搜索和 xref；关键条件、异常处理、JNI 边界和反编译失败函数仍用 `baksmali`/DEX 或 native 工具核验。
-- 保持 `JADX_DISABLE_XML_SECURITY`、`JADX_DISABLE_ZIP_SECURITY` 未设置；不为处理异常附件而关闭 ZIP/XML 安全限制。
+默认 `auto` 模式不能正确恢复控制流时，用 `--decompilation-mode simple` 或 `fallback` 对照；`--show-bad-code` 只显示不完整结果，不证明语义正确。关键分支、异常与 JNI 边界回到 DEX/smali 或 native 汇编。APK 低层解包调用见 [mobile-tooling.md](mobile-tooling.md)。
 
-### 专项全路径工具
+保持 `JADX_DISABLE_XML_SECURITY`、`JADX_DISABLE_ZIP_SECURITY` 未设置，不为异常附件自动关闭 ZIP/XML 检查。Manifest 摘要路径取决于实际输出布局，先确认文件存在。
 
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| **pycdc** | `/home/kali/pycdc/build/pycdc` | Python 3.9+ `.pyc` 反编译主力；旧版本字节码按需与 `decompyle3` / `uncompyle6` 交叉验证 | `/home/kali/pycdc/build/pycdc file.pyc` |
-| **pycdas** | `/home/kali/pycdc/build/pycdas` | Python 字节码反汇编 | `/home/kali/pycdc/build/pycdas file.pyc` |
-| **capa** | `ctf-tools` Conda 环境 | 自动识别 binary 能力（加密/通信/反分析） | `wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools capa -vv binary` |
-| **decompyle3** | `/home/kali/.local/bin/decompyle3` | 用户层 Python bytecode 反编译器；只在传统 Python 反编译链更适合时，作为 `pycdc` 的补充交叉验证 | `/home/kali/.local/bin/decompyle3 file.pyc` |
+## 失败处理与转向
+
+- IDA/Ghidra 会话或伪代码不可用：保留汇编、字符串、导入与交叉引用事实；VM/SMC/壳转 [vm-obfuscation-transform-family.md](vm-obfuscation-transform-family.md)、[packers-deobfuscation-and-debug-automation.md](packers-deobfuscation-and-debug-automation.md)。
+- 运行时退出或检测调试器：查 [anti-analysis.md](anti-analysis.md)；比较点可断时优先 [compare-breakpoint-plaintext-recovery.md](compare-breakpoint-plaintext-recovery.md)。
+- pycdc 遇到未知 opcode 或输出错误：核对 magic 与目标 Python 版本，保留 pycdas 指令，不能把“Python 3.9+”当作完整支持保证。确需新反编译器先评估 Windows 兼容版本。
+- 局部 Unicorn 模拟缺 syscall、loader 或外设：先明确最小执行边界，再看 [qiling-triton-pin-and-ldpreload.md](qiling-triton-pin-and-ldpreload.md) 或 [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)；方法页提到工具不表示本机已安装。
+- 任何 WSL 新增、升级、重装，须先说明用途、Linux 必要性、方式、目标及主要依赖影响并取得明确同意。

@@ -6,53 +6,41 @@ skills: [ctf-hardware-embedded]
 
 # Hardware / Embedded Tooling
 
-本页是 `ctf-hardware-embedded` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-hardware-embedded/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页服务总线、物理接口、MCU 外设、RF/IQ、侧信道与启动信任链。普通固件逻辑恢复用 [reverse-tooling.md](reverse-tooling.md)，利用原语用 [pwn-tooling.md](pwn-tooling.md)。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+## 平台与当前能力
 
-## 工具选择边界
+离线逻辑采样、IQ、功耗 trace 和图像数组优先在 Windows 分析，Python 固定为 `D:/文档/新建文件夹/venv/Scripts/python.exe`（3.14.3）。固件来自 Linux 或 MCU，不等于解析数据必须进入 WSL。
 
-- 固件文件先确认格式、架构、端序、分区和压缩层；逻辑/RF/侧信道输入先保存原始 capture、采样率、位宽、电平和通道定义。
-- 真实设备的写 flash、解锁、故障注入、电压改变或擦除操作可能不可恢复；本页命令只覆盖只读首检和离线分析。
-- 已提取代码的普通软件语义成为主障碍后转 Reverse；已采集证据的事件恢复成为主障碍后转 Forensics。
+| 入口 | 当前状态 | 用途 |
+|---|---|---|
+| Windows venv `numpy` / `scipy` | `2.4.4` / `1.17.1` | 样本读取、重采样、频谱、相关和基础信号处理 |
+| Windows venv `matplotlib` | `3.11.0` | 波形、功率谱、时序和统计可视化 |
+| Windows venv `capstone` / `unicorn` | `5.0.7` / `2.1.4` | CPU 指令与局部算法模拟；不自动提供 MCU 外设 |
+| binwalk / unsquashfs | WSL `/usr/bin/binwalk`、`/usr/bin/unsquashfs`；APT `2.4.3+dfsg1-3` / `1:4.7.5-1` | 已有固件嵌入识别与文件系统提取工具 |
+| QEMU user/system | WSL 已有，版本与调用见 Pwn 工具页 | 需要 Linux 用户态、内核或受支持机器模型时使用 |
+| IDA/Ghidra | 当前静态入口见 Reverse 工具页 | 固件架构、端序、基址与代码/数据分界 |
 
-## 完整调用约定
+本页没有已配置并验证的 USB 探针、JTAG/SWD、SDR 或逻辑分析仪连接。WSL 安装了模拟器也不能证明硬件透传、外设模型或加速可用；GNU Radio、sigrok、OpenOCD 等专项链不作为现成入口。先检查采集文件能否离线处理，再评估确需的硬件与软件。
 
-系统工具使用 WSL 绝对路径；数值脚本使用 `ctf-tools`；MCP 静态分析先检查会话。所有终端命令从 `pwsh` 发起：
+## 完整调用
+
+以下示例假定已知 IQ 是 little-endian complex64；真实格式必须从题面、采集设置或文件头确认：
 
 ```pwsh
-wsl /usr/bin/file /path/to/firmware.bin
-wsl /usr/bin/binwalk /path/to/firmware.bin
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/signal_analysis.py
-wsl /usr/bin/qemu-arm -L /usr/arm-linux-gnueabihf/ /path/to/arm-binary
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'import numpy as np; x=np.fromfile("D:/题目路径/capture.iq", dtype="<c8", count=4096); print(x.shape); print(np.abs(x[:8]))'
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/decode_trace.py"
+wsl -d kali-linux --exec /usr/bin/binwalk "/mnt/d/题目路径/firmware.bin"
+wsl -d kali-linux --exec /usr/bin/unsquashfs -s "/mnt/d/题目路径/rootfs.sqfs"
+wsl -d kali-linux --exec /usr/bin/unsquashfs -d "/mnt/d/题目路径/rootfs-output" "/mnt/d/题目路径/rootfs.sqfs"
 ```
 
-## 当前状态与路径
+`D:/题目路径` 对应 `/mnt/d/题目路径`。先列嵌入段或超级块，再提取到题目输出目录；不默认递归运行所有提取器。QEMU 的目标 sysroot、machine、CPU、加载地址与设备应从题目配置确定，不能把现有二进制误当完整仿真环境。
 
-| 工具 | 当前状态/版本 | 路径或环境 | 何时使用 | 完整调用 |
-|---|---|---|---|---|
-| `file` | 可用，5.47 | `/usr/bin/file`，WSL system | 固件、镜像和未知载体首检 | `wsl /usr/bin/file /path/to/input` |
-| `xxd` | 可用，Vim xxd 9.2.0524 | `/usr/bin/xxd`，WSL system | header、端序、寄存器表或帧字节检查 | `wsl /usr/bin/xxd -g 1 /path/to/input` |
-| `binwalk` | 可用，2.4.3 | `/usr/bin/binwalk`，WSL system | 固件签名、嵌入结构和文件系统定位 | `wsl /usr/bin/binwalk /path/to/firmware.bin` |
-| `numpy` / `scipy` | 可用，2.4.4 / 1.17.1 | WSL `ctf-tools` | 采样、滤波、相关、频谱和侧信道统计 | `wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/signal_analysis.py` |
-| QEMU user | 可用，11.0.3 | `/usr/bin/qemu-arm`、`qemu-aarch64`、`qemu-mips`、`qemu-riscv64` | 已知架构的用户态程序重放 | 见上方 `qemu-arm` 示例；按架构改入口和 sysroot |
-| IDA Pro MCP（`idalib`） | 方法可调用；当前 0 个会话；版本未暴露 | MCP | 已提取 firmware/boot code 的静态分析 | `idb_list` → `idb_open(绝对路径)` → `survey_binary` |
-| Ghidra MCP | 方法可调用；当前无运行实例；版本未暴露 | MCP | IDA 不适用、需要显式 raw language 或已有项目时 | `list_instances` → `connect_instance`；raw 导入时再用明确 language 的 `import_file` |
-| `sigrok-cli` / PulseView | 未发现 | WSL/Windows | 逻辑分析仪与 UART/I2C/SPI/CAN 协议解码 | 当前无可执行命令 |
-| `rtl_433` / GNU Radio | 未发现 | WSL/Windows | RF/IQ 调制、同步和帧恢复 | 当前无可执行命令 |
-| OpenOCD | 未发现 | WSL/Windows 与 `/home/kali` | JTAG/SWD 目标识别和调试 | 当前无可执行命令 |
+## 失败处理与下一跳
 
-## 失败处理
-
-- `binwalk` 只有签名没有可复现提取：先手工记录 offset、压缩格式和文件系统，不用递归提取结果代替证据。
-- QEMU 因 sysroot、动态链接器或 syscall 失败：先缩到单函数/用户态样本；完整固件环境再转 [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md)。
-- 逻辑/RF 工具缺失：保留原始 capture 和采样元数据，先用 `numpy/scipy` 做离线频谱与 framing；确认专用协议工具确实必要后再申请安装。
-- MCP 没有会话/实例：这不是工具缺失；按表中顺序打开目标。文件架构和基址仍不明时先回到 `file`、header 和芯片资料。
-
-## 关联知识页
-
-- [signals-and-hardware.md](signals-and-hardware.md)
-- [bus-logic-and-serial-frame-decoding.md](bus-logic-and-serial-frame-decoding.md)
-- [rf-sdr.md](rf-sdr.md)
-- [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)
-- [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md)
+- 波形/频谱没有稳定结构：核对采样率、符号率、端序、I/Q 排列与有符号格式；查 [signals-and-hardware.md](signals-and-hardware.md)、[rf-sdr.md](rf-sdr.md)。
+- 总线帧解析不符：核对阈值、时钟边沿、bit order、起止位、校验与通道映射；查 [bus-logic-and-serial-frame-decoding.md](bus-logic-and-serial-frame-decoding.md)。
+- 仿真卡在 MMIO、异常或启动早期：先定位缺失外设、ROM/RAM 映射和中断条件；查 [firmware-loader-and-boot-chain-emulation.md](firmware-loader-and-boot-chain-emulation.md)。
+- 架构、启动模式或内核边界不明：查 [hardware-isa-bootloader-and-kvm.md](hardware-isa-bootloader-and-kvm.md)，不无目标地换模拟器。
+- 缺包先评估 Windows 兼容版本。确需 WSL 新增、升级或重装时，必须先说明 Linux 必要性、安装方式、目标及依赖影响并取得明确同意。

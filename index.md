@@ -4,7 +4,7 @@
 
 - Knowledge base path: `D:/文档/markdown文件/ctf-wiki`
 - Structure: flat graph
-- Updated: 2026-09-07
+- Updated: 2026-09-11
 
 ## 查询顺序
 
@@ -31,6 +31,8 @@
 ## 方向入口速查
 
 当题目方向已经初步明确时，优先从下表的首轮入口进入对应 family，再按页面内“路由表 / 分流流程 / 关联技巧”跳转；若证据已经精确命中特定 technique，可直接进入该页。只有工具调用、环境路径或失败状态不清楚时再读 tooling 页。
+
+工具页按 Windows 主力、WSL 补充的当前环境维护：通用脚本优先 Windows，Linux 原生工作按专项入口调用。工具状态、版本、完整命令和缺失能力只查对应 tooling；安装与授权边界遵循全局 AGENTS.md。
 
 | 方向 | 首轮入口 | 工具入口 | 适用边界 |
 |---|---|---|---|

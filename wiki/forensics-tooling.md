@@ -6,199 +6,77 @@ skills: [ctf-forensics]
 
 # Forensics Tooling
 
-本页是 `ctf-forensics` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-forensics/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页维护文件、PCAP、磁盘、内存、日志与文档证据恢复的本机工具。隐藏载荷提取见 [stego-tooling.md](stego-tooling.md)，硬件采集与外设见 [hardware-embedded-tooling.md](hardware-embedded-tooling.md)。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。Stego 与 Hardware/Embedded 的专项工具分别由 [stego-tooling.md](stego-tooling.md) 和 [hardware-embedded-tooling.md](hardware-embedded-tooling.md) 维护。
+## 平台与 Python 能力
 
-## 完整调用约定
+文件分析、离线 PCAP、PDF、图片与表格默认使用 Windows `D:/文档/新建文件夹/venv/Scripts/python.exe`（3.14.3）。不要把已清理的通用 Python 包重新装入 WSL `ctf-tools`。
 
-系统工具通过绝对路径直接交给 WSL；Python/Conda 工具使用 `ctf-tools` 环境。所有命令从 `pwsh` 发起，不激活环境：
+| Windows venv 包 | 当前版本 | 作用 |
+|---|---|---|
+| `scapy` | `2.7.0` | 离线 PCAP 读取、报文字段和重组脚本；当前无 libpcap provider，未建立实时抓包能力 |
+| `PyMuPDF` / `pypdf` / `pdfplumber` | `1.27.2.3` / `6.10.2` / `0.11.9` | PDF 文本、页面、对象、附件及表格解析，按格式选用 |
+| `Pillow` | `12.2.0` | 图像格式、尺寸、模式与像素检查 |
+| `openpyxl` | `3.1.5` | XLSX 工作表、单元格与公式读取 |
+| `lxml` / `beautifulsoup4` | `6.0.4` / `4.14.3` | XML/HTML 证据结构解析 |
+| `zstandard` | `0.25.0` | Zstd 数据流解压；ZIP/tar/gzip 可先用标准库 |
+
+当前通用环境没有 Volatility、oletools、pcodedmp 等专用内存或 Office 宏分析入口；它们不再列为可执行工具。PDF 与图像任务使用上述现存 Python 包，不调用已不存在的 mutool、ImageMagick 或旧 Conda 文档命令。
 
 ```pwsh
-wsl /usr/bin/file /path/to/evidence.bin
-wsl /usr/bin/tshark -r /path/to/capture.pcap -Y http
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools vol -f /path/to/memory.dmp windows.pslist
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/analysis.py
+Get-FileHash -LiteralPath "D:/题目路径/evidence.bin" -Algorithm SHA256
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'from scapy.utils import PcapReader; from itertools import islice; r=PcapReader("D:/题目路径/capture.pcap"); [print(p.summary()) for p in islice(r,5)]; r.close()'
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'import pymupdf; d=pymupdf.open("D:/题目路径/document.pdf"); print(d.page_count, d.metadata); print(d.embfile_names()); d.close()'
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/recover_evidence.py"
 ```
 
-表格中的 Linux 片段说明工具参数；执行时应使用同一行给出的绝对路径，并保留输入证据和输出目录。
+## 已有 WSL 系统工具
 
-## 工具选择边界
+下列是 APT 包或现存系统入口。直接从 `pwsh` 调用，不套 Conda，不用 pip 改系统 Python：
 
-### 入口选择
+| 工具与绝对入口 | APT 包版本 | 用途 |
+|---|---|---|
+| `/usr/bin/file`、`/usr/bin/strings`、`/usr/bin/xxd` | `file 1:5.47-4`、`binutils 2.47-2`；xxd 已有 | 文件头、字符串与字节定位 |
+| `/usr/bin/binwalk` | `2.4.3+dfsg1-3` | 嵌入文件与固件签名识别 |
+| `/usr/bin/foremost`、`/usr/bin/scalpel` | `1.5.7-12+b1` / `1.60+git20240110.6960eb2-2` | 按文件签名雕刻；输出目录与规则需指定 |
+| `/usr/bin/testdisk`、`/usr/bin/photorec` | `testdisk 7.2-2` | 分区分析和文件恢复；交互写操作按授权进行 |
+| `/usr/bin/mmls`、`fsstat`、`fls`、`istat`、`icat`、`blkcat`、`blkcalc` | `sleuthkit 4.14.0+dfsg-0kali1` | 分区、文件系统、inode 和数据块取证 |
+| `/usr/sbin/debugfs`、`/usr/sbin/e2fsck` | `e2fsprogs 1.47.4-1+b1` | ext 文件系统检查；原证据优先只读 |
+| `/usr/bin/tshark` | `4.6.6-1` | PCAP 协议解析和字段导出 |
+| `/usr/bin/tcpdump`、`/usr/bin/pcapfix` | `4.99.6-2` / `1.1.7-3` | 离线报文查看与损坏 PCAP 修复输出 |
+| `/usr/bin/scapy` | `python3-scapy 2.7.0+dfsg1-1` | APT 工具及其依赖；一般离线脚本优先 Windows |
+| `/usr/bin/exiftool` | `libimage-exiftool-perl 13.55+dfsg-1` | 文件元数据和嵌入标记 |
+| `/usr/bin/7z`、`/usr/bin/unsquashfs` | `7zip 26.02+dfsg-2` / `squashfs-tools 1:4.7.5-1` | 归档与 SquashFS 列表、提取 |
+| `/usr/bin/tar`、`gzip`、`dd`；`/usr/sbin/losetup` | 系统入口存在 | Linux 容器/镜像辅助；不用写盘参数处理原证据 |
 
-- 首轮先用 system-global 工具识别载体：`file`、`exiftool`、`tshark`、`binwalk`、Sleuth Kit。
-- 需要 Python 图像、信号或内存处理时再用固定 Conda 入口运行 `ctf-tools`，不激活或退出环境。
-- 对磁盘镜像、内存 dump、PCAP 和媒体文件，优先导出中间产物，避免只保留工具 UI 结论。
+哈希口令恢复使用 [crypto-tooling.md](crypto-tooling.md) 的 John/hashcat 入口；音视频、条码、zsteg 和 steghide 的用途与调用由 Stego 工具页维护，不在这里重复清单。
 
-### 不应进入 Forensics 工具链的情况
+## PCAP、磁盘与归档调用
 
-- 载体只是 Web 响应、API 数据或远程服务交互时，先按 Web/Pentest 保存请求链。
-- 二进制行为、混淆、VM 或反调试是主障碍时，先转 Reverse/Malware，不用取证工具硬拆。
-- 只有普通编码时转 Crypto；隐藏载荷与 QR/视觉碎片转 Stego；语言 jail 按执行边界转 Pwn/Web/Reverse；纯规则且证据不足时回到 `ctf-solve-challenge`，不把所有“附件题”都归入 Forensics。
+`D:/题目路径` 对应 WSL `/mnt/d/题目路径`。先列信息再提取，输出写到独立文件：
 
-### 补工具经验的触发条件
+```pwsh
+wsl -d kali-linux --exec /usr/bin/tshark -r "/mnt/d/题目路径/capture.pcap" -c 20 -T fields -e frame.number -e ip.src -e ip.dst -e _ws.col.Protocol
+wsl -d kali-linux --exec /usr/bin/mmls "/mnt/d/题目路径/disk.img"
+wsl -d kali-linux --exec /usr/bin/fls -o 2048 "/mnt/d/题目路径/disk.img"
+wsl -d kali-linux --exec /usr/bin/7z l "/mnt/d/题目路径/archive.7z"
+wsl -d kali-linux --exec /usr/bin/exiftool "/mnt/d/题目路径/evidence.bin"
+```
 
-- raw 给出 EVTX、Amcache、ShimCache、PowerShell history，并且现有工具页无法指导复现。
-- 云对象存储或公开 bucket 证据需要记录 API/版本历史/权限边界。
-- 移动端 app sandbox、SQLite、shared_prefs、plist/backup 成为可复用入口。
+`-o 2048` 只是示例分区起始扇区，必须替换为 mmls 及实际扇区大小支持的值；不要把字节偏移直接当扇区。确定 inode 后，二进制数据在 Linux 内重定向，避免经 PowerShell 文本管道损坏：
 
-## 本机工具清单（按使用时机）
+```pwsh
+wsl -d kali-linux --exec bash -c '/usr/bin/icat -o 2048 "/mnt/d/题目路径/disk.img" 42 > "/mnt/d/题目路径/recovered.bin"'
+wsl -d kali-linux --exec /usr/sbin/debugfs -R "stats" "/mnt/d/题目路径/partition.img"
+wsl -d kali-linux --exec /usr/sbin/e2fsck -n "/mnt/d/题目路径/partition-copy.img"
+```
 
-### 首轮常用
+示例 inode `42` 也须替换。debugfs 不加 `-w`，e2fsck 使用 `-n`；需要修复时先明确副本和写入范围，不把修复原镜像作为首检。
 
-| 工具 | 为什么放在首轮 |
-|---|---|
-| `file` | 先确认真实载体类型，决定后续分流 |
-| `exiftool` | 图片、文档、媒体题的低成本首检 |
-| `tshark` | PCAP 题最先看协议分布与明显流量 |
-| `fls` / `icat` | 磁盘镜像题最先建立文件树与提取链 |
-| `vol` | 内存镜像题确认进程、句柄、文件扫描 |
-| `binwalk` | 固件/容器类题快速看嵌套结构 |
+## 失败处理与转向
 
-### 专项按需
-
-- 恢复/雕刻：`foremost`、`scalpel`、`photorec`、`testdisk`
-- 隐写：`zsteg`、`zsteg-mask`、`zsteg-reflow`、`zpng`、`steghide`、`zbarimg`
-- PCAP 修复与抓取：`pcapfix`、`tcpdump`
-- 文档与媒体：当前确认 `mutool`、`ffmpeg`、`olevba`、`pcodedmp`；`pdfinfo`、`pdftotext`、`pdfimages` 使用前先检查安装状态
-- 文件系统深挖：`istat`、`blkcat`、`mmls`、`fsstat`、`debugfs` 等
-- 运行中 Python 进程：`pyrasite`、`pyrasite-shell`、`pyrasite-memory-viewer`
-
-### 当前未装 / 建议按需补装
-
-- 当前 `pdfinfo`、`pdftotext`、`pdfimages` 未安装，PDF 首轮先用已确认的 `mutool`；只有具体题目确需 Poppler 工具时再评估安装。若后续经常做事件日志或注册表题，再单独评估专用解析工具。
-
-## 失败信号与转向
-
-- `file`、`binwalk`、`exiftool` 结论互相矛盾：先保存 magic、尾部数据、metadata 和导出层级，再转 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)。
-- PCAP 导出物不是 flag 而是凭据、密钥、音频或文件：保留 stream 编号和导出命令，再转 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md) 或对应媒体/文件页面。
-- 磁盘/内存/容器工具输出太多：先建立时间线和对象清单；如果是文件系统恢复，转 [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)，如果是运行态证据，转 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)。
-- 隐写工具无命中：不要继续堆工具，先确认位平面、颜色通道、帧序、音频频谱或文档对象是否真有异常。
-
-## 详细清单
-
-### 文件提取/雕刻
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| binwalk | /usr/bin/binwalk | 固件/文件嵌入提取 | `binwalk -Me firmware.bin` |
-| foremost | /usr/bin/foremost | 按文件头/尾/大小雕刻 | `foremost -t all -i image.dd` |
-| scalpel | /usr/bin/scalpel | 基于配置的高性能文件雕刻 | `scalpel image.dd -o out/` |
-| photorec | /usr/bin/photorec | 按文件签名恢复删除文件 | `photorec image.dd` |
-| testdisk | /usr/bin/testdisk | 恢复删除分区、修复分区表 | `testdisk image.dd` |
-
-### 磁盘/文件系统取证 (Sleuth Kit)
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| fls | /usr/bin/fls | 列出文件/目录（含已删除） | `fls -r image.dd` |
-| icat | /usr/bin/icat | 按 inode 提取文件内容 | `icat image.dd 12345` |
-| istat | /usr/bin/istat | 查看 inode 元数据 | `istat image.dd 12345` |
-| blkcat | /usr/bin/blkcat | 按块号提取数据 | `blkcat image.dd 1000` |
-| mmls | /usr/bin/mmls | 列出分区布局 | `mmls image.dd` |
-| fsstat | /usr/bin/fsstat | 文件系统统计信息 | `fsstat image.dd` |
-| blkcalc | /usr/bin/blkcalc | 文件系统块号与磁盘扇区映射 | `blkcalc -u 64 image.dd` |
-| debugfs | /usr/sbin/debugfs | ext2/3/4 调试与恢复 | `debugfs -w image.dd` |
-| e2fsck | /usr/sbin/e2fsck | ext2/3/4 文件系统检查修复 | `e2fsck -y image.dd` |
-| dd | /usr/bin/dd | 磁盘/分区原始读写 | `dd if=image.dd bs=512 skip=2048` |
-| losetup | /usr/sbin/losetup | 将文件映射为块设备 | `losetup -f image.dd` |
-
-### 隐写/元数据
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| zsteg | /usr/local/bin/zsteg | PNG/BMP 位面隐写检测 | `zsteg -a image.png` |
-| zsteg-mask | /usr/local/bin/zsteg-mask | 生成/测试 zsteg 掩码 | `zsteg-mask ...` |
-| zsteg-reflow | /usr/local/bin/zsteg-reflow | 对像素流重新排布后再做隐写分析 | `zsteg-reflow ...` |
-| zpng | /usr/local/bin/zpng | zsteg 配套 PNG 处理工具 | `zpng ...` |
-| steghide | /usr/bin/steghide | JPEG/BMP/WAV 隐写嵌入/提取 | `steghide extract -sf image.jpg` |
-| exiftool | /usr/bin/exiftool | 读取/写入文件元数据 | `exiftool suspicious.jpg` |
-| zbarimg | /usr/bin/zbarimg | 二维码/条形码解码 | `zbarimg qrcode.png` |
-
-### 网络/PCAP
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| tshark | /usr/bin/tshark | 命令行协议分析器 | `tshark -r capture.pcap -Y "http"` |
-| tcpdump | /usr/bin/tcpdump | 网络抓包/过滤 | `tcpdump -r capture.pcap -A` |
-| pcapfix | /usr/bin/pcapfix | 修复损坏的 PCAP 文件 | `pcapfix -d corrupted.pcap` |
-
-### 密码/哈希
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| john | /usr/sbin/john | 密码哈希破解 | `john --wordlist=rockyou.txt hash.txt` |
-| keepass2john | /usr/sbin/keepass2john | KeePass 数据库提取哈希 | `keepass2john db.kdbx > hash.txt` |
-| openssl | /usr/bin/openssl | 加解密/证书/PKI | `openssl enc -d -aes-256-cbc -in enc.bin` |
-
-### 音视频/图像
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| ffmpeg | /usr/bin/ffmpeg | 音视频转换/频谱图生成 | `ffmpeg -i audio.wav -lavfi showspectrumpic spec.png` |
-| convert | /usr/bin/convert | ImageMagick 图像格式转换 | `convert image.png image.jpg` |
-| magick | /usr/bin/magick | ImageMagick 7 统一入口 | `magick convert input.png output.jpg` |
-| identify | /usr/bin/identify | 查看图像属性 | `identify -verbose image.png` |
-| compare | /usr/bin/compare | 图像差异比较 | `compare a.png b.png diff.png` |
-
-### PDF 工具
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| pdfinfo | 当前未安装 | PDF 元数据查看 | 使用前 live verify；当前先用 `mutool info document.pdf` |
-| pdftotext | 当前未安装 | PDF 文本提取 | 使用前 live verify；当前先用 `mutool draw -F txt document.pdf` |
-| pdfimages | 当前未安装 | PDF 嵌入图像提取 | 使用前 live verify；当前可先尝试 `mutool extract document.pdf` |
-
-### 压缩/归档
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| 7z | /usr/bin/7z | 通用压缩/解压 | `7z x archive.7z` |
-| tar | /usr/bin/tar | tar 归档 | `tar xf archive.tar.gz` |
-| gzip | /usr/bin/gzip | gzip 压缩 | `gzip -d file.gz` |
-| unsquashfs | /usr/bin/unsquashfs | squashfs 文件系统解包 | `unsquashfs firmware.squashfs` |
-
-### 通用
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| strings | /usr/bin/strings | 提取可打印字符串 | `strings file \| grep -i flag` |
-| file | /usr/bin/file | 识别文件真实类型 | `file unknown.bin` |
-| git | /usr/bin/git | 版本控制/仓库取证 | `git log --all` |
-| apktool | /usr/bin/apktool | APK 反编译 | `apktool d app.apk` |
-| perl | /usr/bin/perl | 脚本/文本处理 | `perl -pe ...` |
-
-### Ruby Gem
-
-| 工具 | 路径 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|---|
-| zsteg | /usr/local/bin/zsteg | 0.2.14 | PNG/BMP 位面隐写综合检测 | `zsteg -a image.png` |
-
-### ctf-tools conda 环境 (Python 包)
-
-| 包名 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|
-| volatility3 | 2.27.0 | 内存取证框架（ctf-tools 中命令为 `vol`） | `vol -f memory.dmp windows.pslist` |
-| oletools | 0.60.2 | Office 文档宏/结构分析 | `olevba suspicious.doc` |
-| pcodedmp | 1.2.6 | VBA p-code 提取，适合宏源码被篡改或 stomped 时补看真实逻辑 | `pcodedmp suspicious.doc` |
-| msoffcrypto-tool | 6.0.0 | 加密 Office 文档解密 | `msoffcrypto-tool encrypted.docx decrypted.docx` |
-| Pillow | 11.3.0 | Python 图像处理库 | `Image.open('stego.png')` |
-| numpy | 2.4.4 | 数值计算/多维数组 | `np.array(pixels)` |
-| scipy | 1.17.1 | 科学计算/信号处理 | `scipy.signal.spectrogram(audio)` |
-| matplotlib | 3.10.8 | 数据可视化/绘图 | `plt.imshow(spectrogram)` |
-| scapy | 2.7.0 | 数据包构造与解析 | `scapy.rdpcap('capture.pcap')` |
-| pycryptodome | 3.17 | 加密算法库 | `from Crypto.Cipher import AES` |
-| uncompyle6 | 3.9.3 | Python 2.7-3.8 bytecode 反编译 | `uncompyle6 compiled.pyc` |
-| olefile | 0.47 | OLE 复合文档解析 | `olefile.isOleFile('doc.xls')` |
-| pyzbar | 0.1.9 | Python 条码/二维码解码绑定 | `from pyzbar.pyzbar import decode` |
-| zxing-cpp | 3.0.0 | 更广谱的条码/二维码识别库 | `import zxingcpp` |
-
-### 独立工具
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| pycdc | /home/kali/pycdc/build/pycdc | Python 3.9+ bytecode 反编译 | `pycdc file.pyc` |
-| pyrasite | /usr/local/bin/pyrasite | 向运行中的 Python 进程注入代码 | `pyrasite PID payload.py` |
-| pyrasite-shell | /usr/local/bin/pyrasite-shell | 连接运行中的 Python 进程交互 shell | `pyrasite-shell PID` |
-| pyrasite-memory-viewer | /usr/local/bin/pyrasite-memory-viewer | 查看运行中 Python 进程对象/内存 | `pyrasite-memory-viewer PID` |
+- 文件类型与扩展名冲突：查 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)，保留哈希、真实文件头与中间产物。
+- 协议字段为空或重组失败：确认链路层、捕获完整性、过滤条件与会话方向；查 [pcap-protocol-credential-recovery-family.md](pcap-protocol-credential-recovery-family.md)。
+- 文件系统读取失败：先核对分区偏移、扇区大小、加密与格式；查 [filesystem-archive-recovery-and-repair.md](filesystem-archive-recovery-and-repair.md)。
+- 内存、VM 或容器工具缺失：先明确镜像格式、符号与目标版本，查 [disk-memory-vm-and-container-forensics.md](disk-memory-vm-and-container-forensics.md)，再评估 Windows 最小依赖。
+- WSL 新增、升级或重装须先说明 Linux 必要性、安装方式、环境、依赖影响并取得明确同意；“恢复证据”不自动授权安装。

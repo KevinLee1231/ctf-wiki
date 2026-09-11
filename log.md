@@ -2978,3 +2978,13 @@
 
 - 按用户要求将 `wiki/crypto-tooling.md` 的 RsaCtfTool 节收窄为工具使用方法与适用边界：删除"算法库质量状态"小节（测试计数、各轮审计修复记录、人工复核结论不再入页），Sage 脚本可用性表压缩为一段可用性与选用建议（qicheng 与 ecm 的因子规模分工、lattice/partial_d 适用场景、neca/wolframalpha 跳过原因），保留 venv 调用、超时下限、环境重建与检查命令等操作事实。
 - 修复与审计历史只留在 RsaCtfTool 仓库的提交记录中，不进入工具页；页面路径、类型与索引入口未变化，`index.md` 无需修改。
+
+## [2026-09-11] tooling-refresh | 同步 Windows 主力与 WSL 精简后的工具入口
+
+- 按当前环境逐页修订 15 个 tooling 页面，移除已清理工具的可执行清单、失效路径与自动补装建议。通用密码、数学、文件、图像、离线网络及模型脚本改用 Windows venv；WSL 保留现有 Linux 原生调试、Sage、APT 与独立工具的具体入口。cross-category 只保留未知附件首检和专项分流。
+- 明确 ctf-tools 的 pwntools/Frida 及必要依赖边界、Sage 与 RsaCtfTool 独立环境、Windows CPU 版 PyTorch、Scapy 离线可用但实时捕获后端未建立，以及设备、GUI、MCP 文件存在与实际会话就绪的区别。保留 IDA/Ghidra、IDAPython、x64dbg 有效说明，JADX 改为从 pwsh 直接运行 Java jar。
+- 修正 APT Impacket 被 Conda PATH 截获时误选 Python 的调用方式；保留 Go 编译型工具并说明运行不依赖 Go 编译器；Neo-reGeorg 使用 Windows venv 读取现有 WSL 源码。没有为文档核验新增、升级、重装或卸载软件。
+- 同步仓库外 16 个 CTF skill：14 个专项补充各自的平台选择条件，solve-challenge 约束首检平台，writeup 区分历史命令与当前复现入口；WSL 安装变更继续引用全局 AGENTS.md 的说明和明确同意要求。具体状态、版本、路径与命令留在 tooling 页面，外部 skill 不纳入本仓库提交。
+- 结构与链接检查覆盖 4924 份 Markdown（含 16 个外部 skill），本地目标无断链；237 篇 wiki 全部被索引覆盖，类型保持 family 99、technique 123、tooling 15，14 个正式方向各有唯一工具页。16 个 skill 以 UTF-8 模式运行 quick_validate 通过，38 个 PowerShell 代码块和 1 个 Python 代码块语法检查通过。
+- 短验证包括 Windows AES/GMP/Z3/Capstone/Unicorn/Pillow/离线 PCAP/CPU 张量、ROPGadget、JADX 与 Neo-reGeorg 帮助，以及 WSL Sage LLL、YAFU 小整数分解、pwndbg 加载、Frida/代表性 APT CLI 帮助。ctf-tools 与 RsaCtfTool 的 pip check 通过；没有把这些检查写成实际目标利用、移动设备连接或 GUI/MCP 样本分析验收。
+- 更新 index 的平台选择提示；raw 正文、既有备份与无关的未跟踪日志不纳入本次修改。文档校验和范围复核完成后，按本次会话授权提交并推送 main。

@@ -6,56 +6,60 @@ skills: [ctf-stego]
 
 # Stego Tooling
 
-本页是 `ctf-stego` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-stego/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页服务媒体、文档、文本、QR、场景或协议中的隐藏载荷。普通可逆编码见 [crypto-tooling.md](crypto-tooling.md)，事件与证据恢复见 [forensics-tooling.md](forensics-tooling.md)。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+## 平台与现存工具
 
-## 工具选择边界
+图片、位面、频谱数组、帧差、QR 重组与文档脚本优先在 Windows 完成，使用 `D:/文档/新建文件夹/venv/Scripts/python.exe`（3.14.3）。旧 Conda 图像、QR 和 OCR 包不再作为入口。
 
-- 先保存原始文件和 hash，避免转码、重采样或元数据写入破坏隐藏通道。
-- 工具必须由具体异常触发：通道/bitplane、尾部/嵌入、QR 网格、帧差、声道/频谱或文档对象；无异常时不堆自动扫描器。
-- 文件修复、删除恢复和正常会话重组转 Forensics；普通可逆编码转 Crypto；RF/IQ 与物理信号转 Hardware/Embedded。
+| Windows 工具 | 当前状态 | 用途 |
+|---|---|---|
+| `Pillow` | venv `12.2.0` | 图像模式、通道、像素、裁剪与重排 |
+| `numpy` / `scipy` | venv `2.4.4` / `1.17.1` | 位面、阈值、FFT、滤波与相关 |
+| `matplotlib` | venv `3.11.0` | 位图、频谱、时序和散点输出 |
+| `PyMuPDF` | venv `1.27.2.3` | PDF 文本、嵌图与附件；更多文档工具见 Forensics 页 |
+| StegSolve | `D:/CTF工具/stegsolve.jar`，文件存在 | 手工通道、位面和图像变换；GUI 未经启动不能当作已验证会话 |
 
-## 完整调用约定
+| 已有 WSL 工具 | 位置与版本 | 用途 |
+|---|---|---|
+| zsteg / zpng | `/usr/local/bin/zsteg`、`/usr/local/bin/zpng`；Ruby gem `0.2.14` / `0.4.6` | PNG/BMP 位面检查与 PNG 结构辅助；同目录还有 zsteg-mask、zsteg-reflow |
+| steghide | `/usr/bin/steghide`；APT `0.5.1+git20240220-2` | 支持容器的信息与载荷提取 |
+| zbarimg / qrencode | `/usr/bin/zbarimg`、`/usr/bin/qrencode`；APT `0.23.93-9+b4` / `4.1.1-2+b2` | 已有条码解码与 QR 生成 |
+| exiftool | `/usr/bin/exiftool`；APT `13.55+dfsg-1` | 媒体、文档元数据 |
+| ffmpeg / sox | `/usr/bin/ffmpeg`、`/usr/bin/sox`；APT `7:8.1.2-2+b3` / `14.7.1.2+ds1-1` | 音视频转换、帧与频谱输出 |
+| qsstv | `/usr/bin/qsstv`；APT `9.5.8-6` | SSTV GUI，需实际音频/显示环境；未验证收音链 |
 
-系统工具通过 WSL 绝对路径调用；Python 图像/信号脚本使用 `ctf-tools`。所有命令从 `pwsh` 发起：
+当前没有可用的 pytesseract/Tesseract、OpenCV、Python QR 绑定或 Piet 解释器入口。普通像素与信号工作先使用上表；需要 OCR、新条码格式或专门 esolang 解释器时，先评估 Windows 最小方案，不自动补回 WSL。
+
+## 从 pwsh 调用
+
+题目路径与输出按实际任务替换。WSL 工具属于 APT/Ruby 层，不套 Conda：
 
 ```pwsh
-wsl /usr/bin/file /path/to/carrier.bin
-wsl /usr/bin/exiftool /path/to/carrier.png
-wsl /usr/local/bin/zsteg -a /path/to/image.png
-wsl /usr/bin/zbarimg /path/to/reassembled-qr.png
-wsl /usr/bin/ffmpeg -i /path/to/audio.wav -lavfi showspectrumpic /path/to/spectrum.png
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/stego_analysis.py
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'from PIL import Image; im=Image.open("D:/题目路径/image.png"); print(im.format, im.mode, im.size); print(im.getextrema())'
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/extract_bitplanes.py"
+wsl -d kali-linux --exec /usr/local/bin/zsteg -a "/mnt/d/题目路径/image.png"
+wsl -d kali-linux --exec /usr/bin/zbarimg --quiet "/mnt/d/题目路径/qr.png"
+wsl -d kali-linux --exec /usr/bin/qrencode -o "/mnt/d/题目路径/qr-output.png" "known test text"
+wsl -d kali-linux --exec /usr/bin/steghide info "/mnt/d/题目路径/image.jpg"
+wsl -d kali-linux --exec /usr/bin/exiftool "/mnt/d/题目路径/image.png"
+wsl -d kali-linux --exec /usr/bin/sox "/mnt/d/题目路径/audio.wav" -n spectrogram -o "/mnt/d/题目路径/spectrum.png"
+wsl -d kali-linux --exec /usr/bin/ffmpeg -i "/mnt/d/题目路径/video.mp4" -frames:v 1 "/mnt/d/题目路径/first-frame.png"
 ```
 
-## 当前状态与路径
+`D:/题目路径` 对应 `/mnt/d/题目路径`。`zsteg -h` 可查看帮助；其 `--version` 退出码不能单独用于判定工具损坏。`-a` 会尝试多种位面组合，大图先裁剪或限制参数。steghide 若询问口令，应按题目已知条件处理，不自动进入爆破。
 
-| 工具 | 当前状态/版本 | 路径或环境 | 何时使用 | 完整调用 |
-|---|---|---|---|---|
-| `file` | 可用，5.47 | `/usr/bin/file`，WSL system | 真实格式与容器首检 | 见上方命令 |
-| `xxd` | 可用，Vim xxd 9.2.0524 | `/usr/bin/xxd`，WSL system | chunk、header、尾部和字节序检查 | `wsl /usr/bin/xxd -g 1 /path/to/carrier.bin` |
-| `exiftool` | 可用，13.55 | `/usr/bin/exiftool`，WSL system | 图片、文档和媒体 metadata | 见上方命令 |
-| `zsteg` | 可用，0.2.14 | `/usr/local/bin/zsteg`，Ruby Gem | PNG/BMP 通道和 bitplane 检查 | 见上方命令 |
-| `steghide` | 可用，入口报告 0.6.0 | `/usr/bin/steghide`，WSL system | JPEG/BMP/WAV 常见嵌入载荷 | `wsl /usr/bin/steghide info /path/to/carrier.jpg` |
-| `zbarimg` | 可用，0.23.93 | `/usr/bin/zbarimg`，WSL system | QR/条码完整性和重组验证 | 见上方命令 |
-| `ffmpeg` | 可用，8.1.2 | `/usr/bin/ffmpeg`，WSL system | 帧、声道和频谱的无损拆分 | 见上方命令 |
-| `sox` | 可用，14.7.1.2 | `/usr/bin/sox`，WSL system | 音频通道、反转、滤波和 spectrogram | `wsl /usr/bin/sox /path/to/audio.wav -n spectrogram -o /path/to/spec.png` |
-| `mutool` | 可用，1.27.0 | `/usr/bin/mutool`，WSL system | PDF 对象、文本、图片和增量结构 | `wsl /usr/bin/mutool info /path/to/document.pdf` |
-| Python 图像/信号包 | Pillow 11.3.0、numpy 2.4.4、scipy 1.17.1、matplotlib 3.10.8、pyzbar 0.1.9、zxing-cpp 3.0.0 | WSL `ctf-tools` | 自定义像素顺序、帧差、频谱、网格和条码重组 | 见上方 Python 脚本命令 |
-| Poppler CLI | `pdfinfo`、`pdftotext`、`pdfimages` 当前未安装 | WSL | PDF 元数据、文本和图片的替代提取链 | 当前先用 `mutool info/draw/extract`，不要调用不存在的入口 |
+StegSolve 需要手工查看图像时可在 Windows 运行：
 
-## 失败处理
+```pwsh
+& "C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe" -jar "D:/CTF工具/stegsolve.jar"
+```
 
-- 自动隐写工具无命中：回到通道、bit、扫描顺序、端序、帧序、频谱和对象结构，不把“未命中”当作无隐藏信息证明。
-- QR 解码失败：先检查 finder、网格尺寸、quiet zone、mask、纠错和碎片顺序；保留每次重组图像。
-- 音视频拆分后信息消失：确认没有有损转码、重采样或声道混合，优先从原始载体重新导出。
-- PDF 需要 Poppler 特定行为：先验证 `mutool` 是否足够；确需缺失工具时再按全局授权规则安装，并更新本页当前状态。
+## 失败处理与下一跳
 
-## 关联知识页
-
-- [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)
-- [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md)
-- [qr-and-structured-symbol-reassembly.md](qr-and-structured-symbol-reassembly.md)
-- [audio-spectrum-and-symbol-decoding.md](audio-spectrum-and-symbol-decoding.md)
-- [video-document-and-media-stego.md](video-document-and-media-stego.md)
+- 位面噪声或大量假阳性：核对模式、透明通道、像素顺序、位序与 payload 长度；见 [image-bitplane-qr-and-jpeg-stego.md](image-bitplane-qr-and-jpeg-stego.md)。
+- 多图、帧差或通道重组：见 [media-channel-bitplane-and-frame-difference-extraction.md](media-channel-bitplane-and-frame-difference-extraction.md)。
+- QR 不能识别：先验证定位图案、quiet zone、网格与方向，再查 [qr-and-structured-symbol-reassembly.md](qr-and-structured-symbol-reassembly.md)，不要直接加装一组解码器。
+- 音频看不出结构：确认采样率、声道、符号率和调制，再查 [audio-spectrum-and-symbol-decoding.md](audio-spectrum-and-symbol-decoding.md)。
+- PDF/视频对象或隐藏帧：见 [video-document-and-media-stego.md](video-document-and-media-stego.md)；GUI 文件存在不代表已完成媒体解码。
+- WSL 新增、升级或重装须先说明用途、Linux 必要性、方式、目标及依赖影响并取得明确同意。

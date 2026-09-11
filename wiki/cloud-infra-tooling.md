@@ -6,51 +6,47 @@ skills: [ctf-cloud-infra]
 
 # Cloud / Infra Tooling
 
-本页是 `ctf-cloud-infra` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-cloud-infra/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页服务 IAM、资源策略、metadata、Kubernetes 控制面、CI/CD 与制品信任问题。部署在云上的普通应用漏洞仍用 [web-tooling.md](web-tooling.md)。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+## 平台与当前状态
 
-## 工具选择边界
+JSON、YAML、JWT、HTTP 和制品文件检查默认在 Windows 完成，Python 固定使用 `D:/文档/新建文件夹/venv/Scripts/python.exe`（3.14.3）。分析目标运行 Linux 或 Kubernetes，不等于本地客户端必须在 WSL。
 
-- 先确认厂商、account/project、region、cluster/context、namespace 和题目凭据，再选择 CLI；不读取或复用个人机器上的环境凭据作为题目默认值。
-- 先用保存的响应、token claim、策略文档和最小只读 API 建 identity → action → resource → trust 图，再决定是否需要云 CLI、Kubernetes、registry 或 IaC 工具。
-- 创建/删除资源、修改 IAM/RBAC、触发 pipeline、部署 workload 或扩大枚举范围前，必须再次确认题目范围和身份上下文。
+| 入口 | 当前状态 | 用途 |
+|---|---|---|
+| `Invoke-RestMethod`、`ConvertFrom-Json` | PowerShell 内置 | 已授权 API 的定点查询与结构化响应 |
+| `C:/Windows/System32/curl.exe` | `8.21.0` | 原始 HTTP 请求、响应头与连接诊断 |
+| Windows venv `requests` | `2.33.1` | 可复现的 HTTP/metadata 交互脚本 |
+| Windows venv `PyYAML` | `6.0.3` | 用 `yaml.safe_load` 阅读策略、工作流和清单 |
+| Windows venv `PyJWT` / `cryptography` | `2.12.1` / `46.0.7` | JWT 结构和签名语义；解析 payload 不等于验证 token |
+| `C:/Windows/System32/OpenSSH/ssh.exe` | Windows 已有入口 | 已授权 SSH 连接及端口转发 |
+| `/usr/bin/jq` | WSL APT `1.8.2-1` | 已有 Linux 工作流中的 JSON 筛选；普通 Windows JSON 分析无需切换平台 |
 
-## 完整调用约定
+Windows 与 WSL 当前 PATH 均未发现 `docker`、`kubectl`、`aws`、`az`、`gcloud`、`terraform`。这表示没有可直接调用的这些 CLI，不代表题目云端也缺少它们。先用现有 API/文件分析能力；确需厂商 CLI、容器或 IaC 执行时，另行选择 Windows 兼容版本和最小安装范围。
 
-当前可用基线是 WSL 系统 `curl` 与 `jq`。所有命令从 `pwsh` 发起：
+## 完整调用
+
+以下只读示例从 `pwsh` 发起；替换成当前题目的文件与授权端点：
 
 ```pwsh
-wsl /usr/bin/curl -sS -D /tmp/headers.txt https://ctf-control-plane.example/api/status
-wsl /usr/bin/jq . /path/to/policy-or-token-claims.json
+Get-Content -LiteralPath "D:/题目路径/policy.json" -Raw | ConvertFrom-Json
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'from pathlib import Path; import yaml; print(yaml.safe_load(Path("D:/题目路径/workflow.yml").read_text(encoding="utf-8")))'
+& "C:/Windows/System32/curl.exe" --max-time 10 --include "http://127.0.0.1:8080/health"
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/analyze_policy.py"
 ```
 
-如果后续安装某个厂商 CLI，必须先在本页记录其当前绝对路径、版本和所需 context，再从 `pwsh` 以该绝对路径调用；不要依赖未知的默认 profile。
+已经处于 Linux 工件处理链时，可直接用系统工具，不套 Conda：
 
-## 当前状态与路径
+```pwsh
+wsl -d kali-linux --exec /usr/bin/jq . "/mnt/d/题目路径/policy.json"
+```
 
-| 工具 | 当前状态/版本 | 路径或环境 | 何时使用 | 完整调用 |
-|---|---|---|---|---|
-| `curl` | 可用，8.21.0 | `/usr/bin/curl`，WSL system | 元数据、OIDC、控制面 API 和最小只读请求 | `wsl /usr/bin/curl -sS URL` |
-| `jq` | 可用，1.8.2 | `/usr/bin/jq`，WSL system | policy、token claim、audit event 与 API JSON | `wsl /usr/bin/jq . /path/to/input.json` |
-| AWS CLI | 未发现 | WSL/Windows `PATH` 与 `/home/kali` 未发现 | AWS identity、STS、IAM、S3、Lambda 等 | 当前无可执行命令 |
-| Google Cloud CLI | 未发现 | WSL/Windows `PATH` | GCP identity、IAM、project 与资源图 | 当前无可执行命令 |
-| Azure CLI | 未发现 | WSL/Windows `PATH` | Azure tenant、subscription、role 与资源图 | 当前无可执行命令 |
-| `kubectl` | 未发现 | WSL/Windows `PATH` 与 `/home/kali` 未发现 | context、namespace、RBAC、service account、secret 与 workload | 当前无可执行命令 |
-| `docker` / `skopeo` | 未发现 | WSL/Windows `PATH`；常见 Docker Desktop CLI 路径也不存在 | image、manifest、layer、registry 与签名检查 | 当前无可执行命令 |
-| `terraform` | 未发现 | WSL/Windows `PATH` 与 `/home/kali` 未发现 | plan、state、provider、variable 与 IaC 信任边界 | 当前无可执行命令 |
-| Python 云 SDK | `boto3`、`google-cloud-storage`、`azure-identity`、`kubernetes`、`docker`、`python-terraform` 均未装 | WSL `ctf-tools` | 只有需要脚本化厂商 API 时才考虑 | 当前不可导入 |
+记录 principal、resource、action、条件和信任来源，再判断下一次请求。不要把一次 metadata 响应直接等同于可调用所有控制面 API，也不要把 token payload 里的 role 当作服务端已经授权。
 
-## 失败处理
+## 失败处理与下一跳
 
-- 没有厂商 CLI：先用题目给出的 JSON、HTTP 响应、token 和策略文本完成静态权限图；不要为了题型猜测一次性安装全部云工具。
-- CLI 报认证或 context 错误：先记录当前 account/project/region/cluster/namespace 和错误响应；不要尝试个人 profile、真实云账号或扩大枚举。
-- 镜像/registry 是证据恢复问题时转 [forensics-tooling.md](forensics-tooling.md)；恶意依赖或 C2 行为主导时转 [malware-tooling.md](malware-tooling.md)。
-- 题目确认需要缺失工具后，安装应进入独立、可追踪的工具层；安装和验证完成后再把版本、路径与完整命令写回本页。
-
-## 关联知识页
-
-- [cloud-identity-token-to-control-plane-pivot.md](cloud-identity-token-to-control-plane-pivot.md)
-- [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)
-- [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md)
-- [oauth-saml-cors-and-cicd.md](oauth-saml-cors-and-cicd.md)
+- 401/403：核对凭据来源、受众、scope、过期时间、资源策略与签名要求；转 [cloud-identity-token-to-control-plane-pivot.md](cloud-identity-token-to-control-plane-pivot.md)。
+- metadata 可读但调用失败：确认代理与网络路径、临时凭据完整性、目标区域和实际 principal，不盲目安装整套云工具。
+- 制品内容被信任或加载：转 [artifact-trust-ssrf-to-node-require-rce.md](artifact-trust-ssrf-to-node-require-rce.md)；证据提取见 [forensics-tooling.md](forensics-tooling.md)，恶意载荷语义见 [malware-tooling.md](malware-tooling.md)。
+- CI runner/internal API 越权：转 [workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md)；身份与协议边界看 [oauth-saml-cors-and-cicd.md](oauth-saml-cors-and-cicd.md)。
+- Windows 缺包先评估兼容的新版本；仅当本地复现确需 Linux 能力时考虑 WSL。WSL 新增、升级或重装必须先说明用途、必要性、目标和依赖影响并取得明确同意。

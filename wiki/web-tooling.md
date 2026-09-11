@@ -6,247 +6,82 @@ skills: [ctf-web]
 
 # Web Tooling
 
-本页是 `ctf-web` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-web/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页维护 HTTP/API、认证、浏览器、模板和服务端输入边界的本机工具。先记录正常请求与响应，再根据具体差异选择有界验证。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+## Windows 默认入口
 
-## 完整调用约定
+Python 脚本固定使用 `D:/文档/新建文件夹/venv/Scripts/python.exe`（3.14.3）。HTTP、JSON、JWT、Flask session 与页面解析不需要进入 WSL `ctf-tools`。
 
-系统 CLI 通过绝对路径从 `pwsh` 调用 WSL；Python 包与入口使用 `ctf-tools`。MCP 方法只在当前工具清单实际暴露时调用：
+| 工具 | 当前版本与位置 | 用途 |
+|---|---|---|
+| requests | Windows venv `2.33.1` | 请求重放、会话、Cookie 和超时控制 |
+| PyJWT | Windows venv `2.12.1` | JWT header/payload 与签名算法实验 |
+| Flask / itsdangerous / Jinja2 | Windows venv `3.1.3` / `2.2.0` / `3.1.6` | 按题目配置复现 session、签名与模板语义 |
+| beautifulsoup4 / lxml | Windows venv `4.14.3` / `6.0.4` | HTML/XML 结构提取 |
+| pycryptodome / cryptography | Windows venv `3.23.0` / `46.0.7` | 已确定的加密、签名与证书流程 |
+| curl | `C:/Windows/System32/curl.exe`，`8.21.0` | 原始 HTTP、响应头和连接诊断 |
+| Burp Suite | `D:/CTF工具/BurpSuite/burpsuite.jar`，文件存在 | GUI 代理历史、Repeater 和手工请求修改 |
+| ysoserial | `D:/CTF工具/ysoserial-all.jar`，文件存在 | 已指向 Java 反序列化时的专项候选；未验证当前 JDK 与具体 gadget 兼容性 |
+
+Windows 存在 `httpx2` 发行包，但不能把它当成任意旧脚本的 `httpx` API 保证；普通请求可先用已验证的 requests。当前没有 flask-unsign、jwcrypto、hashpumpy、hash_extender 或 phpggc 调用入口；需要专门能力时先确认漏洞机制，再评估 Windows 最小实现或兼容新版本。
 
 ```pwsh
-wsl /usr/bin/curl -i -sS https://target.example/
-wsl /usr/bin/ffuf -u https://target.example/FUZZ -w /path/to/wordlist.txt
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools flask-unsign --decode --cookie eyJ...
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/web_solver.py
+& "C:/Windows/System32/curl.exe" --include --max-time 10 "http://127.0.0.1:8080/"
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'import requests; r=requests.get("http://127.0.0.1:8080/", timeout=10, allow_redirects=False); print(r.status_code); print(dict(r.headers)); print(r.text[:1000])'
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/replay_request.py"
 ```
 
-表格中的 Linux 片段说明参数语义；实际执行时使用同一行绝对路径。扫描、爆破、Intruder 和主动漏洞验证只对题目明确授权的目标执行。
+示例 URL 替换为题目授权端点。JWT 解析结果不是鉴权结论；Flask/Jinja2 行为要对齐题目 secret、salt、算法和实际模板上下文，不要求为了复用旧脚本保留已清理版本。
 
-## 工具选择边界
+## Burp 与浏览器
 
-### 入口选择
+当前会话没有暴露 Burp MCP。目录中 `mcp-proxy.jar` 存在不等于插件已加载或连接成功，不从旧固定工具名列表构造调用。需要代理时先核对 GUI、监听地址、浏览器代理与本题范围，再查看正常请求历史；重复请求优先使用 Repeater 并保留原始报文。
 
-- Web 首轮无条件用 `curl` 建 baseline；先检查 Burp MCP 是否 callable，可用时再结合 Burp 保存请求/响应、cookie、redirect、认证状态和差异样本。
-- fuzz/扫描要有边界：确认应用面不足时才用 `ffuf/gobuster/feroxbuster`，确认注入信号后才用 `sqlmap`。
-- Java/PHP 反序列化、hash length extension、JWT/JWE、PDF 附件等专项工具按本页路径进入，不要和普通请求测试混在一起。
+在需要显示 Burp GUI 时，由 `pwsh` 直接启动现有 jar：
 
-### 不应进入 Web 工具链的情况
+```pwsh
+& "C:/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot/bin/java.exe" -jar "D:/CTF工具/BurpSuite/burpsuite.jar"
+```
 
-- 目标主要是本地 binary、内存破坏、固件或模型文件时，Web 只保留传输证据，主线转对应专项。
-- 扫描器没有输入面、认证态和 baseline 时不要先跑；先用 Burp/curl 建最小差异样本。
-- Web 只是进入内网、runner、主机命令或凭据链的第一步时，要及时转 Pentest/Reverse/Pwn。
+上述为文件入口，不代表本次已验证 GUI 启动或扩展加载。后续若发现可调用 MCP，先核对参数 schema、会话及范围，再按“读取历史 → 选择请求 → 修改最少字段 → 比较响应”使用。不得把开启持续代理、Intruder 批量任务或更改全局配置作为一次读请求的隐含步骤。
 
-### 补工具经验的触发条件
+## 已有 Kali CLI
 
-- raw 给出 H2/H1 转换、CL/TE、proxy normalization 等 HTTP parser differential。
-- Browser-side 证据集中在 postMessage、XS-Leaks、CSP bypass 或 Service Worker。
-- Supply chain/CI 题需要 artifact trust、workflow token、internal runner 的工具链复现。
+下列 APT 工具仍保留；它们直接从 `pwsh` 调 WSL，不能套入 Conda。ffuf、gobuster、nuclei 等已编译程序运行不依赖 Go 编译器。
 
-## 本机工具清单（按使用时机）
-
-### 首轮常用
-
-| 工具 | 为什么放在首轮 |
-|---|---|
-| Burp Suite / Burp MCP | 先检查是否 callable；可用时查看请求/响应、认证流和参数，不可用时回退 `curl` |
-| `curl` | 快速看跳转、响应头、Cookie 和基础行为 |
-| `gobuster` / `ffuf` | 当应用面还不完整时，用来补隐藏路由 |
-| `sqlmap` | 只有在已出现注入信号时，才作为快速验证工具进入首轮 |
-
-### 专项按需
-
-- 指纹/组件验证：`nuclei`、`nikto`
-- 子域与外围面：`subfinder`、`nmap`
-- 认证专项：`flask-unsign`、`john`、`hashcat`
-- 哈希/长度扩展：`hashpumpy`、`hash_extender`
-- 流量与数据处理：`tshark`、`tcpdump`、`jq`
-- 题型专项：`hydra`、`ysoserial`、`pdfdetach`、`requests`、`pwntools`、`/home/kali/phpggc/phpggc`
-
-### 当前未装 / 建议按需补装
-
-- `pdfdetach` 当前未安装；需要处理 PDF 附件时先转 Forensics，并用当前可用的 `/usr/bin/mutool` 1.27.0 检查和提取，不从旧命令推断 Poppler 已安装。
-- `jwcrypto` 已在 `ctf-tools` 中，只有在需要完整 JWT/JWS/JWE 构造、验证或调试时才进入；不要把它当成 `flask-unsign` 的替代品。
-
-## 失败信号与转向
-
-- Burp/curl 只有页面差异，没有明确参数控制点：先回到 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md) 建 baseline、认证态和输入面，不要直接上扫描器。
-- 目录扫描命中大量静态文件或误报：收敛到路由、文件首检或源码线索；若导出附件/压缩包，转 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)。
-- `sqlmap`、nuclei 或模板扫描无结果：保留能复现差异的请求、响应片段和参数控制点，再按 SQLi、SSRF、反序列化、认证或浏览器侧 family 分流。
-- 请求已经进入内网服务、runner、token 或主机命令阶段：转 [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md)、[workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md) 或 [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)。
-
-## 详细清单
-
-### Burp Suite MCP（可选，先检查）
-
-Burp MCP 是高信息密度入口，但不是稳定常驻事实。当前工具清单未暴露 Burp 方法；每次使用前先检查 callable，失败时用 `curl`、浏览器开发者工具或手工 Burp 建 baseline。
-
-| 工具 | 功能 | 调用方式 |
-|---|---|---|
-| `burp__base64_encode/decode` | Base64 编解码（cookie/token/payload） | MCP 直接调用 |
-| `burp__url_encode/decode` | URL 编解码 | MCP 直接调用 |
-| `burp__get_proxy_http_history` | 查看 HTTP 代理历史 | MCP，`count`/`offset` 参数 |
-| `burp__get_proxy_http_history_regex` | 按正则匹配 HTTP 历史 | MCP，`regex` 参数 |
-| `burp__send_http1_request` | 发送 HTTP/1.1 请求 | MCP，`content`+`targetHostname`+`targetPort`+`usesHttps` |
-| `burp__send_http2_request` | 发送 HTTP/2 请求 | MCP，`headers`+`pseudoHeaders`+`requestBody` |
-| `burp__create_repeater_tab` | 创建 Repeater 标签页（手工测试） | MCP，`tabName` 可选 |
-| `burp__send_to_intruder` | 发送到 Intruder（fuzzing） | MCP |
-| `burp__set_proxy_intercept_state` | 启用/禁用拦截 | MCP，`intercepting: true/false` |
-| `burp__generate_random_string` | 生成随机字符串 | MCP |
-
-### 系统全局命令（WSL Kali）
-
-| 工具 | 路径 | 功能 | 典型用法 |
+| 工具 | 绝对入口 | APT 版本 | 用途 |
 |---|---|---|---|
-| **gobuster** | `/usr/bin/gobuster` 3.8.2 | 目录/文件快速扫描 | `gobuster dir -u URL -w /usr/share/wordlists/dirb/common.txt` |
-| **ffuf** | `/usr/bin/ffuf` 2.1.0-dev | 灵活 Web fuzzer（支持参数化 fuzz） | `ffuf -u URL/FUZZ -w wordlist.txt` |
-| **feroxbuster** | `/usr/bin/feroxbuster` 2.13.1 | 递归内容发现，适合目录树较深时补强 `gobuster` / `ffuf` | `feroxbuster -u URL` |
-| **nuclei** | `/usr/bin/nuclei` 3.11.0 | YAML 模板驱动漏洞扫描（CVE/配置/泄露） | `nuclei -u URL -t cves/ -t exposures/` |
-| **sqlmap** | `/usr/bin/sqlmap` 1.10.8 | SQL 注入自动检测与利用 | `sqlmap -u "URL?id=1" --dbs` |
-| **hydra** | `/usr/bin/hydra` 9.7 | 在线口令爆破（HTTP/FTP/SSH 等） | `hydra -l admin -P pass.txt target http-post-form "/login:user=^USER^&pass=^PASS^:F=error"` |
-| **nmap** | `/usr/bin/nmap` 7.99 | 端口扫描/服务版本/脚本引擎 | `nmap -sV -sC target` |
-| **subfinder** | `/usr/bin/subfinder` 2.14.0 | 被动子域名发现 | `subfinder -d target.com` |
-| **nikto** | `/usr/bin/nikto` | Web 服务器检查 | `nikto -h https://target.com` |
-| **tshark** | `/usr/bin/tshark` 4.6.6 | 命令行 Wireshark（PCAP 分析） | `tshark -r capture.pcap -Y "http"` |
-| **curl** | `/usr/bin/curl` | HTTP 客户端（请求/响应测试） | `curl -v http://target.com` |
-| **nc** | `/usr/bin/nc` | TCP/UDP 连接/netcat | `nc target 80 <<< "GET / HTTP/1.0"` |
-| **hash_extender** | `/usr/local/bin/hash_extender` | CLI 哈希长度扩展攻击 | `hash_extender -d data -s hash -a append -l len` |
-| **john** | `/usr/sbin/john` 1.9.0-jumbo | 哈希破解/JWT secret 暴力 | `john jwt.txt --wordlist=rockyou.txt` |
-| **hashcat** | `/usr/bin/hashcat` 7.1.2 | GPU 哈希破解（全类型支持） | `hashcat -m 16500 jwt.txt rockyou.txt` |
-| **jq** | `/usr/bin/jq` 1.8.2 | JSON 解析/查询/格式化 | `curl -s API \| jq '.flag'` |
-| **tcpdump** | `/usr/bin/tcpdump` 4.99.6 | 网络流量抓取 | `tcpdump -i eth0 -w capture.pcap port 80` |
-| **pdfdetach** | 当前未安装 | PDF 附件提取 | 转 Forensics；当前先用 `/usr/bin/mutool extract file.pdf` |
+| ffuf | `/usr/bin/ffuf` | `2.2.1-1` | 已知输入点的有界内容发现 |
+| feroxbuster | `/usr/bin/feroxbuster` | `2.13.1-0kali3` | 目录枚举，递归深度与请求量需限制 |
+| gobuster | `/usr/bin/gobuster` | `3.8.2-1` | 目录、DNS 等模式枚举 |
+| sqlmap | `/usr/bin/sqlmap` | `1.10.8-1` | 已有 SQL 注入证据时进一步验证 |
+| nuclei | `/usr/bin/nuclei` | `3.11.1-0kali1` | 指定模板检查；模板是否存在另行核对，不自动更新 |
+| nikto | `/usr/bin/nikto` | `1:2.6.1-0kali1` | 已获准的 Web 服务配置检查 |
+| cewl | `/usr/bin/cewl` | `6.2.1-1` | 按已授权站点和抓取范围构造词表 |
+| searchsploit | `/usr/bin/searchsploit` | `exploitdb 20260826-0kali1` | 本地漏洞资料检索，命中仍须核对版本与条件 |
+| SecLists | `/usr/share/seclists` | `2025.3-0kali1` | 现有字典；`Discovery/Web-Content/common.txt` 存在 |
 
-### Python 包（ctf-tools conda）
+不假定旧的 dirb/rockyou 路径存在。先看工具帮助与本地资料，不发起扫描：
 
-| 工具 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|
-| **flask-unsign** | 1.2.1 | Flask session 解码/签名暴破/字典破解 | `flask-unsign --decode --cookie 'eyJ...'` |
-| **jwcrypto** | 1.5.7 | JWT/JWS/JWE 构造、验证与调试 | `from jwcrypto import jwt, jwk, jws, jwe` |
-| **hashpumpy** | 1.2 | 哈希长度扩展攻击 | `hashpumpy.hashpump(known_hash, known_data, append_data, key_len)` |
-| **requests** | 2.33.1 | HTTP 请求库（session/cookie/代理） | `requests.get(URL, cookies={}, proxies={})` |
-| **pwntools** | 4.15.0 | 数据打包/编码/序列化 | `from pwn import xor; xor(data, key)` |
-
-### WSL 本地源码工具
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| **phpggc** | `/home/kali/phpggc/phpggc` | PHP 反序列化 gadget chain 生成 | `/home/kali/phpggc/phpggc -l` |
-
-### Windows 本地
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| **ysoserial** | `D:\CTF工具\ysoserial-all.jar` | Java 反序列化 payload 生成 | `java -jar ysoserial-all.jar CommonsCollections1 'cmd'` |
-
-
----
-
-## Burp Suite MCP 详细操作
-
-以下是 Burp MCP callable 时可用的方法参考；不要据此推断当前已经连接。当前工具清单没有相应方法时，不得直接调用：
-
-### 编码/解码工具
-
-| 工具 | 功能 | 示例 |
-|------|------|------|
-| `mcp__burp__base64_encode` | Base64 编码 | 编码 XSS payload、JWT 片段 |
-| `mcp__burp__base64_decode` | Base64 解码 | 解码 cookie、token |
-| `mcp__burp__url_encode` | URL 编码 | 编码特殊字符 payload |
-| `mcp__burp__url_decode` | URL 解码 | 解码 URL-encoded 参数 |
-| `mcp__burp__generate_random_string` | 生成随机字符串 | 生成 fuzzing 随机输入 |
-
-### Proxy 历史查看
-
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `mcp__burp__get_proxy_http_history` | 查看 HTTP 代理历史 | `count`（数量）, `offset`（偏移） |
-| `mcp__burp__get_proxy_http_history_regex` | 按正则匹配查看 HTTP 历史 | `regex`, `count`, `offset` |
-| `mcp__burp__get_proxy_websocket_history` | 查看 WebSocket 代理历史 | `count`, `offset` |
-| `mcp__burp__get_proxy_websocket_history_regex` | 按正则匹配查看 WebSocket 历史 | `regex`, `count`, `offset` |
-
-```bash
-# 查看最近 20 条 HTTP 历史
-get_proxy_http_history(count=20, offset=0)
-
-# 按正则搜索包含 flag、token、secret 的请求
-get_proxy_http_history_regex(regex="flag|token|secret", count=20, offset=0)
-
-# 查看 WebSocket 历史
-get_proxy_websocket_history(count=20, offset=0)
+```pwsh
+wsl -d kali-linux --exec /usr/bin/ffuf -h
+wsl -d kali-linux --exec /usr/bin/sqlmap --version
+wsl -d kali-linux --exec /usr/bin/searchsploit "product version"
 ```
 
-### 请求发送工具
+明确目标、输入点、字典大小和请求预算后，内容发现示例为：
 
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `mcp__burp__send_http1_request` | 发送 HTTP/1.1 请求 | `content`, `targetHostname`, `targetPort`, `usesHttps` |
-| `mcp__burp__send_http2_request` | 发送 HTTP/2 请求 | `headers`, `pseudoHeaders`, `requestBody`, `targetHostname`, `targetPort`, `usesHttps` |
-
-```bash
-# 发送 HTTP/1.1 请求（注意使用 \r\n 作为换行）
-send_http1_request(
-  content="GET /admin HTTP/1.1\r\nHost: target.com\r\n\r\n",
-  targetHostname="target.com",
-  targetPort=443,
-  usesHttps=true
-)
+```pwsh
+wsl -d kali-linux --exec /usr/bin/ffuf -u "http://127.0.0.1:8080/FUZZ" -w "/usr/share/seclists/Discovery/Web-Content/common.txt" -t 2 -rate 5 -maxtime 30
 ```
 
-### Repeater 和 Intruder
+## 失败处理与转向
 
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `mcp__burp__create_repeater_tab` | 创建 Repeater 标签页 | `content`, `targetHostname`, `targetPort`, `usesHttps`, `tabName`(可选) |
-| `mcp__burp__send_to_intruder` | 发送请求到 Intruder | `content`, `targetHostname`, `targetPort`, `usesHttps`, `tabName`(可选) |
-
-```bash
-# 在 Repeater 中打开一个请求以便编辑和手动测试
-create_repeater_tab(
-  content="POST /api/login HTTP/1.1\r\nHost: target.com\r\nContent-Type: application/json\r\n\r\n{\"user\":\"admin\",\"pass\":\"test\"}",
-  targetHostname="target.com",
-  targetPort=443,
-  usesHttps=true,
-  tabName="Login Test"
-)
-
-# 发送到 Intruder 进行 fuzzing
-send_to_intruder(
-  content="GET /page?id=§1§ HTTP/1.1\r\nHost: target.com\r\n\r\n",
-  targetHostname="target.com",
-  targetPort=443,
-  usesHttps=true
-)
-```
-
-### 编辑器操作
-
-| 工具 | 功能 |
-|------|------|
-| `mcp__burp__get_active_editor_contents` | 获取当前活动编辑器的内容 |
-| `mcp__burp__set_active_editor_contents` | 设置当前活动编辑器的内容 |
-
-### 配置和状态控制
-
-| 工具 | 功能 |
-|------|------|
-| `mcp__burp__set_proxy_intercept_state` | 启用/禁用 Proxy Intercept（`intercepting: true/false`） |
-| `mcp__burp__set_task_execution_engine_state` | 启用/禁用 Task Execution Engine（`running: true/false`） |
-| `mcp__burp__output_project_options` | 输出项目级配置（JSON） |
-| `mcp__burp__set_project_options` | 设置项目级配置 |
-| `mcp__burp__output_user_options` | 输出用户级配置（JSON） |
-| `mcp__burp__set_user_options` | 设置用户级配置 |
-
-```bash
-# 启用代理拦截
-set_proxy_intercept_state(intercepting=true)
-
-# 禁用代理拦截
-set_proxy_intercept_state(intercepting=false)
-
-# 暂停任务执行引擎
-set_task_execution_engine_state(running=false)
-```
+- 重放与浏览器不同：对齐 Cookie、跳转、Content-Type、代理、编码与请求体；看 [web-first-pass-triage-and-chain-patterns.md](web-first-pass-triage-and-chain-patterns.md)。
+- 上传或响应其实是文件容器：保留原始字节，查 [file-signatures-and-flag-artifact-hunting.md](file-signatures-and-flag-artifact-hunting.md)。
+- SSRF/协议注入连到内部服务：查 [protocol-relay-and-internal-service-injection.md](protocol-relay-and-internal-service-injection.md)、[workflow-runner-internal-api-chain.md](workflow-runner-internal-api-chain.md)。
+- 已取得 foothold，剩下凭据、横向或隧道：转 [pentest-attack-chains-and-tunneling.md](pentest-attack-chains-and-tunneling.md)。
+- APT Python 工具报缺模块：先退出 Conda 路由并核对系统入口，不向系统 Python pip 安装。任何 WSL 新增、升级、重装须先说明 Linux 必要性、方式、环境及依赖影响并取得明确同意。
 
 ## 来自 WP 的案例索引
 

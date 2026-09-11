@@ -6,136 +6,50 @@ skills: [ctf-solve-challenge]
 
 # Cross-Category Triage Tooling
 
-本页为 `ctf-solve-challenge` 提供跨方向首检工具、调用层和失败转向。它不是第十五个方向，也不承担专项求解；证据足以判断决定性主障碍后，应立即进入 14 个正式 `ctf-*` 专项之一。
+本页只服务类别尚未确定时的低成本首检。出现决定性证据后进入正式专项 skill，并读取该方向唯一的 `*-tooling.md`；这里不维护专项工具合集。
 
-一旦进入任一正式方向，本页不再作为该方向的工具事实来源；工具的当前状态、版本、路径、环境、完整调用和失败处理统一读取对应 `<direction>-tooling.md`。本页只维护类别尚未确定时的跨方向首检工具。
+## 平台与调用
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+Windows 是默认工作平台。首检脚本使用 `D:/文档/新建文件夹/venv/Scripts/python.exe`（Python 3.14.3），不需要为编码、文件头或哈希检查进入 WSL。WSL `ctf-tools` 只承担 Linux 原生工作所需的工具及必要依赖，不能从环境名推断某个通用分析包仍在其中。
 
-## 完整调用约定
-
-跨方向 Python 首检使用 `ctf-tools`，系统格式工具使用 WSL 绝对路径。所有命令从 `pwsh` 发起，不激活环境：
+所有终端示例从 `pwsh` 发起。Windows 路径如 `D:/题目路径/unknown.bin`，传给 WSL 时对应 `/mnt/d/题目路径/unknown.bin`。正文中的题目路径都是需要替换的输入占位。
 
 ```pwsh
-wsl /usr/bin/file /path/to/unknown
-wsl /usr/bin/xxd -g 1 /path/to/unknown
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/triage.py
+Get-Item -LiteralPath "D:/题目路径/unknown.bin" | Select-Object Name,Length
+Get-FileHash -LiteralPath "D:/题目路径/unknown.bin" -Algorithm SHA256
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" -c 'from pathlib import Path; p=Path("D:/题目路径/unknown.bin"); print(p.open("rb").read(64).hex(" "))'
 ```
 
-## 工具选择边界
+已有 WSL 格式识别工具可用于补充容器或架构信息；它们是 APT 命令，不套 Conda：
 
-### 入口选择
+```pwsh
+wsl -d kali-linux --exec /usr/bin/file "/mnt/d/题目路径/unknown.bin"
+wsl -d kali-linux --exec /usr/bin/xxd -l 128 -g 1 "/mnt/d/题目路径/unknown.bin"
+wsl -d kali-linux --exec /usr/bin/strings -n 8 "/mnt/d/题目路径/unknown.bin"
+```
 
-- 跨方向状态只用于证据不足或多个信号冲突，不是执行型后备方向。
-- 首轮用轻量脚本、格式识别、约束检查和文件 triage；出现明确 Stego、Hardware、Cloud、Mobile 或 Blockchain 信号后进入对应专项。
-- Jail 题优先枚举允许语法和可用 builtin，不要先上爆破。
-
-### 不应停留在跨方向工具链的情况
-
-- 已经有 HTTP、binary、crypto equation、PCAP/磁盘镜像或漏洞利用主线时，先转对应专项。
-- “看起来杂”但需要真实服务攻击、反编译或密码学推导时，按决定性主障碍进入专项。
-- 只有一次性剧情、flag 猜测或手工观察，不沉淀成跨方向工具入口。
-
-### 补工具经验的触发条件
-
-- raw 给出 WebSocket/WASM/canvas/存档格式等游戏状态机，并且工具链可复用。
-- OCR、字体映射、组合字符或同形异义成为主要证据，而非一次性观察。
-- SAT/ILP/SMT、递推或博弈搜索需要固定输入建模和失败判断。
-
-## 本机工具清单（按使用时机）
-
-### 首轮常用
-
-| 工具 | 为什么放在首轮 |
-|---|---|
-| `file` / `strings` / `xxd` | 先判断它是不是普通编码、容器或伪装格式 |
-| `zbarimg` | QR / 条形码题最直接 |
-| `ctf-tools` Python | 编码、约束、小脚本谜题最常用的统一脚本环境 |
-
-### 专项按需
-
-- 约束/符号：`z3-solver`、`sympy`、`python-sat`
-- 二进制/VM 辅助：`angr`、`pwntools`
-- 信号/图像：`numpy`、`scipy`、`Pillow`、`matplotlib`
-- 协议与网络：`requests`、`dnspython`、`dnslib`
-- 打包/字节码：`pyinstxtractor-ng`、`uncompyle6`
-- 识别/条码/esolang：`pywhat`、`pyzbar`、`zxing-cpp`、`npiet`、`npietedit`
-- 交叉题型辅助：`flask-unsign`
-
-### 当前未装 / 建议按需补装
-
-- 当前没有明显缺口。跨方向工具页更需要守住“只做首检与路由”的边界，而不是继续扩容。
-
-## 失败信号与转向
-
-- 文件首检出现明确专项信号：立即转对应 skill，不要把跨方向状态当默认桶。
-- 编码/QR/条码工具无结果：保存原始字节和中间图像；完整表示层编码转 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md)，碎片/隐藏载荷转 Stego 页面，异常格式先看 [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)。
-- Jail 或 sandbox 只能得到部分输出：先记录可用语法、builtin、fd、错误回显和过滤阶段，再转 [pyjails.md](pyjails.md)、[bashjails.md](bashjails.md) 或 [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)。
-- Z3/SAT/搜索脚本无解：检查变量域、位宽、目标函数和反馈 oracle；若状态递推或验证码反馈更强，转 [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)。
-
-## 详细清单
-
-### ctf-tools conda 环境 (Python 包)
-
-| 包名 | 版本 | 功能 | 典型用法 | 对应 skill |
-|---|---|---|---|---|
-| z3-solver | 4.13.0.0 | SMT 约束求解器 | `from z3 import *; Solver().add(constraints)` | 按约束来源进入 ctf-crypto / ctf-reverse / ctf-pwn / ctf-web |
-| angr | 9.2.209 | 二进制符号执行框架 | `angr.Project('binary').explore(find=...)` | ctf-reverse / ctf-pwn |
-| pwntools | 4.15.0 | CTF 漏洞利用工具库 | `from pwn import *` | ctf-pwn |
-| sympy | 1.14.0 | 符号数学计算 | `sympy.solve(equation, x)` | ctf-crypto / ctf-reverse |
-| numpy | 2.4.4 | 多维数组数值计算 | `np.fromfile('data', dtype=np.complex64)` | ctf-ai-ml / ctf-forensics / ctf-stego / ctf-hardware-embedded |
-| scipy | 1.17.1 | 科学计算/信号处理 | `scipy.signal.spectrogram(audio)` | ctf-ai-ml / ctf-stego / ctf-hardware-embedded |
-| Pillow | 11.3.0 | Python 图像处理 | `Image.open('puzzle.png')` | ctf-ai-ml / ctf-forensics / ctf-stego |
-| matplotlib | 3.10.8 | 数据可视化 | `plt.scatter(x, y)` | 多专项共享；由数据来源决定路由 |
-| requests | 2.33.1 | HTTP 客户端 | `requests.get(url)` | ctf-web / ctf-osint / ctf-cloud-infra |
-| dnspython | 2.8.0 | DNS 协议 Python 实现 | `dns.resolver.resolve('example.com')` | ctf-web / ctf-forensics / ctf-osint / ctf-pentest |
-| dnslib | 0.9.26 | DNS 报文构造与解析 | `dnslib.DNSRecord.parse(packet)` | ctf-web / ctf-forensics / ctf-malware |
-| pyinstxtractor-ng | 2026.4.7 | PyInstaller 打包 exe 解包 | `pyinstxtractor-ng packed.exe` | ctf-reverse / ctf-malware |
-| uncompyle6 | 3.9.3 | Python 2.7-3.8 bytecode 反编译 | `uncompyle6 compiled.pyc` | ctf-reverse |
-| flask-unsign | 1.2.1 | Flask session 签名/解码 | `flask-unsign -d -c 'cookie'` | ctf-web |
-| python-sat | 1.9.dev2 | SAT / MaxSAT / MUS 求解，适合约束与组合谜题 | `from pysat.solvers import Solver` | 工具不是方向；按模型来源进入 ctf-crypto / ctf-reverse / ctf-web |
-| pywhat | 5.1.0 | 快速识别未知字符串、编码、哈希和格式 | `pywhat 'input'` | ctf-solve-challenge / ctf-crypto / ctf-forensics |
-| pyzbar | 0.1.9 | Python 条码/二维码解码绑定 | `from pyzbar.pyzbar import decode` | ctf-stego / ctf-crypto |
-| zxing-cpp | 3.0.0 | 多格式条码/二维码识别库 | `import zxingcpp` | ctf-stego / ctf-crypto |
-
-### 系统全局命令（WSL Kali）
-
-| 工具 | 路径 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|---|
-| zbarimg | /usr/bin/zbarimg | 0.23.93 | 二维码/条形码解码 | `zbarimg qrcode.png` |
-| qrencode | /usr/bin/qrencode | 4.1.1 | 二维码生成 | `qrencode -o out.png "flag{...}"` |
-| ffmpeg | /usr/bin/ffmpeg | 8.1.2 | 音视频转换/频谱图 | `ffmpeg -i audio.wav -lavfi showspectrumpic spec.png` |
-| sox | /usr/bin/sox | 14.7.1.2 | 音频处理 / 频谱 / 反转 | `sox audio.wav -n spectrogram` |
-| qsstv | /usr/bin/qsstv | — | SSTV 慢扫描电视解码 | GUI 打开并载入音频 |
-| exiftool | /usr/bin/exiftool | 13.55 | 文件元数据读写 | `exiftool audio.wav` |
-| zsteg | /usr/local/bin/zsteg | 0.2.14 | PNG/BMP 位面隐写检测 | `zsteg -a image.png` |
-| binwalk | /usr/bin/binwalk | 2.4.3 | 文件嵌入提取与分析 | `binwalk -Me file.bin` |
-| nmap | /usr/bin/nmap | 7.99 | 端口扫描/服务检测 | `nmap -sV target` |
-| nc | /usr/bin/nc | — | TCP/UDP 网络连接 | `nc target 1337` |
-| 7z | /usr/bin/7z | 26.02 | 通用压缩/解压 | `7z x archive.7z` |
-| netpbm | (系统包) | 11.13.03 | 图像格式转换工具集 | `pamscale` / `pnmtopng` / `ppmtopgm` |
-| npiet | /usr/local/bin/npiet | — | Piet esolang 解释器 | `npiet program.png` |
-| npietedit | /usr/local/bin/npietedit | — | Piet 程序图像编辑辅助工具 | `npietedit program.png` |
-| wasm2wat | /usr/bin/wasm2wat | — | WebAssembly 二进制转文本 | `wasm2wat module.wasm -o module.wat` |
-| wat2wasm | /usr/bin/wat2wasm | — | WebAssembly 文本转二进制 | `wat2wasm module.wat -o module.wasm` |
-
-### 专项数学与密码环境
-
-进入任一正式方向后读取其唯一 tooling 页。本页不重复专项工具的版本、路径和调用方式。
-
-### 独立工具
-
-| 工具 | 路径 | 功能 | 典型用法 |
-|---|---|---|---|
-| pycdc | /home/kali/pycdc/build/pycdc | Python 3.9+ bytecode 反编译 | `pycdc file.pyc` |
-| PySAT helper scripts | `/home/kali/.local/bin/{approxmc.py,bbscan.py,bica.py,fm.py,genhard.py,lbx.py,lsu.py,mcsls.py,models.py,musx.py,optux.py,primer.py,rc2.py,unigen.py}` | SAT / MUS / MaxSAT / 约束实例分析辅助脚本 | 约束类题目按需直接调用对应脚本 |
-
-### 未安装但题目中可能需要的工具（参照表）
-
-| 工具 | 用途 | 备用方案 |
+| 入口 | 当前状态 | 首检用途 |
 |---|---|---|
-| segno | 高级 QR 码生成（Micro QR、SVG） | 使用 qrencode 命令行 |
-| hlextend | SHA-256/MD5 长度扩展攻击 | 手动实现或 conda 安装 |
-| smspdu | SMS PDU 编码解码 | 手工解析 |
-| zxing（Java CLI） | 特殊条码格式（MaxiCode 等） | 本机已装 `zxing-cpp`，需要 Java CLI 时再按需补装 |
-| pytesseract | OCR 文字识别 | 在线 OCR 服务 |
+| PowerShell 文件属性、SHA-256 | Windows 内置命令可用 | 固定文件大小和身份，避免分析错附件 |
+| Python 标准库 | 上述 Windows venv | 用 `pathlib`、`struct`、`base64`、`json`、`zipfile` 检查少量字节或已知表示层 |
+| `/usr/bin/file` | APT `file`：`1:5.47-4` | 识别容器、架构和文件类型线索 |
+| `/usr/bin/strings` | APT `binutils`：`2.47-2` | 提取可打印字符串；字符串是线索，不是格式证明 |
+| `/usr/bin/xxd` | 已有系统入口 | 有界十六进制查看；不默认转储整个大文件 |
+
+## 首检后的选择
+
+| 首检证据 | 下一步 |
+|---|---|
+| Base/hex/URL、码表、多层可逆编码 | [crypto-tooling.md](crypto-tooling.md) 与 [encodings-qr-and-esolangs.md](encodings-qr-and-esolangs.md) |
+| Native、字节码、VM、程序比较逻辑 | [reverse-tooling.md](reverse-tooling.md)；已确认利用原语则进 [pwn-tooling.md](pwn-tooling.md) |
+| 镜像、PCAP、文档或文件容器 | [forensics-tooling.md](forensics-tooling.md) |
+| 像素、QR 碎片、音频或隐藏载荷 | [stego-tooling.md](stego-tooling.md) |
+| HTTP、认证态或服务端输入边界 | [web-tooling.md](web-tooling.md) |
+| 仍有跨方向冲突 | [cross-category-triage-family.md](cross-category-triage-family.md)，继续补一个能区分假设的证据 |
+
+## 失败处理与环境边界
+
+- 格式识别失败时保留原始字节，结合文件头、尾部、长度与容器结构核对；异常格式可转 [exotic-encodings-and-file-formats.md](exotic-encodings-and-file-formats.md)，不要直接批量解码或爆破。
+- Jail 或 sandbox 只有部分输出时，记录允许语法、builtin、fd、错误回显和过滤阶段，再转 [pyjails.md](pyjails.md)、[bashjails.md](bashjails.md) 或 [interactive-containers-jails-and-solvers.md](interactive-containers-jails-and-solvers.md)。
+- Z3、图像、模型、反编译和网络工具由对应专项页选择；它们不是未知题目的默认依赖。约束反馈明确后可查 [oracles-recurrences-captcha-polyglots.md](oracles-recurrences-captcha-polyglots.md)。
+- 缺包先评估 Windows venv 中兼容的新版本或已有替代方案。只有任务确需 Linux 能力才考虑 WSL；WSL 新增、升级、重装均须按全局 AGENTS.md 说明用途、平台必要性、目标和影响并取得明确同意。

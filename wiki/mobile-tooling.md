@@ -6,52 +6,41 @@ skills: [ctf-mobile]
 
 # Mobile Tooling
 
-本页是 `ctf-mobile` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-mobile/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页服务 Android/iOS 组件、IPC、权限、签名、WebView、Keystore/Keychain 和平台沙箱问题。普通 APK 算法或 native 逻辑还原仍由 Reverse 主导。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+## 平台与工具状态
 
-## 工具选择边界
+APK/DEX 静态阅读和一般 Python 分析优先 Windows。JADX、Java、Manifest summary、IDA/Ghidra 的当前路径与完整调用统一见 [reverse-tooling.md](reverse-tooling.md)。文件存在或反编译成功不能证明设备、模拟器、USB、调试权限或签名条件已就绪。
 
-- APK/IPA 先做离线 Manifest/plist/entitlement/DEX/native 清单；只有组件、IPC、权限、签名、Keystore/Keychain 或平台运行时决定解法时才留在 Mobile。
-- 动态 hook 只使用题目模拟器、一次性测试设备或明确授权环境，不默认操作个人设备和真实应用数据。
-- 普通算法/字节码/native 语义转 Reverse；已确认 native 内存破坏原语转 Pwn。
+| 工具 | 当前状态与位置 | 使用条件 |
+|---|---|---|
+| JADX / Manifest summary | Windows 已有；使用 Reverse 工具页入口 | 先读组件、权限、Intent 和 Java/Kotlin-like 逻辑 |
+| Windows Python | `D:/文档/新建文件夹/venv/Scripts/python.exe`，3.14.3 | 解析已导出的 XML/JSON、资源、密文与脚本数据 |
+| apktool | WSL `/usr/bin/apktool`；APT `2.7.0+dfsg-7.2` | 已有 Linux 工具，用于低层 APK 解包、资源和 smali；一般静态阅读先用 Windows JADX |
+| baksmali | WSL `/usr/bin/baksmali`；APT `libsmali-java 2.5.2.git2771eae-4` | DEX 指令、寄存器与控制流核验 |
+| Frida | WSL `ctf-tools` 原生插桩入口保留，详见 Reverse 工具页 | 已验证 Linux 本地 CLI；不能据此认定 Android/iOS 连接可用 |
 
-## 完整调用约定
+当前 Windows 与 WSL PATH 均未发现 `adb`，原 APKiD、Androguard 独立入口已不存在。本页没有已验证的移动设备/server 接入链；不能直接执行旧的 `apkid`、`androguard` 或设备命令。移动端所需 Python 包或 SDK 优先评估 Windows 兼容版本，只有实际设备/运行能力要求 Linux 时才考虑 WSL。
 
-WSL 系统工具用绝对路径；Frida 使用 `ctf-tools`；Windows JADX 由 `pwsh` 直接运行：
+## 从 pwsh 调用
+
+先通过 Reverse 工具页的 Windows JADX 命令读取 APK；需要现有低层解包器时：
 
 ```pwsh
-wsl /usr/bin/apktool d /path/to/app.apk -o /path/to/decoded
-wsl /usr/bin/baksmali d /path/to/classes.dex -o /path/to/smali
-& "D:/CTF工具/jadx-1.5.6/bin/jadx.bat" -d "D:/path/to/jadx-output" "D:/path/to/app.apk"
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools frida -U -f com.example.app -l /path/to/hook.js
+wsl -d kali-linux --exec /usr/bin/apktool d "/mnt/d/题目路径/app.apk" -o "/mnt/d/题目路径/apk-decoded"
+wsl -d kali-linux --exec /usr/bin/baksmali d "/mnt/d/题目路径/classes.dex" -o "/mnt/d/题目路径/smali-output"
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/analyze_mobile.py"
 ```
 
-## 当前状态与路径
+输出目录属于本题工作区；`/mnt/d/题目路径` 对应 Windows `D:/题目路径`。`apktool` 与 `baksmali` 是 APT 入口，不放进 Conda。解包后用实际生成的文本 XML 交给 Manifest summary，不能直接把二进制 AXML 当 UTF-8。
 
-| 工具 | 当前状态/版本 | 路径或环境 | 何时使用 | 完整调用 |
-|---|---|---|---|---|
-| `apktool` | 可用，2.7.0-dirty | `/usr/bin/apktool`，WSL system | Android resources、Manifest 与 smali 解包 | 见上方命令 |
-| `baksmali` | 可用，2.5.2 | `/usr/bin/baksmali`，WSL system | DEX 字节码和关键分支的低层核验 | 见上方命令 |
-| JADX | 可用，1.5.6 | `D:/CTF工具/jadx-1.5.6/bin/jadx.bat`；GUI 为同目录 `jadx-gui.bat` | Java/Kotlin-like 反编译、搜索和 xref | CLI 见上方；GUI：`& "D:/CTF工具/jadx-1.5.6/bin/jadx-gui.bat" "D:/path/to/app.apk"` |
-| Manifest summary | 可用 | `C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1` | 已解码 Manifest 的 SDK、权限、组件和入口摘要 | `& "C:/Users/LMY/.agents/skills/ctf-reverse/scripts/manifest-summary.ps1" -ManifestPath "D:/path/to/decoded/AndroidManifest.xml"` |
-| Frida / frida-tools | 可用，17.9.1 / 14.8.1 | WSL `ctf-tools` | Java/ObjC/native hook、参数观察和临时 patch | 见上方命令；进程首检用 `wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools frida-ps -U` |
-| IDA Pro MCP（`idalib`） | 方法可调用；当前 0 个会话；版本未暴露 | MCP | APK/IPA 内 native library、Mach-O/ELF 与 JNI 边界 | `idb_list` → `idb_open(绝对路径)` → `survey_binary` |
-| Ghidra MCP | 方法可调用；当前无运行实例；版本未暴露 | MCP | IDA 不适用或已有 Ghidra 项目时的 native 分析 | `list_instances` → `connect_instance` |
-| `adb` | WSL 与 Windows `PATH` 均未发现 | 未安装/未配置 | 组件调用、日志、文件传输和设备状态 | 当前无可执行命令 |
-| `lldb` | WSL 与 Windows `PATH` 均未发现 | 未安装/未配置 | iOS/Mach-O/native 运行时调试 | 当前无可执行命令 |
+动态分析先确定本题目标设备、ABI、Android/iOS 版本、授权状态与可用连接，再核对 client/server 版本、进程和 attach/spawn 条件。需要部署 server、SDK 或其他软件时另行说明安装范围；已有 Frida 客户端不构成部署授权。
 
-## 失败处理
+## 失败处理与下一跳
 
-- JADX 伪代码失真或函数失败：回到 `baksmali`/DEX 或 native 汇编核验，不把高层视图当作唯一证据。
-- 没有 `adb`：先完成静态组件、权限、deep link 和 WebView 数据流分析；确认动态设备链确实必要后再决定安装 platform-tools。
-- Frida 连接失败：先确认设备、ABI、API level、server 版本、权限和进程启动时机；当前只有本机 CLI，不代表设备侧 server 已配置。
-- `lldb` 缺失且题目必须做 iOS 运行时调试：先保留 Mach-O、entitlement 和静态证据，再为题目建立独立 Apple 调试环境；不要把 Android 工具硬套到 iOS。
-
-## 关联知识页
-
-- [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)
-- [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)
-- [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md)
-- [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md)
-- [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)
+- JADX 伪代码失败或 exported/权限结论冲突：对照 Manifest、DEX/smali 和实际平台版本；见 [android-games-hardware-and-runtime-platforms.md](android-games-hardware-and-runtime-platforms.md)。
+- apktool 旧资源格式支持不足：保留原 APK，先检查 Windows JADX 输出；升级工具前按安装规则说明，不自动修复 WSL 依赖。
+- WebView、URL Scheme、JS bridge 决定权限边界：转 [mobile-webview-url-scheme-native-bridge.md](mobile-webview-url-scheme-native-bridge.md)。
+- `run-as`、私有目录或 debuggable 条件不满足：核对 manifest、签名与设备实际状态，见 [android-debuggable-run-as-private-data.md](android-debuggable-run-as-private-data.md)。
+- Hook 不命中：先核对进程、ABI、加载时机和连接；运行时观测看 [runtime-patching-oracles-and-tracing.md](runtime-patching-oracles-and-tracing.md)，平台分流看 [mobile-firmware-kernel-and-game-re.md](mobile-firmware-kernel-and-game-re.md)。
+- WSL 新增、升级、重装须先说明用途、为何必须 Linux、目标、方式及依赖影响并取得明确同意。

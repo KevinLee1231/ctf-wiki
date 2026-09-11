@@ -6,149 +6,88 @@ skills: [ctf-pwn]
 
 # Pwn Tooling
 
-本页是 `ctf-pwn` 方向本机工具信息的唯一权威来源，维护当前安装状态、版本、路径、环境、完整调用、适用边界和失败处理。`ctf-pwn/SKILL.md` 只说明何时选择某类工具或知识页，不复制本页细节。
+本页维护已确认利用原语之后的本机工具。尚未理解算法、VM、协议或文件格式时先用 [reverse-tooling.md](reverse-tooling.md)，不要因为附件是 ELF 就直接构造利用。
 
-本页只描述当前真实状态；实际环境与本文不一致时，直接修正文中现状，不在本页累积核验记录或旧版本历史。
+## 平台与环境
 
-## 完整调用约定
+离线 ELF 解析、约束计算、字节处理与局部 CPU 模拟优先使用 Windows venv `D:/文档/新建文件夹/venv/Scripts/python.exe`。Linux 本地进程、ptrace/GDB、seccomp、PTY、目标 loader/libc 和 Linux 用户态运行需要 WSL；这类脚本使用 `ctf-tools`。
 
-Exploit 脚本和 Python 入口使用 WSL `ctf-tools`；调试器、二进制工具和模拟器使用系统绝对路径。所有命令从 `pwsh` 发起，不激活环境：
+`ctf-tools` 位于 `/home/kali/miniforge3/envs/ctf-tools`，Python 3.11.15。当前 42 个发行包支撑 pwntools、Frida 及必要依赖，不是预装所有 solver 库的环境。纯远程协议或数学问题可在 Windows 完成时，不以“使用 pwntools 方便”为由复制整套通用包。
 
-```pwsh
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python /path/to/exploit.py
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn checksec /path/to/binary
-wsl /usr/bin/gdb -q /path/to/binary -ex start -ex checksec
-wsl /usr/local/bin/seccomp-tools dump /path/to/binary
-```
-
-表格中的 Linux 片段说明参数语义；实际执行时使用同一行的绝对路径。启动内核/QEMU、编译 rootfs、fuzz 或连接远程题目服务前，先确认范围和运行成本。
-
-## 工具选择边界
-
-### 入口选择
-
-- 首轮以 `file`、`checksec`、`gdb/pwndbg`、`pwntools`、`ROPgadget/ropper`、`seccomp-tools` 为主。
-- Python exploit 默认在 `ctf-tools` 中执行；需要调试时用 WSL system-global GDB + pwndbg。
-- Kernel/system/qemu 题可能长时间运行，启动服务、编译 rootfs 或跑大量 fuzz 前要先确认。
-
-### 不应进入 Pwn 工具链的情况
-
-- 主障碍仍是理解算法、壳、VM、协议或文件格式时，先转 Reverse/Forensics，不急着写 exploit。
-- 没有崩溃、越界、格式化输出、任意读写、syscall 过滤或 sandbox primitive 时，不把普通 binary 题归入 Pwn。
-- browser/JIT、kernel/QEMU 和沙箱题需要先确认运行环境和最小触发，不直接跑长时间 fuzz。
-
-### 补工具经验的触发条件
-
-- raw 涉及 glibc 2.35+ heap、safe-linking、IO_FILE 变化，并能抽出稳定调试步骤。
-- CET/IBT/Shadow Stack 影响控制流劫持，需要记录替代路线和工具限制。
-- kernel exploit 题出现 KASLR/KPTI/SMEP/SMAP、userfaultfd 替代或 modprobe_path 变化。
-
-## 本机工具清单（按使用时机）
-
-### 首轮常用
-
-| 工具 | 为什么放在首轮 |
-|---|---|
-| `file` / `checksec` / `strings` | 最快建立目标画像 |
-| `nc` | 远程服务题先确认交互和输入面 |
-| `pwntools` | 脚本化交互、偏移、payload 和 remote 流程 |
-| GDB + pwndbg | 一旦需要确认崩溃和寄存器状态，就进入主力 |
-
-### 专项按需
-
-- ROP 与 libc：`ROPgadget`、`ropper`、`one_gadget`
-- 防护与沙箱：`seccomp-tools`
-- 跨架构：`qemu-*`
-- 深度分析/自动化：`angr`、`z3-solver`、`capstone`、`keystone-engine`、`unicorn`、`pyelftools`
-
-### 当前未装 / 建议按需补装
-
-- 当前没有明显缺口。PWN 这套已经足够完整，后续更值得优化的是 libc 数据库和题型脚手架，而不是继续堆基础工具。
-
-## 失败信号与转向
-
-- `checksec` 和 crash 信息不足以判断漏洞族：先最小化输入并转 [pwn-first-pass-red-flags-and-protections.md](pwn-first-pass-red-flags-and-protections.md)，不要直接拼 ROP。
-- GDB 本地可打通但远程失败：优先核对 libc、PIE base、I/O 同步、超时和环境变量；若是保护组合问题，转 [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)。
-- `one_gadget`、ROPgadget 或 ropper 无可用链：回到 primitive 质量，判断是否需要 leak、栈迁移、ret2dlresolve、SROP、FSOP 或 heap 路线。
-- kernel/QEMU/namespace 题跑不稳：先记录启动脚本、initramfs、保护位和调试改动，再转 [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md) 或 [kaslr-kpti-smep-and-kernel-debugging.md](kaslr-kpti-smep-and-kernel-debugging.md)。
-
-## 详细清单
-
-### Native 静态分析 MCP
-
-| 工具 | 当前状态 | 环境/路径 | 完整调用与失败处理 |
-|---|---|---|---|
-| IDA Pro MCP（`idalib`） | 方法可调用；当前 `idb_list` 返回 0 个会话；版本未由 MCP 暴露 | MCP，不是 shell 路径 | `idb_list` → `idb_open(绝对路径)` → `survey_binary`；无会话不等于 MCP 不可用，打开失败时保留 `file`/保护/汇编证据并转 Ghidra 或 GDB。 |
-| Ghidra MCP | 方法可调用；当前没有运行实例；版本未由 MCP 暴露 | MCP，不是 shell 路径 | `list_instances` → `connect_instance`；没有实例时先启动或连接项目，不把静态桥接方法当作已进入分析会话。 |
-
-### Python 包（ctf-tools conda 环境）
-
-| 工具 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|
-| **pwntools** | 4.15.0 | PWN 全栈框架（远程连接、ROP 链、shellcode、checksec、cyclic、DynELF、corefile） | `from pwn import *`；`pwn checksec binary`；`pwn cyclic 200` |
-| **ROPgadget** | 7.7 | ROP gadget 搜索，支持 x86/x64/ARM/MIPS/PowerPC/SPARC | `ROPgadget --binary ./bin \| grep "pop rdi"` |
-| **ropper** | 1.13.13 | 替代性 ROP gadget 搜索，支持语义搜索与链式查询 | `ropper -f ./bin --search "pop rdi; ret"` |
-| **capstone** | 5.0.6 | 轻量级多架构反汇编引擎 | `from capstone import *; Cs(CS_ARCH_X86, CS_MODE_64)` |
-| **keystone-engine** | 0.9.2 | 轻量级多架构汇编引擎，运行时生成 shellcode | `from keystone import *; Ks(KS_ARCH_X86, KS_MODE_64)` |
-| **unicorn** | 2.1.2 | CPU 模拟引擎，模拟执行 shellcode 或分析混淆代码 | `from unicorn import *; Uc(UC_ARCH_X86, UC_MODE_64)` |
-| **angr** | 9.2.209 | 二进制符号执行框架，自动漏洞发现/约束求解/CFG 恢复 | `import angr; angr.Project('./bin')` |
-| **z3-solver** | 4.13.0 | SMT 约束求解器，独立路径条件求解 | `from z3 import *; s = Solver()` |
-| **pyelftools** | 0.32 | ELF 文件解析，读取节头/段头/动态符号 | `from elftools.elf.elffile import ELFFile` |
-| **numpy** | 2.4.4 | 数组/矩阵运算，权重/偏置操作 | `import numpy as np` |
-
-从 `pwsh` 直接调用 `ctf-tools` 环境中的入口：
-
-```pwsh
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn checksec ./binary
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn cyclic 200
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn cyclic -l offset-value
-wsl /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn shellcraft 'amd64.linux.sh()'
-```
-
-### 系统全局命令（WSL Kali）
-
-#### 调试与分析
-
-| 工具 | 路径 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|---|
-| **GDB + pwndbg** | `/usr/bin/gdb` + `/home/kali/pwndbg` | 17.2 | 源码/汇编级调试，`~/.gdbinit` 已配置自动加载 pwndbg | `gdb -q ./bin -ex 'start' -ex 'checksec'` |
-| **objdump** | `/usr/bin/objdump` | 2.47 | 二进制反汇编 | `objdump -d ./bin \| grep -B1 "pop.*rdi"` |
-| **readelf** | `/usr/bin/readelf` | 2.47 | ELF 结构分析（节头/段头/符号表/动态表） | `readelf -h ./bin; readelf -S ./bin` |
-| **nm** | `/usr/bin/nm` | 2.47 | 符号表列出 | `nm ./bin \| grep win` |
-| **strings** | `/usr/bin/strings` | 2.47 | 提取可读字符串（GLIBC 版本检测/密码搜索） | `strings libc.so.6 \| grep GLIBC` |
-| **file** | `/usr/bin/file` | 5.47 | 识别文件类型（位宽/架构/链接方式） | `file ./binary` |
-| **ldd** | `/usr/bin/ldd` | 2.42 | 显示共享库依赖与加载路径 | `ldd ./binary` |
-| **strace** | `/usr/bin/strace` | 7.0 | 系统调用跟踪 | `strace ./binary` |
-| **ltrace** | `/usr/bin/ltrace` | 0.7.91 | 库函数调用跟踪 | `ltrace ./binary` |
-| **checksec** | `/usr/bin/checksec` | 2.6.0 | 二进制保护检测（PIE/RELRO/NX/Canary） | `checksec --file=./binary` |
-
-#### ROP / Gadget / Seccomp
-
-| 工具 | 路径 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|---|
-| **one_gadget** | `/usr/local/bin/one_gadget` | 1.10.0 | libc one-shot RCE gadget 查找 | `one_gadget libc.so.6` |
-| **seccomp-tools** | `/usr/local/bin/seccomp-tools` | 1.6.2 | dump seccomp BPF 过滤规则 | `seccomp-tools dump ./binary` |
-
-#### 跨架构模拟（QEMU 11.0.3）
-
-| 工具 | 功能 | 典型用法 |
+| 能力 | Windows venv | WSL `ctf-tools` |
 |---|---|---|
-| **qemu-aarch64** | ARM64 用户态模拟 | `qemu-aarch64 ./arm64_bin` |
-| **qemu-arm** | ARM32 用户态模拟（可配合 gdb-multiarch） | `qemu-arm -g 1234 ./arm_bin` |
-| **qemu-mips** | MIPS 大端用户态模拟 | `qemu-mips ./mips_bin` |
-| **qemu-i386** | x86 32 位用户态模拟 | `qemu-i386 ./x86_32_bin` |
-| **qemu-x86_64** | x86-64 用户态模拟 | `qemu-x86_64 ./x86_64_bin` |
-| **qemu-system-x86_64** | 完整 x86-64 系统模拟（内核调试/bzImage+initramfs） | `qemu-system-x86_64 -kernel bzImage -initrd rootfs.cpio -nographic -s` |
+| pwntools 原生工作流 | 不作为默认入口 | `pwntools 4.15.0` |
+| gadget 搜索 | `ROPGadget 7.7` | `ROPGadget 7.7`，供现有 Pwn 链使用 |
+| 多架构反汇编 | `capstone 5.0.7` | `capstone 5.0.6`，pwntools 依赖 |
+| 局部 CPU 模拟 | `unicorn 2.1.4` | `unicorn 2.1.2`，pwntools 依赖 |
+| ELF 结构解析 | `pyelftools 0.32` | `pyelftools 0.32`，pwntools 依赖 |
+| SMT 约束 | `z3-solver 4.16.0.0` | 未安装，独立约束脚本放 Windows |
 
-#### 编译与打包
+Frida 的 Linux 插桩入口见 [reverse-tooling.md](reverse-tooling.md)。当前 `ctf-tools` 没有 angr、Qiling、ropper 或 keystone 独立工具入口；需要额外能力时先评估 Windows 新版本及最小实现，不能照旧清单调用或补装。
 
-| 工具 | 路径 | 版本 | 功能 | 典型用法 |
-|---|---|---|---|---|
-| **upx** | `/usr/bin/upx` | 4.2.4 | 可执行文件压缩（内核 exploit 体积压缩） | `upx --best exploit` |
-| **libc6-dbg** | apt 已安装 | 2.42-17 | glibc 调试符号 | GDB 中 `b __malloc` / `p __malloc_hook` |
+## 从 pwsh 调用
 
+题目目录在 Windows 为 `D:/题目路径` 时，WSL 对应 `/mnt/d/题目路径`。系统 CLI 直接调用，Conda 使用固定入口，不激活环境：
 
----
+```pwsh
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/题目路径/analyze_constraints.py"
+& "D:/文档/新建文件夹/venv/Scripts/python.exe" "D:/文档/新建文件夹/venv/Scripts/ROPgadget" --binary "D:/题目路径/binary" --only "pop|ret"
+wsl -d kali-linux --exec /usr/bin/file "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/bin/checksec --file=/mnt/d/题目路径/binary
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn checksec "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools pwn cyclic 200
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools ROPgadget --binary "/mnt/d/题目路径/binary" --only "pop|ret"
+wsl -d kali-linux --exec /home/kali/miniforge3/bin/conda run --no-capture-output -n ctf-tools python "/mnt/d/题目路径/exploit.py"
+```
 
-## 补充速查
-`checksec`, `one_gadget`, `ropper`, `ROPgadget`, `seccomp-tools dump`, `strings libc | grep GLIBC`. See stack-pivots-srop-and-seccomp-rop.md for full command list and pwntools template.
+最后一条可能运行本地目标或连接服务，按脚本实际行为和题目授权执行。cyclic 的字母宽度、目标字长和字节序要与偏移恢复一致。
+
+Windows 的 ROPgadget 入口是上述无扩展名脚本，由 venv Python 执行；没有同名 .exe，不能根据发行包名猜测可执行路径。
+
+## GDB、pwndbg 与原生工具
+
+| 工具 | 位置 | 当前版本或来源 | 作用 |
+|---|---|---|---|
+| GDB / GDB multiarch | `/usr/bin/gdb`、`/usr/bin/gdb-multiarch` | APT `17.2-1+b1` | Linux 调试与跨架构远程调试 |
+| pwndbg | `/home/kali/pwndbg/gdbinit.py`；独立 `.venv` | 源码部署；GDB 加载可用 | 寄存器、栈、堆、内存映射和保护检查 |
+| objdump / readelf / nm / strings | `/usr/bin/` 下同名入口 | APT `binutils 2.47-2` | 汇编、段节、动态链接和符号信息 |
+| checksec | `/usr/bin/checksec` | APT `2.6.0-2` | PIE、RELRO、NX、Canary 等保护 |
+| strace / ltrace | `/usr/bin/strace`、`/usr/bin/ltrace` | APT `7.0+ds-1` / `0.7.91~git20230705.8eabf68-4+b1` | 实际运行目标，观测系统调用或库调用 |
+| one_gadget | `/usr/local/bin/one_gadget` | Ruby gem `1.10.0` | 查找 libc gadget 及寄存器/栈约束 |
+| seccomp-tools | `/usr/local/bin/seccomp-tools` | Ruby gem `1.6.2` | 运行目标并转储 seccomp BPF |
+| libc6-dbg | APT 调试符号 | `2.43-4` | 本机 glibc 调试；不代替题目提供的 libc 与符号 |
+
+pwndbg 有独立依赖环境，不属于 `ctf-tools`。调用时禁用自动更新，避免调试器启动时变更环境：
+
+```pwsh
+wsl -d kali-linux --exec env PWNDBG_NO_AUTOUPDATE=1 /usr/bin/gdb -q "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/bin/readelf -h -l -d "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/bin/objdump -d -M intel "/mnt/d/题目路径/binary"
+wsl -d kali-linux --exec /usr/local/bin/one_gadget "/mnt/d/题目路径/libc.so.6"
+wsl -d kali-linux --exec /usr/local/bin/seccomp-tools dump "/mnt/d/题目路径/binary"
+```
+
+GDB 中按具体目标使用 `start`、`checksec`、`vmmap`、`bt`、`x/16gx $rsp`。没有自动加载 pwndbg 时核对上述源码入口与独立 venv，再在 GDB 中 `source /home/kali/pwndbg/gdbinit.py`；不要自动运行 setup 或安装依赖。陌生 ELF 的依赖首检用 `readelf -d`，实际运行前核对 loader、libc、架构和授权。
+
+## QEMU
+
+| 入口 | APT 包与版本 | 使用边界 |
+|---|---|---|
+| `/usr/bin/qemu-aarch64`、`qemu-arm`、`qemu-mips`、`qemu-riscv64`、`qemu-i386`、`qemu-x86_64` | `qemu-user 1:11.1.0+ds-2` | Linux 用户态模拟，必要时使用题目匹配的 sysroot |
+| `/usr/bin/qemu-system-x86_64` | `qemu-system-x86 1:11.1.0+ds-2` | 内核、initramfs 与完整系统运行 |
+
+用户态示例在运行范围明确后执行；`/path/to/target-sysroot` 是需要提供的目标根文件系统，不是已安装目录：
+
+```pwsh
+wsl -d kali-linux --exec /usr/bin/qemu-arm -L /path/to/target-sysroot "/mnt/d/题目路径/arm_binary"
+```
+
+内核题沿题目启动脚本核对 CPU、内存、保护位、设备与调试端口，不套通用模板假定能复现。长时间 QEMU、rootfs 编译和 fuzz 先明确预算。
+
+## 失败处理与转向
+
+- 保护信息与 crash 还不足以确定漏洞族：最小化输入，转 [pwn-first-pass-red-flags-and-protections.md](pwn-first-pass-red-flags-and-protections.md)。
+- 本地成功、远端失败：对照 libc、PIE、环境变量、I/O 同步、字节序和超时；保护组合见 [runtime-protection-and-tls-exploits.md](runtime-protection-and-tls-exploits.md)。
+- gadget 能找到却不能用：检查每条约束和 primitive，必要时转栈迁移、SROP、FSOP 或堆路线；看 [stack-pivots-srop-and-seccomp-rop.md](stack-pivots-srop-and-seccomp-rop.md)。
+- QEMU/内核行为不符：先核对题目镜像与启动条件，再查 [linux-kernel-exploit-basics.md](linux-kernel-exploit-basics.md)、[kaslr-kpti-smep-and-kernel-debugging.md](kaslr-kpti-smep-and-kernel-debugging.md)。
+- 缺工具不自动安装。WSL 新增、升级、重装须先说明为何依赖 Linux、方式、目标、主要依赖与影响并取得明确同意。
